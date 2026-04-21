@@ -456,7 +456,7 @@ Visi API resursai, grąžinantys kolekcijas, turi palaikyti puslapiavimą:
 *   Maksimalus puslapio dydis apibrėžiamas serverio pusėje; užklausa su pageSize virš maksimalaus - 400 klaida, ne tylus apribojimas
 *   Atsakyme pateikiamos nuorodos į kitą ir ankstesnį puslapį (next, prev pagal RFC 8288 Link antraštę arba atsakymo kūne)
 
-### 3.3.12. Sukūrimo, atnaujinimo ir ištrynimo atsakymų standartas
+### 3.3.12. Sukūrimo, atnaujinimo, ištrynimo ir asinchroninių mutacijų atsakymų standartas
 
 PRIVALOMA:
 
@@ -470,11 +470,17 @@ PRIVALOMA:
 *   DELETE (ištrynimas) grąžina **204 No Content** be atsakymo kūno; jei ištrintą resursą reikia patvirtinti, leidžiama grąžinti **200 OK** su minimalia resurso reprezentacija (pvz., `id` ir `deletedAt`)
 <!-- ARCH-API-P34 | ai-reviewable -->
 *   DELETE operacija, skirta neegzistuojančiam resursui, grąžina **404 Not Found**
+<!-- ARCH-API-P35 | ai-reviewable -->
+*   Asinchroninė mutacija (POST/PUT/PATCH/DELETE, kurios vykdymas trunka ilgiau nei vienas HTTP užklausos ciklas) grąžina **202 Accepted** su užduoties objektu, turinčiu `id`, `status` ir `statusUrl` laukus, nurodančius užklausos sekimo URL
+<!-- ARCH-API-P36 | ai-reviewable -->
+*   Asinchroninės užduoties būsenos sekimo endpoint'as (`statusUrl`) grąžina **200 OK** su dabartine užduoties būsena; užbaigus – su galutine resurso reprezentacija arba klaidos aprašu
 
 REKOMENDUOJAMA:
 
 <!-- ARCH-API-R14 | ai-reviewable -->
 *   Atsakyme į POST įtraukti `Location` antraštę su naujai sukurto resurso URL (pvz., `Location: /api/v1/orders/123`)
+<!-- ARCH-API-R15 | ai-reviewable -->
+*   Asinchroninės mutacijos atsakyme įtraukti `Location` antraštę su užduoties sekimo URL (pvz., `Location: /api/v1/jobs/456`)
 
 **Pavyzdys (POST /orders → 201 Created):**
 
@@ -510,6 +516,41 @@ REKOMENDUOJAMA:
 {
   "id": "123",
   "deletedAt": "2025-04-01T15:30:00Z"
+}
+```
+
+**Pavyzdys (asinchroninė mutacija → 202 Accepted):**
+
+```json
+{
+  "id": "456",
+  "status": "PENDING",
+  "statusUrl": "/api/v1/jobs/456"
+}
+```
+
+**Pavyzdys (GET /api/v1/jobs/456 → 200 OK, užduotis vykdoma):**
+
+```json
+{
+  "id": "456",
+  "status": "IN_PROGRESS",
+  "statusUrl": "/api/v1/jobs/456"
+}
+```
+
+**Pavyzdys (GET /api/v1/jobs/456 → 200 OK, užduotis baigta):**
+
+```json
+{
+  "id": "456",
+  "status": "COMPLETED",
+  "result": {
+    "id": "123",
+    "status": "PROCESSED",
+    "createdAt": "2025-04-01T14:30:00Z",
+    "updatedAt": "2025-04-01T15:00:00Z"
+  }
 }
 ```
 
