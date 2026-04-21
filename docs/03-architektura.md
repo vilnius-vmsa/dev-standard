@@ -473,7 +473,7 @@ PRIVALOMA:
 <!-- ARCH-API-P35 | ai-reviewable -->
 *   Asinchroninė mutacija (POST/PUT/PATCH/DELETE, kurios vykdymas trunka ilgiau nei vienas HTTP užklausos ciklas) grąžina **202 Accepted** su užduoties objektu, turinčiu `id`, `status` ir `statusUrl` laukus, nurodančius užklausos sekimo URL
 <!-- ARCH-API-P36 | ai-reviewable -->
-*   Asinchroninės užduoties būsenos sekimo endpoint'as (`statusUrl`) grąžina **200 OK** su dabartine užduoties būsena; užbaigus – su galutine resurso reprezentacija arba klaidos aprašu
+*   Asinchroninės užduoties būsenos sekimo endpoint (`statusUrl`) grąžina **200 OK** su dabartine užduoties būsena; užbaigus – su galutine resurso reprezentacija arba klaidos aprašu
 
 REKOMENDUOJAMA:
 
