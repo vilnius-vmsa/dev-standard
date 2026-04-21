@@ -456,7 +456,7 @@ Visi API resursai, grąžinantys kolekcijas, turi palaikyti puslapiavimą:
 *   Maksimalus puslapio dydis apibrėžiamas serverio pusėje; užklausa su pageSize virš maksimalaus - 400 klaida, ne tylus apribojimas
 *   Atsakyme pateikiamos nuorodos į kitą ir ankstesnį puslapį (next, prev pagal RFC 8288 Link antraštę arba atsakymo kūne)
 
-### 3.3.12. Sukūrimo ir atnaujinimo atsakymų standartas
+### 3.3.12. Sukūrimo, atnaujinimo ir ištrynimo atsakymų standartas
 
 PRIVALOMA:
 
@@ -466,6 +466,10 @@ PRIVALOMA:
 *   PUT (pilnas pakeitimas) ir PATCH (dalinis pakeitimas) grąžina **200 OK** su pilna atnaujinto resurso reprezentacija atsakymo kūne
 <!-- ARCH-API-P32 | ai-reviewable -->
 *   Draudžiama grąžinti **204 No Content** sukūrimo (POST) ar atnaujinimo (PUT/PATCH) operacijoms – klientas privalo gauti atnaujintą resurso būseną be papildomų užklausų
+<!-- ARCH-API-P33 | ai-reviewable -->
+*   DELETE (ištrynimas) grąžina **204 No Content** be atsakymo kūno; jei ištrintą resursą reikia patvirtinti, leidžiama grąžinti **200 OK** su minimalia resurso reprezentacija (pvz., `id` ir `deletedAt`)
+<!-- ARCH-API-P34 | ai-reviewable -->
+*   DELETE operacija, skirta neegzistuojančiam resursui, grąžina **404 Not Found**
 
 REKOMENDUOJAMA:
 
@@ -491,6 +495,21 @@ REKOMENDUOJAMA:
   "status": "SUBMITTED",
   "createdAt": "2025-04-01T14:30:00Z",
   "updatedAt": "2025-04-01T15:00:00Z"
+}
+```
+
+**Pavyzdys (DELETE /orders/123 → 204 No Content):**
+
+```
+(tuščias atsakymo kūnas)
+```
+
+**Pavyzdys (DELETE /orders/123 → 200 OK, jei reikalingas patvirtinimas):**
+
+```json
+{
+  "id": "123",
+  "deletedAt": "2025-04-01T15:30:00Z"
 }
 ```
 
