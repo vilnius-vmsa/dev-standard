@@ -456,6 +456,44 @@ Visi API resursai, grąžinantys kolekcijas, turi palaikyti puslapiavimą:
 *   Maksimalus puslapio dydis apibrėžiamas serverio pusėje; užklausa su pageSize virš maksimalaus - 400 klaida, ne tylus apribojimas
 *   Atsakyme pateikiamos nuorodos į kitą ir ankstesnį puslapį (next, prev pagal RFC 8288 Link antraštę arba atsakymo kūne)
 
+### 3.3.12. Sukūrimo ir atnaujinimo atsakymų standartas
+
+PRIVALOMA:
+
+<!-- ARCH-API-P30 | ai-reviewable -->
+*   POST (sukūrimas) grąžina **201 Created** su pilna sukurto resurso reprezentacija atsakymo kūne (įskaitant sugeneruotą `id` ir kitus serverio priskirtus laukus) bei `Location` antraštę, nurodančią naujojo resurso URL
+<!-- ARCH-API-P31 | ai-reviewable -->
+*   PUT (pilnas pakeitimas) ir PATCH (dalinis pakeitimas) grąžina **200 OK** su pilna atnaujinto resurso reprezentacija atsakymo kūne
+<!-- ARCH-API-P32 | ai-reviewable -->
+*   Draudžiama grąžinti **204 No Content** sukūrimo (POST) ar atnaujinimo (PUT/PATCH) operacijoms – klientas privalo gauti atnaujintą resurso būseną be papildomų užklausų
+
+REKOMENDUOJAMA:
+
+<!-- ARCH-API-R14 | ai-reviewable -->
+*   Atsakyme į POST įtraukti `Location` antraštę su naujai sukurto resurso URL (pvz., `Location: /api/v1/orders/123`)
+
+**Pavyzdys (POST /orders → 201 Created):**
+
+```json
+{
+  "id": "123",
+  "status": "DRAFT",
+  "createdAt": "2025-04-01T14:30:00Z",
+  "updatedAt": "2025-04-01T14:30:00Z"
+}
+```
+
+**Pavyzdys (PATCH /orders/123 → 200 OK):**
+
+```json
+{
+  "id": "123",
+  "status": "SUBMITTED",
+  "createdAt": "2025-04-01T14:30:00Z",
+  "updatedAt": "2025-04-01T15:00:00Z"
+}
+```
+
 ## 3.4. Duomenys ir integracijos
 
 ### 3.4.1. Duomenų modeliavimas
