@@ -477,8 +477,6 @@ PRIVALOMA:
 
 REKOMENDUOJAMA:
 
-<!-- ARCH-API-R14 | ai-reviewable -->
-*   Atsakyme į POST įtraukti `Location` antraštę su naujai sukurto resurso URL (pvz., `Location: /api/v1/orders/123`)
 <!-- ARCH-API-R15 | ai-reviewable -->
 *   Asinchroninės mutacijos atsakyme įtraukti `Location` antraštę su užduoties sekimo URL (pvz., `Location: /api/v1/jobs/456`)
 
