@@ -534,7 +534,7 @@ REKOMENDUOJAMA:
 
 > Susiję skyriai: [3.3.1](#331-specifikacija-ir-dokumentacija) · [3.3.2](#332-versijavimas) · [3.4.2](#342-integracijų-tipai-ir-pasirinkimo-kriterijai) · [3.4.3](#343-patikimumas-ir-atsparumas-gedimams)
 
-### 3.4.5. Asmens duomenų apsauga (BDAR / GDPR)
+### 3.4.5. Asmens duomenų apsauga (BDAR / GDPR) {#345-asmens-duomenų-apsauga-bdar-gdpr}
 
 Šiame poskyryje apibrėžiami asmens duomenų apsaugos reikalavimai, taikomi duomenų mainams, integracijoms ir tarp sistemų judantiems duomenų srautams. Bendrieji asmens duomenų apsaugos, prieigos kontrolės, duomenų subjektų teisių ir saugojimo terminų reikalavimai apibrėžti [#6.3](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) skyriuje.
 

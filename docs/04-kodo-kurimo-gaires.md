@@ -268,7 +268,7 @@ PRIVALOMA:
 <!-- CODE-VCS-P07 | ai-reviewable -->
 *   Šakų pavadinimai turi atitikti sutartą formatą:
 
-<type>/ticket-<ticket id>-<short description>
+`<type>/ticket-<ticket id>-<short description>`
 
 Pavyzdys:
 
@@ -331,8 +331,8 @@ PRIVALOMA:
 *   Commit žinutėse turi būti aiškiai nurodomas pakeitimo tipas ir susietas uždavinys.
 <!-- CODE-VCS-P16 | ai-reviewable -->
 *   Naudojamas Conventional Commits formatas:
-    *   <tipas>(<apimtis>): <trumpas aprašas> (ticket-<užduoties\_id>)
-    *   Pvz.: feature(auth): add 2 FA (ticket-45678)
+    *   `<tipas>(<apimtis>): <trumpas aprašas> (ticket-<užduoties_id>)`
+    *   Pvz.: `feature(auth): add 2 FA (ticket-45678)`
 <!-- CODE-VCS-P17 | human-reviewable -->
 *   Leidžiami tipai:
     *   **feature:** Įdiegta nauja funkcija
@@ -358,7 +358,7 @@ REKOMENDUOJAMA:
 <!-- CODE-VCS-R08 | ai-reviewable -->
 *   Commit istoriją išlaikyti švarią ir informatyvią, vengiant perteklinių tarpinių commit’ų pagrindinėse šakose.
 
-### 4.3.5. Pull Request / Merge Request reikalavimai
+### 4.3.5. Pull Request / Merge Request reikalavimai {#435-pull-request-merge-request-reikalavimai}
 
 PRIVALOMA:
 

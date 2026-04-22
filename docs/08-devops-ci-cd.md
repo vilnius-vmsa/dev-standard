@@ -61,7 +61,7 @@ REKOMENDUOJAMA:
 
 > Susiję skyriai: [4.2.3](04-kodo-kurimo-gaires.md#423-automatinis-formatavimas-ir-linting) · [4.5](04-kodo-kurimo-gaires.md#45-testai) · [7.9](07-testavimas.md#79-testų-vykdymas-ci-cd-ir-ataskaitos)
 
-## 8.3. CD (Continuous Delivery/Deployment)
+## 8.3. CD (Continuous Delivery/Deployment) {#83-cd-continuous-delivery-deployment}
 
 PRIVALOMA:
 
@@ -131,7 +131,7 @@ REKOMENDUOJAMA:
 
 > Susiję skyriai: [3.6](03-architektura.md#36-patikimumas-ir-atsparumas) · [6](06-saugumas.md) · [9.2](09-stebesena-logai.md#92-monitoring-ir-metrikos)
 
-## 8.6. DevSecOps (CI/CD kontrolė)
+## 8.6. DevSecOps (CI/CD kontrolė) {#86-devsecops-ci-cd-kontrolė}
 
 PRIVALOMA:
 
@@ -155,7 +155,7 @@ REKOMENDUOJAMA:
 
 > Susiję skyriai: [6](06-saugumas.md) · [6.6](06-saugumas.md#66-owasp-top-10) · [5.5](05-versijavimas.md#55-priklausomybių-saugumas-ir-atsekamumas)
 
-## 8.7. Stebėsena, logai ir įvykių valdymas (CI/CD užtikrinimas)
+## 8.7. Stebėsena, logai ir įvykių valdymas (CI/CD užtikrinimas) {#87-stebėsena-logai-ir-įvykių-valdymas-ci-cd-užtikrinimas}
 
 PRIVALOMA:
 
