@@ -174,7 +174,7 @@ REKOMENDUOJAMA:
 
 > Susiję skyriai: [3.2.5](03-architektura.md#325-prieinamumas-a11y) · [3.9.4](03-architektura.md#394-prieinamumas-ir-lokalizacija)
 
-## 7.9. Testų vykdymas CI/CD ir ataskaitos
+## 7.9. Testų vykdymas CI/CD ir ataskaitos {#79-testų-vykdymas-ci-cd-ir-ataskaitos}
 
 PRIVALOMA:
 
@@ -238,7 +238,7 @@ REKOMENDUOJAMA:
 
 > Susiję skyriai: [4.5](04-kodo-kurimo-gaires.md#45-testai) · [9.6](09-stebesena-logai.md#96-incidentų-valdymas)
 
-## 7.12. Duomenų apsauga (BDAR/GDPR) testuose
+## 7.12. Duomenų apsauga (BDAR/GDPR) testuose {#712-duomenų-apsauga-bdar-gdpr-testuose}
 
 PRIVALOMA:
 

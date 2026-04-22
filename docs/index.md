@@ -1,3 +1,7 @@
+---
+slug: /
+---
+
 # Programinės įrangos kūrimo standartas
 
 v1.0
