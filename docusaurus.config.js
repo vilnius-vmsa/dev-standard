@@ -7,7 +7,8 @@ const config = {
   favicon: 'img/favicon.ico',
 
   url: 'https://vilnius-vmsa.github.io',
-  baseUrl: '/dev-standard/',
+//   baseUrl: '/dev-standard/', // uncomment this line when website will go public, and comment the line below
+  baseUrl: '/',
 
   organizationName: 'vilnius-vmsa',
   projectName: 'dev-standard',
