@@ -125,7 +125,7 @@ Kiekvienas standarto reikalavimas turi HTML komentaro žymą, nurodantčią reik
 
 *   `P` – PRIVALOMA reikalavimas
 *   `R` – REKOMENDUOJAMA reikalavimas
-*   Pvz.: `ARCH-FE-P01` – Architektûra › Frontend › Privalomas reikalavimas #01
+*   Pvz.: `ARCH-FE-P01` – Architektūra › Frontend › Privalomas reikalavimas #01
 
 **Tikrinimo tipai:**
 
