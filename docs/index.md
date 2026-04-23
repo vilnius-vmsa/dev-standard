@@ -18,7 +18,9 @@ v1.0
   - [2.2. Kam standartas taikomas](02-paskirtis-ir-taikymo-sritis.md#22-kam-standartas-taikomas)
   - [2.3. Kokioms sistemoms taikomas standartas](02-paskirtis-ir-taikymo-sritis.md#23-kokioms-sistemoms-taikomas-standartas)
   - [2.4. Reikalavimų lygiai](02-paskirtis-ir-taikymo-sritis.md#24-reikalavimų-lygiai)
+    - [2.4.1. Reikalavimų klasifikacijos žymos](02-paskirtis-ir-taikymo-sritis.md#241-reikalavimų-klasifikacijos-žymos)
   - [2.5. Nukrypimai nuo standarto](02-paskirtis-ir-taikymo-sritis.md#25-nukrypimai-nuo-standarto)
+  - [2.6. Standarto įgyvendinimo brandos lygiai](02-paskirtis-ir-taikymo-sritis.md#26-standarto-įgyvendinimo-brandos-lygiai)
 - [3. Architektūros ir dizaino principai](03-architektura.md)
   - [3.1. Bendrieji architektūriniai principai](03-architektura.md#31-bendrieji-architektūriniai-principai)
   - [3.2. Frontend (Web) principai](03-architektura.md#32-frontend-web-principai)
@@ -38,6 +40,7 @@ v1.0
   - [4.5. Testai](04-kodo-kurimo-gaires.md#45-testai)
   - [4.6. Saugumas kodo lygmeniu](04-kodo-kurimo-gaires.md#46-saugumas-kodo-lygmeniu)
   - [4.7. Refaktoringas ir techninė skola](04-kodo-kurimo-gaires.md#47-refaktoringas-ir-techninė-skola)
+  - [4.8. DI priemonių naudojimas (AI Coding Assistants)](04-kodo-kurimo-gaires.md#48-di-priemonių-naudojimas-ai-coding-assistants)
 - [5. Versijavimas ir priklausomybių valdymas](05-versijavimas.md)
   - [5.1. Semantinis versijavimas (SemVer)](05-versijavimas.md#51-semantinis-versijavimas-semver)
   - [5.2. API versijavimas](05-versijavimas.md#52-api-versijavimas)
@@ -57,6 +60,7 @@ v1.0
   - [7.2. Testų tipai ir minimalūs reikalavimai](07-testavimas.md#72-testų-tipai-ir-minimalūs-reikalavimai)
   - [7.3. Priemonės ir rekomenduojamos technologijos](07-testavimas.md#73-priemonės-ir-rekomenduojamos-technologijos)
   - [7.4. Aprėptis ir kokybės vartai (Quality Gates)](07-testavimas.md#74-aprėptis-ir-kokybės-vartai-quality-gates)
+    - [7.4.1. Numatytieji aprėpties slenksčiai](07-testavimas.md#741-numatytieji-aprėpties-slenksčiai)
   - [7.5. Testavimo duomenys ir aplinkos](07-testavimas.md#75-testavimo-duomenys-ir-aplinkos)
   - [7.6. Našumo ir apkrovos testavimas](07-testavimas.md#76-našumo-ir-apkrovos-testavimas)
   - [7.7. Saugumo testavimas (DevSecOps)](07-testavimas.md#77-saugumo-testavimas-devsecops)
@@ -84,6 +88,7 @@ v1.0
   - [9.3. Alerting principai](09-stebesena-logai.md#93-alerting-principai)
   - [9.4. Klaidos ir „error handling"](09-stebesena-logai.md#94-klaidos-ir-error-handling)
   - [9.5. SLA, SLO ir SLI](09-stebesena-logai.md#95-sla-slo-ir-sli)
+    - [9.5.1. Numatytieji SLO lygiai (tiers)](09-stebesena-logai.md#951-numatytieji-slo-lygiai-tiers)
   - [9.6. Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas)
   - [9.7. Audit trail (audito pėdsakas)](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas)
   - [9.8. Eksploatacijos dokumentacija](09-stebesena-logai.md#98-eksploatacijos-dokumentacija)
@@ -115,3 +120,8 @@ v1.0
   - [13.4. Standarto taikymas laike (pereinamieji laikotarpiai)](13-standarto-prieziura.md#134-standarto-taikymas-laike-pereinamieji-laikotarpiai)
   - [13.5. Komunikacija apie pakeitimus](13-standarto-prieziura.md#135-komunikacija-apie-pakeitimus)
   - [13.6. Atitikties palaikymas](13-standarto-prieziura.md#136-atitikties-palaikymas)
+
+## Priedai
+
+- [A priedas. Organizacijos technologijų registras](priedai/technologiju-registras.md)
+- [B priedas. BDAR / GDPR įgyvendinimo šablonai](priedai/bdar-igyvendinimo-sabalonai.md)

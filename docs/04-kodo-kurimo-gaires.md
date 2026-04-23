@@ -330,12 +330,12 @@ PRIVALOMA:
 <!-- CODE-VCS-P15 | ai-reviewable -->
 *   Commit žinutėse turi būti aiškiai nurodomas pakeitimo tipas ir susietas uždavinys.
 <!-- CODE-VCS-P16 | ai-reviewable -->
-*   Naudojamas Conventional Commits formatas:
+*   Naudojamas [Conventional Commits v1.0.0](https://www.conventionalcommits.org/) formatas:
     *   `<tipas>(<apimtis>): <trumpas aprašas> (ticket-<užduoties_id>)`
-    *   Pvz.: `feature(auth): add 2 FA (ticket-45678)`
+    *   Pvz.: `feat(auth): add 2FA (ticket-45678)`
 <!-- CODE-VCS-P17 | human-reviewable -->
 *   Leidžiami tipai:
-    *   **feature:** Įdiegta nauja funkcija
+    *   **feat:** Įdiegta nauja funkcija
     *   **fix:** Ištaisoma klaida
     *   **chore:** Įprastos priežiūros užduotys, pvz., priklausomybių atnaujinimas ar build skriptų pakeitimai
     *   **docs:** Dokumentacijos pakeitimai
@@ -344,8 +344,7 @@ PRIVALOMA:
     *   **perf:** Našumo patobulinimai
     *   **test:** Testų pridėjimas arba atnaujinimas
     *   **build:** Pakeitimai, susiję su build įrankiais arba priklausomybėmis
-    *   **ci:** Nuolatinės integracijos (CI) konfigūracijos pakeitimai
-    *   **ops:** Operaciniai pakeitimai, pvz., diegimo skriptai ar infrastruktūros pakeitimai
+    *   **ci:** Nuolatinės integracijos (CI) ir operaciniai pakeitimai, pvz., diegimo skriptai ar infrastruktūros konfigūracijos pakeitimai
 <!-- CODE-VCS-P18 | ai-reviewable -->
 *   Apimtis turi nurodyti kontekstą arba paliestą sritį, pvz. auth, api, ui, config, docker.
 <!-- CODE-VCS-P19 | human-reviewable -->
@@ -560,3 +559,58 @@ REKOMENDUOJAMA:
 *   Kritinė techninė skola, daranti poveikį saugumui, patikimumui ar palaikomumui, rekomenduojama vertinti kaip prioritetinį darbą, o ne atidėti neribotam laikui.
 
 > Susiję skyriai: [3.1.5 Architecture Decision Records (ADR)](03-architektura.md#315-architecture-decision-records-adr) · [10.4 Architecture Decision Records (ADR)](10-dokumentacija.md#104-architecture-decision-records-adr) · [4.2 Kodo struktūra ir konvencijos](#42-kodo-struktūra-ir-konvencijos) · [5 Versijavimas ir priklausomybių valdymas](05-versijavimas.md) · [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [9 Stebėsena, logai ir eksploatacija](09-stebesena-logai.md)
+
+## 4.8. DI priemonių naudojimas (AI Coding Assistants)
+
+Šiame poskyryje apibrėžiami reikalavimai dirbtinio intelekto (DI) priemonių, tokių kaip kodo generavimo asistentai, pokalbių modeliai ir kiti DI įrankiai, naudojimui programinio kodo kūrime ir keitime.
+
+DI priemonės gali padidinti produktyvumą, tačiau kelia papildomų rizikų, susijusių su kodo kokybe, intelektine nuosavybe, duomenų apsauga ir saugumu.
+
+### 4.8.1. Bendrieji principai
+
+PRIVALOMA:
+
+<!-- CODE-AI-P01 | ai-reviewable -->
+*   DI sugeneruotas kodas traktuojamas lygiai taip pat kaip žmogaus parašytas kodas — jam taikomi visi šio standarto kokybės, saugumo, testavimo ir peržiūros reikalavimai.
+<!-- CODE-AI-P02 | ai-reviewable -->
+*   DI sugeneruotas kodas turi praeiti visas standartines CI patikras (linting, SAST, testai) be išimčių.
+<!-- CODE-AI-P03 | human-reviewable -->
+*   Code review metu peržiūrėtojas privalo vertinti DI sugeneruoto kodo logiką ir teisingumą; formalus patvirtinimas neskaitant kodo yra draudžiamas.
+<!-- CODE-AI-P04 | process-level -->
+*   DI priemonių naudojimas neatleidžia kūrėjo nuo atsakomybės už pateikto kodo kokybę ir saugumą.
+
+### 4.8.2. Duomenų apsauga ir konfidencialumas
+
+PRIVALOMA:
+
+<!-- CODE-AI-P05 | process-level -->
+*   Draudžiama į išorines (ne organizacijos kontroliuojamas) DI paslaugas perduoti:
+    *   asmens duomenis ar kitą jautrią informaciją;
+    *   slaptuosius raktus, slaptažodžius ar tokenus;
+    *   vidinę architektūros, infrastruktūros ar verslo logikos informaciją, kurios atskleidimas kelia riziką.
+<!-- CODE-AI-P06 | process-level -->
+*   Savivaldybės programinis kodas negali būti naudojamas DI modelių mokymui ar viešinamas per DI paslaugas be aiškaus organizacijos leidimo.
+<!-- CODE-AI-P07 | ai-reviewable -->
+*   DI priemonės turi būti naudojamos tik per organizacijos patvirtintus kanalus ir konfigūracijas.
+
+### 4.8.3. Kokybės užtikrinimas
+
+PRIVALOMA:
+
+<!-- CODE-AI-P08 | human-reviewable -->
+*   DI sugeneruoti testai turi būti peržiūrimi dėl prasmingų tikrinimų (assertions); testai, kurie tik didina aprėptį be realaus tikrinimo, yra draudžiami.
+<!-- CODE-AI-P09 | ai-reviewable -->
+*   DI sugeneruotos priklausomybės ir importai turi būti tikrinami dėl egzistavimo, palaikymo būklės ir saugumo — DI modeliai gali siūlyti neegzistuojančius paketus.
+
+REKOMENDUOJAMA:
+
+<!-- CODE-AI-R01 | process-level -->
+*   Naudoti organizacijos patvirtintas DI priemones, nurodytas technologijų registre.
+<!-- CODE-AI-R02 | human-reviewable -->
+*   Pirmenybę teikti IDE integruotoms DI priemonėms (pvz., GitHub Copilot) vietoje tiesioginio teksto kopijavimo iš išorinių pokalbių sąsajų, nes tai mažina duomenų nutekėjimo riziką.
+<!-- CODE-AI-R03 | human-reviewable -->
+*   Jautriems ar sudėtingiems scenarijams svarstyti organizacijos kontroliuojamus (self-hosted) DI sprendimus.
+<!-- CODE-AI-R04 | human-reviewable -->
+*   DI priemones naudoti kaip pagalbinį, o ne pagrindinį kūrimo įrankį — kūrėjas turi suprasti ir galėti paaiškinti kiekvieną kodo eilutę.
+
+> Susiję skyriai: [4.4 Code Review principai](#44-code-review-principai) · [4.6 Saugumas kodo lygmeniu](#46-saugumas-kodo-lygmeniu) · [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [6.4 Secrets management](06-saugumas.md#64-secrets-management) · [12 Tiekėjų ir pavaldžių įstaigų reikalavimai](12-tiekeju-reikalavimai.md)

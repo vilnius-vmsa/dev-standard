@@ -83,7 +83,7 @@ REKOMENDUOJAMA:
 *   Projektavimo metu aiškiai dokumentuoti, kokie asmens duomenys tvarkomi, kur jie saugomi ir kas turi prieigą.
 *   Aukštos rizikos scenarijuose taikyti papildomas priemones, tokias kaip pseudonimizacija ar laukų maskavimas.
 
-> Susiję skyriai: [3.4.5 Asmens duomenų apsauga (BDAR / GDPR)](03-architektura.md#345-asmens-duomenų-apsauga-bdar-gdpr) · [3.10.1 Teisinė ir reguliacinė atitiktis](03-architektura.md#3101-teisinė-ir-reguliacinė-atitiktis) · [9.7 Audit trail (audito pėdsakas)](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas)
+> Susiję skyriai: [3.4.5 Asmens duomenų apsauga (BDAR / GDPR)](03-architektura.md#345-asmens-duomenų-apsauga-bdar-gdpr) · [3.10.1 Teisinė ir reguliacinė atitiktis](03-architektura.md#3101-teisinė-ir-reguliacinė-atitiktis) · [9.7 Audit trail (audito pėdsakas)](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas) · [B priedas. BDAR įgyvendinimo šablonai](priedai/bdar-igyvendinimo-sabalonai.md)
 
 ## 6.4. Secrets management
 
