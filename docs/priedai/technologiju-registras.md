@@ -78,7 +78,7 @@
 | GitHub Copilot (Business/Enterprise) | ✅ Patvirtinta | Tik su organizacijos valdomu planu; žr. [§4.8](../04-kodo-kurimo-gaires.md#48-di-priemonių-naudojimas-ai-coding-assistants) |
 | _Kitos DI priemonės_ | 🔍 Vertinama | Reikia VP ir DPO patvirtinimo |
 
-## A.9. Registravo atnaujinimo procesas
+## A.9. Registro atnaujinimo procesas
 
 1. **Pasiūlymas** — bet kuris kūrėjas arba tiekėjas pateikia technologijos pasiūlymą per Pull Request į šį dokumentą.
 2. **Vertinimas** — architektūros atstovas įvertina technologiją pagal:
