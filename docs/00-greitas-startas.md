@@ -129,7 +129,7 @@ Ką patikrinti prieš pradedant naują projektą arba perimant esamą sistemą:
 | OpenAPI / GraphQL SDL specifikacija prieš kodą | [§3.3.1](03-architektura.md#331-specifikacija-ir-dokumentacija) |
 | REST: daiktavardžiai, kebab-case, daugiskaita | [§3.3.3](03-architektura.md#333-resursų-modeliavimas-ir-url-dizainas) |
 | Versijavimas URI arba antraštėje | [§5.2](05-versijavimas.md#52-api-versijavimas) |
-| Puslapiavimas: maksimalus page size serverio pusėje | [§3.3.11](03-architektura.md#3311-puslapiavimas-ir-didelių-duomenų-rinkinių-apdorojimas) |
+| Puslapiavimas: maksimalus page size serverio pusėje | [§3.3.11](03-architektura.md#3311-puslapiavimas) |
 | Autentifikacija: Bearer token arba session cookie | [§6.2](06-saugumas.md#62-autentifikacija-ir-autorizacija) |
 | Rate limiting viešiems endpointams | [§3.3.4](03-architektura.md#334-apsauga-ir-prieiga) |
 | Klaidos: RFC 9457 `application/problem+json` | [§3.3.9](03-architektura.md#339-klaidų-apdorojimas-api-lygmeniu) |
