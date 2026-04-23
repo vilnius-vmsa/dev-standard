@@ -123,8 +123,8 @@ Kiekvienas standarto reikalavimas turi HTML komentaro žymą, nurodantčią reik
 
 **Identifikatoriaus formatas:** `<SRITIS>-<POSRITYS>-<P|R><NUMERIS>`
 
-*   `P` – PRIVALOMA reikalavimas
-*   `R` – REKOMENDUOJAMA reikalavimas
+*   `P` – PRIVALOMAS reikalavimas
+*   `R` – REKOMENDUOJAMAS reikalavimas
 *   Pvz.: `ARCH-FE-P01` – Architektūra › Frontend › Privalomas reikalavimas #01
 
 **Tikrinimo tipai:**
