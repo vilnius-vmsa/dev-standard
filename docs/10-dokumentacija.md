@@ -32,7 +32,7 @@ REKOMENDUOJAMA:
 <!-- DOC-GEN-R03 | ai-reviewable -->
 *   Vengti dokumentacijos dubliavimo tarp skyrių; vietoje to naudoti nuorodas į pagrindinį reikalavimo šaltinį.
 
-> Susiję skyriai: [3](03-architektura.md) · [4](04-kodo-kurimo-gaires.md) · [9](09-stebesena-logai.md)
+> Susiję skyriai: [3 Architektūros ir dizaino principai](03-architektura.md) · [4 Programinio kodo kūrimo ir keitimo gairės](04-kodo-kurimo-gaires.md) · [9 Stebėsena, logai ir eksploatacija](09-stebesena-logai.md)
 
 ## 10.2. Privaloma dokumentacija
 
@@ -65,7 +65,7 @@ REKOMENDUOJAMA:
 <!-- DOC-REQ-R02 | ai-reviewable -->
 *   Jei sistema turi reikšmingų nefunkcinių reikalavimų, rekomenduojama aiškiai parodyti, kaip architektūriniai sprendimai padeda juos užtikrinti.
 
-> Susiję skyriai: [3.8](03-architektura.md#38-diagramos-ir-dokumentavimas) · [10.4](#104-architecture-decision-records-adr)
+> Susiję skyriai: [3.8 Diagramos ir dokumentavimas](03-architektura.md#38-diagramos-ir-dokumentavimas) · [10.4 Architecture Decision Records (ADR)](#104-architecture-decision-records-adr)
 
 ### 10.2.2. API dokumentacija
 
@@ -85,7 +85,7 @@ REKOMENDUOJAMA:
 <!-- DOC-REQ-R04 | ai-reviewable -->
 *   Išorinėms ar tarporganizacinėms integracijoms rekomenduojama aiškiai nurodyti deprecation politiką ir suderinamumo ribas.
 
-> Susiję skyriai: [3.3](03-architektura.md#33-backend-ir-api-principai) · [3.4](03-architektura.md#34-duomenys-ir-integracijos)
+> Susiję skyriai: [3.3 Backend ir API principai](03-architektura.md#33-backend-ir-api-principai) · [3.4 Duomenys ir integracijos](03-architektura.md#34-duomenys-ir-integracijos)
 
 ### 10.2.3. Diegimo ir eksploatacijos instrukcijos
 
@@ -105,7 +105,7 @@ REKOMENDUOJAMA:
 <!-- DOC-REQ-R06 | ai-reviewable -->
 *   Jei dalis veiksmų yra automatizuoti, instrukcijose rekomenduojama aiškiai atskirti, kas vykdoma per CI/CD, o kas yra rankiniai žingsniai.
 
-> Susiję skyriai: [8](08-devops-ci-cd.md) · [9.8](09-stebesena-logai.md#98-eksploatacijos-dokumentacija)
+> Susiję skyriai: [8 DevOps ir CI/CD reikalavimai](08-devops-ci-cd.md) · [9.8 Eksploatacijos dokumentacija](09-stebesena-logai.md#98-eksploatacijos-dokumentacija)
 
 ### 10.2.4. Naudotojo dokumentacija
 
@@ -125,7 +125,7 @@ REKOMENDUOJAMA:
 <!-- DOC-REQ-R08 | human-reviewable -->
 *   Jei sistema skirta viešiesiems naudotojams, rekomenduojama įtraukti ir prieinamumo bei pagalbos scenarijus.
 
-> Susiję skyriai: [3.2](03-architektura.md#32-frontend-web-principai) · [3.9](03-architektura.md#39-mobilios-aplikacijos-jei-taikoma) · [3.2.5](03-architektura.md#325-prieinamumas-a11y) · [7.8](07-testavimas.md#78-prieinamumo-accessibility-testavimas)
+> Susiję skyriai: [3.2 Frontend (Web) principai](03-architektura.md#32-frontend-web-principai) · [3.9 Mobilios aplikacijos (jei taikoma)](03-architektura.md#39-mobilios-aplikacijos-jei-taikoma) · [3.2.5 Prieinamumas (A11y)](03-architektura.md#325-prieinamumas-a11y) · [7.8 Prieinamumo (Accessibility) testavimas](07-testavimas.md#78-prieinamumo-accessibility-testavimas)
 
 ## 10.3. Dokumentacijos formatai ir struktūra
 
@@ -151,7 +151,7 @@ REKOMENDUOJAMA:
 <!-- DOC-FMT-R03 | ai-reviewable -->
 *   Dokumentų struktūrą rekomenduojama organizuoti taip, kad būtų aiškiai atskirti architektūros, API, eksploatacijos ir naudotojo dokumentacijos artefaktai.
 
-> Susiję skyriai: [3.8](03-architektura.md#38-diagramos-ir-dokumentavimas) · [10.4](#104-architecture-decision-records-adr)
+> Susiję skyriai: [3.8 Diagramos ir dokumentavimas](03-architektura.md#38-diagramos-ir-dokumentavimas) · [10.4 Architecture Decision Records (ADR)](#104-architecture-decision-records-adr)
 
 ## 10.4. Architecture Decision Records (ADR)
 
@@ -181,7 +181,7 @@ REKOMENDUOJAMA:
 <!-- DOC-ADR-R03 | human-reviewable -->
 *   Jei sprendimas turi ilgalaikį poveikį saugumui, palaikomumui, kaštams ar perimamumui, rekomenduojama aiškiai aprašyti jo pasekmes ir rizikas.
 
-> Susiję skyriai: [3.1.5](03-architektura.md#315-architecture-decision-records-adr) · [3.8](03-architektura.md#38-diagramos-ir-dokumentavimas)
+> Susiję skyriai: [3.1.5 Architecture Decision Records (ADR)](03-architektura.md#315-architecture-decision-records-adr) · [3.8 Diagramos ir dokumentavimas](03-architektura.md#38-diagramos-ir-dokumentavimas)
 
 ## 10.5. Dokumentacijos atnaujinimo taisyklės
 
@@ -209,4 +209,4 @@ REKOMENDUOJAMA:
 <!-- DOC-UPD-R03 | ai-reviewable -->
 *   Dokumentacijos pasenimą vertinti kaip kokybės signalą, o ne tik kaip redakcinę problemą.
 
-> Susiję skyriai: [4.3.5](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai) · [4.4](04-kodo-kurimo-gaires.md#44-code-review-principai) · [3.8](03-architektura.md#38-diagramos-ir-dokumentavimas) · [8](08-devops-ci-cd.md)
+> Susiję skyriai: [4.3.5 Pull Request / Merge Request reikalavimai](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai) · [4.4 Code Review principai](04-kodo-kurimo-gaires.md#44-code-review-principai) · [3.8 Diagramos ir dokumentavimas](03-architektura.md#38-diagramos-ir-dokumentavimas) · [8 DevOps ir CI/CD reikalavimai](08-devops-ci-cd.md)

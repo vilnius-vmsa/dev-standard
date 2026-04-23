@@ -26,7 +26,7 @@ REKOMENDUOJAMA:
 <!-- TEST-STRAT-R02 | ai-reviewable -->
 *   Kritinėms sistemoms testavimo strategiją rekomenduojama periodiškai peržiūrėti, vertinant realiai randamų defektų pobūdį ir testų efektyvumą.
 
-> Susiję skyriai: [4.5](04-kodo-kurimo-gaires.md#45-testai) · [8.2](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai)
+> Susiję skyriai: [4.5 Testai](04-kodo-kurimo-gaires.md#45-testai) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai)
 
 ## 7.2. Testų tipai ir minimalūs reikalavimai
 
@@ -54,7 +54,7 @@ REKOMENDUOJAMA:
 <!-- TEST-TYPE-R02 | ai-reviewable -->
 *   Sudėtingoms integracijoms ar aukštos rizikos sistemoms papildomai taikyti atsparumo ar degradacijos scenarijų testus.
 
-> Susiję skyriai: [3.3.1](03-architektura.md#331-specifikacija-ir-dokumentacija) · [3.3.2](03-architektura.md#332-versijavimas) · [3.6](03-architektura.md#36-patikimumas-ir-atsparumas) · [3.9.6](03-architektura.md#396-testavimas)
+> Susiję skyriai: [3.3.1 Specifikacija ir dokumentacija](03-architektura.md#331-specifikacija-ir-dokumentacija) · [3.3.2 Versijavimas](03-architektura.md#332-versijavimas) · [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [3.9.6 Testavimas](03-architektura.md#396-testavimas)
 
 ## 7.3. Priemonės ir rekomenduojamos technologijos
 
@@ -78,7 +78,7 @@ REKOMENDUOJAMA:
 <!-- TEST-TOOL-R04 | ai-reviewable -->
 *   Prieinamumo testams derinti automatinius įrankius su rankiniu tikrinimu.
 
-> Susiję skyriai: [4.2.3](04-kodo-kurimo-gaires.md#423-automatinis-formatavimas-ir-linting) · [8](08-devops-ci-cd.md)
+> Susiję skyriai: [4.2.3 Automatinis formatavimas ir linting](04-kodo-kurimo-gaires.md#423-automatinis-formatavimas-ir-linting) · [8 DevOps ir CI/CD reikalavimai](08-devops-ci-cd.md)
 
 ## 7.4. Aprėptis ir kokybės vartai (Quality Gates)
 
@@ -102,7 +102,7 @@ REKOMENDUOJAMA:
 <!-- TEST-GATE-R03 | ai-reviewable -->
 *   Flaky testų problematiką rekomenduojama valdyti kaip atskirą kokybės riziką, o ne spręsti jų išjungimu be priežasties.
 
-> Susiję skyriai: [4.5](04-kodo-kurimo-gaires.md#45-testai) · [8.2](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai) · [6.6](06-saugumas.md#66-owasp-top-10)
+> Susiję skyriai: [4.5 Testai](04-kodo-kurimo-gaires.md#45-testai) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai) · [6.6 OWASP Top 10](06-saugumas.md#66-owasp-top-10)
 
 ## 7.5. Testavimo duomenys ir aplinkos
 
@@ -126,7 +126,7 @@ REKOMENDUOJAMA:
 <!-- TEST-DATA-R03 | ai-reviewable -->
 *   Jei naudojamos išorinės sistemos, rekomenduojama aiškiai apibrėžti testavimo langus, ribas ir atsakomybę už testavimo poveikį.
 
-> Susiję skyriai: [3.5](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [6.3](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [3.9.6](03-architektura.md#396-testavimas)
+> Susiję skyriai: [3.5 Konfigūracija, slaptieji raktai ir aplinkos](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [3.9.6 Testavimas](03-architektura.md#396-testavimas)
 
 ## 7.6. Našumo ir apkrovos testavimas
 
@@ -148,7 +148,7 @@ REKOMENDUOJAMA:
 <!-- TEST-PERF-R02 | ai-reviewable -->
 *   Našumo testų rezultatus naudoti ne tik leidimo sprendimui, bet ir architektūros, talpyklų, duomenų bazių ar infrastruktūros korekcijai.
 
-> Susiję skyriai: [3.1.1](03-architektura.md#311-kokybės-atributai-nfr) · [3.3.9](03-architektura.md#339-greitaveika-patikimumas-ir-talpyklos) · [9.5](09-stebesena-logai.md#95-sla-slo-ir-sli)
+> Susiję skyriai: [3.1.1 Kokybės atributai (NFR)](03-architektura.md#311-kokybės-atributai-nfr) · [3.3.9 Greitaveika, patikimumas ir talpyklos](03-architektura.md#339-greitaveika-patikimumas-ir-talpyklos) · [9.5 SLA, SLO ir SLI](09-stebesena-logai.md#95-sla-slo-ir-sli)
 
 ## 7.7. Saugumo testavimas (DevSecOps)
 
@@ -172,7 +172,7 @@ REKOMENDUOJAMA:
 <!-- TEST-A11Y-R02 | ai-reviewable -->
 *   Aukštos rizikos ar plačiai naudojamoms sistemoms prieinamumo testavimą rekomenduojama įtraukti į regresijos procesą.
 
-> Susiję skyriai: [3.2.5](03-architektura.md#325-prieinamumas-a11y) · [3.9.4](03-architektura.md#394-prieinamumas-ir-lokalizacija)
+> Susiję skyriai: [3.2.5 Prieinamumas (A11y)](03-architektura.md#325-prieinamumas-a11y) · [3.9.4 Prieinamumas ir lokalizacija](03-architektura.md#394-prieinamumas-ir-lokalizacija)
 
 ## 7.9. Testų vykdymas CI/CD ir ataskaitos {#79-testų-vykdymas-ci-cd-ir-ataskaitos}
 
@@ -194,7 +194,7 @@ REKOMENDUOJAMA:
 <!-- TEST-CICD-R02 | ai-reviewable -->
 *   Kritinių testų rezultatus rekomenduojama įtraukti į release peržiūrą.
 
-> Susiję skyriai: [4.3.5](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai) · [8.2](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai) · [8.9](08-devops-ci-cd.md#89-leidimų-release-valdymas)
+> Susiję skyriai: [4.3.5 Pull Request / Merge Request reikalavimai](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai) · [8.9 Leidimų (release) valdymas](08-devops-ci-cd.md#89-leidimų-release-valdymas)
 
 ## 7.10. Priėmimas (UAT) ir nefunkciniai kriterijai
 
@@ -214,7 +214,7 @@ REKOMENDUOJAMA:
 <!-- TEST-UAT-R02 | process-level -->
 *   UAT radinius aiškiai atskirti nuo techninių defektų ir naudoti kaip įvestį regresijos bei release planavimui.
 
-> Susiję skyriai: [11.3](11-darbo-organizavimas.md#113-reikalavimų-valdymas) · [11](11-darbo-organizavimas.md) · [9.5](09-stebesena-logai.md#95-sla-slo-ir-sli)
+> Susiję skyriai: [11.3 Reikalavimų valdymas](11-darbo-organizavimas.md#113-reikalavimų-valdymas) · [11 Darbo organizavimas ir rolės](11-darbo-organizavimas.md) · [9.5 SLA, SLO ir SLI](09-stebesena-logai.md#95-sla-slo-ir-sli)
 
 ## 7.11. Defektų valdymas ir regresija
 
@@ -236,7 +236,7 @@ REKOMENDUOJAMA:
 <!-- TEST-REG-R02 | process-level -->
 *   Regresijos rinkinį peržiūrėti periodiškai, kad jis išliktų aktualus ir neperkrautas pasenusių scenarijų.
 
-> Susiję skyriai: [4.5](04-kodo-kurimo-gaires.md#45-testai) · [9.6](09-stebesena-logai.md#96-incidentų-valdymas)
+> Susiję skyriai: [4.5 Testai](04-kodo-kurimo-gaires.md#45-testai) · [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas)
 
 ## 7.12. Duomenų apsauga (BDAR/GDPR) testuose {#712-duomenų-apsauga-bdar-gdpr-testuose}
 
@@ -258,7 +258,7 @@ REKOMENDUOJAMA:
 <!-- TEST-GDPR-R02 | ai-reviewable -->
 *   Testavimo duomenų gyvavimo ciklą rekomenduojama valdyti taip pat nuosekliai kaip ir produkcinių duomenų apsaugos priemones.
 
-> Susiję skyriai: [6.3](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [3.4.5](03-architektura.md#345-asmens-duomenų-apsauga-bdar-gdpr) · [9.7](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas)
+> Susiję skyriai: [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [3.4.5 Asmens duomenų apsauga (BDAR / GDPR)](03-architektura.md#345-asmens-duomenų-apsauga-bdar-gdpr) · [9.7 Audit trail (audito pėdsakas)](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas)
 
 ## 7.13. Atsparumo, DR ir atkūrimo testai
 
@@ -280,4 +280,4 @@ REKOMENDUOJAMA:
 <!-- TEST-DR-R03 | ai-reviewable -->
 *   Atsparumo testų rezultatus rekomenduojama naudoti koreguojant eksploatacijos dokumentaciją ir incidentų planus.
 
-> Susiję skyriai: [3.6](03-architektura.md#36-patikimumas-ir-atsparumas) · [9.6](09-stebesena-logai.md#96-incidentų-valdymas) · [9.8](09-stebesena-logai.md#98-eksploatacijos-dokumentacija)
+> Susiję skyriai: [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas) · [9.8 Eksploatacijos dokumentacija](09-stebesena-logai.md#98-eksploatacijos-dokumentacija)

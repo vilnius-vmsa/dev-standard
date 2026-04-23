@@ -181,7 +181,7 @@ REKOMENDUOJAMA:
 <!-- CODE-CONV-R04 | ai-reviewable -->
 *   URL, DB ir failų pavadinimų konvencijas derinti su atitinkamais architektūros ir API reikalavimais.
 
-> Susiję skyriai: [3.3.3](03-architektura.md#333-resursų-modeliavimas-ir-url-dizainas)
+> Susiję skyriai: [3.3.3 Resursų modeliavimas ir URL dizainas](03-architektura.md#333-resursų-modeliavimas-ir-url-dizainas)
 
 ### 4.2.3. Automatinis formatavimas ir linting
 
@@ -209,7 +209,7 @@ REKOMENDUOJAMA:
 <!-- CODE-CONV-R07 | process-level -->
 *   Globalus taisyklės išjungimas turėtų būti leidžiamas tik per formalų taisyklių rinkinio peržiūros procesą.
 
-> Susiję skyriai: [8.2](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai)
+> Susiję skyriai: [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai)
 
 ### 4.2.4. Failų ir modulių dydis
 
@@ -257,7 +257,7 @@ REKOMENDUOJAMA:
 <!-- CODE-VCS-R02 | ai-reviewable -->
 *   Repozitorijų valdymo modelį dokumentuoti taip, kad būtų aišku, kur laikomas programinis kodas, kur infrastruktūros kodas ir kur bendros bibliotekos.
 
-> Susiję skyriai: [12](12-tiekeju-reikalavimai.md) · [8](08-devops-ci-cd.md)
+> Susiję skyriai: [12 Tiekėjų ir pavaldžių įstaigų reikalavimai](12-tiekeju-reikalavimai.md) · [8 DevOps ir CI/CD reikalavimai](08-devops-ci-cd.md)
 
 ### 4.3.2. Šakų (Branch) strategija
 
@@ -293,7 +293,7 @@ REKOMENDUOJAMA:
 <!-- CODE-VCS-R04 | ai-reviewable -->
 *   Pasenusias neaktyvias šakas periodiškai archyvuoti arba šalinti.
 
-> Susiję skyriai: [8.3](08-devops-ci-cd.md#83-cd-continuous-delivery-deployment) · [8.9](08-devops-ci-cd.md#89-leidimų-release-valdymas)
+> Susiję skyriai: [8.3 CD (Continuous Delivery/Deployment)](08-devops-ci-cd.md#83-cd-continuous-delivery-deployment) · [8.9 Leidimų (release) valdymas](08-devops-ci-cd.md#89-leidimų-release-valdymas)
 
 ### 4.3.3. Šakų (Branch) apsauga
 
@@ -315,7 +315,7 @@ REKOMENDUOJAMA:
 <!-- CODE-VCS-R06 | ai-reviewable -->
 *   Aukštos rizikos arba architektūrinio poveikio pakeitimams reikalauti papildomos tech lead ar architekto peržiūros.
 
-> Susiję skyriai: [4.4](#44-code-review-principai) · [8.2](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai)
+> Susiję skyriai: [4.4 Code Review principai](#44-code-review-principai) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai)
 
 ### 4.3.4. Commit'ų gairės
 
@@ -388,7 +388,7 @@ REKOMENDUOJAMA:
 <!-- CODE-VCS-R11 | ai-reviewable -->
 *   Draft PR arba MR rekomenduojama naudoti ankstyvam grįžtamajam ryšiui, jei implementacija dar nebaigta.
 
-> Susiję skyriai: [4.4](#44-code-review-principai) · [4.5](#45-testai) · [8.2](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai) · [10](10-dokumentacija.md)
+> Susiję skyriai: [4.4 Code Review principai](#44-code-review-principai) · [4.5 Testai](#45-testai) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai) · [10 Dokumentacija](10-dokumentacija.md)
 
 ### 4.3.6. Repozitorijos higiena
 
@@ -412,7 +412,7 @@ REKOMENDUOJAMA:
 <!-- CODE-VCS-R14 | ai-reviewable -->
 *   Repozitorijos šaknyje turėti minimalų README su paskirtimi ir pagrindinėmis nuorodomis.
 
-> Susiję skyriai: [3.5.2](03-architektura.md#352-slaptieji-raktai) · [6.4](06-saugumas.md#64-secrets-management) · [10](10-dokumentacija.md) · [12](12-tiekeju-reikalavimai.md)
+> Susiję skyriai: [3.5.2 Slaptieji raktai](03-architektura.md#352-slaptieji-raktai) · [6.4 Secrets management](06-saugumas.md#64-secrets-management) · [10 Dokumentacija](10-dokumentacija.md) · [12 Tiekėjų ir pavaldžių įstaigų reikalavimai](12-tiekeju-reikalavimai.md)
 
 ## 4.4. Code Review principai
 
@@ -450,7 +450,7 @@ REKOMENDUOJAMA:
 <!-- CODE-REV-R04 | ai-reviewable -->
 *   Dideliems arba sudėtingiems pakeitimams rekomenduojama review metu nurodyti, kurios vietos yra didžiausios rizikos ar reikalauja papildomo dėmesio.
 
-> Susiję skyriai: [4.3.5](#435-pull-request-merge-request-reikalavimai) · [4.5](#45-testai)
+> Susiję skyriai: [4.3.5 Pull Request / Merge Request reikalavimai](#435-pull-request-merge-request-reikalavimai) · [4.5 Testai](#45-testai)
 
 ## 4.5. Testai
 
@@ -489,7 +489,7 @@ REKOMENDUOJAMA:
 <!-- CODE-TEST-R05 | ai-reviewable -->
 *   Kritinių modulių testavimo lygis turėtų būti griežtesnis negu pagalbinių ar mažos rizikos komponentų.
 
-> Susiję skyriai: [4.4](#44-code-review-principai) · [7](07-testavimas.md) · [7.8](07-testavimas.md#78-prieinamumo-accessibility-testavimas) · [7.9](07-testavimas.md#79-testų-vykdymas-ci-cd-ir-ataskaitos) · [8.2](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai)
+> Susiję skyriai: [4.4 Code Review principai](#44-code-review-principai) · [7 Testavimo reikalavimai ir principai](07-testavimas.md) · [7.8 Prieinamumo (Accessibility) testavimas](07-testavimas.md#78-prieinamumo-accessibility-testavimas) · [7.9 Testų vykdymas CI/CD ir ataskaitos](07-testavimas.md#79-testų-vykdymas-ci-cd-ir-ataskaitos) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai)
 
 ## 4.6. Saugumas kodo lygmeniu
 
@@ -523,7 +523,7 @@ REKOMENDUOJAMA:
 <!-- CODE-SEC-R04 | ai-reviewable -->
 *   Kodo peržiūros metu papildomai vertinti, ar pakeitimas nepadidina atakos paviršiaus ir neįveda naujų jautrių duomenų nutekėjimo rizikų.
 
-> Susiję skyriai: [3.3.6](03-architektura.md#336-input-validacija-ir-užklausų-apsauga) · [3.3.8](03-architektura.md#338-standartizuotos-klaidos) · [3.5.2](03-architektura.md#352-slaptieji-raktai) · [5](05-versijavimas.md) · [6](06-saugumas.md) · [8.6](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė)
+> Susiję skyriai: [3.3.6 Input validacija ir užklausų apsauga](03-architektura.md#336-input-validacija-ir-užklausų-apsauga) · [3.3.8 Standartizuotos klaidos](03-architektura.md#338-standartizuotos-klaidos) · [3.5.2 Slaptieji raktai](03-architektura.md#352-slaptieji-raktai) · [5 Versijavimas ir priklausomybių valdymas](05-versijavimas.md) · [6 Saugumas (Security by Design)](06-saugumas.md) · [8.6 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė)
 
 ## 4.7. Refaktoringas ir techninė skola
 
@@ -559,4 +559,4 @@ REKOMENDUOJAMA:
 <!-- CODE-DEBT-R05 | human-reviewable -->
 *   Kritinė techninė skola, daranti poveikį saugumui, patikimumui ar palaikomumui, rekomenduojama vertinti kaip prioritetinį darbą, o ne atidėti neribotam laikui.
 
-> Susiję skyriai: [3.1.5](03-architektura.md#315-architecture-decision-records-adr) · [10.4](10-dokumentacija.md#104-architecture-decision-records-adr) · [4.2](#42-kodo-struktūra-ir-konvencijos) · [5](05-versijavimas.md) · [3.6](03-architektura.md#36-patikimumas-ir-atsparumas) · [9](09-stebesena-logai.md)
+> Susiję skyriai: [3.1.5 Architecture Decision Records (ADR)](03-architektura.md#315-architecture-decision-records-adr) · [10.4 Architecture Decision Records (ADR)](10-dokumentacija.md#104-architecture-decision-records-adr) · [4.2 Kodo struktūra ir konvencijos](#42-kodo-struktūra-ir-konvencijos) · [5 Versijavimas ir priklausomybių valdymas](05-versijavimas.md) · [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [9 Stebėsena, logai ir eksploatacija](09-stebesena-logai.md)

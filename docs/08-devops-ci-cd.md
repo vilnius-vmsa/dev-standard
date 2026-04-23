@@ -30,7 +30,7 @@ REKOMENDUOJAMA:
 <!-- OPS-ENV-R03 | human-reviewable -->
 *   Išskirtinius aplinkų skirtumus laikyti minimalius ir aiškiai aprašytus.
 
-> Susiję skyriai: [3.5](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [3.6](03-architektura.md#36-patikimumas-ir-atsparumas) · [3.7](03-architektura.md#37-stebėsena-ir-diagnostika)
+> Susiję skyriai: [3.5 Konfigūracija, slaptieji raktai ir aplinkos](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [3.7 Stebėsena ir diagnostika](03-architektura.md#37-stebėsena-ir-diagnostika)
 
 ## 8.2. CI (Continuous Integration) minimalūs reikalavimai
 
@@ -59,7 +59,7 @@ REKOMENDUOJAMA:
 <!-- OPS-CI-R02 | ai-reviewable -->
 *   Kritiniams projektams aiškiai atskirti greitus PR patikrinimus nuo pilnų priešleidiminių patikrinimų.
 
-> Susiję skyriai: [4.2.3](04-kodo-kurimo-gaires.md#423-automatinis-formatavimas-ir-linting) · [4.5](04-kodo-kurimo-gaires.md#45-testai) · [7.9](07-testavimas.md#79-testų-vykdymas-ci-cd-ir-ataskaitos)
+> Susiję skyriai: [4.2.3 Automatinis formatavimas ir linting](04-kodo-kurimo-gaires.md#423-automatinis-formatavimas-ir-linting) · [4.5 Testai](04-kodo-kurimo-gaires.md#45-testai) · [7.9 Testų vykdymas CI/CD ir ataskaitos](07-testavimas.md#79-testų-vykdymas-ci-cd-ir-ataskaitos)
 
 ## 8.3. CD (Continuous Delivery/Deployment) {#83-cd-continuous-delivery-deployment}
 
@@ -85,7 +85,7 @@ REKOMENDUOJAMA:
 <!-- OPS-CD-R03 | human-reviewable -->
 *   Rollback scenarijus rekomenduojama tikrinti ne tik teoriškai, bet ir praktiniais bandymais.
 
-> Susiję skyriai: [3.6](03-architektura.md#36-patikimumas-ir-atsparumas) · [9.8](09-stebesena-logai.md#98-eksploatacijos-dokumentacija) · [8.9](#89-leidimų-release-valdymas)
+> Susiję skyriai: [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [9.8 Eksploatacijos dokumentacija](09-stebesena-logai.md#98-eksploatacijos-dokumentacija) · [8.9 Leidimų (release) valdymas](#89-leidimų-release-valdymas)
 
 ## 8.4. Versijavimas ir žymėjimas (release artefaktams)
 
@@ -107,7 +107,7 @@ REKOMENDUOJAMA:
 <!-- OPS-VER-R02 | ai-reviewable -->
 *   Release artefaktų ženklinimą suderinti su release notes ir diegimo dokumentacija.
 
-> Susiję skyriai: [5.1](05-versijavimas.md#51-semantinis-versijavimas-semver) · [5.2](05-versijavimas.md#52-api-versijavimas) · [8.9](#89-leidimų-release-valdymas)
+> Susiję skyriai: [5.1 Semantinis versijavimas (SemVer)](05-versijavimas.md#51-semantinis-versijavimas-semver) · [5.2 API versijavimas](05-versijavimas.md#52-api-versijavimas) · [8.9 Leidimų (release) valdymas](#89-leidimų-release-valdymas)
 
 ## 8.5. Konteinerių ir Kubernetes diegimo reikalavimai
 
@@ -129,7 +129,7 @@ REKOMENDUOJAMA:
 <!-- OPS-K8S-R02 | human-reviewable -->
 *   Manifestų kokybę tikrinti dar prieš diegimą, o ne tik klasteryje.
 
-> Susiję skyriai: [3.6](03-architektura.md#36-patikimumas-ir-atsparumas) · [6](06-saugumas.md) · [9.2](09-stebesena-logai.md#92-monitoring-ir-metrikos)
+> Susiję skyriai: [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [6 Saugumas (Security by Design)](06-saugumas.md) · [9.2 Monitoring ir metrikos](09-stebesena-logai.md#92-monitoring-ir-metrikos)
 
 ## 8.6. DevSecOps (CI/CD kontrolė) {#86-devsecops-ci-cd-kontrolė}
 
@@ -153,7 +153,7 @@ REKOMENDUOJAMA:
 <!-- OPS-DEVSEC-R03 | human-reviewable -->
 *   Saugumo taisykles rekomenduojama vykdyti kaip policy-as-code ten, kur tai pagrįsta.
 
-> Susiję skyriai: [6](06-saugumas.md) · [6.6](06-saugumas.md#66-owasp-top-10) · [5.5](05-versijavimas.md#55-priklausomybių-saugumas-ir-atsekamumas)
+> Susiję skyriai: [6 Saugumas (Security by Design)](06-saugumas.md) · [6.6 OWASP Top 10](06-saugumas.md#66-owasp-top-10) · [5.5 Priklausomybių saugumas ir atsekamumas](05-versijavimas.md#55-priklausomybių-saugumas-ir-atsekamumas)
 
 ## 8.7. Stebėsena, logai ir įvykių valdymas (CI/CD užtikrinimas) {#87-stebėsena-logai-ir-įvykių-valdymas-ci-cd-užtikrinimas}
 
@@ -175,7 +175,7 @@ REKOMENDUOJAMA:
 <!-- OPS-MON-R02 | process-level -->
 *   Release peržiūroje rekomenduojama vertinti ir observability pokyčius, jei pakeitimas daro įtaką diagnostikai.
 
-> Susiję skyriai: [3.7](03-architektura.md#37-stebėsena-ir-diagnostika) · [9](09-stebesena-logai.md)
+> Susiję skyriai: [3.7 Stebėsena ir diagnostika](03-architektura.md#37-stebėsena-ir-diagnostika) · [9 Stebėsena, logai ir eksploatacija](09-stebesena-logai.md)
 
 ## 8.8. Infrastruktūra kaip kodas (IaC)
 
@@ -197,7 +197,7 @@ REKOMENDUOJAMA:
 <!-- OPS-IAC-R02 | process-level -->
 *   IaC pakeitimų planą ir taikymą rekomenduojama atskirti į aiškius, peržiūrimus etapus.
 
-> Susiję skyriai: [4.3.1](04-kodo-kurimo-gaires.md#431-versijų-kontrolė-ir-repozitorijų-valdymas) · [3.10.2](03-architektura.md#3102-suderinamumas-su-savivaldybės-infrastruktūra)
+> Susiję skyriai: [4.3.1 Versijų kontrolė ir repozitorijų valdymas](04-kodo-kurimo-gaires.md#431-versijų-kontrolė-ir-repozitorijų-valdymas) · [3.10.2 Suderinamumas su savivaldybės infrastruktūra](03-architektura.md#3102-suderinamumas-su-savivaldybės-infrastruktūra)
 
 ## 8.9. Leidimų (release) valdymas
 
@@ -221,7 +221,7 @@ REKOMENDUOJAMA:
 <!-- OPS-REL-R03 | human-reviewable -->
 *   Kritiniams leidimams rekomenduojama aiškiai nurodyti stebėjimo periodą po diegimo.
 
-> Susiję skyriai: [4.3.5](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai) · [9.8](09-stebesena-logai.md#98-eksploatacijos-dokumentacija) · [9.6](09-stebesena-logai.md#96-incidentų-valdymas)
+> Susiję skyriai: [4.3.5 Pull Request / Merge Request reikalavimai](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai) · [9.8 Eksploatacijos dokumentacija](09-stebesena-logai.md#98-eksploatacijos-dokumentacija) · [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas)
 
 ## 8.10. Kainodara ir efektyvumas (FinOps)
 
@@ -241,7 +241,7 @@ REKOMENDUOJAMA:
 <!-- OPS-FIN-R02 | human-reviewable -->
 *   Kritinėms ar brangioms sistemoms rekomenduojama turėti bazines sąnaudų stebėsenos ataskaitas.
 
-> Susiję skyriai: [3.6](03-architektura.md#36-patikimumas-ir-atsparumas) · [9.2](09-stebesena-logai.md#92-monitoring-ir-metrikos)
+> Susiję skyriai: [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [9.2 Monitoring ir metrikos](09-stebesena-logai.md#92-monitoring-ir-metrikos)
 
 ## 8.11. GitOps repo struktūros gairės
 
@@ -263,4 +263,4 @@ REKOMENDUOJAMA:
 <!-- OPS-GITOPS-R03 | process-level -->
 *   GitOps struktūrą rekomenduojama dokumentuoti taip, kad ją suprastų ne tik pradinė komanda, bet ir nauji perėmėjai.
 
-> Susiję skyriai: [4.3](04-kodo-kurimo-gaires.md#43-versijų-valdymas-ir-repozitorijos) · [8.8](#88-infrastruktūra-kaip-kodas-iac) · [9.8](09-stebesena-logai.md#98-eksploatacijos-dokumentacija)
+> Susiję skyriai: [4.3 Versijų valdymas ir repozitorijos](04-kodo-kurimo-gaires.md#43-versijų-valdymas-ir-repozitorijos) · [8.8 Infrastruktūra kaip kodas (IaC)](#88-infrastruktūra-kaip-kodas-iac) · [9.8 Eksploatacijos dokumentacija](09-stebesena-logai.md#98-eksploatacijos-dokumentacija)

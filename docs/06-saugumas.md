@@ -23,12 +23,7 @@ REKOMENDUOJAMA:
 *   Sudėtingoms sistemoms saugumo rizikas vertinti ne tik projektavimo pradžioje, bet ir po esminių architektūrinių pokyčių.
 *   Saugumo reikalavimus įtraukti į NFR ir priėmimo kriterijus, o ne laikyti atskira poimplementacine veikla.
 
-Ryšys su kitais skyriais:
-
-*   Security by Design ir Privacy by Design – [3.1.3](03-architektura.md#313-security-by-design-ir-privacy-by-design)
-*   Apsauga ir prieiga – [3.3.4](03-architektura.md#334-apsauga-ir-prieiga)
-*   Patikimumas ir atsparumas – [3.6](03-architektura.md#36-patikimumas-ir-atsparumas)
-*   Stebėsena, logai ir eksploatacija – [9](09-stebesena-logai.md)
+> Susiję skyriai: [3.1.3 Security by Design ir Privacy by Design](03-architektura.md#313-security-by-design-ir-privacy-by-design) · [3.3.4 Apsauga ir prieiga](03-architektura.md#334-apsauga-ir-prieiga) · [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [9 Stebėsena, logai ir eksploatacija](09-stebesena-logai.md)
 
 ## 6.2. Autentifikacija ir autorizacija
 
@@ -65,11 +60,7 @@ REKOMENDUOJAMA:
 *   Vengti individualių ir sunkiai prižiūrimų rankinių teisių rinkinių, jei tą patį galima įgyvendinti per roles ar politiką.
 *   Aukštos rizikos veiksmams taikyti papildomas apsaugos priemones, pvz., papildomą autorizacijos patvirtinimą ar dviejų asmenų kontrolės principą, jei tai pagrįsta.
 
-Ryšys su kitais skyriais:
-
-*   Apsauga ir prieiga – [3.3.4](03-architektura.md#334-apsauga-ir-prieiga)
-*   Audit trail – [9.7](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas)
-*   Suderinamumas su savivaldybės infrastruktūra – [3.10.2](03-architektura.md#3102-suderinamumas-su-savivaldybės-infrastruktūra)
+> Susiję skyriai: [3.3.4 Apsauga ir prieiga](03-architektura.md#334-apsauga-ir-prieiga) · [9.7 Audit trail (audito pėdsakas)](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas) · [3.10.2 Suderinamumas su savivaldybės infrastruktūra](03-architektura.md#3102-suderinamumas-su-savivaldybės-infrastruktūra)
 
 ## 6.3. Duomenų apsauga (GDPR kontekstas)
 
@@ -92,11 +83,7 @@ REKOMENDUOJAMA:
 *   Projektavimo metu aiškiai dokumentuoti, kokie asmens duomenys tvarkomi, kur jie saugomi ir kas turi prieigą.
 *   Aukštos rizikos scenarijuose taikyti papildomas priemones, tokias kaip pseudonimizacija ar laukų maskavimas.
 
-Ryšys su kitais skyriais:
-
-*   Asmens duomenų apsauga integracijose – [3.4.5](03-architektura.md#345-asmens-duomenų-apsauga-bdar-gdpr)
-*   Atitiktis ir suderinamumas – [3.10.1](03-architektura.md#3101-teisinė-ir-reguliacinė-atitiktis)
-*   Audit trail – [9.7](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas)
+> Susiję skyriai: [3.4.5 Asmens duomenų apsauga (BDAR / GDPR)](03-architektura.md#345-asmens-duomenų-apsauga-bdar-gdpr) · [3.10.1 Teisinė ir reguliacinė atitiktis](03-architektura.md#3101-teisinė-ir-reguliacinė-atitiktis) · [9.7 Audit trail (audito pėdsakas)](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas)
 
 ## 6.4. Secrets management
 
@@ -116,11 +103,7 @@ REKOMENDUOJAMA:
 *   Paslapčių naudojimo modelį dokumentuoti taip, kad būtų aišku, kokios paslaptys naudojamos, kur jos laikomos ir kas turi prieigą.
 *   Neįprastą paslapčių naudojimą stebėti ir naudoti kaip saugumo signalą.
 
-Ryšys su kitais skyriais:
-
-*   Konfigūracija, slaptieji raktai ir aplinkos – [3.5](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos)
-*   DevSecOps kontrolė – [8.6](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė)
-*   Logging – [9.1](09-stebesena-logai.md#91-logging-žurnalų-standartai)
+> Susiję skyriai: [3.5 Konfigūracija, slaptieji raktai ir aplinkos](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [8.6 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė) · [9.1 Logging (žurnalų) standartai](09-stebesena-logai.md#91-logging-žurnalų-standartai)
 
 ## 6.5. Saugumas naršyklėje
 
@@ -155,12 +138,7 @@ REKOMENDUOJAMA:
 *   OWASP Top 10 naudoti kaip kontrolinį sąrašą architektūrinėms peržiūroms ir saugumo testavimui.
 *   Aukštos rizikos sistemoms periodiškai peržiūrėti, ar neatsirado naujų pažeidžiamumų scenarijų, kurie nebuvo aktualūs projekto pradžioje.
 
-Ryšys su kitais skyriais:
-
-*   Saugumas naršyklėje – [6.5](#65-saugumas-naršyklėje)
-*   Input validacija ir užklausų apsauga – [3.3.6](03-architektura.md#336-input-validacija-ir-užklausų-apsauga)
-*   Saugumas kodo lygmeniu – [4.6](04-kodo-kurimo-gaires.md#46-saugumas-kodo-lygmeniu)
-*   Security testing – [6.7](#67-security-testing)
+> Susiję skyriai: [6.5 Saugumas naršyklėje](#65-saugumas-naršyklėje) · [3.3.6 Input validacija ir užklausų apsauga](03-architektura.md#336-input-validacija-ir-užklausų-apsauga) · [4.6 Saugumas kodo lygmeniu](04-kodo-kurimo-gaires.md#46-saugumas-kodo-lygmeniu) · [6.7 Security testing](#67-security-testing)
 
 ## 6.7. Security testing
 
@@ -181,9 +159,4 @@ REKOMENDUOJAMA:
 *   Saugumo testavimą derinti su architektūros peržiūra, grėsmių modeliavimu ir incidentų pamokomis.
 *   Saugumo testavimo apimtį peržiūrėti po reikšmingų architektūrinių ar integracinių pokyčių.
 
-Ryšys su kitais skyriais:
-
-*   Saugumas kodo lygmeniu – [4.6](04-kodo-kurimo-gaires.md#46-saugumas-kodo-lygmeniu)
-*   Testavimo reikalavimai ir principai – [7](07-testavimas.md)
-*   DevSecOps kontrolė – [8.6](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė)
-*   Atitiktis ir suderinamumas – [3.10](03-architektura.md#310-atitiktis-ir-suderinamumas)
+> Susiję skyriai: [4.6 Saugumas kodo lygmeniu](04-kodo-kurimo-gaires.md#46-saugumas-kodo-lygmeniu) · [7 Testavimo reikalavimai ir principai](07-testavimas.md) · [8.6 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė) · [3.10 Atitiktis ir suderinamumas](03-architektura.md#310-atitiktis-ir-suderinamumas)
