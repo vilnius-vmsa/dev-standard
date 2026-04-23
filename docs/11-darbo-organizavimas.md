@@ -30,7 +30,7 @@ REKOMENDUOJAMA:
 <!-- ORG-GEN-R03 | ai-reviewable -->
 *   Svarbius susitarimus fiksuoti ne tik susitikimuose, bet ir užduočių sistemoje, PR/MR ar dokumentacijoje.
 
-> Susiję skyriai: [2.4](02-paskirtis-ir-taikymo-sritis.md#24-reikalavimų-lygiai) · [2.5](02-paskirtis-ir-taikymo-sritis.md#25-nukrypimai-nuo-standarto) · [3.1.5](03-architektura.md#315-architecture-decision-records-adr) · [10.4](10-dokumentacija.md#104-architecture-decision-records-adr) · [10.5](10-dokumentacija.md#105-dokumentacijos-atnaujinimo-taisyklės)
+> Susiję skyriai: [2.4 Reikalavimų lygiai](02-paskirtis-ir-taikymo-sritis.md#24-reikalavimų-lygiai) · [2.5 Nukrypimai nuo standarto](02-paskirtis-ir-taikymo-sritis.md#25-nukrypimai-nuo-standarto) · [3.1.5 Architecture Decision Records (ADR)](03-architektura.md#315-architecture-decision-records-adr) · [10.4 Architecture Decision Records (ADR)](10-dokumentacija.md#104-architecture-decision-records-adr) · [10.5 Dokumentacijos atnaujinimo taisyklės](10-dokumentacija.md#105-dokumentacijos-atnaujinimo-taisyklės)
 
 ## 11.2. Rolės ir atsakomybės
 
@@ -136,7 +136,7 @@ REKOMENDUOJAMA:
 <!-- ORG-REQ-R02 | ai-reviewable -->
 *   Reikalavimų neapibrėžtumą identifikuoti kuo anksčiau, o ne palikti jį spręsti tik programavimo metu.
 
-> Susiję skyriai: [3](03-architektura.md) · [7](07-testavimas.md)
+> Susiję skyriai: [3 Architektūros ir dizaino principai](03-architektura.md) · [7 Testavimo reikalavimai ir principai](07-testavimas.md)
 
 ## 11.4. Backlog ir pakeitimų (change) valdymas
 
@@ -160,7 +160,7 @@ REKOMENDUOJAMA:
 <!-- ORG-BACKLOG-R02 | process-level -->
 *   Backlog’ą periodiškai peržiūrėti, kad jame neliktų neaktualių, dubliuojančių ar nebeprioritetinių uždavinių.
 
-> Susiję skyriai: [4.7](04-kodo-kurimo-gaires.md#47-refaktoringas-ir-techninė-skola) · [9.6](09-stebesena-logai.md#96-incidentų-valdymas) · [12](12-tiekeju-reikalavimai.md)
+> Susiję skyriai: [4.7 Refaktoringas ir techninė skola](04-kodo-kurimo-gaires.md#47-refaktoringas-ir-techninė-skola) · [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas) · [12 Tiekėjų ir pavaldžių įstaigų reikalavimai](12-tiekeju-reikalavimai.md)
 
 ## 11.5. Techninių sprendimų priėmimas ir tvirtinimas
 
@@ -184,7 +184,7 @@ REKOMENDUOJAMA:
 <!-- ORG-DECISION-R02 | human-reviewable -->
 *   Techninius sprendimus vertinti ne tik pagal trumpalaikį patogumą, bet ir pagal palaikomumą, saugumą, kaštus ir perimamumą.
 
-> Susiję skyriai: [3.1.5](03-architektura.md#315-architecture-decision-records-adr) · [10.4](10-dokumentacija.md#104-architecture-decision-records-adr) · [3.10.3](03-architektura.md#3103-technologijų-suderinimas-su-organizacijos-tech-stack) · [2.5](02-paskirtis-ir-taikymo-sritis.md#25-nukrypimai-nuo-standarto)
+> Susiję skyriai: [3.1.5 Architecture Decision Records (ADR)](03-architektura.md#315-architecture-decision-records-adr) · [10.4 Architecture Decision Records (ADR)](10-dokumentacija.md#104-architecture-decision-records-adr) · [3.10.3 Technologijų suderinimas su organizacijos tech stack](03-architektura.md#3103-technologijų-suderinimas-su-organizacijos-tech-stack) · [2.5 Nukrypimai nuo standarto](02-paskirtis-ir-taikymo-sritis.md#25-nukrypimai-nuo-standarto)
 
 ## 11.6. Komunikacija ir susitikimai
 
@@ -208,4 +208,4 @@ REKOMENDUOJAMA:
 <!-- ORG-COMM-R03 | ai-reviewable -->
 *   Komunikaciją organizuoti taip, kad svarbi informacija būtų lengvai randama ir nepasimestų pokalbių istorijoje.
 
-> Susiję skyriai: [4.4](04-kodo-kurimo-gaires.md#44-code-review-principai) · [10](10-dokumentacija.md) · [13](13-standarto-prieziura.md)
+> Susiję skyriai: [4.4 Code Review principai](04-kodo-kurimo-gaires.md#44-code-review-principai) · [10 Dokumentacija](10-dokumentacija.md) · [13 Standarto priežiūra ir atnaujinimas](13-standarto-prieziura.md)

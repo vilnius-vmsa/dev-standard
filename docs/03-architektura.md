@@ -504,7 +504,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-DATA-R03 | ai-reviewable -->
 *   Integracijose su išorinėmis sistemomis rekomenduojama taikyti aiškų degradacijos režimą (degraded mode) arba kešuotų duomenų naudojimą, jei išorinė sistema laikinai nepasiekiama.
 
-> Susiję skyriai: [3.3.7](#337-idempotentiškumas) · [3.3.9](#339-greitaveika-patikimumas-ir-talpyklos) · [3.4.2](#342-integracijų-tipai-ir-pasirinkimo-kriterijai) · [3.4.7](#347-valstybinių-registrų-ir-išorinių-sistemų-integracijos)
+> Susiję skyriai: [3.3.7 Idempotentiškumas](#337-idempotentiškumas) · [3.3.9 Greitaveika, patikimumas ir talpyklos](#339-greitaveika-patikimumas-ir-talpyklos) · [3.4.2 Integracijų tipai ir pasirinkimo kriterijai](#342-integracijų-tipai-ir-pasirinkimo-kriterijai) · [3.4.7 Valstybinių registrų ir išorinių sistemų integracijos](#347-valstybinių-registrų-ir-išorinių-sistemų-integracijos)
 
 ### 3.4.4. Schemos valdymas ir kontraktų suderinamumas
 
@@ -532,7 +532,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-DATA-R08 | ai-reviewable -->
 *   Schemų registras pirmiausia tinka didelės apimties event-driven architektūroms.
 
-> Susiję skyriai: [3.3.1](#331-specifikacija-ir-dokumentacija) · [3.3.2](#332-versijavimas) · [3.4.2](#342-integracijų-tipai-ir-pasirinkimo-kriterijai) · [3.4.3](#343-patikimumas-ir-atsparumas-gedimams)
+> Susiję skyriai: [3.3.1 Specifikacija ir dokumentacija](#331-specifikacija-ir-dokumentacija) · [3.3.2 Versijavimas](#332-versijavimas) · [3.4.2 Integracijų tipai ir pasirinkimo kriterijai](#342-integracijų-tipai-ir-pasirinkimo-kriterijai) · [3.4.3 Patikimumas ir atsparumas gedimams](#343-patikimumas-ir-atsparumas-gedimams)
 
 ### 3.4.5. Asmens duomenų apsauga (BDAR / GDPR) {#345-asmens-duomenų-apsauga-bdar-gdpr}
 
@@ -564,7 +564,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-DATA-R12 | ai-reviewable -->
 *   Jei integracijų grandinėje dalyvauja keli tiekėjai ar išorinės sistemos, rekomenduojama aiškiai atskirti atsakomybes už duomenų tvarkymą, saugojimą ir incidentų valdymą.
 
-> Susiję skyriai: [6.3](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [3.3.4](#334-apsauga-ir-prieiga) · [3.4.7](#347-valstybinių-registrų-ir-išorinių-sistemų-integracijos) · [9.7](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas)
+> Susiję skyriai: [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [3.3.4 Apsauga ir prieiga](#334-apsauga-ir-prieiga) · [3.4.7 Valstybinių registrų ir išorinių sistemų integracijos](#347-valstybinių-registrų-ir-išorinių-sistemų-integracijos) · [9.7 Audit trail (audito pėdsakas)](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas)
 
 ### 3.4.6. Duomenų kokybė
 
@@ -594,7 +594,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-DATA-R16 | ai-reviewable -->
 *   Jei duomenys ateina iš kelių šaltinių, rekomenduojama aiškiai apibrėžti prioritetinį tiesos šaltinį ir taisykles, kaip sprendžiami duomenų neatitikimai.
 
-> Susiję skyriai: [3.3.6](#336-input-validacija-ir-užklausų-apsauga) · [3.4.4](#344-schemos-valdymas-ir-kontraktų-suderinamumas) · [3.4.7](#347-valstybinių-registrų-ir-išorinių-sistemų-integracijos)
+> Susiję skyriai: [3.3.6 Input validacija ir užklausų apsauga](#336-input-validacija-ir-užklausų-apsauga) · [3.4.4 Schemos valdymas ir kontraktų suderinamumas](#344-schemos-valdymas-ir-kontraktų-suderinamumas) · [3.4.7 Valstybinių registrų ir išorinių sistemų integracijos](#347-valstybinių-registrų-ir-išorinių-sistemų-integracijos)
 
 ### 3.4.7. Valstybinių registrų ir išorinių sistemų integracijos
 
@@ -626,7 +626,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-DATA-R20 | ai-reviewable -->
 *   Jei integracija naudoja jautrius ar asmens duomenis, rekomenduojama aiškiai nurodyti, kurie duomenys yra gaunami, kurie saugomi ir kurie perduodami toliau.
 
-> Susiję skyriai: [3.4.2](#342-integracijų-tipai-ir-pasirinkimo-kriterijai) · [3.4.3](#343-patikimumas-ir-atsparumas-gedimams) · [3.4.5](#345-asmens-duomenų-apsauga-bdar-gdpr) · [3.4.6](#346-duomenų-kokybė) · [9](09-stebesena-logai.md)
+> Susiję skyriai: [3.4.2 Integracijų tipai ir pasirinkimo kriterijai](#342-integracijų-tipai-ir-pasirinkimo-kriterijai) · [3.4.3 Patikimumas ir atsparumas gedimams](#343-patikimumas-ir-atsparumas-gedimams) · [3.4.5 Asmens duomenų apsauga (BDAR / GDPR)](#345-asmens-duomenų-apsauga-bdar-gdpr) · [3.4.6 Duomenų kokybė](#346-duomenų-kokybė) · [9 Stebėsena, logai ir eksploatacija](09-stebesena-logai.md)
 
 ## 3.5. Konfigūracija, slaptieji raktai ir aplinkos
 
@@ -650,7 +650,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-CFG-R02 | ai-reviewable -->
 *   Feature flags laikyti konfigūracijos dalimi ir jiems taikyti tuos pačius valdymo reikalavimus.
 
-> Susiję skyriai: [3.1.6](#316-diegimo-parengtis-ir-konfigūracijos-valdymas) · [8.1](08-devops-ci-cd.md#81-aplinkos-ir-bendri-principai) · [9.1](09-stebesena-logai.md#91-logging-žurnalų-standartai) · [9.7](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas)
+> Susiję skyriai: [3.1.6 Diegimo parengtis ir konfigūracijos valdymas](#316-diegimo-parengtis-ir-konfigūracijos-valdymas) · [8.1 Aplinkos ir bendri principai](08-devops-ci-cd.md#81-aplinkos-ir-bendri-principai) · [9.1 Logging (žurnalų) standartai](09-stebesena-logai.md#91-logging-žurnalų-standartai) · [9.7 Audit trail (audito pėdsakas)](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas)
 
 ### 3.5.2. Slaptieji raktai
 
@@ -674,7 +674,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-CFG-R04 | ai-reviewable -->
 *   Žemesnių aplinkų konfigūracija turėtų kuo labiau atitikti PROD, kad būtų mažiau skirtumų tarp kūrimo ir eksploatacijos.
 
-> Susiję skyriai: [8.1](08-devops-ci-cd.md#81-aplinkos-ir-bendri-principai) · [8.3](08-devops-ci-cd.md#83-cd-continuous-delivery-deployment) · [6.3](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [7.5](07-testavimas.md#75-testavimo-duomenys-ir-aplinkos)
+> Susiję skyriai: [8.1 Aplinkos ir bendri principai](08-devops-ci-cd.md#81-aplinkos-ir-bendri-principai) · [8.3 CD (Continuous Delivery/Deployment)](08-devops-ci-cd.md#83-cd-continuous-delivery-deployment) · [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [7.5 Testavimo duomenys ir aplinkos](07-testavimas.md#75-testavimo-duomenys-ir-aplinkos)
 
 ## 3.6. Patikimumas ir atsparumas
 
@@ -695,7 +695,7 @@ PRIVALOMA:
 <!-- ARCH-REL-P05 | ai-reviewable -->
 *   Kritinių paslaugų RTO ir RPO tikslai turi būti apibrėžti projektavimo stadijoje ir suderinti su verslo savininku.
 
-> Susiję skyriai: [9.5](09-stebesena-logai.md#95-sla-slo-ir-sli) · [8.1](08-devops-ci-cd.md#81-aplinkos-ir-bendri-principai) · [8.5](08-devops-ci-cd.md#85-konteinerių-ir-kubernetes-diegimo-reikalavimai)
+> Susiję skyriai: [9.5 SLA, SLO ir SLI](09-stebesena-logai.md#95-sla-slo-ir-sli) · [8.1 Aplinkos ir bendri principai](08-devops-ci-cd.md#81-aplinkos-ir-bendri-principai) · [8.5 Konteinerių ir Kubernetes diegimo reikalavimai](08-devops-ci-cd.md#85-konteinerių-ir-kubernetes-diegimo-reikalavimai)
 
 ### 3.6.2. Sveikatos patikrinimas
 
@@ -721,7 +721,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-REL-R02 | ai-reviewable -->
 *   Readiness patikrinime vertinti svarbiausias priklausomybes, nuo kurių tiesiogiai priklauso užklausų aptarnavimas.
 
-> Susiję skyriai: [9.2](09-stebesena-logai.md#92-monitoring-ir-metrikos) · [8.5](08-devops-ci-cd.md#85-konteinerių-ir-kubernetes-diegimo-reikalavimai)
+> Susiję skyriai: [9.2 Monitoring ir metrikos](09-stebesena-logai.md#92-monitoring-ir-metrikos) · [8.5 Konteinerių ir Kubernetes diegimo reikalavimai](08-devops-ci-cd.md#85-konteinerių-ir-kubernetes-diegimo-reikalavimai)
 
 ### 3.6.3. Atsparumas tarpservisinėse komunikacijose
 
@@ -747,7 +747,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-REL-R07 | ai-reviewable -->
 *   Jei downstream servisas neveikia, vartotojas turi pristabdyti apdorojimą arba pereiti į aiškiai apibrėžtą degradacijos režimą, o ne kaupti nekontroliuojamą klaidų srautą.
 
-> Susiję skyriai: [3.3.7](#337-idempotentiškumas) · [3.3.9](#339-greitaveika-patikimumas-ir-talpyklos) · [9.4](09-stebesena-logai.md#94-klaidos-ir-error-handling)
+> Susiję skyriai: [3.3.7 Idempotentiškumas](#337-idempotentiškumas) · [3.3.9 Greitaveika, patikimumas ir talpyklos](#339-greitaveika-patikimumas-ir-talpyklos) · [9.4 Klaidos ir „error handling“](09-stebesena-logai.md#94-klaidos-ir-error-handling)
 
 ### 3.6.4. Patikrinimas prieš sudėtingas operacijas (pre-flight validation)
 
@@ -760,7 +760,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-REL-R10 | ai-reviewable -->
 *   Jei operacija negali būti saugiai pradėta, sistema turėtų grąžinti aiškią klaidą iš karto, o ne po ilgo vykdymo.
 
-> Susiję skyriai: [3.3.6](#336-input-validacija-ir-užklausų-apsauga) · [9.4](09-stebesena-logai.md#94-klaidos-ir-error-handling)
+> Susiję skyriai: [3.3.6 Input validacija ir užklausų apsauga](#336-input-validacija-ir-užklausų-apsauga) · [9.4 Klaidos ir „error handling“](09-stebesena-logai.md#94-klaidos-ir-error-handling)
 
 ### 3.6.5. Graceful shutdown ir ilgų operacijų valdymas
 
@@ -775,7 +775,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-REL-R14 | ai-reviewable -->
 *   Jei naudojamas Saga ar kitas kompensacinis modelis, jo elgsena turi būti dokumentuota.
 
-> Susiję skyriai: [3.8](#38-diagramos-ir-dokumentavimas) · [9.6](09-stebesena-logai.md#96-incidentų-valdymas)
+> Susiję skyriai: [3.8 Diagramos ir dokumentavimas](#38-diagramos-ir-dokumentavimas) · [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas)
 
 ### 3.6.6. Mažiausių privilegijų principas operaciniu lygmeniu
 
@@ -790,7 +790,7 @@ PRIVALOMA:
 <!-- ARCH-REL-P18 | human-reviewable -->
 *   Architektūra turi būti projektuojama taip, kad gedimo ar klaidos atveju servisas negalėtų atlikti veiksmų už savo atsakomybės ribų.
 
-> Susiję skyriai: [3.1.3](#313-security-by-design-ir-privacy-by-design) · [3.3.4](#334-apsauga-ir-prieiga) · [6](06-saugumas.md)
+> Susiję skyriai: [3.1.3 Security by Design ir Privacy by Design](#313-security-by-design-ir-privacy-by-design) · [3.3.4 Apsauga ir prieiga](#334-apsauga-ir-prieiga) · [6 Saugumas (Security by Design)](06-saugumas.md)
 
 ### 3.6.7. Duomenų atsarginės kopijos ir atkūrimas
 
@@ -812,7 +812,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-REL-R16 | human-reviewable -->
 *   Kritinėms sistemoms reguliariai tikrinti ne tik atsarginių kopijų sukūrimą, bet ir pilną atkūrimo scenarijų.
 
-> Susiję skyriai: [9.5](09-stebesena-logai.md#95-sla-slo-ir-sli) · [9.6](09-stebesena-logai.md#96-incidentų-valdymas) · [9.8](09-stebesena-logai.md#98-eksploatacijos-dokumentacija)
+> Susiję skyriai: [9.5 SLA, SLO ir SLI](09-stebesena-logai.md#95-sla-slo-ir-sli) · [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas) · [9.8 Eksploatacijos dokumentacija](09-stebesena-logai.md#98-eksploatacijos-dokumentacija)
 
 ## 3.7. Stebėsena ir diagnostika
 
@@ -923,7 +923,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-MOB-R02 | human-reviewable -->
 *   Jei offline-first netaikomas, tinklo klaidų apdorojimas vis tiek turi būti aiškiai numatytas.
 
-> Susiję skyriai: [3.1](#31-bendrieji-architektūriniai-principai) · [3.2](#32-frontend-web-principai) · [3.4](#34-duomenys-ir-integracijos)
+> Susiję skyriai: [3.1 Bendrieji architektūriniai principai](#31-bendrieji-architektūriniai-principai) · [3.2 Frontend (Web) principai](#32-frontend-web-principai) · [3.4 Duomenys ir integracijos](#34-duomenys-ir-integracijos)
 
 ### 3.9.2. Saugumas
 
@@ -957,7 +957,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-MOB-R07 | ai-reviewable -->
 *   Naudoti bazinius aplikacijos integralumo tikrinimo mechanizmus ir root arba jailbreak aptikimą, apie riziką informuojant vartotoją.
 
-> Susiję skyriai: [3.1.3](#313-security-by-design-ir-privacy-by-design) · [3.3.4](#334-apsauga-ir-prieiga) · [3.5.2](#352-slaptieji-raktai) · [6](06-saugumas.md)
+> Susiję skyriai: [3.1.3 Security by Design ir Privacy by Design](#313-security-by-design-ir-privacy-by-design) · [3.3.4 Apsauga ir prieiga](#334-apsauga-ir-prieiga) · [3.5.2 Slaptieji raktai](#352-slaptieji-raktai) · [6 Saugumas (Security by Design)](06-saugumas.md)
 
 ### 3.9.3. Duomenų sinchronizacija
 
@@ -981,7 +981,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-MOB-R10 | ai-reviewable -->
 *   Jei sinchronizacija kritinė verslo procesui, rekomenduojama turėti atskiras metrikas ir techninę stebėseną.
 
-> Susiję skyriai: [3.3.5](#335-laiko-politika) · [3.6](#36-patikimumas-ir-atsparumas) · [9.2](09-stebesena-logai.md#92-monitoring-ir-metrikos)
+> Susiję skyriai: [3.3.5 Laiko politika](#335-laiko-politika) · [3.6 Patikimumas ir atsparumas](#36-patikimumas-ir-atsparumas) · [9.2 Monitoring ir metrikos](09-stebesena-logai.md#92-monitoring-ir-metrikos)
 
 ### 3.9.4. Prieinamumas ir lokalizacija
 
@@ -1009,7 +1009,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-MOB-R12 | human-reviewable -->
 *   UI projektavime numatyti, kad tekstas skirtingomis kalbomis gali būti reikšmingai ilgesnis.
 
-> Susiję skyriai: [3.2.4](#324-tarptautiškumas-ir-lokalizacija) · [3.2.5](#325-prieinamumas-a11y) · [7.8](07-testavimas.md#78-prieinamumo-accessibility-testavimas)
+> Susiję skyriai: [3.2.4 Tarptautiškumas ir lokalizacija](#324-tarptautiškumas-ir-lokalizacija) · [3.2.5 Prieinamumas (A11y)](#325-prieinamumas-a11y) · [7.8 Prieinamumo (Accessibility) testavimas](07-testavimas.md#78-prieinamumo-accessibility-testavimas)
 
 ### 3.9.5. Atnaujinimų valdymas
 
@@ -1029,7 +1029,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-MOB-R14 | process-level -->
 *   Priverstinio atnaujinimo scenarijuose naudotoją informuoti aiškiai, neapsiribojant vien blokavimu.
 
-> Susiję skyriai: [3.3.2](#332-versijavimas) · [9.4](09-stebesena-logai.md#94-klaidos-ir-error-handling)
+> Susiję skyriai: [3.3.2 Versijavimas](#332-versijavimas) · [9.4 Klaidos ir „error handling“](09-stebesena-logai.md#94-klaidos-ir-error-handling)
 
 ### 3.9.6. Testavimas
 
@@ -1055,7 +1055,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-MOB-R17 | human-reviewable -->
 *   Našumo ir saugumo aspektams neapsiriboti vien emuliatoriais.
 
-> Susiję skyriai: [7](07-testavimas.md) · [7.7](07-testavimas.md#77-saugumo-testavimas-devsecops) · [7.8](07-testavimas.md#78-prieinamumo-accessibility-testavimas)
+> Susiję skyriai: [7 Testavimo reikalavimai ir principai](07-testavimas.md) · [7.7 Saugumo testavimas (DevSecOps)](07-testavimas.md#77-saugumo-testavimas-devsecops) · [7.8 Prieinamumo (Accessibility) testavimas](07-testavimas.md#78-prieinamumo-accessibility-testavimas)
 
 ### 3.9.7. Platinimas ir diegimas
 
@@ -1077,7 +1077,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-MOB-R19 | human-reviewable -->
 *   Stebėti versijų pasiskirstymą, crash rodiklius ir pagrindines kokybės metrikas po kiekvieno leidimo.
 
-> Susiję skyriai: [3.5.2](#352-slaptieji-raktai) · [8](08-devops-ci-cd.md) · [9](09-stebesena-logai.md)
+> Susiję skyriai: [3.5.2 Slaptieji raktai](#352-slaptieji-raktai) · [8 DevOps ir CI/CD reikalavimai](08-devops-ci-cd.md) · [9 Stebėsena, logai ir eksploatacija](09-stebesena-logai.md)
 
 ## 3.10. Atitiktis ir suderinamumas
 
@@ -1115,7 +1115,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-COMP-R02 | ai-reviewable -->
 *   Jei sistemai taikomi keli reguliaciniai režimai, rekomenduojama aiškiai dokumentuoti jų ryšį ir atsakomybes.
 
-> Susiję skyriai: [6.3](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [3.4.5](#345-asmens-duomenų-apsauga-bdar-gdpr) · [3.2.5](#325-prieinamumas-a11y) · [3.9.4](#394-prieinamumas-ir-lokalizacija) · [9.6](09-stebesena-logai.md#96-incidentų-valdymas)
+> Susiję skyriai: [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [3.4.5 Asmens duomenų apsauga (BDAR / GDPR)](#345-asmens-duomenų-apsauga-bdar-gdpr) · [3.2.5 Prieinamumas (A11y)](#325-prieinamumas-a11y) · [3.9.4 Prieinamumas ir lokalizacija](#394-prieinamumas-ir-lokalizacija) · [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas)
 
 ### 3.10.2. Suderinamumas su savivaldybės infrastruktūra
 
@@ -1139,7 +1139,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-COMP-R04 | process-level -->
 *   Jei sistema turi nestandartinių infrastruktūrinių poreikių, juos rekomenduojama dokumentuoti ADR arba architektūros apraše.
 
-> Susiję skyriai: [3.3.4](#334-apsauga-ir-prieiga) · [3.5](#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [3.6](#36-patikimumas-ir-atsparumas) · [9.1](09-stebesena-logai.md#91-logging-žurnalų-standartai) · [9.2](09-stebesena-logai.md#92-monitoring-ir-metrikos)
+> Susiję skyriai: [3.3.4 Apsauga ir prieiga](#334-apsauga-ir-prieiga) · [3.5 Konfigūracija, slaptieji raktai ir aplinkos](#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [3.6 Patikimumas ir atsparumas](#36-patikimumas-ir-atsparumas) · [9.1 Logging (žurnalų) standartai](09-stebesena-logai.md#91-logging-žurnalų-standartai) · [9.2 Monitoring ir metrikos](09-stebesena-logai.md#92-monitoring-ir-metrikos)
 
 ### 3.10.3. Technologijų suderinimas su organizacijos tech stack
 
@@ -1161,7 +1161,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-COMP-R07 | ai-reviewable -->
 *   Tikslas nėra standartizuoti visą stack, o užtikrinti, kad pasirinkimai yra apsvarstyti ir organizacija galės juos palaikyti po projekto pabaigos.
 
-> Susiję skyriai: [3.1.5](#315-architecture-decision-records-adr) · [10.4](10-dokumentacija.md#104-architecture-decision-records-adr) · [5](05-versijavimas.md) · [12](12-tiekeju-reikalavimai.md)
+> Susiję skyriai: [3.1.5 Architecture Decision Records (ADR)](#315-architecture-decision-records-adr) · [10.4 Architecture Decision Records (ADR)](10-dokumentacija.md#104-architecture-decision-records-adr) · [5 Versijavimas ir priklausomybių valdymas](05-versijavimas.md) · [12 Tiekėjų ir pavaldžių įstaigų reikalavimai](12-tiekeju-reikalavimai.md)
 
 ### 3.10.4. Kriptografiniai standartai ir komponentų gyvavimo ciklas
 
@@ -1187,7 +1187,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-COMP-R09 | ai-reviewable -->
 *   Komponentų EOL datos turėtų būti stebimos centralizuotai, o atnaujinimai planuojami iš anksto, o ne tik po incidentų ar pažeidžiamumų paskelbimo.
 
-> Susiję skyriai: [6](06-saugumas.md) · [6.6](06-saugumas.md#66-owasp-top-10) · [6.7](06-saugumas.md#67-security-testing) · [5](05-versijavimas.md) · [8.6](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė)
+> Susiję skyriai: [6 Saugumas (Security by Design)](06-saugumas.md) · [6.6 OWASP Top 10](06-saugumas.md#66-owasp-top-10) · [6.7 Security testing](06-saugumas.md#67-security-testing) · [5 Versijavimas ir priklausomybių valdymas](05-versijavimas.md) · [8.6 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė)
 
 ### 3.10.5. Atviro kodo licencijos ir programinės įrangos sudėtis
 
@@ -1211,4 +1211,4 @@ REKOMENDUOJAMA:
 <!-- ARCH-COMP-R12 | ai-reviewable -->
 *   Priklausomybes atnaujinti reguliariai ne tik reaguojant į pažeidžiamumus, bet ir prevenciškai.
 
-> Susiję skyriai: [5](05-versijavimas.md) · [5.5](05-versijavimas.md#55-priklausomybių-saugumas-ir-atsekamumas) · [8.6](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė)
+> Susiję skyriai: [5 Versijavimas ir priklausomybių valdymas](05-versijavimas.md) · [5.5 Priklausomybių saugumas ir atsekamumas](05-versijavimas.md#55-priklausomybių-saugumas-ir-atsekamumas) · [8.6 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė)
