@@ -184,7 +184,7 @@ Ne visos sistemos ir projektai gali pasiekti pilną standarto atitiktį nuo pirm
 
 ### 2.6.1. 1 lygis — Bazinis (Minimum Viable)
 
-Minimalus lygis, privalomas **visoms naujoms sistemoms ir visiems tiekėjų perdavimiems** nuo pirmos dienos.
+Minimalus lygis, privalomas **visoms naujoms sistemoms ir visiems tiekėjų perdavimams** nuo pirmos dienos.
 
 *   Visi PRIVALOMA saugumo reikalavimai ([§6](06-saugumas.md)): slaptieji raktai ne kode, serverio pusės validacija, autentifikacija ir autorizacija
 *   Bazinis CI su build, testais ir SAST ([§8.2](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai))
