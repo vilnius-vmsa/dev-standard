@@ -117,7 +117,7 @@ REKOMENDUOJAMA:
 
 <!-- ARCH-FE-R01 | ai-reviewable -->
 *   komponentų grupavimą organizuoti pagal Atomic Design ar ekvivalentišką principą (atomai → molekulės → organizmai), kai tai tinka projekto masteliu
-<!-- ARCH-FE-R16 | ai-reviewable -->
+<!-- ARCH-FE-R99 | ai-reviewable -->
 *   vizualinė ir vartotojo elgsenos specifikacija dokumentuojama (pvz., Storybook ar ekvivalentas)
 
 ### 3.2.2. Būsenos (state) valdymas
