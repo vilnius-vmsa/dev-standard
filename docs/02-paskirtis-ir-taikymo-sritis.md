@@ -132,7 +132,7 @@ Kiekvienas standarto reikalavimas turi HTML komentaro žymą, nurodantčią reik
 | Tipas | Reikšmė |
 |---|---|
 | `ai-reviewable` | Reikalavimas gali būti tikrinamas automatiškai: statinė analizė, linteriai, CI patikrinimai, AI kodo peržiūros įrankiai |
-| `human-reviewable` | Reikalavimas reikalauja žmogaus vertinimo: architektûrinė peržiūra, kontekstinis sprendimas, kokybės vertinimas |
+| `human-reviewable` | Reikalavimas reikalauja žmogaus vertinimo: architektūrinė peržiūra, kontekstinis sprendimas, kokybės vertinimas |
 | `process-level` | Organizacinis ar procesinis reikalavimas, netikrinamas kodo lygmeniu (pvz., komunikacijos, tvirtinimo, planavimo procesai) |
 
 Šios žymos naudojamos:
