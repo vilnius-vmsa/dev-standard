@@ -116,7 +116,7 @@ PRIVALOMA:
 REKOMENDUOJAMA:
 
 <!-- ARCH-FE-R01 | ai-reviewable -->
-*   komponentų grupavimuį organizuoti pagal Atomic Design ar ekvivalentį principą (atomai → molekulės → organizmai), kai tai tinka projekto masteliu
+*   komponentų grupavimą organizuoti pagal Atomic Design ar ekvivalentišką principą (atomai → molekulės → organizmai), kai tai tinka projekto masteliu
 <!-- ARCH-FE-R16 | ai-reviewable -->
 *   vizualinė ir vartotojo elgsenos specifikacija dokumentuojama (pvz., Storybook ar ekvivalentas)
 
