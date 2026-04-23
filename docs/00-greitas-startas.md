@@ -104,7 +104,7 @@ Ką patikrinti prieš pradedant naują projektą arba perimant esamą sistemą:
 
 | Taisyklė | Nuoroda |
 |---|---|
-| Backend: struktūruotas klaidos atsakymas (`type`, `title`, `status`, `detail`) — RFC 9457 | [§3.3.9](03-architektura.md#339-klaidų-apdorojimas-api-lygmeniu) |
+| Backend: struktūruotas klaidos atsakymas (`type`, `title`, `status`, `detail`) — RFC 7807 | [§3.3.8](03-architektura.md#338-standartizuotos-klaidos) |
 | Frontend: Global Error Boundary + fallback UI | [§3.2.7](03-architektura.md#327-klaidų-apdorojimas-ir-ux-atsparumas) |
 | Loguoti kontekstą, ne tik stacktrace; jokių asmens duomenų | [§9.1](09-stebesena-logai.md#91-logging-žurnalų-standartai) |
 | Klaidų klasifikacija: `retriable`, `user_error`, `system_error`, `external_dependency` | [§9.4](09-stebesena-logai.md#94-klaidos-ir-error-handling) |
