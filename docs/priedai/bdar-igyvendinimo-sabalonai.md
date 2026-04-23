@@ -71,7 +71,7 @@ Klasifikacija yra pagrindas visoms kitoms priemonėms — prieigos kontrolei, lo
 | **Trynimas** (str. 17) | Ištrinti duomenis, kai nebėra teisinio pagrindo | Soft delete + kaskadinis mechanizmas (žr. B.2.2) |
 | **Apribojimas** (str. 18) | Sustabdyti duomenų tvarkymą išlaikant duomenis | `processing_restricted` vėliavėlė; API/UI neleidžia matyti/naudoti |
 | **Perkeliamumas** (str. 20) | Pateikti duomenis struktūruotu formatu | JSON/CSV eksportas per API |
-| **Prieštaravimas** (str. 21) | Nutraukti tvarkymą profileklavimo tikslais | Opt-out mechanizmas; consent atšaukimas |
+| **Prieštaravimas** (str. 21) | Nutraukti tvarkymą profiliavimo tikslais | Opt-out mechanizmas; consent atšaukimas |
 
 ### B.3.2. DSAR apdorojimo srautas
 
