@@ -132,4 +132,4 @@ Ką patikrinti prieš pradedant naują projektą arba perimant esamą sistemą:
 | Puslapiavimas: maksimalus page size serverio pusėje | [§3.3.11](03-architektura.md#3311-puslapiavimas) |
 | Autentifikacija: Bearer token arba session cookie | [§6.2](06-saugumas.md#62-autentifikacija-ir-autorizacija) |
 | Rate limiting viešiems endpointams | [§3.3.4](03-architektura.md#334-apsauga-ir-prieiga) |
-| Klaidos: RFC 9457 `application/problem+json` | [§3.3.9](03-architektura.md#339-klaidų-apdorojimas-api-lygmeniu) |
+| Klaidos: RFC 7807 `application/problem+json` | [§3.3.8](03-architektura.md#338-klaidų-apdorojimas-api-lygmeniu) |
