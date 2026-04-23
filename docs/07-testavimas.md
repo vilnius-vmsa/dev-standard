@@ -92,11 +92,11 @@ PRIVALOMA:
 *   Kritinių modulių testavimo reikalavimai turi būti griežtesni negu pagalbinių ar mažos rizikos komponentų.
 <!-- TEST-GATE-P04 | ai-reviewable -->
 *   Nestabilūs testai negali būti ignoruojami ilgiau kaip 5 darbo dienas; jie turi būti identifikuojami, pažymimi ir taisomi.
-<!-- TEST-GATE-P05 | ai-reviewable -->
-*   Projektas privalo apibrėžti ir CI procese tikrinti minimalius testų aprėpties slenksčius.
 
 ### 7.4.1. Numatytieji aprėpties slenksčiai
 
+<!-- TEST-GATE-P05 | ai-reviewable -->
+*   Projektas privalo apibrėžti ir CI procese tikrinti minimalius testų aprėpties slenksčius.
 Šioje lentelėje pateikiami numatytieji testų aprėpties tikslai pagal komponento tipą. Tai yra pradiniai orientyrai, kuriuos kiekvienas projektas gali koreguoti (aukštyn arba žemyn su pagrindimu) projekto pradžioje.
 
 | Komponento tipas | Min. eilučių aprėptis | Min. šakų aprėptis | Pastabos |
