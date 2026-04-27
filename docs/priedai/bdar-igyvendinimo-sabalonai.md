@@ -115,7 +115,7 @@ Atsižvelgiant į BDAR str. 35, DPIA privalomas kai duomenų tvarkymas gali kelt
 
 ### B.5.1. Ar reikia DPIA?
 
-Atsakykite „taip" / „ne":
+Atsakykite „taip“ / „ne“:
 
 - [ ] Ar sistema tvarko ypatingų kategorijų duomenis (sveikatos, biometriniai)?
 - [ ] Ar vykdomas sistemingas ir platus profiliavimas?
@@ -125,7 +125,7 @@ Atsakykite „taip" / „ne":
 - [ ] Ar tvarkomos pažeidžiamų asmenų (vaikų, pacientų) duomenys?
 - [ ] Ar duomenys siunčiami į trečiąsias šalis?
 
-> **Jei ≥ 2 atsakymai „taip" — DPIA tikėtinai privalomas.** Konsultuokitės su DPO.
+> **Jei ≥ 2 atsakymai „taip“ — DPIA tikėtinai privalomas.** Konsultuokitės su DPO.
 
 ### B.5.2. DPIA proceso punktai
 
