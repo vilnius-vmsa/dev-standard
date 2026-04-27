@@ -275,3 +275,5 @@ REKOMENDUOJAMA:
     *   jų tarpusavio ryšius
     *   pagrindinius stebėsenos taškus ir priklausomybes
 *   Eksploatacijos dokumentacijoje rekomenduojama pateikti nuorodas į susijusius dashboardus, alerting taisykles, incidentų valdymo procedūras ir diegimo instrukcijas.
+
+> Susiję skyriai: [10 Dokumentacija](10-dokumentacija.md) · [8.3 CD](08-devops-ci-cd.md#83-cd-continuous-delivery-deployment) · [F priedas. Runbook šablonas](priedai/runbook-sablonas.md)

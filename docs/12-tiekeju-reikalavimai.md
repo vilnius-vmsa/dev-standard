@@ -189,4 +189,4 @@ REKOMENDUOJAMA:
 <!-- VENDOR-ACC-R02 | process-level -->
 *   Priėmimo metu rekomenduojama įvertinti sistemos atitiktį tiksliniam [brandos lygiui](02-paskirtis-ir-taikymo-sritis.md#26-standarto-įgyvendinimo-brandos-lygiai) pagal [§2.6](02-paskirtis-ir-taikymo-sritis.md#26-standarto-įgyvendinimo-brandos-lygiai) kriterijus.
 
-> Susiję skyriai: [2.6 Standarto įgyvendinimo brandos lygiai](02-paskirtis-ir-taikymo-sritis.md#26-standarto-įgyvendinimo-brandos-lygiai) · [12.3 Privalomi perdavimo artefaktai](#123-privalomi-perdavimo-artefaktai) · [9.5.1 Numatytieji SLO lygiai](09-stebesena-logai.md#951-numatytieji-slo-lygiai-tiers)
+> Susiję skyriai: [2.6 Standarto įgyvendinimo brandos lygiai](02-paskirtis-ir-taikymo-sritis.md#26-standarto-įgyvendinimo-brandos-lygiai) · [12.3 Privalomi perdavimo artefaktai](#123-privalomi-perdavimo-artefaktai) · [9.5.1 Numatytieji SLO lygiai](09-stebesena-logai.md#951-numatytieji-slo-lygiai-tiers) · [C priedas. Perdavimo kontrolinis sąrašas](priedai/perdavimo-kontrolinis-sarasas.md)

@@ -181,7 +181,7 @@ REKOMENDUOJAMA:
 <!-- DOC-ADR-R03 | human-reviewable -->
 *   Jei sprendimas turi ilgalaikį poveikį saugumui, palaikomumui, kaštams ar perimamumui, rekomenduojama aiškiai aprašyti jo pasekmes ir rizikas.
 
-> Susiję skyriai: [3.1.5 Architecture Decision Records (ADR)](03-architektura.md#315-architecture-decision-records-adr) · [3.8 Diagramos ir dokumentavimas](03-architektura.md#38-diagramos-ir-dokumentavimas)
+> Susiję skyriai: [3.1.5 Architecture Decision Records (ADR)](03-architektura.md#315-architecture-decision-records-adr) · [3.8 Diagramos ir dokumentavimas](03-architektura.md#38-diagramos-ir-dokumentavimas) · [D priedas. ADR šablonas](priedai/adr-sablonas.md)
 
 ## 10.5. Dokumentacijos atnaujinimo taisyklės
 
