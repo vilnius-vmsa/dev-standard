@@ -43,7 +43,7 @@
 
 | # | Tikrinimo punktas | Standarto nuoroda | ✅ |
 |---|---|---|---|
-| 4.1 | Nėra žinomų critical / high pažeidžiamųmų be sprendimo plano | [§12.2](../12-tiekeju-reikalavimai.md#122-minimalūs-techniniai-reikalavimai) | ☐ |
+| 4.1 | Nėra žinomų critical / high pažeidžiamumų be sprendimo plano | [§12.2](../12-tiekeju-reikalavimai.md#122-minimalūs-techniniai-reikalavimai) | ☐ |
 | 4.2 | SAST ir dependency scan vykdomas CI | [§8.6](../08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė) | ☐ |
 | 4.3 | Secret scanning įjungtas repozitorijoje | [§4.3.6](../04-kodo-kurimo-gaires.md#436-repozitorijos-higiena) | ☐ |
 | 4.4 | TLS ≥ 1.2 + HSTS viešiems endpointams | [§6.5](../06-saugumas.md#65-saugumas-naršyklėje) | ☐ |
