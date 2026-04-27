@@ -4,6 +4,13 @@ on:
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - README.md
+      - CHANGELOG.md
+      - .github/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
 
 jobs:
   test-deploy:
