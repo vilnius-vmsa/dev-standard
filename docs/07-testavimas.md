@@ -93,6 +93,22 @@ PRIVALOMA:
 <!-- TEST-GATE-P04 | ai-reviewable -->
 *   Nestabilūs testai negali būti ignoruojami ilgiau kaip 5 darbo dienas; jie turi būti identifikuojami, pažymimi ir taisomi.
 
+### 7.4.1. Numatytieji aprėpties slenksčiai
+
+<!-- TEST-GATE-P05 | ai-reviewable -->
+*   Projektas privalo apibrėžti ir CI procese tikrinti minimalius testų aprėpties slenksčius.
+Šioje lentelėje pateikiami numatytieji testų aprėpties tikslai pagal komponento tipą. Tai yra pradiniai orientyrai, kuriuos kiekvienas projektas gali koreguoti (aukštyn arba žemyn su pagrindimu) projekto pradžioje.
+
+| Komponento tipas | Min. eilučių aprėptis | Min. šakų aprėptis | Pastabos |
+|---|---|---|---|
+| Verslo logika / domenas | ≥ 80 % | ≥ 70 % | Pagrindinės taisyklės, skaičiavimai, būsenos mašinos |
+| Saugumui kritinis kodas | ≥ 90 % | ≥ 80 % | Autentifikacija, autorizacija, kriptografija, įvesties validacija |
+| API kontroleriai / handleriai | ≥ 70 % | — | Akcentas į integracijos ir kontraktų testus |
+| UI komponentai | ≥ 60 % | — | Akcentas į sąveikos ir prieinamumo testus |
+| Infrastruktūra / konfigūracija | — | — | Dengiama IaC validacija, ne unit testų aprėptimi |
+
+*   Aprėptis vertinama ne tik kaip formalus skaičius, bet ir pagal kritinių kelių padengimą.
+*   Konkrečios reikšmės turi būti patvirtintos projekto pradžioje ir peržiūrimos periodiškai.
 REKOMENDUOJAMA:
 
 <!-- TEST-GATE-R01 | ai-reviewable -->

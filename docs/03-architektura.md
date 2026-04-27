@@ -109,13 +109,15 @@ UI skaidomas į smulkius, pakartotinai naudojamus komponentus su aiškia viena a
 PRIVALOMA:
 
 <!-- ARCH-FE-P01 | ai-reviewable -->
-*   komponentai grupuojami pagal atsakomybę (pvz., Atomic Design principu: atomai → molekulės → organizmai)
+*   komponentai grupuojami pagal aiškią atsakomybę ir pakartotinio naudojimo principą
 <!-- ARCH-FE-P02 | human-reviewable -->
 *   bendrai naudojami komponentai iškeliami į bendrą komponentų biblioteką (atskirą paketą, monorepo dalį ar kitą centralizuotą formą), o ne dubliuojami projektuose
 
 REKOMENDUOJAMA:
 
 <!-- ARCH-FE-R01 | ai-reviewable -->
+*   komponentų grupavimą organizuoti pagal Atomic Design ar ekvivalentišką principą (atomai → molekulės → organizmai), kai tai tinka projekto masteliu
+<!-- ARCH-FE-R99 | ai-reviewable -->
 *   vizualinė ir vartotojo elgsenos specifikacija dokumentuojama (pvz., Storybook ar ekvivalentas)
 
 ### 3.2.2. Būsenos (state) valdymas
@@ -447,13 +449,17 @@ REKOMENDUOJAMA:
 
 ### 3.3.11. Puslapiavimas
 
+PRIVALOMA:
+
+<!-- ARCH-API-P30 | ai-reviewable -->
+*   API resursai, grąžinantys kolekcijas, privalo turėti serverio pusėje apibrėžtą maksimalų puslapio dydį; užklausa su pageSize virš maksimalaus turi būti atmetama su 400 klaida, o ne tyliai apribojama
+
 REKOMENDUOJAMA:
 
 Visi API resursai, grąžinantys kolekcijas, turi palaikyti puslapiavimą:
 
 *   **Cursor-based** puslapiavimas rekomenduojamas didelėms arba greitai kintančioms kolekcijoms (stabilus, nepriklausomai nuo įterpimų)
 *   **Offset-based** (?page=2&pageSize=50) - priimtinas mažoms, stabilios tvarkos kolekcijoms
-*   Maksimalus puslapio dydis apibrėžiamas serverio pusėje; užklausa su pageSize virš maksimalaus - 400 klaida, ne tylus apribojimas
 *   Atsakyme pateikiamos nuorodos į kitą ir ankstesnį puslapį (next, prev pagal RFC 8288 Link antraštę arba atsakymo kūne)
 
 ## 3.4. Duomenys ir integracijos
@@ -564,7 +570,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-DATA-R12 | ai-reviewable -->
 *   Jei integracijų grandinėje dalyvauja keli tiekėjai ar išorinės sistemos, rekomenduojama aiškiai atskirti atsakomybes už duomenų tvarkymą, saugojimą ir incidentų valdymą.
 
-> Susiję skyriai: [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [3.3.4 Apsauga ir prieiga](#334-apsauga-ir-prieiga) · [3.4.7 Valstybinių registrų ir išorinių sistemų integracijos](#347-valstybinių-registrų-ir-išorinių-sistemų-integracijos) · [9.7 Audit trail (audito pėdsakas)](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas)
+> Susiję skyriai: [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [3.3.4 Apsauga ir prieiga](#334-apsauga-ir-prieiga) · [3.4.7 Valstybinių registrų ir išorinių sistemų integracijos](#347-valstybinių-registrų-ir-išorinių-sistemų-integracijos) · [9.7 Audit trail (audito pėdsakas)](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas) · [B priedas. BDAR įgyvendinimo šablonai](priedai/bdar-igyvendinimo-sabalonai.md)
 
 ### 3.4.6. Duomenų kokybė
 
@@ -764,18 +770,21 @@ REKOMENDUOJAMA:
 
 ### 3.6.5. Graceful shutdown ir ilgų operacijų valdymas
 
+PRIVALOMA:
+
+<!-- ARCH-REL-P23 | ai-reviewable -->
+*   Konteinerizuoti servisai privalo palaikyti graceful shutdown: gavus sustabdymo signalą (SIGTERM), servisas turi užbaigti vykdomas užklausas per apibrėžtą laikotarpį, nepriimant naujų.
+<!-- ARCH-REL-P24 | ai-reviewable -->
+*   Ilgai trunkančios operacijos, viršijančios nustatytus laiko limitus, turi būti nutraukiamos kontroliuotai, su aiškia būsena ir klaidos rezultatu.
+
 REKOMENDUOJAMA:
 
-<!-- ARCH-REL-R11 | ai-reviewable -->
-*   Servisai turėtų palaikyti graceful shutdown, kad gavus sustabdymo signalą būtų užbaigiamos vykdomos užklausos per apibrėžtą laikotarpį, nepriimant naujų.
-<!-- ARCH-REL-R12 | ai-reviewable -->
-*   Ilgai trunkančios operacijos, viršijančios nustatytus laiko limitus, turėtų būti nutraukiamos kontroliuotai, su aiškia būsena ir klaidos rezultatu.
 <!-- ARCH-REL-R13 | ai-reviewable -->
 *   Jei operacija apima kelis servisus ar kelis žingsnius, rekomenduojama apibrėžti kompensavimo logiką arba kitą atkuriamumo mechanizmą.
 <!-- ARCH-REL-R14 | ai-reviewable -->
 *   Jei naudojamas Saga ar kitas kompensacinis modelis, jo elgsena turi būti dokumentuota.
 
-> Susiję skyriai: [3.8 Diagramos ir dokumentavimas](#38-diagramos-ir-dokumentavimas) · [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas)
+> Susiję skyriai: [3.8 Diagramos ir dokumentavimas](#38-diagramos-ir-dokumentavimas) · [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas) · [8.5 Konteinerių ir Kubernetes diegimo reikalavimai](08-devops-ci-cd.md#85-konteinerių-ir-kubernetes-diegimo-reikalavimai)
 
 ### 3.6.6. Mažiausių privilegijų principas operaciniu lygmeniu
 
@@ -1161,7 +1170,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-COMP-R07 | ai-reviewable -->
 *   Tikslas nėra standartizuoti visą stack, o užtikrinti, kad pasirinkimai yra apsvarstyti ir organizacija galės juos palaikyti po projekto pabaigos.
 
-> Susiję skyriai: [3.1.5 Architecture Decision Records (ADR)](#315-architecture-decision-records-adr) · [10.4 Architecture Decision Records (ADR)](10-dokumentacija.md#104-architecture-decision-records-adr) · [5 Versijavimas ir priklausomybių valdymas](05-versijavimas.md) · [12 Tiekėjų ir pavaldžių įstaigų reikalavimai](12-tiekeju-reikalavimai.md)
+> Susiję skyriai: [3.1.5 Architecture Decision Records (ADR)](#315-architecture-decision-records-adr) · [10.4 Architecture Decision Records (ADR)](10-dokumentacija.md#104-architecture-decision-records-adr) · [5 Versijavimas ir priklausomybių valdymas](05-versijavimas.md) · [12 Tiekėjų ir pavaldžių įstaigų reikalavimai](12-tiekeju-reikalavimai.md) · [A priedas. Technologijų registras](priedai/technologiju-registras.md)
 
 ### 3.10.4. Kriptografiniai standartai ir komponentų gyvavimo ciklas
 

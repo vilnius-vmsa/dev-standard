@@ -136,6 +136,7 @@ PRIVALOMA:
     *   Pasiekiamumu
     *   atsako laiku
     *   klaidų lygiu
+*   Kiekvienai sistemai turi būti priskirtas SLO lygis (tier) projekto pradžioje, remiantis sistemos kritiškumu ir paskirtimi.
 *   SLI (Service Level Indicators) turi būti aiškiai susieti su stebimomis metrikomis ir apskaičiuojami objektyviai, remiantis [#9.2](#92-monitoring-ir-metrikos) skyriuje apibrėžtu monitoringu
 *   Jei sistemai taikomi išoriniai ar sutartiniai paslaugų lygio įsipareigojimai, jie turi būti dokumentuoti kaip SLA (Service Level Agreement).
 *   SLO ir SLI turi būti dokumentuoti taip, kad būtų aišku:
@@ -144,6 +145,19 @@ PRIVALOMA:
     *   kokia yra priimtina riba
     *   kas laikoma pažeidimu
 *   SLO pažeidimo arba reikšmingos degradacijos rizika turi būti susieta su alerting mechanizmais
+
+### 9.5.1. Numatytieji SLO lygiai (tiers)
+
+Šioje lentelėje pateikiami numatytieji SLO tikslai pagal sistemos kritiškumo lygį. Tai yra pradiniai orientyrai, kuriuos kiekvienas projektas gali koreguoti pagal nefunkcinius reikalavimus ir infrastruktūros galimybes.
+
+| Lygis | Sistemų tipai | Pasiekiamumas | p95 atsako laikas | Klaidų lygis (5xx) | Matavimo laikotarpis |
+|---|---|---|---|---|---|
+| **1 lygis — Kritinės viešosios** | Piliečiams skirti portalai, e. paslaugos, savitarna | ≥ 99,9 % | ≤ 500 ms | ≤ 0,1 % | 30 dienų slankusis langas |
+| **2 lygis — Vidinės verslo** | Administracinės sistemos, bylų valdymas, vidinės API | ≥ 99,5 % | ≤ 1 s | ≤ 0,5 % | 30 dienų slankusis langas |
+| **3 lygis — Pagalbinės** | Ataskaitų generavimas, batch procesai, kūrimo įrankiai | ≥ 99,0 % | ≤ 3 s | ≤ 1,0 % | 30 dienų slankusis langas |
+
+*   1 lygio sistemoms error budget principas rekomenduojamas kaip numatytoji patikimumo valdymo priemonė.
+*   Konkretūs SLO tikslai turi būti patvirtinti Product Owner ir techninio vadovo projekto pradžioje.
 
 REKOMENDUOJAMA:
 
