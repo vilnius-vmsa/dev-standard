@@ -387,7 +387,7 @@ REKOMENDUOJAMA:
 <!-- CODE-VCS-R11 | ai-reviewable -->
 *   Draft PR arba MR rekomenduojama naudoti ankstyvam grįžtamajam ryšiui, jei implementacija dar nebaigta.
 
-> Susiję skyriai: [4.4 Code Review principai](#44-code-review-principai) · [4.5 Testai](#45-testai) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai) · [10 Dokumentacija](10-dokumentacija.md)
+> Susiję skyriai: [4.4 Code Review principai](#44-code-review-principai) · [4.5 Testai](#45-testai) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai) · [10 Dokumentacija](10-dokumentacija.md) · [E priedas. PR / MR šablonas](priedai/pr-mr-sablonas.md)
 
 ### 4.3.6. Repozitorijos higiena
 

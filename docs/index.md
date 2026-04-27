@@ -125,3 +125,7 @@ v1.0
 
 - [A priedas. Organizacijos technologijų registras](priedai/technologiju-registras.md)
 - [B priedas. BDAR / GDPR įgyvendinimo šablonai](priedai/bdar-igyvendinimo-sabalonai.md)
+- [C priedas. Perdavimo kontrolinis sąrašas](priedai/perdavimo-kontrolinis-sarasas.md)
+- [D priedas. ADR šablonas](priedai/adr-sablonas.md)
+- [E priedas. PR / MR šablonas](priedai/pr-mr-sablonas.md)
+- [F priedas. Runbook šablonas](priedai/runbook-sablonas.md)
