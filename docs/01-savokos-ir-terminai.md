@@ -11,7 +11,9 @@
 | CI | Continuous Integration (tęstinė integracija) – automatinis kodo sujungimas, build ir testų vykdymas dažnai (pvz., kiekvienam PR). |
 | CI/CD | Procesų ir įrankių visuma, apimanti CI ir CD praktiką (automatizuotas build, testavimas, leidimai ir diegimas). |
 | DevOps | Development + Operations – praktikų ir kultūros rinkinys, skirtas automatizuoti ir sutrumpinti programinės įrangos kūrimo, testavimo, diegimo ir priežiūros ciklą. |
+| DI priemonė | Dirbtinio intelekto (AI) kodavimo asistentas (pvz., GitHub Copilot) – įrankis, padedantis generuoti, peržiūrėti ar refaktorinti kodą naudojant didelius kalbos modelius. Žr. [4.8](04-kodo-kurimo-gaires.md#48-di-priemonių-naudojimas-ai-coding-assistants). |
 | DPIA (DAPV) | Duomenų apsaugos poveikio vertinimas (Data Protection Impact Assessment) – BDAR numatytas vertinimas, kai tvarkymas gali kelti didelę riziką. |
+| DSAR | Data Subject Access Request – duomenų subjekto prašymas pasinaudoti savo teisėmis pagal BDAR (prieiga, trynimas, perkėlimas ir kt.). Žr. [B priedas](priedai/bdar-igyvendinimo-sabalonai.md#b3-duomenų-subjektų-teisės-dsar). |
 | FE | Front-End (naudotojo sąsajos dalis) – kliento pusėje veikianti sistemos dalis (dažniausiai naršyklėje). |
 | IaC | Infrastructure as Code – infrastruktūros aprašymas ir valdymas kodu (pvz., Terraform, Helm), užtikrinant pakartojamumą ir atsekamumą. |
 | JWT | JSON Web Token – pasirašytas tokenas, dažnai naudojamas autentifikacijai / autorizacijai perduodant teises (claims). |
@@ -20,10 +22,13 @@
 | OAuth 2.0 | Autorizacijos protokolas, skirtas deleguoti prieigą (pvz., per access tokenus) tarp kliento ir resurso serverio. |
 | OIDC | OpenID Connect – autentifikacijos sluoksnis virš OAuth 2.0, apibrėžiantis tapatybės tokenus (ID token) ir prisijungimo srautą. |
 | PO | Product Owner (produkto savininkas) – asmuo, atsakingas už produkto viziją, backlog prioritetus ir reikalavimų valdymą. |
+| Brandos lygis | Standarto įgyvendinimo brandos pakopa (Bazinis, Standartinis, Pavyzdinis), nusakanti sistemos atitikties standartui laipsnį. Žr. [2.6](02-paskirtis-ir-taikymo-sritis.md#26-standarto-įgyvendinimo-brandos-lygiai). |
 | SBOM | Software Bill of Materials – programinės įrangos sudėties sąrašas (naudojamos bibliotekos, komponentai ir jų versijos). |
 | SCA | Software Composition Analysis – priklausomybių (paketų/bibliotekų) analizė dėl licencijų ir žinomų pažeidžiamumų. |
+| SLO tier | Paslaugos lygio tikslo kategorija (Tier 1 – kritinė vieša, Tier 2 – vidinė verslo, Tier 3 – pagalbinė), apibrėžianti numatytuosius prieinamumo ir atsako laiko tikslus. Žr. [9.5.1](09-stebesena-logai.md#951-numatytieji-slo-lygiai-tiers). |
 | SAST | Static Application Security Testing – statinė kodo analizė, skirta aptikti saugumo spragas (pvz., CI procese). |
 | SLA | Service Level Agreement – sutartinis paslaugos lygis (pvz., prieinamumas per laikotarpį). |
 | SLI | Service Level Indicator – metrika, pagal kurią matuojamas SLO (pvz., p95 atsako laikas, klaidų %). |
 | SLO | Service Level Objective – išmatuojamas paslaugos tikslas (pvz., 99,9% sėkmingų užklausų per 30 dienų). |
+| Technologijų registras | Organizacijos lygiu tvarkomas patvirtintų technologijų, karkasų ir įrankių sąrašas su statusais ir versijomis. Žr. [A priedas](priedai/technologiju-registras.md). |
 | UAT | User Acceptance Testing – naudotojų / užsakovo priėmimo testavimas prieš produkcinį leidimą. |
