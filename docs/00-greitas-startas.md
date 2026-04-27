@@ -59,7 +59,7 @@ Prieš projektavimą / naują funkcionalumą:
 | Kuriu naują API endpoint | [3.3 Backend ir API principai](03-architektura.md#33-backend-ir-api-principai), [6.2 Autentifikacija ir autorizacija](06-saugumas.md#62-autentifikacija-ir-autorizacija) |
 | Rašau PR / MR | [4.3.5 PR reikalavimai](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai), [4.4 CR principai](04-kodo-kurimo-gaires.md#44-code-review-principai), [4.5](04-kodo-kurimo-gaires.md#45-testai) |
 | Konfigūruoju CI/CD pipeline | [8.2 CI minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai), [8.6 DevSecOps CI/CD kontrolė](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė) |
-| Pridedu naują priklausomybę | [5.3 Bibliotekų ir paketų valdymas](05-versijavimas.md#53-bibliotekų-ir-paketų-valdymas), [5.4 Leidžiamos irdraudžiamos priklausomybės](05-versijavimas.md#54-leidžiamos-ir-draudžiamos-priklausomybės) |
+| Pridedu naują priklausomybę | [5.3 Bibliotekų ir paketų valdymas](05-versijavimas.md#53-bibliotekų-ir-paketų-valdymas), [5.4 Leidžiamos ir draudžiamos priklausomybės](05-versijavimas.md#54-leidžiamos-ir-draudžiamos-priklausomybės) |
 | Projektuoju integraciją | [3.4 Duomenys ir integracijos](03-architektura.md#34-duomenys-ir-integracijos), [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) |
 | Tvarkau incidentą | [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas), [9.4 Klaidos ir error handling](09-stebesena-logai.md#94-klaidos-ir-error-handling) |
 | Priimu tiekėjo darbą | [12.7 Darbų priėmimas](12-tiekeju-reikalavimai.md#127-darbų-priėmimas), [12.3 Privalomi perdavimo artefaktai](12-tiekeju-reikalavimai.md#123-privalomi-perdavimo-artefaktai) |
