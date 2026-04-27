@@ -50,7 +50,7 @@ REKOMENDUOJAMA:
 <!-- VENDOR-TECH-R01 | ai-reviewable -->
 *   Jei sprendimui taikomi ne visi šio standarto skyriai, rekomenduojama techninėje specifikacijoje aiškiai nurodyti, kurie skyriai yra privalomi konkrečiam tiekimui ar projektui.
 <!-- VENDOR-TECH-R02 | process-level -->
-*   Tikslinis [brandos lygis](02-paskirtis-ir-taikymo-sritis.md#26-standarto-įgyvendinimo-brandos-lygiai) rekomenduojama nurodyti techninėje specifikacijoje arba sutartyje; minimaliai – 1 lygis (Bazinis), kritinėms viešosioms sistemoms – 2 lygis (Standartinis).
+*   Tikslinį [brandos lygį](02-paskirtis-ir-taikymo-sritis.md#26-standarto-įgyvendinimo-brandos-lygiai) rekomenduojama nurodyti techninėje specifikacijoje arba sutartyje; minimaliai – 1 lygis (Bazinis), kritinėms viešosioms sistemoms – 2 lygis (Standartinis).
 
 ## 12.3. Privalomi perdavimo artefaktai
 
