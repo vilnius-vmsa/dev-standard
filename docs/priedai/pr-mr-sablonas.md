@@ -7,7 +7,7 @@
 
 ## Parengtas šablonas
 
-Šis repozitorius jau turi veikiantį GitHub šabloną: [`.github/pull_request_template.md`](../../.github/pull_request_template.md).
+Šis repozitorius jau turi veikiantį GitHub šabloną: [`.github/pull_request_template.md`](https://github.com/vilnius-vmsa/dev-standard/blob/main/.github/pull_request_template.md).
 
 Projektas gali naudoti šį šabloną tiesiogiai arba jį pritaikyti savo poreikiams, išlaikant žemiau aprašytą minimalią struktūrą.
 
