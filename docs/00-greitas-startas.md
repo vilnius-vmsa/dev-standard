@@ -1,3 +1,6 @@
+---
+slug: /
+---
 # Greitas startas (Quick Start)
 
 Šis puslapis padės greitai rasti reikiamą standarto dalį pagal jūsų rolę arba situaciją.
@@ -86,16 +89,16 @@ Detaliau: [2.4 – Reikalavimų lygiai](02-paskirtis-ir-taikymo-sritis.md#24-rei
 
 Ką patikrinti prieš pradedant naują projektą arba perimant esamą sistemą:
 
-- [ ] Priskirtas tikslinis **brandos lygis** ([§2.6](02-paskirtis-ir-taikymo-sritis.md#26-standarto-įgyvendinimo-brandos-lygiai))
-- [ ] Priskirtas **SLO tier** ([§9.5.1](09-stebesena-logai.md#951-numatytieji-slo-lygiai-tiers))
+- [ ] Priskirtas tikslinis **brandos lygis** ([2.6](02-paskirtis-ir-taikymo-sritis.md#26-standarto-įgyvendinimo-brandos-lygiai))
+- [ ] Priskirtas **SLO tier** ([9.5.1](09-stebesena-logai.md#951-numatytieji-slo-lygiai-tiers))
 - [ ] Pasirinktos technologijos suderintos su **technologijų registru** ([A priedas](priedai/technologiju-registras.md))
-- [ ] Repozitorija sukurta savivaldybės kontroliuojamoje GIT platformoje ([§4.3.1](04-kodo-kurimo-gaires.md#431-versijų-kontrolė-ir-repozitorijų-valdymas))
-- [ ] README su paleidimo instrukcija ([§3.8.4](03-architektura.md#384-onboarding-dokumentacija))
-- [ ] CI pipeline su build + lint + test + SAST ([§8.2](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai))
-- [ ] Slaptieji raktai ne kode, naudojama centralizuota saugykla ([§6.4](06-saugumas.md#64-secrets-management))
-- [ ] API dokumentuota OpenAPI arba SDL specifikacija ([§3.3.1](03-architektura.md#331-specifikacija-ir-dokumentacija))
-- [ ] Linting / formatavimo taisyklės nustatytos ([§4.2.3](04-kodo-kurimo-gaires.md#423-automatinis-formatavimas-ir-linting))
-- [ ] Struktūruoti logai siunčiami į centralizuotą platformą ([§9.1](09-stebesena-logai.md#91-logging-žurnalų-standartai))
+- [ ] Repozitorija sukurta savivaldybės kontroliuojamoje GIT platformoje ([4.3.1](04-kodo-kurimo-gaires.md#431-versijų-kontrolė-ir-repozitorijų-valdymas))
+- [ ] README su paleidimo instrukcija ([3.8.4](03-architektura.md#384-onboarding-dokumentacija))
+- [ ] CI pipeline su build + lint + test + SAST ([8.2](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai))
+- [ ] Slaptieji raktai ne kode, naudojama centralizuota saugykla ([6.4](06-saugumas.md#64-secrets-management))
+- [ ] API dokumentuota OpenAPI arba SDL specifikacija ([3.3.1](03-architektura.md#331-specifikacija-ir-dokumentacija))
+- [ ] Linting / formatavimo taisyklės nustatytos ([4.2.3](04-kodo-kurimo-gaires.md#423-automatinis-formatavimas-ir-linting))
+- [ ] Struktūruoti logai siunčiami į centralizuotą platformą ([9.1](09-stebesena-logai.md#91-logging-žurnalų-standartai))
 - [ ] Jei tvarkomi asmens duomenys — peržiūrėtas [B priedas (BDAR šablonai)](priedai/bdar-igyvendinimo-sabalonai.md)
 
 ## Teminiai trumpiniai (Cheat Sheets)
@@ -104,32 +107,32 @@ Ką patikrinti prieš pradedant naują projektą arba perimant esamą sistemą:
 
 | Taisyklė | Nuoroda |
 |---|---|
-| Backend: struktūruotas klaidos atsakymas (`type`, `title`, `status`, `detail`) — RFC 7807 | [§3.3.8](03-architektura.md#338-standartizuotos-klaidos) |
-| Frontend: Global Error Boundary + fallback UI | [§3.2.7](03-architektura.md#327-klaidų-apdorojimas-ir-ux-atsparumas) |
-| Loguoti kontekstą, ne tik stacktrace; jokių asmens duomenų | [§9.1](09-stebesena-logai.md#91-logging-žurnalų-standartai) |
-| Klaidų klasifikacija: `retriable`, `user_error`, `system_error`, `external_dependency` | [§9.4](09-stebesena-logai.md#94-klaidos-ir-error-handling) |
-| Saugumas: klaidų pranešimai neturi atskleisti vidinės sistemos informacijos | [§6.1](06-saugumas.md#61-bendrieji-saugumo-principai) |
+| Backend: struktūruotas klaidos atsakymas (`type`, `title`, `status`, `detail`) — RFC 7807 | [3.3.8](03-architektura.md#338-standartizuotos-klaidos) |
+| Frontend: Global Error Boundary + fallback UI | [3.2.7](03-architektura.md#327-klaidų-apdorojimas-ir-ux-atsparumas) |
+| Loguoti kontekstą, ne tik stacktrace; jokių asmens duomenų | [9.1](09-stebesena-logai.md#91-logging-žurnalų-standartai) |
+| Klaidų klasifikacija: `retriable`, `user_error`, `system_error`, `external_dependency` | [9.4](09-stebesena-logai.md#94-klaidos-ir-error-handling) |
+| Saugumas: klaidų pranešimai neturi atskleisti vidinės sistemos informacijos | [6.1](06-saugumas.md#61-bendrieji-saugumo-principai) |
 
 ### Saugumas — greitas patikrinimas
 
 | Ką tikrinti | Nuoroda |
 |---|---|
-| Validacija **serverio pusėje** (ne tik kliente) | [§6.6](06-saugumas.md#66-owasp-top-10) |
-| CSP nonce-based arba strict-dynamic | [§6.5](06-saugumas.md#65-saugumas-naršyklėje) |
-| Slapukai: `HttpOnly`, `Secure`, `SameSite` | [§6.5](06-saugumas.md#65-saugumas-naršyklėje) |
-| CORS: jokio `*` wildcard autentifikuotoms API | [§6.5](06-saugumas.md#65-saugumas-naršyklėje) |
-| Slaptieji raktai ne kode, rotacija kas 90 d. | [§6.4](06-saugumas.md#64-secrets-management) |
-| SAST + dependency scan CI pipeline | [§8.6](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė) |
-| TLS ≥ 1.2 + HSTS visuose viešuose endpointuose | [§6.5](06-saugumas.md#65-saugumas-naršyklėje) |
+| Validacija **serverio pusėje** (ne tik kliente) | [6.6](06-saugumas.md#66-owasp-top-10) |
+| CSP nonce-based arba strict-dynamic | [6.5](06-saugumas.md#65-saugumas-naršyklėje) |
+| Slapukai: `HttpOnly`, `Secure`, `SameSite` | [6.5](06-saugumas.md#65-saugumas-naršyklėje) |
+| CORS: jokio `*` wildcard autentifikuotoms API | [6.5](06-saugumas.md#65-saugumas-naršyklėje) |
+| Slaptieji raktai ne kode, rotacija kas 90 d. | [6.4](06-saugumas.md#64-secrets-management) |
+| SAST + dependency scan CI pipeline | [8.6](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė) |
+| TLS ≥ 1.2 + HSTS visuose viešuose endpointuose | [6.5](06-saugumas.md#65-saugumas-naršyklėje) |
 
 ### API dizainas — greitas patikrinimas
 
 | Ką tikrinti | Nuoroda |
 |---|---|
-| OpenAPI / GraphQL SDL specifikacija prieš kodą | [§3.3.1](03-architektura.md#331-specifikacija-ir-dokumentacija) |
-| REST: daiktavardžiai, kebab-case, daugiskaita | [§3.3.3](03-architektura.md#333-resursų-modeliavimas-ir-url-dizainas) |
-| Versijavimas URI arba antraštėje | [§5.2](05-versijavimas.md#52-api-versijavimas) |
-| Puslapiavimas: maksimalus page size serverio pusėje | [§3.3.11](03-architektura.md#3311-puslapiavimas) |
-| Autentifikacija: Bearer token arba session cookie | [§6.2](06-saugumas.md#62-autentifikacija-ir-autorizacija) |
-| Rate limiting viešiems endpointams | [§3.3.4](03-architektura.md#334-apsauga-ir-prieiga) |
-| Klaidos: RFC 7807 `application/problem+json` | [§3.3.8](03-architektura.md#338-klaidų-apdorojimas-api-lygmeniu) |
+| OpenAPI / GraphQL SDL specifikacija prieš kodą | [3.3.1](03-architektura.md#331-specifikacija-ir-dokumentacija) |
+| REST: daiktavardžiai, kebab-case, daugiskaita | [3.3.3](03-architektura.md#333-resursų-modeliavimas-ir-url-dizainas) |
+| Versijavimas URI arba antraštėje | [5.2](05-versijavimas.md#52-api-versijavimas) |
+| Puslapiavimas: maksimalus page size serverio pusėje | [3.3.11](03-architektura.md#3311-puslapiavimas) |
+| Autentifikacija: Bearer token arba session cookie | [6.2](06-saugumas.md#62-autentifikacija-ir-autorizacija) |
+| Rate limiting viešiems endpointams | [3.3.4](03-architektura.md#334-apsauga-ir-prieiga) |
+| Klaidos: RFC 7807 `application/problem+json` | [3.3.8](03-architektura.md#338-klaidų-apdorojimas-api-lygmeniu) |

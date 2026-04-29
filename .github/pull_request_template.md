@@ -35,11 +35,11 @@ Closes #
 
 ## Kontrolinis sąrašas / Checklist
 
-- [ ] Kodas atitinka projekto konvencijas ([§4.2](docs/04-kodo-kurimo-gaires.md#42-kodo-struktūra-ir-konvencijos))
-- [ ] Testai pridėti / atnaujinti ([§4.5](docs/04-kodo-kurimo-gaires.md#45-testai))
-- [ ] Dokumentacija atnaujinta (jei reikia) ([§10.5](docs/10-dokumentacija.md#105-dokumentacijos-atnaujinimo-taisyklės))
+- [ ] Kodas atitinka projekto konvencijas ([4.2](docs/04-kodo-kurimo-gaires.md#42-kodo-struktūra-ir-konvencijos))
+- [ ] Testai pridėti / atnaujinti ([4.5](docs/04-kodo-kurimo-gaires.md#45-testai))
+- [ ] Dokumentacija atnaujinta (jei reikia) ([10.5](docs/10-dokumentacija.md#105-dokumentacijos-atnaujinimo-taisyklės))
 - [ ] CI patikrinimai praeina
-- [ ] Jei naudotas AI — output peržiūrėtas ir patikrintas ([§4.8](docs/04-kodo-kurimo-gaires.md#48-di-priemonių-naudojimas-ai-coding-assistants))
+- [ ] Jei naudotas AI — output peržiūrėtas ir patikrintas ([4.8](docs/04-kodo-kurimo-gaires.md#48-di-priemonių-naudojimas-ai-coding-assistants))
 
 ## Ekrano nuotraukos / Screenshots
 
