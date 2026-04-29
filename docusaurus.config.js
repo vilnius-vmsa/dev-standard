@@ -2,8 +2,8 @@
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Programinės įrangos kūrimo standartas',
-  tagline: 'Vilniaus miesto savivaldybės programinės įrangos kūrimo, keitimo, diegimo ir priežiūros standartas',
+  title: 'Programinės įrangos kūrimo standartas [draft]',
+  tagline: 'Vilniaus miesto savivaldybės programinės įrangos kūrimo, keitimo, diegimo ir priežiūros standartas [draft]',
   favicon: 'img/favicon.ico',
 
   url: 'https://vilnius-vmsa.github.io',
@@ -48,7 +48,7 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'VMS Dev Standartas',
+        title: 'VMS Dev Standartas [draft]',
         items: [
           {
             href: 'https://github.com/vilnius-vmsa/dev-standard',

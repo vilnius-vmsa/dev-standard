@@ -1,3 +1,6 @@
+---
+slug: /
+---
 # Greitas startas (Quick Start)
 
 Šis puslapis padės greitai rasti reikiamą standarto dalį pagal jūsų rolę arba situaciją.

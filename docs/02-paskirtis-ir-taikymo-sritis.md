@@ -117,10 +117,10 @@ REKOMENDUOJAMA:
 
 ### 2.4.1. Reikalavimų klasifikacijos žymos
 
-Kiekvienas standarto reikalavimas turi HTML komentaro žymą, nurodantčią reikalavimo identifikatorių ir tikrinimo tipą:
+Kiekvienas standarto reikalavimas turi HTML komentaro žymą, nurodančią reikalavimo identifikatorių ir tikrinimo tipą:
 
 `<!-- IDENTIFIKATORIUS | tikrinimo-tipas -->`
-
+s
 **Identifikatoriaus formatas:** `<SRITIS>-<POSRITYS>-<P|R><NUMERIS>`
 
 *   `P` – PRIVALOMAS reikalavimas
