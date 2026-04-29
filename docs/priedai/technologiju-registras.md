@@ -1,9 +1,9 @@
 # A priedas. Organizacijos technologijų registras
 
-> **Statusas:** gyvas dokumentas — atnaujinamas pagal [§13 Standarto priežiūra](../13-standarto-prieziura.md).
+> **Statusas:** gyvas dokumentas — atnaujinamas pagal [13 Standarto priežiūra](../13-standarto-prieziura.md).
 > **Paskutinis peržiūrėjimas:** 2025-XX-XX
 
-Šis registras apibrėžia organizacijos lygiu patvirtintas technologijas, karkasus ir įrankius. Jis yra privalomas atskaitos taškas pagal [§4.2.3](../04-kodo-kurimo-gaires.md#423-automatinis-formatavimas-ir-linting) ir [§3.10.3](../03-architektura.md#3103-technologijų-suderinimas-su-organizacijos-tech-stack).
+Šis registras apibrėžia organizacijos lygiu patvirtintas technologijas, karkasus ir įrankius. Jis yra privalomas atskaitos taškas pagal [4.2.3](../04-kodo-kurimo-gaires.md#423-automatinis-formatavimas-ir-linting) ir [3.10.3](../03-architektura.md#3103-technologijų-suderinimas-su-organizacijos-tech-stack).
 
 ## A.1. Technologijų statusai
 
@@ -75,7 +75,7 @@
 
 | Priemonė | Statusas | Sąlygos |
 |---|---|---|
-| GitHub Copilot (Business/Enterprise) | ✅ Patvirtinta | Tik su organizacijos valdomu planu; žr. [§4.8](../04-kodo-kurimo-gaires.md#48-di-priemonių-naudojimas-ai-coding-assistants) |
+| GitHub Copilot (Business/Enterprise) | ✅ Patvirtinta | Tik su organizacijos valdomu planu; žr. [4.8](../04-kodo-kurimo-gaires.md#48-di-priemonių-naudojimas-ai-coding-assistants) |
 | _Kitos DI priemonės_ | 🔍 Vertinama | Reikia viceprezidento (VP) ir DPO patvirtinimo |
 
 ## A.9. Registro atnaujinimo procesas

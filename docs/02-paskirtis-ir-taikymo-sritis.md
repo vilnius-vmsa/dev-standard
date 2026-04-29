@@ -186,37 +186,37 @@ Ne visos sistemos ir projektai gali pasiekti pilną standarto atitiktį nuo pirm
 
 Minimalus lygis, privalomas **visoms naujoms sistemoms ir visiems tiekėjų perdavimams** nuo pirmos dienos.
 
-*   Visi PRIVALOMA saugumo reikalavimai ([§6](06-saugumas.md)): serverio pusės validacija, autentifikacija ir autorizacija
-*   Bazinis CI su build, testais ir SAST ([§8.2](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai))
-*   Šaltinio kodas savivaldybės kontroliuojamoje repozitorijoje ([§4.3.1](04-kodo-kurimo-gaires.md#431-versijų-kontrolė-ir-repozitorijų-valdymas))
-*   README su paleidimo instrukcijomis ([§3.8.4](03-architektura.md#384-onboarding-dokumentacija))
-*   API dokumentuota OpenAPI / SDL specifikacija ([§3.3.1](03-architektura.md#331-specifikacija-ir-dokumentacija))
-*   Slaptieji raktai ne programiniame kode ([§6.4](06-saugumas.md#64-secrets-management))
-*   Struktūruoti logai siunčiami į centralizuotą platformą ([§9.1](09-stebesena-logai.md#91-logging-žurnalų-standartai))
+*   Visi PRIVALOMA saugumo reikalavimai ([6](06-saugumas.md)): serverio pusės validacija, autentifikacija ir autorizacija
+*   Bazinis CI su build, testais ir SAST ([8.2](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai))
+*   Šaltinio kodas savivaldybės kontroliuojamoje repozitorijoje ([4.3.1](04-kodo-kurimo-gaires.md#431-versijų-kontrolė-ir-repozitorijų-valdymas))
+*   README su paleidimo instrukcijomis ([3.8.4](03-architektura.md#384-onboarding-dokumentacija))
+*   API dokumentuota OpenAPI / SDL specifikacija ([3.3.1](03-architektura.md#331-specifikacija-ir-dokumentacija))
+*   Slaptieji raktai ne programiniame kode ([6.4](06-saugumas.md#64-secrets-management))
+*   Struktūruoti logai siunčiami į centralizuotą platformą ([9.1](09-stebesena-logai.md#91-logging-žurnalų-standartai))
 
 ### 2.6.2. 2 lygis — Standartinis
 
 Tikslinis lygis **visiems aktyviems projektams**. Rekomenduojamas pasiekti per 6 mėnesius nuo projekto pradžios.
 
 *   Visas 1 lygis + visi likę PRIVALOMA reikalavimai
-*   Pilna testavimo piramidė su apibrėžtais aprėpties slenksčiais ([§7](07-testavimas.md))
-*   Stebėsena: struktūruoti logai + pagrindinės metrikos + alerting ([§9](09-stebesena-logai.md))
-*   ADR reikšmingiems architektūriniams sprendimams ([§10.4](10-dokumentacija.md#104-architecture-decision-records-adr))
-*   CD pipeline su rollback mechanizmu ([§8.3](08-devops-ci-cd.md#83-cd-continuous-delivery-deployment))
-*   Conventional Commits ir PR šablonai ([§4.3.4](04-kodo-kurimo-gaires.md#434-commitų-gairės), [§4.3.5](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai))
-*   Apibrėžti ir stebimi SLO ([§9.5](09-stebesena-logai.md#95-sla-slo-ir-sli))
+*   Pilna testavimo piramidė su apibrėžtais aprėpties slenksčiais ([7](07-testavimas.md))
+*   Stebėsena: struktūruoti logai + pagrindinės metrikos + alerting ([9](09-stebesena-logai.md))
+*   ADR reikšmingiems architektūriniams sprendimams ([10.4](10-dokumentacija.md#104-architecture-decision-records-adr))
+*   CD pipeline su rollback mechanizmu ([8.3](08-devops-ci-cd.md#83-cd-continuous-delivery-deployment))
+*   Conventional Commits ir PR šablonai ([4.3.4](04-kodo-kurimo-gaires.md#434-commitų-gairės), [4.3.5](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai))
+*   Apibrėžti ir stebimi SLO ([9.5](09-stebesena-logai.md#95-sla-slo-ir-sli))
 
 ### 2.6.3. 3 lygis — Pavyzdinis
 
-Aukštesnės brandos lygis, **rekomenduojamas kritinėms viešosioms sistemoms** (1 lygio SLO tier pagal [§9.5.1](09-stebesena-logai.md#951-numatytieji-slo-lygiai-tiers)).
+Aukštesnės brandos lygis, **rekomenduojamas kritinėms viešosioms sistemoms** (1 lygio SLO tier pagal [9.5.1](09-stebesena-logai.md#951-numatytieji-slo-lygiai-tiers)).
 
 *   Visas 2 lygis + pagrindiniai REKOMENDUOJAMA reikalavimai
-*   Kontraktų testai tarp vidinių servisų ([§3.4.4](03-architektura.md#344-schemos-valdymas-ir-kontraktų-suderinamumas))
-*   Atsparumo ir atkūrimo testai ([§7.13](07-testavimas.md#713-atsparumo-dr-ir-atkūrimo-testai))
-*   Error budget principas ir SLO-driven planavimas ([§9.5](09-stebesena-logai.md#95-sla-slo-ir-sli))
-*   SBOM generavimas kiekvienam leidimui ([§5.5](05-versijavimas.md#55-priklausomybių-saugumas-ir-atsekamumas))
-*   FinOps sąnaudų stebėsena ([§8.10](08-devops-ci-cd.md#810-kainodara-ir-efektyvumas-finops))
-*   Periodiniai penetraciniai testai ([§6.7](06-saugumas.md#67-security-testing))
+*   Kontraktų testai tarp vidinių servisų ([3.4.4](03-architektura.md#344-schemos-valdymas-ir-kontraktų-suderinamumas))
+*   Atsparumo ir atkūrimo testai ([7.13](07-testavimas.md#713-atsparumo-dr-ir-atkūrimo-testai))
+*   Error budget principas ir SLO-driven planavimas ([9.5](09-stebesena-logai.md#95-sla-slo-ir-sli))
+*   SBOM generavimas kiekvienam leidimui ([5.5](05-versijavimas.md#55-priklausomybių-saugumas-ir-atsekamumas))
+*   FinOps sąnaudų stebėsena ([8.10](08-devops-ci-cd.md#810-kainodara-ir-efektyvumas-finops))
+*   Periodiniai penetraciniai testai ([6.7](06-saugumas.md#67-security-testing))
 
 ### 2.6.4. Lygio priskyrimas ir vertinimas
 

@@ -1,9 +1,9 @@
 # B priedas. BDAR / GDPR įgyvendinimo šablonai
 
-> **Statusas:** gyvas dokumentas — atnaujinamas pagal [§13 Standarto priežiūra](../13-standarto-prieziura.md).
+> **Statusas:** gyvas dokumentas — atnaujinamas pagal [13 Standarto priežiūra](../13-standarto-prieziura.md).
 > **Susiję skyriai:** [6.3 Duomenų apsauga (GDPR kontekstas)](../06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [3.4.5 Asmens duomenų apsauga (BDAR / GDPR)](../03-architektura.md#345-asmens-duomenų-apsauga-bdar-gdpr) · [9.7 Audit trail](../09-stebesena-logai.md#97-audit-trail-audito-pėdsakas)
 
-Šis priedas pateikia praktinius šablonus ir patarimus, padedančius įgyvendinti BDAR reikalavimus, apibrėžtus [§6.3](../06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) ir [§3.4.5](../03-architektura.md#345-asmens-duomenų-apsauga-bdar-gdpr). Tai nėra teisinė konsultacija; visais klausimais rekomenduojama konsultuotis su organizacijos duomenų apsaugos pareigūnu (DPO).
+Šis priedas pateikia praktinius šablonus ir patarimus, padedančius įgyvendinti BDAR reikalavimus, apibrėžtus [6.3](../06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) ir [3.4.5](../03-architektura.md#345-asmens-duomenų-apsauga-bdar-gdpr). Tai nėra teisinė konsultacija; visais klausimais rekomenduojama konsultuotis su organizacijos duomenų apsaugos pareigūnu (DPO).
 
 ---
 

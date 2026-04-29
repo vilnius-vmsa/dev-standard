@@ -1,6 +1,6 @@
 # D priedas. ADR šablonas (Architecture Decision Record Template)
 
-> **Paskirtis:** vieningas ADR formatas pagal [§10.4](../10-dokumentacija.md#104-architecture-decision-records-adr) ir [§3.1.5](../03-architektura.md#315-architecture-decision-records-adr).
+> **Paskirtis:** vieningas ADR formatas pagal [10.4](../10-dokumentacija.md#104-architecture-decision-records-adr) ir [3.1.5](../03-architektura.md#315-architecture-decision-records-adr).
 > **Formatas:** [Michael Nygard](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions) klasikinis stilius.
 > **Naudojimas:** kopijuoti šabloną į projekto `docs/adr/` katalogą ir pildyti pagal sprendimą.
 
@@ -62,7 +62,7 @@ Būkite konkretūs — ne "naudosime cache", o "naudosime Redis 7.x kaip distrib
    - Pasirenkamas architektūros stilius (monolitas, mikroservisai, BFF ir pan.).
    - Keičiamas integracijos modelis, duomenų srauto kryptis ar autentifikacijos schema.
    - Priimamas reikšmingas kompromisas tarp NFR (pvz., našumas vs. paprastumas).
-   - Nukrypstama nuo standarto (susieti su [§2.5](../02-paskirtis-ir-taikymo-sritis.md#25-nukrypimai-nuo-standarto) nukrypimo dokumentavimu).
+   - Nukrypstama nuo standarto (susieti su [2.5](../02-paskirtis-ir-taikymo-sritis.md#25-nukrypimai-nuo-standarto) nukrypimo dokumentavimu).
 
 2. **Kur saugoti?**
    - `docs/adr/` kataloge projekto repozitorijoje.

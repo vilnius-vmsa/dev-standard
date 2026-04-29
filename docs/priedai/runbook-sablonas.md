@@ -1,6 +1,6 @@
 # F priedas. Runbook šablonas (Operational Runbook Template)
 
-> **Paskirtis:** standartizuotas runbook formatas pagal [§9.8 Eksploatacijos dokumentacija](../09-stebesena-logai.md#98-eksploatacijos-dokumentacija).
+> **Paskirtis:** standartizuotas runbook formatas pagal [9.8 Eksploatacijos dokumentacija](../09-stebesena-logai.md#98-eksploatacijos-dokumentacija).
 > **Naudojimas:** kopijuoti šabloną į projekto `docs/runbooks/` katalogą ir pildyti kiekvienam eksploataciniam scenarijui.
 
 ---
@@ -13,7 +13,7 @@
 **Service:** [Paslaugos / sistemos pavadinimas]
 **Last updated:** YYYY-MM-DD
 **Owner:** [Komanda / atsakingas asmuo]
-**SLO Tier:** [1 | 2 | 3] (pagal §9.5.1)
+**SLO Tier:** [1 | 2 | 3] (pagal 9.5.1)
 **Severity:** [P1 Critical | P2 High | P3 Medium | P4 Low]
 
 ---
@@ -97,7 +97,7 @@ kubectl rollout undo deployment/<service> -n <namespace>
 
 ---
 
-## Minimalūs runbook scenarijai (pagal §9.8)
+## Minimalūs runbook scenarijai (pagal 9.8)
 
 Kiekvienai sistemai turi būti parengti runbook'ai bent šiems scenarijams:
 
