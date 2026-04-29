@@ -264,7 +264,7 @@ REKOMENDUOJAMA:
 PRIVALOMA:
 
 <!-- CODE-VCS-P06 | ai-reviewable -->
-*   Projektuose turi būti naudojama aiški ir visai komandai vienodai taikoma šakų strategija.
+*   Projektuose turi būti naudojama aiški, dokumentuota ir visai komandai vienodai taikoma šakų strategija.
 <!-- CODE-VCS-P07 | ai-reviewable -->
 *   Šakų pavadinimai turi atitikti sutartą formatą:
 
@@ -275,22 +275,26 @@ Pavyzdys:
 feature/ticket-123456-add-2fa
 
 *   Turi būti aiškiai apibrėžtos bent šios šakų paskirtys:
-    *   main – stabilus, išleistas kodas
-    *   staging – priešprodukcinei aplinkai ir UAT
-    *   dev – integracinei plėtrai
+    *   main – stabilus, išleistas kodas (privaloma visoms strategijoms)
     *   feature/\* – atskiroms funkcijoms ar uždaviniams
     *   hotfix/\* – kritiniams pataisymams
-    *   release/\* – leidimo paruošimui, jei projektas tokį etapą taiko
-*   Tiesioginiai push’ai į main, staging ir dev šakas turi būti draudžiami.
+*   Tiesioginiai push’ai į apsaugotas šakas (bent main) turi būti draudžiami.
 *   Feature ir hotfix šakos turi būti trumpalaikės ir šalinamos po sujungimo.
 
 REKOMENDUOJAMA:
 
 <!-- CODE-VCS-R03 | human-reviewable -->
-*   Naudoti nuoseklų srautą:
+*   Šakų strategiją pasirinkti pagal projekto sudėtingumą ir komandos dydį. Galimi modeliai:
+    *   **GitHub Flow** (main + feature/\*) – tinka mažesnėms komandoms ir projektams su nuolatiniu diegimu (continuous deployment). Pakeitimai iš feature šakų jungiami tiesiai į main.
+    *   **GitFlow** (main + dev + staging + feature/\* + release/\*) – tinka didesnėms komandoms, projektams su keliais lygiagrečiais leidimais ar reguliuojamais priėmimo etapais (UAT).
+    *   Kiti modeliai (trunk-based development, release branching) leidžiami, jei dokumentuoti ir suderinti komandoje.
+<!-- CODE-VCS-R04 | ai-reviewable -->
+*   Jei naudojamas GitFlow modelis su staging ir dev šakomis, rekomenduojamas nuoseklus srautas:
     *   feature/\* → dev → staging → main
     *   hotfix/\* → main ir atgal į dev arba staging, jei taikoma
-<!-- CODE-VCS-R04 | ai-reviewable -->
+<!-- CODE-VCS-R05a | ai-reviewable -->
+*   release/\* šakos naudojamos leidimo paruošimui, jei projektas tokį etapą taiko.
+<!-- CODE-VCS-R06a | ai-reviewable -->
 *   Pasenusias neaktyvias šakas periodiškai archyvuoti arba šalinti.
 
 > Susiję skyriai: [8.3 CD (Continuous Delivery/Deployment)](08-devops-ci-cd.md#83-cd-continuous-delivery-deployment) · [8.9 Leidimų (release) valdymas](08-devops-ci-cd.md#89-leidimų-release-valdymas)
@@ -300,7 +304,7 @@ REKOMENDUOJAMA:
 PRIVALOMA:
 
 <!-- CODE-VCS-P08 | human-reviewable -->
-*   Main, staging ir dev šakoms turi būti įjungta apsauga nuo tiesioginių push’ų.
+*   Pagrindinėms šakoms (bent main; taip pat staging, dev ar kitoms ilgalaikėms šakoms, jei jos naudojamos pagal pasirinktą strategiją) turi būti įjungta apsauga nuo tiesioginių push’ų.
 <!-- CODE-VCS-P09 | ai-reviewable -->
 *   Šių šakų pakeitimai gali būti atliekami tik per PR arba MR procesą.
 <!-- CODE-VCS-P10 | human-reviewable -->
@@ -311,7 +315,7 @@ PRIVALOMA:
 REKOMENDUOJAMA:
 
 <!-- CODE-VCS-R05 | process-level -->
-*   Main ir staging šakoms naudoti griežtesnius peržiūros reikalavimus negu feature šakoms.
+*   Pagrindinėms šakoms (main ir, jei taikoma, staging) naudoti griežtesnius peržiūros reikalavimus negu feature šakoms.
 <!-- CODE-VCS-R06 | ai-reviewable -->
 *   Aukštos rizikos arba architektūrinio poveikio pakeitimams reikalauti papildomos tech lead ar architekto peržiūros.
 
