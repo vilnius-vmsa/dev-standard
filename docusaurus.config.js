@@ -35,6 +35,7 @@ const config = {
         docs: {
           routeBasePath: '/',
           sidebarPath: './sidebars.js',
+          editUrl: 'https://github.com/vilnius-vmsa/dev-standard/edit/main/',
         },
         blog: false,
         theme: {
@@ -48,7 +49,11 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'VMS Dev Standartas [draft]',
+        title: 'VMS DEV Standartas [draft]',
+        logo: {
+          alt: 'Vilniaus miesto savivaldybės logotipas',
+          src: 'logo.svg',
+        },
         items: [
           {
             href: 'https://github.com/vilnius-vmsa/dev-standard',
