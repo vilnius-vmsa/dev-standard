@@ -50,7 +50,7 @@ REKOMENDUOJAMA:
 
 > Susiję skyriai: [3.3.2 Versijavimas](03-architektura.md#332-versijavimas) · [3.9.5 Atnaujinimų valdymas](03-architektura.md#395-atnaujinimų-valdymas) · [8.4 Versijavimas ir žymėjimas (release artefaktams)](08-devops-ci-cd.md#84-versijavimas-ir-žymėjimas-release-artefaktams) · [8.9 Leidimų (release) valdymas](08-devops-ci-cd.md#89-leidimų-release-valdymas)
 
-## 5.3. Bibliotekų ir paketų valdymas
+## 5.3. Bibliotekų ir paketų valdymas (angl. dependencies)
 
 PRIVALOMA:
 
@@ -62,6 +62,26 @@ PRIVALOMA:
 *   Produkcijoje turi būti naudojamos konkrečios priklausomybių versijos, o ne neapibrėžtos latest tipo nuorodos.
 <!-- VER-PKG-P04 | ai-reviewable -->
 *   Naudojami tik patvirtinti oficialūs arba organizacijos registrai.
+<!-- VER-PKG-P05 | ai-reviewable -->
+*   Dependabot arba lygiavertis automatizuotas priklausomybių naujinimo įrankis turi būti sukonfigūruotas visoms projekte naudojamoms priklausomybių valdymo ekosistemoms, įskaitant Composer, npm, Yarn, pnpm, Maven, Gradle, pip, Docker ir GitHub Actions, jei jos naudojamos projekte.
+<!-- VER-PKG-P06 | ai-reviewable -->
+*   Dependabot konfigūracija turi apimti aplikacijos bibliotekų, konteinerių vaizdų, CI/CD darbo eigų ir kitų projekto priklausomybių atnaujinimus, jei tokios priklausomybės naudojamos.
+<!-- VER-PKG-P07 | human-reviewable -->
+*   Automatiniams priklausomybių atnaujinimams valdyti turi būti naudojama atskira ilgalaikė `dependencies` šaka, skirta Dependabot arba lygiaverčio įrankio siūlomiems atnaujinimams testuoti ir integruoti.
+<!-- VER-PKG-P08 | ai-reviewable -->
+*   `dependencies` šaka turi būti nuolat sinchronizuojama su pagrindine `main` šaka, kad priklausomybių atnaujinimai būtų vertinami pagal aktualią projekto kodo bazės ir konfigūracijos būseną.
+<!-- VER-PKG-P09 | human-reviewable -->
+*   Priklausomybių atnaujinimai neturi būti automatiškai suliejami į `main` šaką be atsakingo asmens peržiūros, suderinamumo įvertinimo ir testavimo.
+<!-- VER-PKG-P10 | human-reviewable -->
+*   Atsakingas kūrėjas, gavęs Dependabot arba lygiaverčio įrankio pasiūlytą atnaujinimą, turi lokaliai atsisiųsti `dependencies` šaką, pritaikyti siūlomą pakeitimą ir atlikti suderinamumo, testų bei veikimo patikrą.
+<!-- VER-PKG-P11 | human-reviewable -->
+*   Patikrinus priklausomybių atnaujinimo suderinamumą, atsakingas kūrėjas turi paruošti Pull Request į `main` šaką ir, jei projekte naudojama, į `stage` arba kitą tarpinės aplinkos šaką.
+<!-- VER-PKG-P12 | ai-reviewable -->
+*   Dependabot arba lygiaverčio įrankio sukurti Pull Request turi aiškiai nurodyti atnaujinamą priklausomybę, esamą ir siūlomą versiją, priklausomybių ekosistemą, pvz., npm, Composer, Docker, GitHub Actions, bei atnaujinimo tipą, pvz., patch, minor arba major.
+<!-- VER-PKG-P13 | human-reviewable -->
+*   Major versijų atnaujinimai turi būti vertinami atskirai nuo patch ir minor atnaujinimų, papildomai peržiūrint suderinamumą, migracijos instrukcijas ir galimus nesuderinamus pakeitimus.
+<!-- VER-PKG-P14 | ai-reviewable -->
+*   Saugumo atnaujinimai turi būti prioritetizuojami ir tvarkomi greičiau nei įprasti funkcinių ar techninių versijų atnaujinimai.
 
 REKOMENDUOJAMA:
 
@@ -69,6 +89,8 @@ REKOMENDUOJAMA:
 *   Priklausomybių atnaujinimus planuoti reguliariai, o ne tik reaguojant į incidentus ar pažeidžiamumus.
 <!-- VER-PKG-R02 | ai-reviewable -->
 *   Minor ir major atnaujinimus atlikti planuotai ir su testavimu, o ne atsitiktinai.
+<!-- VER-PKG-R03 | ai-reviewable -->
+*   `dependencies` šaka turi būti automatiškai sinchronizuojama su `main` šaka po kiekvieno `main` šakos atnaujinimo, kad kūrėjams nereikėtų rankiniu būdu perkelti `main` pakeitimų į `dependencies` šaką.
 
 ## 5.4. Leidžiamos ir draudžiamos priklausomybės
 
