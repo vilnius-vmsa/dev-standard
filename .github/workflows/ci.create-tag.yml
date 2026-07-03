@@ -135,7 +135,6 @@ jobs:
           gh release create "$TAG_NAME" \
             --title "$TAG_NAME" \
             --generate-notes \
-            --fail-on-no-commits \
             --latest \
             "${source_flags[@]}" \
             "${notes_flags[@]}"
