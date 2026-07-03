@@ -6,6 +6,7 @@ diegimo ir priežiūros standartas.
 ## Navigacija
 
 - [Publikuota standarto svetainė](https://vilnius-vmsa.github.io/dev-standard/)
+- [Atsisiųsti naujausią PDF](https://github.com/vilnius-vmsa/dev-standard/releases/latest/download/dev-standard.pdf)
 - **[→ Greitas startas](docs/00-greitas-startas.md)** – pradėkite čia
 - [Turinys](docs/index.md) – pilnas standarto turinys
 - [Pakeitimų žurnalas](changelog.md) – versijų istorija
@@ -52,7 +53,7 @@ Naujos versijos išleidimas:
 3. Įveskite žymą, sudarytą iš `v` ir trijų skaičių, pavyzdžiui,
    `v1.2.3`, ir trumpai aprašykite, kodėl versija išleidžiama.
 4. Workflow patikrins žymą, sukurs GitHub Release ir automatiškai
-   sugeneruos pakeitimų suvestinę iš sujungtų pull request.
+   sugeneruos pakeitimų suvestinę iš Git commit bei sujungtų pull request.
 5. **CD: Deploy to GitHub Pages** surinks būtent pažymėtą versiją,
    sukurs PDF artefaktą ir publikuos svetainę į GitHub Pages.
 
