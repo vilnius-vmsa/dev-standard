@@ -26,9 +26,6 @@ diegimo ir priežiūros standartas.
 
 Detaliau: [2 skyrius – Standarto paskirtis ir taikymo sritis](docs/02-paskirtis-ir-taikymo-sritis.md)
 
-## Versija
-
-v1.0 | 2026-04-20
 
 ## Vietinis paleidimas
 
