@@ -54,8 +54,10 @@ Naujos versijos išleidimas:
    `v1.2.3`, ir trumpai aprašykite, kodėl versija išleidžiama.
 4. Workflow patikrins žymą, sukurs GitHub Release ir automatiškai
    sugeneruos pakeitimų suvestinę iš Git commit bei sujungtų pull request.
-5. **CD: Deploy to GitHub Pages** surinks būtent pažymėtą versiją,
-   sukurs PDF artefaktą ir publikuos svetainę į GitHub Pages.
+5. Release workflow surinks ir prie GitHub Release pridės viešai
+   atsisiunčiamą PDF failą.
+6. **CD: Deploy to GitHub Pages** surinks būtent pažymėtą versiją ir
+   publikuos svetainę į GitHub Pages.
 
 Release taip pat sukuriamas automatiškai, kai į GitHub įkeliama tinkamo
 formato Git žyma, pavyzdžiui, `v1.2.3`. Žymos su raidėmis, papildomomis
