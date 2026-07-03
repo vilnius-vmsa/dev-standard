@@ -1,0 +1,114 @@
+name: "CI: Create release tag"
+
+run-name: "Release ${{ inputs.tag_name || github.ref_name }} by @${{ github.actor }}"
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+      - "!v*.*.*-*"
+      - "!v*.*.*+*"
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Version tag (SemVer, for example v1.2.3)"
+        required: true
+        type: string
+      release_description:
+        description: "Why is this tag/release being created?"
+        required: true
+        type: string
+
+permissions:
+  actions: write
+  contents: write
+
+concurrency:
+  group: create-release-tag
+  cancel-in-progress: false
+
+jobs:
+  create-release:
+    name: Create tag and GitHub Release
+    if: github.event_name != 'push' || github.event.deleted == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out release source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'push' && github.ref_name || 'main' }}
+          fetch-depth: 0
+
+      - name: Validate release input
+        id: validate
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          TAG_NAME: ${{ inputs.tag_name || github.ref_name }}
+          RELEASE_DESCRIPTION: ${{ inputs.release_description }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$TAG_NAME" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "::error::Tag must contain only a v prefix and three numbers, for example v1.2.3."
+            exit 1
+          fi
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" && -z "${RELEASE_DESCRIPTION//[[:space:]]/}" ]]; then
+            echo "::error::Release description must explain why the tag is being created."
+            exit 1
+          fi
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            if git ls-remote --exit-code --tags origin "refs/tags/${TAG_NAME}" >/dev/null 2>&1; then
+              echo "::error::Tag ${TAG_NAME} already exists."
+              exit 1
+            fi
+          elif ! git show-ref --verify --quiet "refs/tags/${TAG_NAME}"; then
+            echo "::error::Pushed tag ${TAG_NAME} could not be checked out."
+            exit 1
+          fi
+
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            echo "::error::Release ${TAG_NAME} already exists."
+            exit 1
+          fi
+
+          echo "release_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Create tag and release with generated changelog
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ inputs.tag_name || github.ref_name }}
+          RELEASE_DESCRIPTION: ${{ inputs.release_description }}
+          RELEASE_SHA: ${{ steps.validate.outputs.release_sha }}
+        run: |
+          set -euo pipefail
+
+          source_flags=(--target "$RELEASE_SHA")
+          if [[ "$EVENT_NAME" == "push" ]]; then
+            source_flags=(--verify-tag)
+          fi
+
+          notes_flags=()
+          if [[ -n "${RELEASE_DESCRIPTION//[[:space:]]/}" ]]; then
+            notes_flags=(--notes "$RELEASE_DESCRIPTION")
+          fi
+
+          gh release create "$TAG_NAME" \
+            --title "$TAG_NAME" \
+            --generate-notes \
+            --fail-on-no-commits \
+            --latest \
+            "${source_flags[@]}" \
+            "${notes_flags[@]}"
+
+      - name: Trigger release deployment
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ inputs.tag_name || github.ref_name }}
+        run: gh workflow run cd.deploy.yml --ref main --field tag_name="$TAG_NAME"
