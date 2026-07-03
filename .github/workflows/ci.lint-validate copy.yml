@@ -11,8 +11,8 @@ on:
     branches:
       - main
     paths-ignore:
-      - README.md
-      - CHANGELOG.md
+      - readme.md
+      - changelog.md
       - .github/**
 
 concurrency:
@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   test-deploy:
-    name: Test deployment
+    name: Lint & Validate codebase
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
