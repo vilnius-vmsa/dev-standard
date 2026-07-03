@@ -58,12 +58,13 @@ jobs:
             exit 1
           fi
 
-          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
-            if git ls-remote --exit-code --tags origin "refs/tags/${TAG_NAME}" >/dev/null 2>&1; then
-              echo "::error::Tag ${TAG_NAME} already exists."
-              exit 1
-            fi
-          elif ! git show-ref --verify --quiet "refs/tags/${TAG_NAME}"; then
+          tag_exists=false
+          release_sha="$(git rev-parse HEAD)"
+
+          if git show-ref --verify --quiet "refs/tags/${TAG_NAME}"; then
+            tag_exists=true
+            release_sha="$(git rev-list -n 1 "$TAG_NAME")"
+          elif [[ "$EVENT_NAME" == "push" ]]; then
             echo "::error::Pushed tag ${TAG_NAME} could not be checked out."
             exit 1
           fi
@@ -73,7 +74,8 @@ jobs:
             exit 1
           fi
 
-          echo "release_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "tag_exists=${tag_exists}" >> "$GITHUB_OUTPUT"
+          echo "release_sha=${release_sha}" >> "$GITHUB_OUTPUT"
 
       - name: Create tag and release with generated changelog
         shell: bash
@@ -81,13 +83,14 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           GH_TOKEN: ${{ github.token }}
           TAG_NAME: ${{ inputs.tag_name || github.ref_name }}
+          TAG_EXISTS: ${{ steps.validate.outputs.tag_exists }}
           RELEASE_DESCRIPTION: ${{ inputs.release_description }}
           RELEASE_SHA: ${{ steps.validate.outputs.release_sha }}
         run: |
           set -euo pipefail
 
           source_flags=(--target "$RELEASE_SHA")
-          if [[ "$EVENT_NAME" == "push" ]]; then
+          if [[ "$EVENT_NAME" == "push" || "$TAG_EXISTS" == "true" ]]; then
             source_flags=(--verify-tag)
           fi
 
@@ -120,7 +123,7 @@ jobs:
               "$subject" "$short_sha" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$commit_sha" \
               >> release-notes.md
             commit_count=$((commit_count + 1))
-          done < <(git log --no-merges --pretty=format:'%H%x09%h%x09%s' "$commit_range")
+          done < <(git log --no-merges --pretty=tformat:'%H%x09%h%x09%s' "$commit_range")
 
           if [[ "$commit_count" -eq 0 ]]; then
             echo "::error::No commits found for release ${TAG_NAME}."
