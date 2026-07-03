@@ -3,6 +3,13 @@
 Vilniaus miesto savivaldybės programinės įrangos kūrimo, keitimo,
 diegimo ir priežiūros standartas.
 
+[![Naujausia versija](https://img.shields.io/github/v/release/vilnius-vmsa/dev-standard?display_name=tag&sort=semver&label=versija)](https://github.com/vilnius-vmsa/dev-standard/releases/latest)
+[![Testai](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/ci.lint-validate.yml/badge.svg)](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/ci.lint-validate.yml)
+[![Diegimas](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/cd.deploy.yml/badge.svg)](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/cd.deploy.yml)
+[![CodeQL](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/codeql.yml/badge.svg)](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/codeql.yml)
+[![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Licencija: CC BY 4.0](https://img.shields.io/badge/licencija-CC_BY_4.0-2b5797?logo=creativecommons&logoColor=white)](LICENSE)
+
 ## Navigacija
 
 - [Publikuota standarto svetainė](https://vilnius-vmsa.github.io/dev-standard/)
