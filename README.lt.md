@@ -1,3 +1,5 @@
+**Lietuvių** | [English](README.md)
+
 # Programinės įrangos kūrimo standartas
 
 Vilniaus miesto savivaldybės programinės įrangos kūrimo, keitimo,
@@ -26,6 +28,10 @@ diegimo ir priežiūros standartas.
 
 Detaliau: [2 skyrius – Standarto paskirtis ir taikymo sritis](docs/02-paskirtis-ir-taikymo-sritis.md)
 
+## Versija
+
+[![Naujausia versija](https://img.shields.io/github/v/release/vilnius-vmsa/dev-standard?display_name=tag&sort=semver&label=versija)](https://github.com/vilnius-vmsa/dev-standard/releases/latest)
+[![Išleidimo data](https://img.shields.io/github/release-date/vilnius-vmsa/dev-standard?label=i%C5%A1leista)](https://github.com/vilnius-vmsa/dev-standard/releases/latest)
 
 ## Vietinis paleidimas
 
