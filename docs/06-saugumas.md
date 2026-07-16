@@ -78,7 +78,7 @@ PRIVALOMA:
 *   Turi būti apibrėžti ir techniškai užtikrinti duomenų saugojimo terminai bei trynimo logika.
 *   Jei duomenų tvarkymas gali kelti didelę riziką, turi būti atliktas Duomenų apsaugos poveikio vertinimas.
 <!-- SEC-GDPR-P01 | ai-reviewable -->
-*   Asmens duomenų laukai persistencijos sluoksnyje (Eloquent models, Doctrine entities) turi būti pažymėti `#[PersonalData]` atributu, nurodant jautrumo lygį ir kategoriją. Sistema turi gebėti automatiškai sugeneruoti asmens duomenų inventorių iš kodo (žr. [C priedą](priedai/asmens-duomenu-inventorizacija.md)).
+*   Asmens duomenų laukai persistencijos sluoksnyje (ORM modeliai / entitetai) turi būti pažymėti natyviu kalbai žymeniu pagal [C priedą](priedai/asmens-duomenu-inventorizacija.md), nurodant jautrumo lygį ir duomenų kategoriją (pvz., PHP: `#[PersonalData]`). Sistema turi gebėti automatiškai sugeneruoti asmens duomenų inventorių iš kodo.
 
 REKOMENDUOJAMA:
 
