@@ -29,7 +29,7 @@ Reikalavimas `SEC-GDPR-P01` yra **stack-agnostinis**: asmens duomenų laukai per
 
 ## C.2. PHP (Laravel / Symfony)
 
-Asmens duomenų laukai persistencijos sluoksnyje žymimi PHP 8 atributu `#[PersonalData]`, nurodant du privalomus parametrus — jautrumo lygį ir duomenų kategoriją.
+Asmens duomenų laukai persistencijos sluoksnyje žymimi PHP 8.1+ atributu `#[PersonalData]`, nurodant du privalomus parametrus — jautrumo lygį ir duomenų kategoriją.
 
 ### C.2.1. Anotacijos sintaksė
 
