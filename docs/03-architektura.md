@@ -570,7 +570,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-DATA-R12 | ai-reviewable -->
 *   Jei integracijų grandinėje dalyvauja keli tiekėjai ar išorinės sistemos, rekomenduojama aiškiai atskirti atsakomybes už duomenų tvarkymą, saugojimą ir incidentų valdymą.
 
-> Susiję skyriai: [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [3.3.4 Apsauga ir prieiga](#334-apsauga-ir-prieiga) · [3.4.7 Valstybinių registrų ir išorinių sistemų integracijos](#347-valstybinių-registrų-ir-išorinių-sistemų-integracijos) · [9.7 Audit trail (audito pėdsakas)](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas) · [B priedas. BDAR įgyvendinimo šablonai](priedai/bdar-igyvendinimo-sabalonai.md)
+> Susiję skyriai: [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [3.3.4 Apsauga ir prieiga](#334-apsauga-ir-prieiga) · [3.4.7 Valstybinių registrų ir išorinių sistemų integracijos](#347-valstybinių-registrų-ir-išorinių-sistemų-integracijos) · [9.7 Audit trail (audito pėdsakas)](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas) · [B priedas. BDAR įgyvendinimo šablonai](priedai/bdar-igyvendinimo-sabalonai.md) · [C priedas. Asmens duomenų inventorizacija](priedai/asmens-duomenu-inventorizacija.md)
 
 ### 3.4.6. Duomenų kokybė
 

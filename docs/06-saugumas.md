@@ -77,13 +77,17 @@ PRIVALOMA:
 *   Sistemos turi sudaryti galimybę įgyvendinti duomenų subjektų teises, kai tai taikoma.
 *   Turi būti apibrėžti ir techniškai užtikrinti duomenų saugojimo terminai bei trynimo logika.
 *   Jei duomenų tvarkymas gali kelti didelę riziką, turi būti atliktas Duomenų apsaugos poveikio vertinimas.
+<!-- SEC-GDPR-P01 | ai-reviewable -->
+*   Asmens duomenų laukai persistencijos sluoksnyje (Eloquent models, Doctrine entities) turi būti pažymėti `#[PersonalData]` atributu, nurodant jautrumo lygį ir kategoriją. Sistema turi gebėti automatiškai sugeneruoti asmens duomenų inventorių iš kodo (žr. [C priedą](priedai/asmens-duomenu-inventorizacija.md)).
 
 REKOMENDUOJAMA:
 
 *   Projektavimo metu aiškiai dokumentuoti, kokie asmens duomenys tvarkomi, kur jie saugomi ir kas turi prieigą.
 *   Aukštos rizikos scenarijuose taikyti papildomas priemones, tokias kaip pseudonimizacija ar laukų maskavimas.
+<!-- SEC-GDPR-R01 | ai-reviewable -->
+*   Asmens duomenų anotacijų spragų aptikimą (neanotuotus, bet įtartinus laukus) vykdyti CI aplinkoje kaip neblokuojantį įspėjimą (žr. [C.6 Spragų aptikimas](priedai/asmens-duomenu-inventorizacija.md#c6-spragų-aptikimas)).
 
-> Susiję skyriai: [3.4.5 Asmens duomenų apsauga (BDAR / GDPR)](03-architektura.md#345-asmens-duomenų-apsauga-bdar-gdpr) · [3.10.1 Teisinė ir reguliacinė atitiktis](03-architektura.md#3101-teisinė-ir-reguliacinė-atitiktis) · [9.7 Audit trail (audito pėdsakas)](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas) · [B priedas. BDAR įgyvendinimo šablonai](priedai/bdar-igyvendinimo-sabalonai.md)
+> Susiję skyriai: [3.4.5 Asmens duomenų apsauga (BDAR / GDPR)](03-architektura.md#345-asmens-duomenų-apsauga-bdar-gdpr) · [3.10.1 Teisinė ir reguliacinė atitiktis](03-architektura.md#3101-teisinė-ir-reguliacinė-atitiktis) · [9.7 Audit trail (audito pėdsakas)](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas) · [B priedas. BDAR įgyvendinimo šablonai](priedai/bdar-igyvendinimo-sabalonai.md) · [C priedas. Asmens duomenų inventorizacija](priedai/asmens-duomenu-inventorizacija.md)
 
 ## 6.4. Secrets management
 
