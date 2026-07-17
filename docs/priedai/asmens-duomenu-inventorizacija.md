@@ -5,7 +5,7 @@
 
 Šis priedas apibrėžia, kaip sistemose **automatiškai ir pakartojamai** aptikti, kokie asmens duomenys tvarkomi, kur jie saugomi ir koks jų jautrumas. Priedas įgyvendina [6.3](../06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) skyriaus reikalavimą `SEC-GDPR-P01` ir remiasi [B.1 Duomenų klasifikacija](bdar-igyvendinimo-sabalonai.md#b1-duomenų-klasifikacija) jautrumo lygiais.
 
-Priedas nustato **konvenciją ir privalomą rezultatą**, bet neteikia bendro įrankio — kiekviena komanda įgyvendina skenavimą savo kodų bazėje pagal čia aprašytą kontraktą.
+Sistemoms, sukurtoms naudojant PHP (Laravel, Symfony), standartas teikia bendrą bendruomeninį paketą **`vilnius/personal-data-inventory`**, kuris automatizuoja skenavimą, spragų paiešką ir ataskaitų generavimą. Kitoms technologijoms priedas nustato **konvenciją ir privalomą rezultatą** (įgyvendinamą lokaliai).
 
 ---
 
@@ -76,9 +76,101 @@ Nedidelis fiksuotas rinkinys, kad ataskaitą būtų galima prasmingai grupuoti:
 
 ---
 
-### C.2.4. Referencinės klasės (copy-paste)
+### C.2.4. Paketas `vilnius/personal-data-inventory` (Rekomenduojama)
 
-Standartas apibrėžia **atributo signatūrą ir semantiką**, o ne tiekiamą klasę. Kiekvienas repozitorijus pas save deklaruoja identišką `#[PersonalData]` atributą ir abu enum tipus. Bendras Composer paketas šioje versijoje nenumatytas (žr. [C.8](#c8-diegimo-fazės)).
+Projektams rekomenduojama nemėginti kurti savo atskirų skenerių, o naudoti oficialų **Vilniaus miesto savivaldybės bendruomeninį paketą**:
+
+*   **Paskirtis:** suteikia bendrus `#[PersonalData]`, `#[NotPersonalData]`, `#[PersonalDataField]` bei `#[NotPersonalDataField]` atributus, `Sensitivity`/`DataCategory` enum tipus, integraciją su Laravel (Eloquent) bei Symfony (Doctrine) ORM, spragų matavimo logiką bei Markdown/JSON ataskaitų generatorius.
+*   **Įdiegimas:**
+    ```json
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/vilnius-vmsa/personal-data-inventory.git"
+        }
+    ],
+    "require": {
+        "vilnius/personal-data-inventory": "^1.0"
+    }
+    ```
+
+#### Taikymas — Symfony (Doctrine)
+
+Kadangi Doctrine entitetai turi aiškiai apibrėžtas ir tipizuotas savybes, anotuojama savybių (property) lygiu:
+
+```php
+use Vilnius\PersonalDataInventory\Attribute\PersonalData;
+use Vilnius\PersonalDataInventory\Attribute\NotPersonalData;
+use Vilnius\PersonalDataInventory\Enum\Sensitivity;
+use Vilnius\PersonalDataInventory\Enum\DataCategory;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+class Citizen
+{
+    #[ORM\Column]
+    #[PersonalData(Sensitivity::Confidential, DataCategory::Identity)]
+    private string $fullname;
+
+    #[ORM\Column]
+    #[PersonalData(Sensitivity::Confidential, DataCategory::Contact)]
+    private string $email;
+
+    #[ORM\Column]
+    #[NotPersonalData('Sisteminis unikalus raktas, nesuderintas su fiziniu asmeniu')]
+    private string $systemKey;
+}
+```
+
+**Skenavimas Symfony aplinkoje:**
+Užregistruokite paketą failo `config/bundles.php` struktūroje:
+```php
+return [
+    // ...
+    Vilnius\PersonalDataInventory\Symfony\VilniusPersonalDataBundle::class => ['all' => true],
+];
+```
+Generuokite ataskaitas naudodami CLI komandą:
+```bash
+php bin/console personal-data:scan --format=md --output=var/personal-data-inventory.md
+```
+
+#### Taikymas — Laravel (Eloquent)
+
+Eloquent modeliai neturi kietai koduotų tipizuotų savybių klasėje (visos stulpelių reikšmės gyvena dinaminiame `$attributes` masyve). Todėl Laravel projektams anotuoti naudojami **klasės lygio atskiri, kartojami atributai**:
+
+```php
+use Vilnius\PersonalDataInventory\Attribute\PersonalDataField;
+use Vilnius\PersonalDataInventory\Attribute\NotPersonalDataField;
+use Vilnius\PersonalDataInventory\Enum\Sensitivity;
+use Vilnius\PersonalDataInventory\Enum\DataCategory;
+use Illuminate\Database\Eloquent\Model;
+
+#[PersonalDataField('email', Sensitivity::Confidential, DataCategory::Contact)]
+#[PersonalDataField('phone', Sensitivity::Confidential, DataCategory::Contact)]
+#[NotPersonalDataField('name', 'Parduotuvės viešas pavadinimas, ne asmens duomenys')]
+class Organization extends Model
+{
+    // Laukų sąrašas, nurodomas $fillable arba $casts pavidalu
+    protected $fillable = ['name', 'email', 'phone', 'address'];
+}
+```
+
+**Skenavimas Laravel aplinkoje:**
+Service provider yra užregistruojamas automatiškai. Jeigu norite praplėsti nustatymus arba pritaikyti savus spragų aptikimo šablonus:
+```bash
+php artisan vendor:publish --tag=personal-data-config
+```
+Generuokite ataskaitas naudodami CLI komandą:
+```bash
+php artisan personal-data:scan --format=md --output=docs/personal-data-inventory.md
+```
+
+---
+
+### C.2.5. Referencinės klasės (atsarginiu atveju / fall-back)
+
+Jeigu repozitorijus yra visiškai atskirtas ar dėl tam tikrų griežtų reikalavimų negali naudoti išorinio `vilnius/personal-data-inventory` paketo, rekomenduojama pasirašyti savo identiškos semantikos atributus lokaliai:
 
 **Atributas:**
 
@@ -125,40 +217,11 @@ enum DataCategory: string
 }
 ```
 
-**Taikymas — Laravel (Eloquent):**
-
-```php
-class User extends Model
-{
-    #[PersonalData(level: Sensitivity::Confidential, category: DataCategory::Identity)]
-    protected string $name;
-
-    #[PersonalData(level: Sensitivity::Confidential, category: DataCategory::Contact)]
-    protected string $email;
-}
-```
-
-**Taikymas — Symfony (Doctrine):**
-
-```php
-#[ORM\Entity]
-class Citizen
-{
-    #[ORM\Column(length: 11)]
-    #[PersonalData(level: Sensitivity::Special, category: DataCategory::Identity)]
-    private string $personalCode;
-
-    #[ORM\Column]
-    #[PersonalData(level: Sensitivity::Confidential, category: DataCategory::Contact)]
-    private string $phone;
-}
-```
-
 ---
 
-### C.2.5. `#[NotPersonalData]` — sąmoningos išimtys (PHP)
+### C.2.6. `#[NotPersonalData]` — sąmoningos išimtys (PHP rankinis fall-back)
 
-Kad spragų aptikimo (žr. [C.6](#c6-spragų-aptikimas)) klaidingi teigiami rezultatai konverguotų į nulį, laukui, kuris pagal pavadinimą atrodo kaip asmens duomenys, bet jais **nėra**, taikomas aiškus žymuo su priežastimi:
+Atitinkama lokali išimčių deklaracija, jei nenaudojamas paketas:
 
 ```php
 namespace App\Privacy\Attribute;
@@ -173,11 +236,6 @@ final class NotPersonalData
     ) {
     }
 }
-```
-
-```php
-#[NotPersonalData(reason: 'Sisteminis pavadinimas, ne fizinio asmens vardas')]
-private string $name;
 ```
 
 ---
