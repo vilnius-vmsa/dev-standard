@@ -71,7 +71,7 @@ Prieš projektavimą / naują funkcionalumą:
 | Nukrypstu nuo standarto | [2.5 Nukrypimai nuo standarto](02-paskirtis-ir-taikymo-sritis.md#25-nukrypimai-nuo-standarto) |
 | Pradedu naują projektą | [Naujo projekto kontrolinis sąrašas](#naujo-projekto-kontrolinis-sąrašas) (žemiau), [2.6 Brandos lygiai](02-paskirtis-ir-taikymo-sritis.md#26-standarto-įgyvendinimo-brandos-lygiai) |
 | Renkuosi technologiją | [3.10.3 Technologijų suderinimas](03-architektura.md#3103-technologijų-suderinimas-su-organizacijos-tech-stack), [A priedas — Technologijų registras](priedai/technologiju-registras.md) |
-| Tvarkau asmens duomenis | [6.3 Duomenų apsauga](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas), [3.4.5 BDAR](03-architektura.md#345-asmens-duomenų-apsauga-bdar-gdpr), [B priedas — BDAR šablonai](priedai/bdar-igyvendinimo-sabalonai.md) |
+| Tvarkau asmens duomenis | [6.3 Duomenų apsauga](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas), [3.4.5 BDAR](03-architektura.md#345-asmens-duomenų-apsauga-bdar-gdpr), [B priedas — BDAR šablonai](priedai/bdar-igyvendinimo-sabalonai.md), [C priedas — Asmens duomenų inventorizacija](priedai/asmens-duomenu-inventorizacija.md) |
 | Naudoju AI įrankius kodavimui | [4.8 DI priemonių naudojimas](04-kodo-kurimo-gaires.md#48-di-priemonių-naudojimas-ai-coding-assistants) |
 
 ## Reikalavimų lygiai
