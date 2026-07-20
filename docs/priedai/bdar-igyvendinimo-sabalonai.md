@@ -18,7 +18,7 @@ Klasifikacija yra pagrindas visoms kitoms priemonėms — prieigos kontrolei, lo
 | **Viešas** | Laisvai prieinami duomenys | Organizacijos pavadinimas, viešai skelbiami dokumentai | Standartinė prieigos kontrolė |
 | **Vidinis** | Organizacijos vidaus informacija | Darbuotojų el. pašto adresai, vidiniai identifikatoriai | Autentifikacija + RBAC |
 | **Konfidencialus** | Asmens duomenys, jautrūs verslo duomenys | Piliečių vardas/pavardė, asmens kodas, adresas | Šifravimas ramybės ir tranzito metu, audit trail, minimali prieiga |
-| **Ypatingas** | Ypatingų kategorijų duomenys (BDAR str. 9) | Sveikatos duomenys, biometriniai duomenys | Konfidencialaus + DPIA, pseudonimizacija, papildomas teisinis pagrindas |
+| **Riboto naudojimo** | Itin jautrūs duomenys, kuriems reikalingos papildomos apsaugos priemonės | Sveikatos duomenys, biometriniai duomenys, šifravimo raktai | Konfidencialaus lygio priemonės + papildomos kontrolės (DPIA, pseudonimizacija, griežtesnė prieigos kontrolė) |
 
 ### B.1.2. Klasifikacijos taikymo gairės
 

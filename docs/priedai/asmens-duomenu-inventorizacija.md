@@ -54,25 +54,29 @@ Lygiai atitinka 1:1 [B.1.1](bdar-igyvendinimo-sabalonai.md#b11-rekomenduojami-ja
 | `Sensitivity::Public` | Viešas |
 | `Sensitivity::Internal` | Vidinis |
 | `Sensitivity::Confidential` | Konfidencialus |
-| `Sensitivity::Special` | Ypatingas |
+| `Sensitivity::Restricted` | Riboto naudojimo |
 
 ### C.2.3. `DataCategory` — duomenų kategorijos
 
 Nedidelis fiksuotas rinkinys, kad ataskaitą būtų galima prasmingai grupuoti:
 
-`Identity`, `Contact`, `Financial`, `Health`, `Location`, `Online`, `Other`.
-
 | Kategorija | Paaiškinimas | Pavyzdžiai |
-|---|---|---|
-| `Identity` | Tapatybę identifikuojantys duomenys | vardas, pavardė, asmens kodas |
-| `Contact` | Kontaktiniai duomenys | el. paštas, telefonas, adresas |
-| `Financial` | Finansiniai duomenys | IBAN, sąskaitos, mokėjimai |
-| `Health` | Sveikatos duomenys (BDAR str. 9) | diagnozės, negalios žymos |
-| `Location` | Vietos / geografiniai duomenys | koordinatės, buvimo vieta |
-| `Online` | Internetiniai identifikatoriai | IP adresas, įrenginio ID, slapukų ID |
-| `Other` | Kiti asmens duomenys, netelpantys aukščiau | — |
-
-> **Pastaba:** kategorija `Health` beveik visada reiškia „Ypatingų kategorijų duomenis“ (žr. [B.5 DPIA](bdar-igyvendinimo-sabalonai.md#b5-dpia-duomenų-apsaugos-poveikio-vertinimas--kontrolinis-sąrašas)) ir paprastai žymima `Sensitivity::Special`.
+|------------|--------------|------------|
+| `Identity` | Tapatybę identifikuojantys duomenys | vardas, pavardė, asmens kodas, gimimo data, paso numeris |
+| `Contact` | Kontaktiniai duomenys | el. pašto adresas, telefono numeris, gyvenamosios vietos adresas, korespondencijos adresas |
+| `Demographic` | Demografiniai duomenys | amžius, lytis, pilietybė, šeiminė padėtis, kalba |
+| `Financial` | Finansiniai duomenys | IBAN, banko sąskaitos numeris, mokėjimų istorija, darbo užmokestis |
+| `Employment` | Darbo ir užimtumo duomenys | pareigos, darbovietė, darbo sutarties informacija, darbo stažas |
+| `Location` | Vietos nustatymo duomenys | GPS koordinatės, buvimo vieta, maršrutų istorija, parkavimo vieta |
+| `Online` | Internetiniai identifikatoriai ir veiklos duomenys | IP adresas, įrenginio ID, slapukų ID, prisijungimų istorija, naršymo duomenys |
+| `Health` | Sveikatos duomenys (BDAR 9 str.) | diagnozės, nedarbingumo pažymėjimai, negalios duomenys, medicininiai įrašai |
+| `Biometric` | Biometriniai duomenys | pirštų atspaudai, veido atvaizdo šablonas, rainelės nuskaitymo duomenys |
+| `Genetic` | Genetiniai duomenys | DNR tyrimų rezultatai, genetinių tyrimų išvados |
+| `Ethnicity` | Rasinė ir etninė kilmė | tautybė, etninė grupė, rasinė kilmė |
+| `Beliefs` | Politinės pažiūros, religiniai ar filosofiniai įsitikinimai, narystė profesinėse sąjungose | religinė priklausomybė, politinės pažiūros, narystė profesinėje sąjungoje |
+| `Sexuality` | Duomenys apie lytinį gyvenimą ir seksualinę orientaciją | seksualinė orientacija, partnerystės informacija, su lytiniu gyvenimu susiję duomenys |
+| `Criminal` | Duomenys apie teistumą ir nusikalstamas veikas | teistumo pažyma, administraciniai pažeidimai, ikiteisminio tyrimo informacija |
+| `Other` | Kiti asmens duomenys, netelpantys į aukščiau nurodytas kategorijas | pomėgiai, interesai, kliento numeris, vidinis naudotojo identifikatorius |
 
 ---
 
@@ -202,17 +206,25 @@ enum Sensitivity: string
     case Public = 'public';             // Viešas
     case Internal = 'internal';         // Vidinis
     case Confidential = 'confidential'; // Konfidencialus
-    case Special = 'special';           // Ypatingas
+    case Restricted = 'restricted';     // Riboto naudojimo
 }
 
 enum DataCategory: string
 {
     case Identity = 'identity';
     case Contact = 'contact';
+    case Demographic = 'demographic';
     case Financial = 'financial';
-    case Health = 'health';
+    case Employment = 'employment';
     case Location = 'location';
     case Online = 'online';
+    case Health = 'health';
+    case Biometric = 'biometric';
+    case Genetic = 'genetic';
+    case Ethnicity = 'ethnicity';
+    case Beliefs = 'beliefs';
+    case Sexuality = 'sexuality';
+    case Criminal = 'criminal';
     case Other = 'other';
 }
 ```
