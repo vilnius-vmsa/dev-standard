@@ -462,6 +462,102 @@ Visi API resursai, grąžinantys kolekcijas, turi palaikyti puslapiavimą:
 *   **Offset-based** (?page=2&pageSize=50) - priimtinas mažoms, stabilios tvarkos kolekcijoms
 *   Atsakyme pateikiamos nuorodos į kitą ir ankstesnį puslapį (next, prev pagal RFC 8288 Link antraštę arba atsakymo kūne)
 
+### 3.3.12. Sukūrimo, atnaujinimo, ištrynimo ir asinchroninių mutacijų atsakymų standartas
+
+PRIVALOMA:
+
+<!-- ARCH-API-P30 | ai-reviewable -->
+*   POST (sukūrimas) grąžina **201 Created** su pilna sukurto resurso reprezentacija atsakymo kūne (įskaitant sugeneruotą `id` ir kitus serverio priskirtus laukus) bei `Location` antraštę, nurodančią naujojo resurso URL
+<!-- ARCH-API-P31 | ai-reviewable -->
+*   PUT (pilnas pakeitimas) ir PATCH (dalinis pakeitimas) grąžina **200 OK** su pilna atnaujinto resurso reprezentacija atsakymo kūne
+<!-- ARCH-API-P32 | ai-reviewable -->
+*   Draudžiama grąžinti **204 No Content** sukūrimo (POST) ar atnaujinimo (PUT/PATCH) operacijoms – klientas privalo gauti atnaujintą resurso būseną be papildomų užklausų
+<!-- ARCH-API-P33 | ai-reviewable -->
+*   DELETE (ištrynimas) grąžina **204 No Content** be atsakymo kūno; jei ištrintą resursą reikia patvirtinti, leidžiama grąžinti **200 OK** su minimalia resurso reprezentacija (pvz., `id` ir `deletedAt`)
+<!-- ARCH-API-P34 | ai-reviewable -->
+*   DELETE operacija, skirta neegzistuojančiam resursui, grąžina **404 Not Found**
+<!-- ARCH-API-P35 | ai-reviewable -->
+*   Asinchroninė mutacija (POST/PUT/PATCH/DELETE, kurios vykdymas trunka ilgiau nei vienas HTTP užklausos ciklas) grąžina **202 Accepted** su užduoties objektu, turinčiu `id`, `status` ir `statusUrl` laukus, nurodančius užklausos sekimo URL
+<!-- ARCH-API-P36 | ai-reviewable -->
+*   Asinchroninės užduoties būsenos sekimo endpoint (`statusUrl`) grąžina **200 OK** su dabartine užduoties būsena; užbaigus – su galutine resurso reprezentacija arba klaidos aprašu
+
+REKOMENDUOJAMA:
+
+<!-- ARCH-API-R15 | ai-reviewable -->
+*   Asinchroninės mutacijos atsakyme įtraukti `Location` antraštę su užduoties sekimo URL (pvz., `Location: /api/v1/jobs/456`)
+
+**Pavyzdys (POST /orders → 201 Created):**
+
+```json
+{
+  "id": "123",
+  "status": "DRAFT",
+  "createdAt": "2025-04-01T14:30:00Z",
+  "updatedAt": "2025-04-01T14:30:00Z"
+}
+```
+
+**Pavyzdys (PATCH /orders/123 → 200 OK):**
+
+```json
+{
+  "id": "123",
+  "status": "SUBMITTED",
+  "createdAt": "2025-04-01T14:30:00Z",
+  "updatedAt": "2025-04-01T15:00:00Z"
+}
+```
+
+**Pavyzdys (DELETE /orders/123 → 204 No Content):**
+
+```
+(tuščias atsakymo kūnas)
+```
+
+**Pavyzdys (DELETE /orders/123 → 200 OK, jei reikalingas patvirtinimas):**
+
+```json
+{
+  "id": "123",
+  "deletedAt": "2025-04-01T15:30:00Z"
+}
+```
+
+**Pavyzdys (asinchroninė mutacija → 202 Accepted):**
+
+```json
+{
+  "id": "456",
+  "status": "PENDING",
+  "statusUrl": "/api/v1/jobs/456"
+}
+```
+
+**Pavyzdys (GET /api/v1/jobs/456 → 200 OK, užduotis vykdoma):**
+
+```json
+{
+  "id": "456",
+  "status": "IN_PROGRESS",
+  "statusUrl": "/api/v1/jobs/456"
+}
+```
+
+**Pavyzdys (GET /api/v1/jobs/456 → 200 OK, užduotis baigta):**
+
+```json
+{
+  "id": "456",
+  "status": "COMPLETED",
+  "result": {
+    "id": "123",
+    "status": "PROCESSED",
+    "createdAt": "2025-04-01T14:30:00Z",
+    "updatedAt": "2025-04-01T15:00:00Z"
+  }
+}
+```
+
 ## 3.4. Duomenys ir integracijos
 
 ### 3.4.1. Duomenų modeliavimas
