@@ -96,6 +96,16 @@ jobs:
       - name: Build PDF
         run: npm run build:pdf
 
+      - name: Build agent bundle
+        shell: bash
+        env:
+          TAG_NAME: ${{ inputs.tag_name || github.ref_name }}
+        run: |
+          set -euo pipefail
+          npm run rules:validate -- --strict
+          npm run rules:bundle -- --out=artifacts/bundle --version="$TAG_NAME"
+          (cd artifacts/bundle && zip -qr ../dev-standard-agent-bundle.zip .)
+
       - name: Create tag and release with generated changelog
         shell: bash
         env:
@@ -149,10 +159,22 @@ jobs:
             exit 1
           fi
 
+          printf '\n## Org custom instructions\n\n' >> release-notes.md
+          if [[ -n "$previous_tag" ]] \
+            && gh release download "$previous_tag" --pattern org-instructions.md --output previous-org-instructions.md 2>/dev/null \
+            && cmp -s previous-org-instructions.md artifacts/bundle/org-instructions.md; then
+            printf 'Unchanged since %s. Org admins: no action needed.\n' "$previous_tag" >> release-notes.md
+          else
+            printf '**Changed.** Org admins: paste the attached `org-instructions.md` into Organization settings → Copilot → Custom instructions.\n' >> release-notes.md
+          fi
+
           notes_flags=(--notes-file release-notes.md)
 
           gh release create "$TAG_NAME" \
             "artifacts/dev-standard.pdf#Programinės įrangos kūrimo standartas (${TAG_NAME})" \
+            "artifacts/dev-standard-agent-bundle.zip#Agent bundle (${TAG_NAME})" \
+            "artifacts/bundle/org-instructions.md#Org custom instructions" \
+            "artifacts/bundle/rules.json#Rules (JSON)" \
             --title "$TAG_NAME" \
             --generate-notes \
             --latest \

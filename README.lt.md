@@ -51,6 +51,22 @@ npm audit --audit-level=high
 Komanda grąžina klaidą, jei aptinkama aukšto (`high`) arba kritinio
 (`critical`) lygio pažeidžiamumų.
 
+## Reikalavimai DI agentams
+
+Kiekvienas `ai-reviewable` reikalavimas `docs/` kataloge turi žymą, pvz.,
+`<!-- CODE-SEC-P01 | ai-reviewable | stacks=all | enforced-by=ai -->`, ir angliškai suformuluotą sakinį faile
+`standard/rules.en.yaml`. Privalomas yra lietuviškas tekstas; angliškas tekstas skirtas DI agentams ir Copilot kodo peržiūrai.
+
+Kai pridedate ar keičiate `ai-reviewable` reikalavimą:
+
+1. Pridėkite arba atnaujinkite žymą (`stacks` iš `standard/stacks.yaml`, `enforced-by` – `ai` arba `tool:<pavadinimas>`).
+2. Įrašykite anglišką tekstą į `standard/rules.en.yaml` ir paleiskite `npm run rules:accept -- <REIKALAVIMO-ID>`.
+   Kol angliško teksto nėra arba jis pasenęs, CI blokuoja pakeitimą.
+3. Turi praeiti `npm run rules:validate -- --strict`.
+
+Prie kiekvieno leidimo pridedamas `dev-standard-agent-bundle.zip` (Copilot instrukcijų failai, `dev-standard` skill,
+`AGENTS.md` fragmentas, `rules.json`) ir `org-instructions.md`. Angliškas reikalavimų sąrašas svetainėje – `/rules`.
+
 ## CI/CD ir versijos išleidimas
 
 Pull request į `main` šaką automatiškai patikrina priklausomybių saugumą
