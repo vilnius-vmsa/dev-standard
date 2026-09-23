@@ -1383,187 +1383,187 @@ DOC-UPD-R03:
   source_hash: c29b900bd205
   status: machine-draft
 OPS-CD-P01:
-  text: ""
+  text: Deployments run through an automated CD process that makes releases to the target environment traceable and repeatable.
   source_hash: 0852317b16c6
   status: machine-draft
 OPS-CD-P03:
-  text: ""
+  text: A rollback mechanism is defined, documented and tested.
   source_hash: 1c56e073cb72
   status: machine-draft
 OPS-CD-P04:
-  text: ""
+  text: Database migrations are part of the release process and run in a controlled way.
   source_hash: 0a56407d1028
   status: machine-draft
 OPS-CD-P05:
-  text: ""
+  text: The deployment strategy is chosen explicitly and matches the system's risk and criticality.
   source_hash: fc1b1ff53d4c
   status: machine-draft
 OPS-CD-R01:
-  text: ""
+  text: Critical or high-risk releases use advanced strategies such as canary or blue-green.
   source_hash: c57f46a1b74a
   status: machine-draft
 OPS-CD-R02:
-  text: ""
+  text: Where release windows are used, they are aligned with operational and business needs.
   source_hash: 3b5daaf169b1
   status: machine-draft
 OPS-CI-P01:
-  text: ""
+  text: The CI pipeline runs for every PR or MR and for main branches.
   source_hash: f52329f00fbc
   status: machine-draft
 OPS-CI-P02:
-  text: ""
+  text: Builds are reproducible, using pinned base versions, lock files and controlled caching.
   source_hash: 8cc50892cd61
   status: machine-draft
 OPS-CI-P03:
-  text: ""
+  text: "Where applicable, CI runs at least: the build, formatting and linting checks, unit tests, API or contract validation, and security and dependency checks."
   source_hash: 5105f66dd7f7
   status: machine-draft
 OPS-CI-P05:
-  text: ""
+  text: Failed mandatory quality gates block merging.
   source_hash: e51688346d00
   status: machine-draft
 OPS-CI-R01:
-  text: ""
+  text: The pipeline is optimised to shorten feedback without reducing the scope of quality control.
   source_hash: 7068b403dab0
   status: machine-draft
 OPS-CI-R02:
-  text: ""
+  text: Critical projects clearly separate fast PR checks from full pre-release checks.
   source_hash: 1c3da58fe87e
   status: machine-draft
 OPS-DEVSEC-P01:
-  text: ""
+  text: CI/CD runs security checks appropriate to the system's risk level.
   source_hash: bcc2673184c1
   status: machine-draft
 OPS-DEVSEC-P03:
-  text: ""
+  text: Secret detection is enabled in repositories and in CI.
   source_hash: 1bb2a69fd279
   status: machine-draft
 OPS-DEVSEC-P04:
-  text: ""
+  text: Security findings classed as critical by organisational policy block the merge or release until the risk is resolved or explicitly accepted.
   source_hash: b9c066db5abf
   status: machine-draft
 OPS-DEVSEC-R01:
-  text: ""
+  text: An SBOM is generated automatically at release and stored with the release artefacts.
   source_hash: d69ce45bf9ff
   status: machine-draft
 OPS-ENV-P01:
-  text: ""
+  text: All deployments to environments go only through CI/CD; manual changes in environments are forbidden except for clearly documented incident handling.
   source_hash: 3d940a48cd81
   status: machine-draft
 OPS-ENV-P02:
-  text: ""
+  text: CI/CD and GitOps keep environments isolated and compliant with section 3.5.3.
   source_hash: eff91a64759f
   status: machine-draft
 OPS-ENV-P03:
-  text: ""
+  text: The deployment pipeline does not use the same configuration or credentials for different environments unless this is explicitly described and approved.
   source_hash: e0822c487a81
   status: machine-draft
 OPS-ENV-P05:
-  text: ""
+  text: Secret values come from a secure secrets store; they are never kept in the repository, build logs or pipeline artefacts.
   source_hash: 6db3f2e025e8
   status: machine-draft
 OPS-ENV-R02:
-  text: ""
+  text: The project's deployment documentation describes how environments, branches and deployment flows relate.
   source_hash: afef1865f877
   status: machine-draft
 OPS-FIN-P03:
-  text: ""
+  text: System and infrastructure solutions are designed for support and operating efficiency, not only for functionality.
   source_hash: 4d24168e43e1
   status: machine-draft
 OPS-GITOPS-P01:
-  text: ""
+  text: The GitOps repository structure clearly separates application templates, environment parameters and, where applicable, cluster declarations.
   source_hash: 94daa58108fc
   status: machine-draft
 OPS-GITOPS-P02:
-  text: ""
+  text: The repository structure is consistent, so it is clear where shared templates and environment-specific parameters live.
   source_hash: abb57e113e2f
   status: machine-draft
 OPS-GITOPS-P03:
-  text: ""
+  text: When Helm or an equivalent is used, how charts are versioned and validated is clearly defined.
   source_hash: a01eb5f5c1ba
   status: machine-draft
 OPS-IAC-P02:
-  text: ""
+  text: IaC changes are reviewed through a PR or MR just like application code.
   source_hash: 05a8c9b0b2ed
   status: machine-draft
 OPS-IAC-P03:
-  text: ""
+  text: Infrastructure state is not routinely managed through unversioned manual changes.
   source_hash: 653500a96c1c
   status: machine-draft
 OPS-K8S-P01:
-  text: ""
+  text: Deployment manifests include resource limits and requests, health probes and secure runtime settings.
   source_hash: f0416028ce14
   status: machine-draft
 OPS-K8S-P02:
-  text: ""
+  text: Deployment configuration implements the section 3.6 requirements for replicas, health semantics and resilience.
   source_hash: d9b82307d175
   status: machine-draft
 OPS-K8S-P03:
-  text: ""
+  text: Ingress is secured with TLS and an ingress configuration that meets organisational requirements.
   source_hash: 57b96f2a5c18
   status: machine-draft
 OPS-K8S-P04:
-  text: ""
+  text: Container and Kubernetes configuration does not contradict security, reliability or operational requirements.
   source_hash: b38e44000874
   status: machine-draft
 OPS-K8S-R01:
-  text: ""
+  text: Critical systems use extra reliability measures such as a pod disruption budget or horizontal scaling when the non-functional requirements call for it.
   source_hash: 79660e428e65
   status: machine-draft
 OPS-MON-P01:
-  text: ""
+  text: Deployment and CI/CD configuration make sure the system meets chapter 9 requirements for logs, metrics, alerts and operational readiness.
   source_hash: 3370b6594aac
   status: machine-draft
 OPS-MON-P02:
-  text: ""
+  text: Logs, metrics and, where applicable, traces are exported to the central monitoring platform.
   source_hash: 7e4ef3a9618d
   status: machine-draft
 OPS-MON-P03:
-  text: ""
+  text: The deployment process makes clear when and how the observability configuration is checked.
   source_hash: d655851adbf3
   status: machine-draft
 OPS-MON-P04:
-  text: ""
+  text: Rollback or incident steps in the release process are aligned with operational procedures.
   source_hash: 5fbb0c93c35d
   status: machine-draft
 OPS-MON-R01:
-  text: ""
+  text: Minimum observability readiness (health, log collection and key metrics) is checked before release.
   source_hash: f9de8a2aedae
   status: machine-draft
 OPS-REL-P01:
-  text: ""
+  text: Every production release has a clear release description.
   source_hash: 5a9cf686b827
   status: machine-draft
 OPS-REL-P02:
-  text: ""
+  text: Before a release it is clear which changes are included, which risks are known, which migrations are needed and how rollback works.
   source_hash: f34110b92d8e
   status: machine-draft
 OPS-REL-P03:
-  text: ""
+  text: The release approval process matches organisational responsibilities and audit needs.
   source_hash: 2adcca584e52
   status: machine-draft
 OPS-REL-P04:
-  text: ""
+  text: Minimum release acceptance criteria are defined in advance.
   source_hash: abe1220c8099
   status: machine-draft
 OPS-REL-R01:
-  text: ""
+  text: Production releases use a standard release notes template.
   source_hash: 2b06721812fa
   status: machine-draft
 OPS-REL-R02:
-  text: ""
+  text: Release reviews cover technical, operational and business changes in one place.
   source_hash: 87ae31a1b852
   status: machine-draft
 OPS-VER-P03:
-  text: ""
+  text: Production never relies only on a latest-style tag.
   source_hash: b6a26d63ac14
   status: machine-draft
 OPS-VER-R01:
-  text: ""
+  text: Artefacts carry both a semantic version and an immutable commit or build identifier.
   source_hash: 2d2e2196ee6d
   status: machine-draft
 OPS-VER-R02:
-  text: ""
+  text: Release artefact tagging is aligned with the release notes and deployment documentation.
   source_hash: 782441c4bd7a
   status: machine-draft
 ORG-BACKLOG-P01:
@@ -1691,11 +1691,11 @@ ORG-ROLE-R05:
   source_hash: ae62adbef6d5
   status: machine-draft
 SEC-GDPR-P01:
-  text: ""
+  text: "Personal data fields in the persistence layer (ORM models/entities) are marked with the language's native annotation as described in appendix C, stating sensitivity level and data category (for example PHP: #[PersonalData]); the system can generate its personal data inventory automatically from the code."
   source_hash: b630c1f8ed6a
   status: machine-draft
 SEC-GDPR-R01:
-  text: ""
+  text: Gap detection for personal data annotations (unannotated but suspicious fields) runs in CI as a non-blocking warning (see appendix C.6).
   source_hash: 76dbd2948461
   status: machine-draft
 STD-APPROVE-P01:
@@ -2147,122 +2147,122 @@ VENDOR-TECH-R01:
   source_hash: ff9bc8fa5d39
   status: machine-draft
 VER-ALLOW-P01:
-  text: ""
+  text: Only actively maintained dependencies with a clear licence and an understandable support model are allowed.
   source_hash: cfbe187644f3
   status: machine-draft
 VER-ALLOW-P02:
-  text: ""
+  text: End-of-life libraries, components with unclear licences, and untrusted or unaudited sources are forbidden.
   source_hash: a779d8863e5f
   status: machine-draft
 VER-ALLOW-P03:
-  text: ""
+  text: Dependencies comply with the organisation's licence policy.
   source_hash: ba88fb14f313
   status: machine-draft
 VER-ALLOW-P04:
-  text: ""
+  text: Licence violations block the release until the risk is resolved or explicitly accepted.
   source_hash: 2a4a22deeaa0
   status: machine-draft
 VER-ALLOW-R01:
-  text: ""
+  text: Dependencies are judged not only on functionality but also on long-term maintainability, community activity and security history.
   source_hash: 40cb90b8dc98
   status: machine-draft
 VER-API-P01:
-  text: ""
+  text: All public APIs are versioned.
   source_hash: ffde0205290a
   status: machine-draft
 VER-API-P02:
-  text: ""
+  text: Breaking changes (for example removing fields, changing semantics, or changing authentication or authorization) are made only in a new major API version.
   source_hash: c75b4b287919
   status: machine-draft
 VER-API-P03:
-  text: ""
+  text: API contracts are stored and versioned together with the code.
   source_hash: a24faf3d206d
   status: machine-draft
 VER-API-P04:
-  text: ""
+  text: A deprecation policy is defined, covering how old versions are marked, how long they are supported and how consumers are notified in advance.
   source_hash: 4807c167e0b1
   status: machine-draft
 VER-API-R01:
-  text: ""
+  text: The API version is given in the URL path (/v1/...) or the Accept header; one approach is chosen and used consistently across the system.
   source_hash: "081935614987"
   status: machine-draft
 VER-API-R02:
-  text: ""
+  text: API sunset dates are announced with the Sunset and Deprecation HTTP headers.
   source_hash: 51228a614c32
   status: machine-draft
 VER-API-R03:
-  text: ""
+  text: Systems with external consumers support at least two API versions at the same time when the product lifecycle justifies it.
   source_hash: 398eeb8cf364
   status: machine-draft
 VER-PKG-P02:
-  text: ""
+  text: Lock files are used and committed to the repository.
   source_hash: ccde041aa02f
   status: machine-draft
 VER-PKG-P03:
-  text: ""
+  text: Production uses pinned dependency versions, not unbounded references such as latest.
   source_hash: 37f257e81e56
   status: machine-draft
 VER-PKG-P04:
-  text: ""
+  text: Only approved official or organisation registries are used.
   source_hash: 508409a582ba
   status: machine-draft
 VER-PKG-P05:
-  text: ""
+  text: Dependabot or an equivalent automated update tool is configured for every dependency ecosystem the project uses, including Composer, npm, Yarn, pnpm, Maven, Gradle, pip, Docker and GitHub Actions.
   source_hash: 2521fe34ff13
   status: machine-draft
 VER-PKG-P06:
-  text: ""
+  text: The Dependabot configuration covers application libraries, container images, CI/CD workflows and other project dependencies where they are used.
   source_hash: a751f5886b44
   status: machine-draft
 VER-PKG-P08:
-  text: ""
+  text: The dependencies branch is kept in sync with main, so dependency updates are evaluated against the current code base and configuration.
   source_hash: ff796426df85
   status: machine-draft
 VER-PKG-P12:
-  text: ""
+  text: Pull requests from Dependabot or an equivalent tool state the dependency being updated, its current and proposed version, its ecosystem (for example npm, Composer, Docker, GitHub Actions) and the update type (patch, minor or major).
   source_hash: 30be18f4c497
   status: machine-draft
 VER-PKG-P14:
-  text: ""
+  text: Security updates are prioritised and handled faster than regular functional or technical version updates.
   source_hash: ee516a19384a
   status: machine-draft
 VER-PKG-R01:
-  text: ""
+  text: Dependency updates are planned regularly, not only in response to incidents or vulnerabilities.
   source_hash: e4c1278fb890
   status: machine-draft
 VER-PKG-R02:
-  text: ""
+  text: Minor and major updates are done in a planned way with testing, not ad hoc.
   source_hash: 14d90be03ce8
   status: machine-draft
 VER-PKG-R03:
-  text: ""
+  text: The dependencies branch is synced with main automatically after every change to main, so developers never have to move main changes into it by hand.
   source_hash: e72f9e73fc91
   status: machine-draft
 VER-SEC-R01:
-  text: ""
+  text: An SBOM is generated for every release and stored with the release artefacts.
   source_hash: d0cc23083532
   status: machine-draft
 VER-SEC-R02:
-  text: ""
+  text: The SBOM is used for vulnerability management, licence audits and supply chain risk assessment.
   source_hash: c0dda96f8001
   status: machine-draft
 VER-SEM-P01:
-  text: ""
+  text: Semantic versioning MAJOR.MINOR.PATCH applies to all systems, libraries, APIs and deployment artefacts.
   source_hash: 3695bacd0a40
   status: machine-draft
 VER-SEM-P03:
-  text: ""
+  text: The MINOR version increases when backward-compatible functionality is added.
   source_hash: f00836338138
   status: machine-draft
 VER-SEM-P04:
-  text: ""
+  text: The PATCH version increases for bug fixes without functional changes.
   source_hash: 4cc9534e6840
   status: machine-draft
 VER-SEM-P05:
-  text: ""
+  text: Pre-release versions such as alpha, beta or rc are allowed only in non-production environments.
   source_hash: 493b3a7e4c5f
   status: machine-draft
 VER-SEM-P06:
-  text: ""
+  text: The version source is managed in the repository using tags or releases, not by hand on a server or only inside CI.
   source_hash: 98f940d43efa
   status: machine-draft
