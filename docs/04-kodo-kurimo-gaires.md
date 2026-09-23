@@ -18,7 +18,7 @@ PRIVALOMA:
 *   Kintamųjų, metodų, klasių, modulių ir paketų pavadinimai turi aiškiai atspindėti paskirtį ir kontekstą.
 <!-- CODE-GEN-P03 | human-reviewable -->
 *   Vengiamos santrumpos be aiškaus konteksto, išskyrus visuotinai priimtas santrumpas, tokias kaip id, url, dto.
-<!-- CODE-GEN-P04 | ai-reviewable -->
+<!-- CODE-GEN-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Metodai ir funkcijos turi turėti vieną aiškią atsakomybę; jei metodą sunku apibūdinti trumpu pavadinimu, tai signalas, kad jis daro per daug.
 
 REKOMENDUOJAMA:
@@ -32,36 +32,36 @@ Komentarai kode yra išimtis, ne norma. Gerai parašytas kodas turėtų būti ki
 
 PRIVALOMA:
 
-<!-- CODE-GEN-P05 | ai-reviewable -->
+<!-- CODE-GEN-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Komentarai paliekami tik tada, kai jie paaiškina neakivaizdžią verslo taisyklę, išorinės sistemos nestandartinį elgesį, sąmoningą kompromisą ar sudėtingo algoritmo sprendimo motyvaciją.
-<!-- CODE-GEN-P06 | ai-reviewable -->
+<!-- CODE-GEN-P06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Komentarai, susiję su technine skola ar laikinais sprendimais, turi turėti nuorodą į uždavinį.
-<!-- CODE-GEN-P07 | ai-reviewable -->
+<!-- CODE-GEN-P07 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Pasenę ar realaus kodo neatitinkantys komentarai turi būti atnaujinami arba šalinami nedelsiant.
-<!-- CODE-GEN-P08 | ai-reviewable -->
+<!-- CODE-GEN-P08 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Draudžiama laikyti užkomentuotą kodą.
-<!-- CODE-GEN-P09 | ai-reviewable -->
+<!-- CODE-GEN-P09 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Draudžiama palikti komentarus, kurie dubliuoja akivaizdžią kodo logiką.
 
 REKOMENDUOJAMA:
 
-<!-- CODE-GEN-R02 | ai-reviewable -->
+<!-- CODE-GEN-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei komentaras aiškina, ką daro kodas, tai laikoma signalu refaktorizuoti kodą, o ne plėsti komentarus.
 
 ### 4.1.3. Dead code draudimas
 
 PRIVALOMA:
 
-<!-- CODE-GEN-P10 | ai-reviewable -->
+<!-- CODE-GEN-P10 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Repozitorijoje negali būti nepasiekiamo kodo, nenaudojamų importų, kintamųjų, metodų ar klasių.
-<!-- CODE-GEN-P11 | ai-reviewable -->
+<!-- CODE-GEN-P11 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Laikinas debug kodas negali likti produkciniame ar į pagrindines šakas jungiamame kode.
-<!-- CODE-GEN-P12 | ai-reviewable -->
+<!-- CODE-GEN-P12 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Dead code turi būti šalinamas nedelsiant.
 
 REKOMENDUOJAMA:
 
-<!-- CODE-GEN-R03 | ai-reviewable -->
+<!-- CODE-GEN-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Linter ir IDE inspekcijos naudojamos automatiškai aptikti dead code, o CI proceso metu tokie pažeidimai blokuoja merge’inimą.
 
 ### 4.1.4. Magiškų reikšmių draudimas
@@ -70,36 +70,36 @@ PRIVALOMA:
 
 <!-- CODE-GEN-P13 | human-reviewable -->
 *   Skaičiai, eilutės ir kitos reikšmės, turinčios verslo prasmę arba naudojamos daugiau nei vienoje vietoje, turi būti išskiriamos į pavadintas konstantas arba enum tipus.
-<!-- CODE-GEN-P14 | ai-reviewable -->
+<!-- CODE-GEN-P14 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Draudžiamos magiškos reikšmės be konteksto.
-<!-- CODE-GEN-P15 | ai-reviewable -->
+<!-- CODE-GEN-P15 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Konstantos turi būti grupuojamos pagal domeną ar funkcionalumą, o ne išbarstomos po visą kodą.
 
 ### 4.1.5. Konfigūracija ≠ kodas
 
 PRIVALOMA:
 
-<!-- CODE-GEN-P16 | ai-reviewable -->
+<!-- CODE-GEN-P16 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Aplinkos specifinės reikšmės, tokios kaip URL, limitai, feature flag’ai ar laiko intervalai, negali būti hardcoded programiniame kode.
-<!-- CODE-GEN-P17 | ai-reviewable -->
+<!-- CODE-GEN-P17 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Tokios reikšmės valdomos per aplinkos kintamuosius arba konfigūracijos paslaugas.
 
 REKOMENDUOJAMA:
 
-<!-- CODE-GEN-R04 | ai-reviewable -->
+<!-- CODE-GEN-R04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Konfigūracijos reikšmes grupuoti ir dokumentuoti taip, kad būtų aišku, kurios jų yra bendros, o kurios priklauso nuo aplinkos.
-<!-- CODE-GEN-R05 | ai-reviewable -->
+<!-- CODE-GEN-R05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Taikoma kartu su [#3.5](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos) skyriaus konfigūracijos, slaptųjų raktų ir aplinkų valdymo reikalavimais.
 
 ### 4.1.6. Klaidų valdymas
 
 PRIVALOMA:
 
-<!-- CODE-GEN-P18 | ai-reviewable -->
+<!-- CODE-GEN-P18 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Klaidos turi būti valdomos eksplicitiškai; draudžiama tyliai ignoruoti išimtis.
 <!-- CODE-GEN-P19 | human-reviewable -->
 *   Žemesnio lygio išimtys turi būti apvyniojamos į domeno lygmens išimtis, pridedant kontekstą, kai tai pagrįsta.
-<!-- CODE-GEN-P20 | ai-reviewable -->
+<!-- CODE-GEN-P20 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Klaidų pranešimai vartotojui turi būti informatyvūs, bet neatskleisti vidinės sistemos detalių.
 <!-- CODE-GEN-P21 | human-reviewable -->
 *   Techninės klaidų detalės pateikiamos tik loguose.
@@ -113,18 +113,18 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- CODE-GEN-P22 | ai-reviewable -->
+<!-- CODE-GEN-P22 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Asinchroninis programavimas turi būti naudojamas nuosekliai; draudžiami blokuojantys kvietimai asinchroniniame kontekste.
-<!-- CODE-GEN-P23 | ai-reviewable -->
+<!-- CODE-GEN-P23 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Bendrai naudojami ištekliai turi būti apsaugoti tinkamais sinchronizacijos mechanizmais.
-<!-- CODE-GEN-P24 | ai-reviewable -->
+<!-- CODE-GEN-P24 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Atšaukimo mechanizmai turi būti perduodami per visą asinchroninių kvietimų grandinę, kad operacijos galėtų būti nutrauktos korektiškai.
 
 REKOMENDUOJAMA:
 
 <!-- CODE-GEN-R07 | human-reviewable -->
 *   Bendros kintamos būsenos naudojimą minimizuoti.
-<!-- CODE-GEN-R08 | ai-reviewable -->
+<!-- CODE-GEN-R08 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Asinchroninį kodą projektuoti taip, kad jis būtų lengvai testuojamas ir nuspėjamas.
 
 ## 4.2. Kodo struktūra ir konvencijos
@@ -146,7 +146,7 @@ PRIVALOMA:
 
 REKOMENDUOJAMA:
 
-<!-- CODE-CONV-R01 | ai-reviewable -->
+<!-- CODE-CONV-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Projekto struktūrą išlaikyti kuo stabilesnę per visą projekto gyvavimo ciklą.
 <!-- CODE-CONV-R02 | human-reviewable -->
 *   Jei projekte taikoma kelių sluoksnių ar modulių architektūra, struktūrą rekomenduojama aiškiai atskirti pagal atsakomybes, o ne pagal techninius atsitiktinumus.
@@ -155,30 +155,30 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- CODE-CONV-P04 | ai-reviewable -->
+<!-- CODE-CONV-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Pavadinimų konvencijos turi būti taikomos nuosekliai visame projekte.
-<!-- CODE-CONV-P05 | ai-reviewable -->
+<!-- CODE-CONV-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Klasės, tipai ir komponentai – PascalCase
-<!-- CODE-CONV-P06 | ai-reviewable -->
+<!-- CODE-CONV-P06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Metodai, funkcijos ir kintamieji – camelCase
 <!-- CODE-CONV-P07 | human-reviewable -->
 *   Konstantos ir enum reikšmės – UPPER\_SNAKE\_CASE
 <!-- CODE-CONV-P08 | human-reviewable -->
 *   Duomenų bazės lentelės ir stulpeliai – snake\_case
-<!-- CODE-CONV-P09 | ai-reviewable -->
+<!-- CODE-CONV-P09 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   URL segmentai – kebab-case
 <!-- CODE-CONV-P10 | human-reviewable -->
 *   Failai – pagal kalbos ar technologijos plačiausiai priimtą praktiką
-<!-- CODE-CONV-P11 | ai-reviewable -->
+<!-- CODE-CONV-P11 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kalboms ar technologijoms, neaptartoms šiame dokumente, taikoma oficiali arba plačiausiai priimta bendruomenės konvencija.
-<!-- CODE-CONV-P12 | ai-reviewable -->
+<!-- CODE-CONV-P12 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Nukrypimai turi būti aiškiai apibrėžti projekto README arba kituose projekto lygmens susitarimuose.
 
 REKOMENDUOJAMA:
 
-<!-- CODE-CONV-R03 | ai-reviewable -->
+<!-- CODE-CONV-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei technologijų rinkinyje naudojamos skirtingos kalbos, konvencijas rekomenduojama suderinti taip, kad jos būtų kuo lengviau suprantamos visos komandos mastu.
-<!-- CODE-CONV-R04 | ai-reviewable -->
+<!-- CODE-CONV-R04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   URL, DB ir failų pavadinimų konvencijas derinti su atitinkamais architektūros ir API reikalavimais.
 
 > Susiję skyriai: [3.3.3 Resursų modeliavimas ir URL dizainas](03-architektura.md#333-resursų-modeliavimas-ir-url-dizainas)
@@ -187,24 +187,24 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- CODE-CONV-P13 | ai-reviewable -->
+<!-- CODE-CONV-P13 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kiekvienas projektas turi naudoti organizacijos pateiktą arba organizacijos lygiu patvirtintą formatavimo ir linting taisyklių rinkinį.
 <!-- CODE-CONV-P14 | process-level -->
 *   Bazinių taisyklių rinkinys neturi būti savavališkai keičiamas projekto ar komandos lygiu be suderinto peržiūros proceso.
-<!-- CODE-CONV-P15 | ai-reviewable -->
+<!-- CODE-CONV-P15 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Konkretūs įrankiai ir jų versijos turi būti aiškiai nurodyti organizacijos technologijų registre arba projekto techniniame apraše.
-<!-- CODE-CONV-P16 | ai-reviewable -->
+<!-- CODE-CONV-P16 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Formatavimas ir linting turi būti vykdomi tiek lokaliai prieš commit, tiek CI/CD procese.
-<!-- CODE-CONV-P17 | ai-reviewable -->
+<!-- CODE-CONV-P17 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Nepraėję automatiniai formatavimo ar linting patikrinimai turi blokuoti commit arba merge, priklausomai nuo taikomo proceso.
-<!-- CODE-CONV-P18 | ai-reviewable -->
+<!-- CODE-CONV-P18 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Taisyklių išimtys konkrečiai eilutei ar blokui leidžiamos tik su aiškiu paaiškinimu kode.
 
 REKOMENDUOJAMA:
 
-<!-- CODE-CONV-R05 | ai-reviewable -->
+<!-- CODE-CONV-R05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Naudoti pre-commit hooks kaip pirmąją gynybos liniją prieš nekokybišką kodą patenkant į repozitoriją.
-<!-- CODE-CONV-R06 | ai-reviewable -->
+<!-- CODE-CONV-R06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Projekto specifinius papildymus prie bazinio taisyklių rinkinio taikyti tik tais atvejais, kai jie neprieštarauja bendroms organizacijos taisyklėms.
 <!-- CODE-CONV-R07 | process-level -->
 *   Globalus taisyklės išjungimas turėtų būti leidžiamas tik per formalų taisyklių rinkinio peržiūros procesą.
@@ -217,7 +217,7 @@ PRIVALOMA:
 
 <!-- CODE-CONV-P19 | process-level -->
 *   Labai dideli failai, moduliai ar metodai turi būti laikomi signalu peržiūrėti atsakomybių paskirstymą.
-<!-- CODE-CONV-P20 | ai-reviewable -->
+<!-- CODE-CONV-P20 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Sprendimas refaktorizuoti turi būti grindžiamas ne vien eilučių skaičiumi, bet pirmiausia Single Responsibility principu ir kodo suprantamumu.
 
 REKOMENDUOJAMA:
@@ -239,22 +239,22 @@ Tikslas – užtikrinti atsekamą, saugų ir perimamą programinio kodo, konfig�
 
 PRIVALOMA:
 
-<!-- CODE-VCS-P01 | ai-reviewable -->
+<!-- CODE-VCS-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Visas programinis kodas, infrastruktūros kodas, konfigūracijos šablonai ir automatizavimo skriptai turi būti saugomi Git versijų valdymo sistemoje.
-<!-- CODE-VCS-P02 | ai-reviewable -->
+<!-- CODE-VCS-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Repozitorijos turi būti laikomos savivaldybės arba jos kontroliuojamoje platformoje; draudžiama naudoti tiekėjo privačią repozitoriją kaip vienintelį kodo šaltinį.
-<!-- CODE-VCS-P03 | ai-reviewable -->
+<!-- CODE-VCS-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Išoriniai tiekėjai turi dirbti savivaldybės platformos repozitorijose arba naudoti automatizuotą mirror’inimą su atsekama sinchronizacija.
-<!-- CODE-VCS-P04 | ai-reviewable -->
+<!-- CODE-VCS-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Prieigos prie repozitorijų turi būti suteikiamos ir atimamos pagal atsakomybes ir sutarties galiojimą.
-<!-- CODE-VCS-P05 | ai-reviewable -->
+<!-- CODE-VCS-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Tiesioginiai pakeitimai serveriuose, failų sistemose ar per administravimo sąsajas be repozitorijos yra draudžiami.
 
 REKOMENDUOJAMA:
 
-<!-- CODE-VCS-R01 | ai-reviewable -->
+<!-- CODE-VCS-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Repozitorijų struktūrą, pavadinimus ir atsakomybes išlaikyti nuoseklias visos organizacijos mastu.
-<!-- CODE-VCS-R02 | ai-reviewable -->
+<!-- CODE-VCS-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Repozitorijų valdymo modelį dokumentuoti taip, kad būtų aišku, kur laikomas programinis kodas, kur infrastruktūros kodas ir kur bendros bibliotekos.
 
 > Susiję skyriai: [12 Tiekėjų ir pavaldžių įstaigų reikalavimai](12-tiekeju-reikalavimai.md) · [8 DevOps ir CI/CD reikalavimai](08-devops-ci-cd.md)
@@ -263,9 +263,9 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- CODE-VCS-P06 | ai-reviewable -->
+<!-- CODE-VCS-P06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Projektuose turi būti naudojama aiški, dokumentuota ir visai komandai vienodai taikoma šakų strategija.
-<!-- CODE-VCS-P07 | ai-reviewable -->
+<!-- CODE-VCS-P07 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Šakų pavadinimai turi atitikti sutartą formatą:
 
 `<type>/ticket-<ticket id>-<short description>`
@@ -288,13 +288,13 @@ REKOMENDUOJAMA:
     *   **GitHub Flow** (main + feature/\*) – tinka mažesnėms komandoms ir projektams su nuolatiniu diegimu (continuous deployment). Pakeitimai iš feature šakų jungiami tiesiai į main.
     *   **GitFlow** (main + dev + staging + feature/\* + release/\*) – tinka didesnėms komandoms, projektams su keliais lygiagrečiais leidimais ar reguliuojamais priėmimo etapais (UAT).
     *   Kiti modeliai (trunk-based development, release branching) leidžiami, jei dokumentuoti ir suderinti komandoje.
-<!-- CODE-VCS-R04 | ai-reviewable -->
+<!-- CODE-VCS-R04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei naudojamas GitFlow modelis su staging ir dev šakomis, rekomenduojamas nuoseklus srautas:
     *   feature/\* → dev → staging → main
     *   hotfix/\* → main ir atgal į dev arba staging, jei taikoma
-<!-- CODE-VCS-R05a | ai-reviewable -->
+<!-- CODE-VCS-R05a | ai-reviewable | stacks=all | enforced-by=ai -->
 *   release/\* šakos naudojamos leidimo paruošimui, jei projektas tokį etapą taiko.
-<!-- CODE-VCS-R06a | ai-reviewable -->
+<!-- CODE-VCS-R06a | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Pasenusias neaktyvias šakas periodiškai archyvuoti arba šalinti.
 
 > Susiję skyriai: [8.3 CD (Continuous Delivery/Deployment)](08-devops-ci-cd.md#83-cd-continuous-delivery-deployment) · [8.9 Leidimų (release) valdymas](08-devops-ci-cd.md#89-leidimų-release-valdymas)
@@ -305,18 +305,18 @@ PRIVALOMA:
 
 <!-- CODE-VCS-P08 | human-reviewable -->
 *   Pagrindinėms šakoms (bent main; taip pat staging, dev ar kitoms ilgalaikėms šakoms, jei jos naudojamos pagal pasirinktą strategiją) turi būti įjungta apsauga nuo tiesioginių push’ų.
-<!-- CODE-VCS-P09 | ai-reviewable -->
+<!-- CODE-VCS-P09 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Šių šakų pakeitimai gali būti atliekami tik per PR arba MR procesą.
 <!-- CODE-VCS-P10 | human-reviewable -->
 *   Prieš sujungimą turi būti sėkmingai įvykdyti visi privalomi automatiniai patikrinimai.
-<!-- CODE-VCS-P11 | ai-reviewable -->
+<!-- CODE-VCS-P11 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei po peržiūros PR yra papildomai pakeičiamas, ankstesni patvirtinimai turi būti peržiūrimi iš naujo arba automatiškai anuliuojami pagal platformos galimybes.
 
 REKOMENDUOJAMA:
 
 <!-- CODE-VCS-R05 | process-level -->
 *   Pagrindinėms šakoms (main ir, jei taikoma, staging) naudoti griežtesnius peržiūros reikalavimus negu feature šakoms.
-<!-- CODE-VCS-R06 | ai-reviewable -->
+<!-- CODE-VCS-R06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Aukštos rizikos arba architektūrinio poveikio pakeitimams reikalauti papildomos tech lead ar architekto peržiūros.
 
 > Susiję skyriai: [4.4 Code Review principai](#44-code-review-principai) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai)
@@ -325,15 +325,15 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- CODE-VCS-P12 | ai-reviewable -->
+<!-- CODE-VCS-P12 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Vienas commit’as turi atitikti vieną aiškią loginę idėją arba pataisą.
-<!-- CODE-VCS-P13 | ai-reviewable -->
+<!-- CODE-VCS-P13 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Commit žinutės turi būti aiškios, atsekamos ir rašomos anglų kalba.
-<!-- CODE-VCS-P14 | ai-reviewable -->
+<!-- CODE-VCS-P14 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Automatiniai formatavimo ar linting commit’ai neturi maskuoti funkcinių pakeitimų.
-<!-- CODE-VCS-P15 | ai-reviewable -->
+<!-- CODE-VCS-P15 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Commit žinutėse turi būti aiškiai nurodomas pakeitimo tipas ir susietas uždavinys.
-<!-- CODE-VCS-P16 | ai-reviewable -->
+<!-- CODE-VCS-P16 | ai-reviewable | stacks=all | enforced-by=tool:commitlint -->
 *   Naudojamas [Conventional Commits v1.0.0](https://www.conventionalcommits.org/) formatas:
     *   `<tipas>(<apimtis>): <trumpas aprašas> (ticket-<užduoties_id>)`
     *   Pvz.: `feat(auth): add 2FA (ticket-45678)`
@@ -349,23 +349,23 @@ PRIVALOMA:
     *   **test:** Testų pridėjimas arba atnaujinimas
     *   **build:** Pakeitimai, susiję su build įrankiais arba priklausomybėmis
     *   **ci:** Nuolatinės integracijos (CI) ir operaciniai pakeitimai, pvz., diegimo skriptai ar infrastruktūros konfigūracijos pakeitimai
-<!-- CODE-VCS-P18 | ai-reviewable -->
+<!-- CODE-VCS-P18 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Apimtis turi nurodyti kontekstą arba paliestą sritį, pvz. auth, api, ui, config, docker.
 <!-- CODE-VCS-P19 | human-reviewable -->
 *   Trumpas aprašas turi būti imperatyvus, rašomas mažosiomis raidėmis ir be taško sakinio gale.
 
 REKOMENDUOJAMA:
 
-<!-- CODE-VCS-R07 | ai-reviewable -->
+<!-- CODE-VCS-R07 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Didelius pakeitimus skaidyti į kelis logiškai nuoseklius commit’us, kad būtų paprasčiau peržiūrėti istoriją ir atlikti rollback.
-<!-- CODE-VCS-R08 | ai-reviewable -->
+<!-- CODE-VCS-R08 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Commit istoriją išlaikyti švarią ir informatyvią, vengiant perteklinių tarpinių commit’ų pagrindinėse šakose.
 
 ### 4.3.5. Pull Request / Merge Request reikalavimai {#435-pull-request-merge-request-reikalavimai}
 
 PRIVALOMA:
 
-<!-- CODE-VCS-P20 | ai-reviewable -->
+<!-- CODE-VCS-P20 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kiekvienas PR arba MR turi turėti aprašą pagal organizacijos šabloną.
 <!-- CODE-VCS-P21 | human-reviewable -->
 *   Apraše turi būti nurodyta:
@@ -375,20 +375,20 @@ PRIVALOMA:
     *   ar reikia atnaujinti dokumentaciją
     *   ar reikia keisti konfigūraciją
     *   ar yra duomenų migracijų
-<!-- CODE-VCS-P22 | ai-reviewable -->
+<!-- CODE-VCS-P22 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kiekvienas PR arba MR turi būti susietas su uždaviniu užduočių valdymo sistemoje.
-<!-- CODE-VCS-P23 | ai-reviewable -->
+<!-- CODE-VCS-P23 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Turi būti aiškiai nurodyta, ar pakeitimas turi breaking changes, migracijų, priklausomybių ar infrastruktūrinį poveikį.
-<!-- CODE-VCS-P24 | ai-reviewable -->
+<!-- CODE-VCS-P24 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   PR arba MR negali būti sujungtas, jei automatiniai patikrinimai nesėkmingi.
 
 REKOMENDUOJAMA:
 
-<!-- CODE-VCS-R09 | ai-reviewable -->
+<!-- CODE-VCS-R09 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Mažesni ir dažnesni PR yra laikomi geresne praktika negu reti ir labai dideli pakeitimai.
-<!-- CODE-VCS-R10 | ai-reviewable -->
+<!-- CODE-VCS-R10 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Labai didelės apimties PR turėtų būti skaidomos, kai tai įmanoma.
-<!-- CODE-VCS-R11 | ai-reviewable -->
+<!-- CODE-VCS-R11 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Draft PR arba MR rekomenduojama naudoti ankstyvam grįžtamajam ryšiui, jei implementacija dar nebaigta.
 
 > Susiję skyriai: [4.4 Code Review principai](#44-code-review-principai) · [4.5 Testai](#45-testai) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai) · [10 Dokumentacija](10-dokumentacija.md) · [E priedas. PR / MR šablonas](priedai/pr-mr-sablonas.md)
@@ -397,22 +397,22 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- CODE-VCS-P25 | ai-reviewable -->
+<!-- CODE-VCS-P25 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Repozitorijoje turi būti tinkamai sukonfigūruotas .gitignore.
-<!-- CODE-VCS-P26 | ai-reviewable -->
+<!-- CODE-VCS-P26 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Slaptieji raktai, IDE failai, kompiliavimo artefaktai ir kiti nereikalingi failai negali patekti į repozitoriją.
-<!-- CODE-VCS-P27 | ai-reviewable -->
+<!-- CODE-VCS-P27 | ai-reviewable | stacks=all | enforced-by=tool:gitleaks -->
 *   Slaptųjų raktų skenavimas turi būti įjungtas; aptiktas secret turi būti laikomas incidentu, reikalaujančiu neatidėliotinos reakcijos.
-<!-- CODE-VCS-P28 | ai-reviewable -->
+<!-- CODE-VCS-P28 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Repozitorijoje neturi būti laikomi dideli dvejetainiai failai, jei tam nėra aiškaus pagrindimo ir tinkamo valdymo mechanizmo.
 
 REKOMENDUOJAMA:
 
 <!-- CODE-VCS-R12 | human-reviewable -->
 *   Didelius dvejetainius failus valdyti per git-lfs arba lygiavertį mechanizmą.
-<!-- CODE-VCS-R13 | ai-reviewable -->
+<!-- CODE-VCS-R13 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Repozitorijos aprašą, temas ir nuorodas į dokumentaciją laikyti aktualias.
-<!-- CODE-VCS-R14 | ai-reviewable -->
+<!-- CODE-VCS-R14 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Repozitorijos šaknyje turėti minimalų README su paskirtimi ir pagrindinėmis nuorodomis.
 
 > Susiję skyriai: [3.5.2 Slaptieji raktai](03-architektura.md#352-slaptieji-raktai) · [6.4 Secrets management](06-saugumas.md#64-secrets-management) · [10 Dokumentacija](10-dokumentacija.md) · [12 Tiekėjų ir pavaldžių įstaigų reikalavimai](12-tiekeju-reikalavimai.md)
@@ -425,9 +425,9 @@ Code review tikslas – užtikrinti kodo kokybę, saugumą, architektūros princ
 
 PRIVALOMA:
 
-<!-- CODE-REV-P01 | ai-reviewable -->
+<!-- CODE-REV-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kiekvieną PR arba MR turi peržiūrėti bent vienas kitas komandos narys.
-<!-- CODE-REV-P02 | ai-reviewable -->
+<!-- CODE-REV-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Sudėtingiems, aukštos rizikos arba architektūrinį poveikį turintiems pakeitimams turi būti atliekama papildoma tech lead arba architekto peržiūra.
 <!-- CODE-REV-P03 | process-level -->
 *   Kodo peržiūros metu privaloma įvertinti bent šiuos aspektus:
@@ -435,22 +435,22 @@ PRIVALOMA:
     *   saugumo aspektus
     *   architektūros principų laikymąsi
     *   testų pakankamumą ir kokybę
-<!-- CODE-REV-P04 | ai-reviewable -->
+<!-- CODE-REV-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Autorius yra atsakingas už pateikto kodo kokybę ir visų peržiūros komentarų adresavimą.
-<!-- CODE-REV-P05 | ai-reviewable -->
+<!-- CODE-REV-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Reviewer yra atsakingas už pastebėtų rizikų, neatitikimų ir tobulintinų vietų aiškų užfiksavimą.
-<!-- CODE-REV-P06 | ai-reviewable -->
+<!-- CODE-REV-P06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Neišspręstos peržiūros diskusijos blokuoja merge’inimą.
 
 REKOMENDUOJAMA:
 
 <!-- CODE-REV-R01 | process-level -->
 *   Code review laikyti ne tik kontrolės, bet ir žinių pasidalijimo priemone.
-<!-- CODE-REV-R02 | ai-reviewable -->
+<!-- CODE-REV-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Komentarus formuluoti orientuojantis į sprendimą, o ne į asmenį; kritikuojamas kodas, ne autorius.
-<!-- CODE-REV-R03 | ai-reviewable -->
+<!-- CODE-REV-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei pakeitimas apima kelias temas, rekomenduojama review metu aiškiai atskirti kritines pastabas nuo siūlomų patobulinimų.
-<!-- CODE-REV-R04 | ai-reviewable -->
+<!-- CODE-REV-R04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Dideliems arba sudėtingiems pakeitimams rekomenduojama review metu nurodyti, kurios vietos yra didžiausios rizikos ar reikalauja papildomo dėmesio.
 
 > Susiję skyriai: [4.3.5 Pull Request / Merge Request reikalavimai](#435-pull-request-merge-request-reikalavimai) · [4.5 Testai](#45-testai)
@@ -463,33 +463,33 @@ Bendrieji testavimo principai, testų tipai, kokybės vartai ir testų vykdymo C
 
 PRIVALOMA:
 
-<!-- CODE-TEST-P01 | ai-reviewable -->
+<!-- CODE-TEST-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testai yra programinio kodo dalis, o ne priedas; jie turi būti saugomi toje pačioje repozitorijoje ir palaikomi kartu su kodu.
-<!-- CODE-TEST-P02 | ai-reviewable -->
+<!-- CODE-TEST-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Naujas funkcionalumas turi turėti atitinkamus testus prieš merge’inimą.
-<!-- CODE-TEST-P03 | ai-reviewable -->
+<!-- CODE-TEST-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kiekvienas bug fix turi turėti testą, kuris atkartoja klaidą ir patvirtina pataisymą.
-<!-- CODE-TEST-P04 | ai-reviewable -->
+<!-- CODE-TEST-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testavimo apimtis turi būti parenkama pagal pakeitimo pobūdį ir riziką.
-<!-- CODE-TEST-P05 | ai-reviewable -->
+<!-- CODE-TEST-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Minimaliai turi būti taikomi šie testų tipai:
     *   unit testai – verslo logikai ir izoliuotiems komponentams
     *   integration arba API testai – servisų tarpusavio specifikacijų laikymuisi
     *   E2E testai – kritiniams vartotojo srautams, kurių apimtis apibrėžiama projekto pradžioje
-<!-- CODE-TEST-P06 | ai-reviewable -->
+<!-- CODE-TEST-P06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   PR arba MR negali būti laikomas paruoštu merge’inimui, jei būtini testai nepridėti arba neatnaujinti.
 
 REKOMENDUOJAMA:
 
-<!-- CODE-TEST-R01 | ai-reviewable -->
+<!-- CODE-TEST-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testų skaitomumas turi būti laikomas tokios pačios svarbos kaip ir produkcinio kodo skaitomumas.
-<!-- CODE-TEST-R02 | ai-reviewable -->
+<!-- CODE-TEST-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testuose rekomenduojama naudoti aiškius pavadinimus, nuoseklią struktūrą ir vengti perteklinės logikos.
-<!-- CODE-TEST-R03 | ai-reviewable -->
+<!-- CODE-TEST-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kai tai pagrįsta, rekomenduojama laikytis AAA principo – Arrange, Act, Assert.
-<!-- CODE-TEST-R04 | ai-reviewable -->
+<!-- CODE-TEST-R04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testų aprėptis turi būti stebima, o minimalūs slenksčiai nustatomi projekto pradžioje.
-<!-- CODE-TEST-R05 | ai-reviewable -->
+<!-- CODE-TEST-R05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kritinių modulių testavimo lygis turėtų būti griežtesnis negu pagalbinių ar mažos rizikos komponentų.
 
 > Susiję skyriai: [4.4 Code Review principai](#44-code-review-principai) · [7 Testavimo reikalavimai ir principai](07-testavimas.md) · [7.8 Prieinamumo (Accessibility) testavimas](07-testavimas.md#78-prieinamumo-accessibility-testavimas) · [7.9 Testų vykdymas CI/CD ir ataskaitos](07-testavimas.md#79-testų-vykdymas-ci-cd-ir-ataskaitos) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai)
@@ -502,28 +502,28 @@ Bendrieji saugumo, autentifikacijos, autorizacijos, slaptųjų raktų, priklauso
 
 PRIVALOMA:
 
-<!-- CODE-SEC-P01 | ai-reviewable -->
+<!-- CODE-SEC-P01 | ai-reviewable | stacks=all | enforced-by=tool:gitleaks -->
 *   Programiniame kode negali būti slaptažodžių, raktų, tokenų ar kitos jautrios informacijos.
-<!-- CODE-SEC-P02 | ai-reviewable -->
+<!-- CODE-SEC-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Išorinis įvedimas visada laikomas nepatikimu ir turi būti validuojamas serverio pusėje, nepriklausomai nuo kliento validacijos.
-<!-- CODE-SEC-P03 | ai-reviewable -->
+<!-- CODE-SEC-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Draudžiama formuoti užklausas, komandas ar kitus vykdomus fragmentus tiesiogiai iš nevaliduoto įvedimo.
-<!-- CODE-SEC-P04 | ai-reviewable -->
+<!-- CODE-SEC-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Klaidų pranešimai vartotojui negali atskleisti vidinės sistemos detalių, tokių kaip stack trace, SQL struktūra, failų keliai ar infrastruktūros informacija.
 <!-- CODE-SEC-P05 | human-reviewable -->
 *   Techninės klaidų detalės gali būti pateikiamos tik loguose, laikantis logavimo ir jautrių duomenų apsaugos reikalavimų.
-<!-- CODE-SEC-P06 | ai-reviewable -->
+<!-- CODE-SEC-P06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Naujos priklausomybės negali būti įtraukiamos neįvertinus jų palaikymo būklės, licencijos ir žinomų saugumo rizikų.
 
 REKOMENDUOJAMA:
 
 <!-- CODE-SEC-R01 | human-reviewable -->
 *   Naudoti standartinių bibliotekų ir framework’ų saugius mechanizmus vietoje savarankiškai kuriamų kriptografinių ar saugumo sprendimų.
-<!-- CODE-SEC-R02 | ai-reviewable -->
+<!-- CODE-SEC-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Validacijos, autorizacijos ir klaidų apdorojimo logiką centralizuoti, kai tai leidžia architektūra.
-<!-- CODE-SEC-R03 | ai-reviewable -->
+<!-- CODE-SEC-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Taikyti statinę analizę ir kitas automatinio secure coding tikrinimo priemones dar prieš merge’inimą.
-<!-- CODE-SEC-R04 | ai-reviewable -->
+<!-- CODE-SEC-R04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kodo peržiūros metu papildomai vertinti, ar pakeitimas nepadidina atakos paviršiaus ir neįveda naujų jautrių duomenų nutekėjimo rizikų.
 
 > Susiję skyriai: [3.3.6 Input validacija ir užklausų apsauga](03-architektura.md#336-input-validacija-ir-užklausų-apsauga) · [3.3.8 Standartizuotos klaidos](03-architektura.md#338-standartizuotos-klaidos) · [3.5.2 Slaptieji raktai](03-architektura.md#352-slaptieji-raktai) · [5 Versijavimas ir priklausomybių valdymas](05-versijavimas.md) · [6 Saugumas (Security by Design)](06-saugumas.md) · [8.6 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė)
@@ -536,26 +536,26 @@ Tikslas – užtikrinti, kad sistemos kokybė būtų gerinama nuosekliai, o tech
 
 PRIVALOMA:
 
-<!-- CODE-DEBT-P01 | ai-reviewable -->
+<!-- CODE-DEBT-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Didelis refaktoringas turi būti planuojamas atskirai ir suderinamas su product owner, jei jis daro reikšmingą poveikį darbų apimčiai, terminams ar rizikai.
-<!-- CODE-DEBT-P02 | ai-reviewable -->
+<!-- CODE-DEBT-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei refaktoringas keičia architektūrą, integracijų modelį ar esminius techninius šablonus, sprendimas turi būti dokumentuojamas ADR.
 <!-- CODE-DEBT-P03 | process-level -->
 *   Techninė skola turi būti matoma ir valdoma; žinomi kompromisai, laikini sprendimai ir neatidėti techniniai darbai turi būti registruojami kaip atskiri uždaviniai backlog’e.
-<!-- CODE-DEBT-P04 | ai-reviewable -->
+<!-- CODE-DEBT-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Techninė skola negali būti ignoruojama neribotą laiką; jos būklė turi būti periodiškai peržiūrima kartu su planavimo ir prioritetizavimo procesu.
-<!-- CODE-DEBT-P05 | ai-reviewable -->
+<!-- CODE-DEBT-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   TODO ir FIXME komentarai kode leidžiami tik su aiškia nuoroda į uždavinį; komentarai be nuorodos nelaikomi priimtinais.
-<!-- CODE-DEBT-P06 | ai-reviewable -->
+<!-- CODE-DEBT-P06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Techninė skola turi būti vertinama ne tik kodo lygmeniu, bet ir priklausomybių, architektūrinių kompromisų, neautomatizuotų procesų, pasenusios konfigūracijos ir eksploatacinių spragų požiūriu.
 
 REKOMENDUOJAMA:
 
-<!-- CODE-DEBT-R01 | ai-reviewable -->
+<!-- CODE-DEBT-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Mažas refaktoringas, toks kaip pervadinimai, metodų išskyrimas ar dubliavimo mažinimas, rekomenduojamas atlikti kartu su funkcinių pakeitimų įgyvendinimu.
-<!-- CODE-DEBT-R02 | ai-reviewable -->
+<!-- CODE-DEBT-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Taikyti principą „palik kodą švaresnį nei radai“, jei tai nekelia neproporcingos rizikos ar nepakeičia užduoties apimties.
-<!-- CODE-DEBT-R03 | ai-reviewable -->
+<!-- CODE-DEBT-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Refaktoringo ir techninės skolos prioritetus rekomenduojama vertinti pagal poveikį palaikomumui, saugumui, testuojamumui, našumui ir būsimiems pokyčiams.
 <!-- CODE-DEBT-R04 | process-level -->
 *   Jei techninės skolos sprendimas atidedamas, rekomenduojama aiškiai nurodyti riziką, poveikį ir planuojamą sprendimo laikotarpį.
@@ -574,9 +574,9 @@ DI priemonės gali padidinti produktyvumą, tačiau kelia papildomų rizikų, su
 
 PRIVALOMA:
 
-<!-- CODE-AI-P01 | ai-reviewable -->
+<!-- CODE-AI-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   DI sugeneruotas kodas traktuojamas lygiai taip pat kaip žmogaus parašytas kodas — jam taikomi visi šio standarto kokybės, saugumo, testavimo ir peržiūros reikalavimai.
-<!-- CODE-AI-P02 | ai-reviewable -->
+<!-- CODE-AI-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   DI sugeneruotas kodas turi praeiti visas standartines CI patikras (linting, SAST, testai) be išimčių.
 <!-- CODE-AI-P03 | human-reviewable -->
 *   Code review metu peržiūrėtojas privalo vertinti DI sugeneruoto kodo logiką ir teisingumą; formalus patvirtinimas neskaitant kodo yra draudžiamas.
@@ -594,7 +594,7 @@ PRIVALOMA:
     *   vidinę architektūros, infrastruktūros ar verslo logikos informaciją, kurios atskleidimas kelia riziką.
 <!-- CODE-AI-P06 | process-level -->
 *   Savivaldybės programinis kodas negali būti naudojamas DI modelių mokymui ar viešinamas per DI paslaugas be aiškaus organizacijos leidimo.
-<!-- CODE-AI-P07 | ai-reviewable -->
+<!-- CODE-AI-P07 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   DI priemonės turi būti naudojamos tik per organizacijos patvirtintus kanalus ir konfigūracijas.
 
 ### 4.8.3. Kokybės užtikrinimas
@@ -603,7 +603,7 @@ PRIVALOMA:
 
 <!-- CODE-AI-P08 | human-reviewable -->
 *   DI sugeneruoti testai turi būti peržiūrimi dėl prasmingų tikrinimų (assertions); testai, kurie tik didina aprėptį be realaus tikrinimo, yra draudžiami.
-<!-- CODE-AI-P09 | ai-reviewable -->
+<!-- CODE-AI-P09 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   DI sugeneruotos priklausomybės ir importai turi būti tikrinami dėl egzistavimo, palaikymo būklės ir saugumo — DI modeliai gali siūlyti neegzistuojančius paketus.
 
 REKOMENDUOJAMA:
