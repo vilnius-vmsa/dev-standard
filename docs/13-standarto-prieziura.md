@@ -12,7 +12,7 @@ PRIVALOMA:
 *   Standartas neturi būti keičiamas dažnai ar impulsyviai; stabilumas laikomas prioritetu.
 <!-- STD-CHANGE-P02 | process-level -->
 *   Kiekvienas standarto pakeitimas turi būti dokumentuotas ir pagrįstas.
-<!-- STD-CHANGE-P03 | ai-reviewable -->
+<!-- STD-CHANGE-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Nedideli pakeitimai neturi sukelti neproporcingos naštos projektams, komandoms ar tiekėjams.
 
 REKOMENDUOJAMA:
@@ -28,12 +28,12 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- STD-APPROVE-P01 | ai-reviewable -->
+<!-- STD-APPROVE-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Pakeitimų siūlymai negali būti įgyvendinami tiesiogiai, apeinant nustatytą peržiūros ir tvirtinimo procesą.
 
 REKOMENDUOJAMA:
 
-<!-- STD-APPROVE-R01 | ai-reviewable -->
+<!-- STD-APPROVE-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Pakeitimus gali inicijuoti vidinės IT komandos, Product Owneriai, analitikai, kibernetinio saugumo ar audito funkcija, pavaldžios įstaigos ir išoriniai tiekėjai per savivaldybės atsakingus asmenis.
 <!-- STD-APPROVE-R02 | human-reviewable -->
 *   Pakeitimų siūlymus rekomenduojama teikti taip, kad būtų aiškiai nurodyta problema, siūlomas pakeitimas, poveikis ir priežastis.
@@ -44,27 +44,27 @@ PRIVALOMA:
 
 <!-- STD-APPROVE-P02 | process-level -->
 *   Standarto savininkas turi būti aiškiai paskirtas.
-<!-- STD-APPROVE-P03 | ai-reviewable -->
+<!-- STD-APPROVE-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Standarto savininkas atsako už pasiūlymų rinkimą, poveikio vertinimą, sprendimų rengimą ir komunikaciją su suinteresuotomis šalimis.
-<!-- STD-APPROVE-P04 | ai-reviewable -->
+<!-- STD-APPROVE-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei standarto savininko funkcija paskirstyta keliems asmenims ar rolėms, jų atsakomybės turi būti aiškiai apibrėžtos.
 
 REKOMENDUOJAMA:
 
-<!-- STD-APPROVE-R03 | ai-reviewable -->
+<!-- STD-APPROVE-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Standarto savininko funkciją rekomenduojama pavesti savivaldybės IT padaliniui arba kitai oficialiai paskirtai atsakingai institucijai.
-<!-- STD-APPROVE-R04 | ai-reviewable -->
+<!-- STD-APPROVE-R04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Reikšmingų pakeitimų vertinimui rekomenduojama įtraukti architektūros, saugumo, teisinės ar eksploatacijos atstovus, kai tai aktualu.
 
 ### 13.2.3. Pakeitimų tvirtinimas
 
 PRIVALOMA:
 
-<!-- STD-APPROVE-P05 | ai-reviewable -->
+<!-- STD-APPROVE-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Nereikšmingi pakeitimai, tokie kaip redakciniai pataisymai ar paaiškinimai, turi būti tvirtinami standarto savininko lygiu.
 <!-- STD-APPROVE-P06 | human-reviewable -->
 *   Reikšmingi pakeitimai, tokie kaip nauji reikalavimai ar PRIVALOMA lygio pakeitimai, turi būti derinami su IT vadovybe.
-<!-- STD-APPROVE-P07 | ai-reviewable -->
+<!-- STD-APPROVE-P07 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei pakeitimas turi teisinį, saugumo ar atitikties poveikį, turi būti įtraukiamos atitinkamos atsakingos funkcijos.
 
 REKOMENDUOJAMA:
@@ -78,13 +78,13 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- STD-VER-P01 | ai-reviewable -->
+<!-- STD-VER-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Standartas turi būti versijuojamas pagal SemVer principus: MAJOR.MINOR.PATCH.
 <!-- STD-VER-P02 | human-reviewable -->
 *   MAJOR versija reiškia esminius pakeitimus, galinčius turėti įtakos galiojantiems projektams ar taikymo logikai.
 <!-- STD-VER-P03 | human-reviewable -->
 *   MINOR versija reiškia naujus reikalavimus ar patikslinimus, neturinčius esminio atgalinio poveikio.
-<!-- STD-VER-P04 | ai-reviewable -->
+<!-- STD-VER-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   PATCH versija reiškia redakcinius pataisymus, klaidų ištaisymus ar paaiškinimus.
 <!-- STD-VER-P05 | human-reviewable -->
 *   Kiekviena standarto versija turi turėti datą, pakeitimų santrauką ir galiojimo aprašą.
@@ -111,7 +111,7 @@ PRIVALOMA:
 
 REKOMENDUOJAMA:
 
-<!-- STD-TRANS-R01 | ai-reviewable -->
+<!-- STD-TRANS-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Pereinamąjį laikotarpį nustatyti proporcingai pakeitimo mastui ir projektų brandai.
 <!-- STD-TRANS-R02 | process-level -->
 *   Jei vykdomas projektas pereina prie naujesnės standarto versijos, rekomenduojama tai dokumentuoti kaip atskirą sprendimą ar nukrypimą.
@@ -122,7 +122,7 @@ PRIVALOMA:
 
 <!-- STD-COMM-P01 | process-level -->
 *   Visi standarto pakeitimai turi būti komunikuojami vidinėms komandoms, pavaldžioms įstaigoms ir aktyviems tiekėjams, kuriems jie aktualūs.
-<!-- STD-COMM-P02 | ai-reviewable -->
+<!-- STD-COMM-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Komunikacijoje turi būti aiškiai nurodyta:
 <!-- STD-COMM-P03 | human-reviewable -->
 *   kas pasikeitė
@@ -130,12 +130,12 @@ PRIVALOMA:
 *   nuo kada pakeitimas taikomas
 <!-- STD-COMM-P05 | human-reviewable -->
 *   kam jis taikomas
-<!-- STD-COMM-P06 | ai-reviewable -->
+<!-- STD-COMM-P06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   ar dėl jo reikia atlikti papildomus veiksmus
 
 REKOMENDUOJAMA:
 
-<!-- STD-COMM-R01 | ai-reviewable -->
+<!-- STD-COMM-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Komunikaciją pateikti ne tik formaliai, bet ir praktiškai suprantamu formatu, kad komandos aiškiai matytų poveikį savo darbui.
 <!-- STD-COMM-R02 | human-reviewable -->
 *   Reikšmingiems pakeitimams rekomenduojama parengti trumpą santrauką arba palyginimą su ankstesne versija.
@@ -144,11 +144,11 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- STD-MAINT-P01 | ai-reviewable -->
+<!-- STD-MAINT-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei nustatoma, kad standartas tapo nebeadekvatus praktikai, technologijoms, teisiniams reikalavimams ar organizaciniam modeliui, turi būti inicijuojamas jo atnaujinimas.
 <!-- STD-MAINT-P02 | process-level -->
 *   Kol atnaujinimas nepatvirtintas, laikini nukrypimai turi būti dokumentuojami pagal bendrą nukrypimų valdymo tvarką.
-<!-- STD-MAINT-P03 | ai-reviewable -->
+<!-- STD-MAINT-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Standarto pakeitimai negali būti taikomi atgaline data be aiškaus teisinio ar organizacinio pagrindo.
 
 REKOMENDUOJAMA:
