@@ -6,7 +6,7 @@ const SITE = 'https://example.test/dev-standard';
 const STACKS = new Map([
   ['all', { description: 'Rules for every repository', applyTo: '**' }],
   ['php', { description: 'PHP code', applyTo: '**/*.php' }],
-  ['laravel', { description: 'Laravel applications', applyTo: 'app/**,routes/**' }],
+  ['laravel', { description: 'Laravel applications', applyTo: 'app/**,routes/**', implies: ['php'] }],
   ['mobile', { description: 'Mobile applications', applyTo: '**/*.kt' }],
 ]);
 const r = (id, stacks, check = 'ai-reviewable') => ({
@@ -86,4 +86,11 @@ test('missing English for an ai-reviewable rule is an error', () => {
     () => buildBundle({ rules: RULES, english: {}, stacks: STACKS, version: 'v1', siteUrl: SITE }),
     /CODE-SEC-R01.*no English text/,
   );
+});
+
+test('a stack that builds on another points to it, and the manifest lists implied stacks', () => {
+  const files = build();
+  assert.ok(files.get('instructions/dev-standard-laravel.instructions.md').includes('This stack builds on php: also follow `dev-standard-php.instructions.md`.'));
+  assert.ok(!files.get('instructions/dev-standard-php.instructions.md').includes('This stack builds on'));
+  assert.deepEqual(JSON.parse(files.get('manifest.json')).implies, { laravel: ['php'] });
 });

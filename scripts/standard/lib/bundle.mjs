@@ -32,6 +32,9 @@ function instructionsFile(stack, info, rules, version, siteUrl) {
     'English, non-binding summary of the Lithuanian standard; the Lithuanian text behind each link is binding.',
     'MUST rules (IDs with -P) are must-fix. SHOULD rules (IDs with -R) are suggestions. Cite the rule ID whenever you flag a violation.',
     '',
+    ...(info.implies?.length
+      ? [`This stack builds on ${info.implies.join(', ')}: also follow ${info.implies.map((s) => `\`dev-standard-${s}.instructions.md\``).join(', ')}.`, '']
+      : []),
     ...(rules.length ? ruleSections(rules, siteUrl) : ['No rules are assigned to this stack in this version.', '']),
   ].join('\n');
 }
@@ -48,7 +51,7 @@ ${notice(version)}
 
 The rules live in [\`.github/instructions/\`](../../../.github/instructions/):
 
-- \`dev-standard-<stack>.instructions.md\`: the standard's rules for each stack listed in \`.dev-standard/config.json\`. The \`applyTo\` header of each file says which paths it covers.
+- \`dev-standard-<stack>.instructions.md\`: the standard's rules for each stack listed in \`.dev-standard/config.json\`, plus the stacks those build on (a file that builds on another says so near its top). The \`applyTo\` header of each file says which paths it covers.
 - \`dev-standard-local.instructions.md\` (if present): this repository's own extra rules. They can only be stricter than the standard.
 
 Read those files from disk. Never state a rule from memory.
@@ -120,6 +123,7 @@ export function buildBundle({ rules, english, stacks, version, siteUrl }) {
       source: `${siteUrl}${r.route === '/' ? '/' : r.route}#${r.anchor}`,
     })),
   }, null, 2)}\n`);
-  files.set('manifest.json', `${JSON.stringify({ version, stacks: [...stacks.keys()], files: [...files.keys()].sort() }, null, 2)}\n`);
+  const implies = Object.fromEntries([...stacks].filter(([, info]) => info.implies?.length).map(([name, info]) => [name, info.implies]));
+  files.set('manifest.json', `${JSON.stringify({ version, stacks: [...stacks.keys()], implies, files: [...files.keys()].sort() }, null, 2)}\n`);
   return files;
 }
