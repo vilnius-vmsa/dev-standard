@@ -1567,127 +1567,127 @@ OPS-VER-R02:
   source_hash: 782441c4bd7a
   status: machine-draft
 ORG-BACKLOG-P01:
-  text: ""
+  text: Every system has one clear, official backlog.
   source_hash: c3cfea1939d4
   status: machine-draft
 ORG-BACKLOG-P02:
-  text: ""
+  text: Changes are assessed for their impact on scope, deadlines, risk and dependencies.
   source_hash: 699ede3f89f0
   status: machine-draft
 ORG-BACKLOG-P04:
-  text: ""
+  text: Unplanned changes are never implemented informally, bypassing the backlog or change management process.
   source_hash: 9d3c6c02572c
   status: machine-draft
 ORG-BACKLOG-P05:
-  text: ""
+  text: Urgent changes are allowed only when justified by an incident, a legal requirement or another clearly documented need.
   source_hash: 4deb7dcff215
   status: machine-draft
 ORG-BACKLOG-R01:
-  text: ""
+  text: Large or risky changes get an additional technical assessment before they enter the backlog.
   source_hash: 23cc571a2d14
   status: machine-draft
 ORG-COMM-P02:
-  text: ""
+  text: Communication between business, analysts, developers, DevOps and others is sufficient to avoid gaps in how decisions or requirements are interpreted.
   source_hash: 660d5671f0d1
   status: machine-draft
 ORG-COMM-P03:
-  text: ""
+  text: Significant technical or organisational decisions are never left as verbal agreements only.
   source_hash: 5bad37e6acb8
   status: machine-draft
 ORG-COMM-P04:
-  text: ""
+  text: A decision made in a meeting that affects architecture, deadlines, scope or risk is recorded in the relevant artefact.
   source_hash: 1f9e44c43bd4
   status: machine-draft
 ORG-COMM-R03:
-  text: ""
+  text: Communication is organised so important information is easy to find and does not get lost in chat history.
   source_hash: 1aa9f9623af4
   status: machine-draft
 ORG-DECISION-P02:
-  text: ""
+  text: Technical decisions include choices about architecture style, technology, integration model, security or performance.
   source_hash: 78039fb77d1c
   status: machine-draft
 ORG-GEN-P01:
-  text: ""
+  text: Responsibilities are clearly defined and understood by everyone on the project.
   source_hash: c1e0cd0c4f0b
   status: machine-draft
 ORG-GEN-P05:
-  text: ""
+  text: Work is organised so that it supports good planning, review, testing and handover.
   source_hash: 5ee0d23df30b
   status: machine-draft
 ORG-GEN-R03:
-  text: ""
+  text: Important agreements are recorded in the task system, PR/MR or documentation, not only in meetings.
   source_hash: 8552fc9a0794
   status: machine-draft
 ORG-REQ-P01:
-  text: ""
+  text: Requirements are documented as user stories, use cases, functional requirements or equivalent artefacts.
   source_hash: 8402c0696a2f
   status: machine-draft
 ORG-REQ-P02:
-  text: ""
+  text: Acceptance criteria are clear, testable and approved before implementation starts.
   source_hash: bc6f32e7e98e
   status: machine-draft
 ORG-REQ-P03:
-  text: ""
+  text: Undocumented or unapproved requirements are never quietly added to the implementation.
   source_hash: b424d36fb266
   status: machine-draft
 ORG-REQ-P05:
-  text: ""
+  text: Requirements are detailed enough for the team to estimate scope, risk and dependencies.
   source_hash: 7dab3f5b1057
   status: machine-draft
 ORG-REQ-R01:
-  text: ""
+  text: Complex or integration scenarios also describe user flows, data flows or edge cases.
   source_hash: 23fb0a306b82
   status: machine-draft
 ORG-REQ-R02:
-  text: ""
+  text: Requirement uncertainty is identified as early as possible rather than left to be settled during coding.
   source_hash: 60fbb7cf3360
   status: machine-draft
 ORG-ROLE-P02:
-  text: ""
+  text: The developer writes and maintains tests together with code changes.
   source_hash: b06a22ff9123
   status: machine-draft
 ORG-ROLE-P03:
-  text: ""
+  text: The developer updates documentation when a change affects it.
   source_hash: 185513fbc96c
   status: machine-draft
 ORG-ROLE-P06:
-  text: ""
+  text: The DevOps or infrastructure engineer maintains CI/CD, environments, deployment mechanisms and infrastructure.
   source_hash: bf569e13585c
   status: machine-draft
 ORG-ROLE-P07:
-  text: ""
+  text: The DevOps or infrastructure engineer is responsible for reliable deployment processes and for integrating monitoring, logging and alerting.
   source_hash: eb2c3e393f1d
   status: machine-draft
 ORG-ROLE-P08:
-  text: ""
+  text: The DevOps or infrastructure engineer takes part in incident management with other teams when an incident involves deployment, infrastructure or operations.
   source_hash: 3f422c879cdc
   status: machine-draft
 ORG-ROLE-P09:
-  text: ""
+  text: The DevOps or infrastructure engineer keeps the related technical documentation and runbooks current within their area of responsibility.
   source_hash: a201a4ac4cb3
   status: machine-draft
 ORG-ROLE-P11:
-  text: ""
+  text: The Product Owner approves acceptance criteria and prioritises functional changes.
   source_hash: 4394dbc79270
   status: machine-draft
 ORG-ROLE-P12:
-  text: ""
+  text: The Product Owner takes part in UAT and final acceptance of functionality.
   source_hash: 29080a5484d6
   status: machine-draft
 ORG-ROLE-P15:
-  text: ""
+  text: The analyst describes processes, user scenarios, data flows and integration needs as far as needed to build the solution.
   source_hash: 80f2633a797c
   status: machine-draft
 ORG-ROLE-P17:
-  text: ""
+  text: The analyst keeps requirements documentation current within their role.
   source_hash: 5a3962d7be2f
   status: machine-draft
 ORG-ROLE-R03:
-  text: ""
+  text: The DevOps or infrastructure engineer is involved early when the project has specific infrastructure, operational or platform needs.
   source_hash: 9f26fe16f169
   status: machine-draft
 ORG-ROLE-R05:
-  text: ""
+  text: On complex projects the analyst helps link business requirements to acceptance criteria, data flows and integration scenarios.
   source_hash: ae62adbef6d5
   status: machine-draft
 SEC-GDPR-P01:
@@ -1699,71 +1699,71 @@ SEC-GDPR-R01:
   source_hash: 76dbd2948461
   status: machine-draft
 STD-APPROVE-P01:
-  text: ""
+  text: Proposed changes to the standard are never implemented directly, bypassing the defined review and approval process.
   source_hash: ab3f8df32e2d
   status: machine-draft
 STD-APPROVE-P03:
-  text: ""
+  text: The standard owner is responsible for collecting proposals, assessing impact, preparing decisions and communicating with stakeholders.
   source_hash: 51173cad2e21
   status: machine-draft
 STD-APPROVE-P04:
-  text: ""
+  text: If the standard owner role is shared among several people or roles, their responsibilities are clearly defined.
   source_hash: 2ddceb1bee2f
   status: machine-draft
 STD-APPROVE-P05:
-  text: ""
+  text: Minor changes such as editorial corrections or clarifications are approved at the standard owner level.
   source_hash: a3510a82e0ae
   status: machine-draft
 STD-APPROVE-P07:
-  text: ""
+  text: Changes with legal, security or compliance impact involve the responsible functions.
   source_hash: ec4af39a5064
   status: machine-draft
 STD-APPROVE-R01:
-  text: ""
+  text: Changes can be proposed by internal IT teams, Product Owners, analysts, the cybersecurity or audit function, subordinate institutions, and external vendors through the municipality's responsible persons.
   source_hash: 5c912e658bba
   status: machine-draft
 STD-APPROVE-R03:
-  text: ""
+  text: The standard owner role is assigned to the municipality's IT department or another officially designated responsible body.
   source_hash: fd282ea4b828
   status: machine-draft
 STD-APPROVE-R04:
-  text: ""
+  text: Significant changes are assessed with architecture, security, legal or operations representatives where relevant.
   source_hash: 00cd60bb36a1
   status: machine-draft
 STD-CHANGE-P03:
-  text: ""
+  text: Minor changes to the standard do not impose a disproportionate burden on projects, teams or vendors.
   source_hash: 677bfc14e351
   status: machine-draft
 STD-COMM-P02:
-  text: ""
+  text: Communication about a change to the standard states clearly what changed, from when it applies, whom it affects, and whether it requires additional action.
   source_hash: 82f92d7ed949
   status: machine-draft
 STD-COMM-P06:
-  text: ""
+  text: Communication about a change to the standard states whether it requires additional action.
   source_hash: 4425ca3513a3
   status: machine-draft
 STD-COMM-R01:
-  text: ""
+  text: Changes are communicated in a practical, understandable form, not just formally, so teams clearly see the impact on their work.
   source_hash: a1747c573465
   status: machine-draft
 STD-MAINT-P01:
-  text: ""
+  text: When the standard no longer fits practice, technology, legal requirements or the organisational model, an update is initiated.
   source_hash: b84937acb824
   status: machine-draft
 STD-MAINT-P03:
-  text: ""
+  text: Changes to the standard are never applied retroactively without a clear legal or organisational basis.
   source_hash: 0a0f3784af24
   status: machine-draft
 STD-TRANS-R01:
-  text: ""
+  text: The transition period is proportional to the scale of the change and the maturity of projects.
   source_hash: d09dee6be9cf
   status: machine-draft
 STD-VER-P01:
-  text: ""
+  text: "The standard is versioned using SemVer: MAJOR.MINOR.PATCH."
   source_hash: cada740fb9ba
   status: machine-draft
 STD-VER-P04:
-  text: ""
+  text: A PATCH version means editorial corrections, error fixes or clarifications.
   source_hash: 683f63eb7092
   status: machine-draft
 TEST-A11Y-P01:
@@ -2039,111 +2039,111 @@ TEST-UAT-R01:
   source_hash: 2dd1179317ec
   status: machine-draft
 VENDOR-ACC-P04:
-  text: ""
+  text: Work is not finally accepted while critical technical or security debt remains without a clear remediation plan.
   source_hash: 904abffe7db6
   status: machine-draft
 VENDOR-ACC-R01:
-  text: ""
+  text: Acceptance uses a formal handover checklist covering code, documentation, access, deployment and operational readiness.
   source_hash: ac7ad2cd1ada
   status: machine-draft
 VENDOR-COMPL-P02:
-  text: ""
+  text: Compliance may be assessed through technical reviews, test and security reports, documentation checks and a trial deployment.
   source_hash: 50d64b6c15b8
   status: machine-draft
 VENDOR-HAND-P01:
-  text: ""
+  text: The complete source code is handed over, including frontend, backend, integrations, infrastructure as code and other related components that are part of the solution.
   source_hash: 73127099a05a
   status: machine-draft
 VENDOR-HAND-P02:
-  text: ""
+  text: The whole Git repository is handed over with its history, not just an archive of the final version.
   source_hash: 1f523a26cadc
   status: machine-draft
 VENDOR-HAND-P03:
-  text: ""
+  text: The CI/CD configurations and build or deployment scripts in use are handed over.
   source_hash: c6f020d632cd
   status: machine-draft
 VENDOR-HAND-P04:
-  text: ""
+  text: Test code and test results or reports (if generated separately) are handed over.
   source_hash: 956e97cf9958
   status: machine-draft
 VENDOR-HAND-P05:
-  text: ""
+  text: The code contains no hardcoded secrets, has a working build and complies with this standard.
   source_hash: "103428342264"
   status: machine-draft
 VENDOR-HAND-P06:
-  text: ""
+  text: All mandatory technical documentation defined in chapter 10 is handed over, as far as it applies to the system.
   source_hash: ecdf11438622
   status: machine-draft
 VENDOR-HAND-P07:
-  text: ""
+  text: At minimum this includes the architecture description, API documentation, deployment and operation instructions, user documentation where applicable, and operational runbooks and other artefacts needed for business continuity.
   source_hash: a86f37bab851
   status: machine-draft
 VENDOR-HAND-P08:
-  text: ""
+  text: The documentation is current, versioned and sufficient for independent operation and further development of the system.
   source_hash: 2c84ede90d40
   status: machine-draft
 VENDOR-HAND-P09:
-  text: ""
+  text: Access to the code repositories is handed over if the municipality still needs it after acceptance.
   source_hash: 22650d500d28
   status: machine-draft
 VENDOR-HAND-P10:
-  text: ""
+  text: Access to CI/CD systems, or their configuration, is handed over if the municipality takes over their management.
   source_hash: a72909d141a7
   status: machine-draft
 VENDOR-HAND-P11:
-  text: ""
+  text: Cloud and infrastructure configurations, including IaC artefacts where used, are handed over.
   source_hash: 5a564b20bcc8
   status: machine-draft
 VENDOR-HAND-P12:
-  text: ""
+  text: Administrative access, or a clear procedure for transferring it, is handed over.
   source_hash: 7224038a7858
   status: machine-draft
 VENDOR-HAND-P13:
-  text: ""
+  text: A rotation plan for passwords, certificates and other secrets is handed over where one applies.
   source_hash: 7bfc16b34a72
   status: machine-draft
 VENDOR-HAND-R01:
-  text: ""
+  text: At handover, a short explanation of the repository structure is provided when the solution is complex or spans several repositories.
   source_hash: ed91ef1302c3
   status: machine-draft
 VENDOR-HAND-R02:
-  text: ""
+  text: For complex systems, additional knowledge transfer material is handed over, such as a summary of key decisions, a description of system dependencies or a takeover checklist.
   source_hash: 4048db5c57fb
   status: machine-draft
 VENDOR-OWN-P01:
-  text: ""
+  text: All software built under the contract, its source code, infrastructure configurations and related artefacts belong to the municipality unless the contract explicitly says otherwise.
   source_hash: 62e53f9e8e59
   status: machine-draft
 VENDOR-OWN-P03:
-  text: ""
+  text: The vendor does not restrict the municipality's rights through licences, technical choices or non-transferable dependencies, unless this was explicitly agreed during procurement or in the contract.
   source_hash: ea3f8bbc5b8e
   status: machine-draft
 VENDOR-OWN-R01:
-  text: ""
+  text: When third-party components or licensed dependencies are used, the rights the municipality gets and the restrictions that apply are documented in advance.
   source_hash: 5dc48d150880
   status: machine-draft
 VENDOR-SCOPE-P02:
-  text: ""
+  text: These requirements apply to municipal subordinate institutions that develop information systems themselves, hire third parties, or hand systems over to the municipality for operation.
   source_hash: 8c3e4472b185
   status: machine-draft
 VENDOR-SCOPE-P03:
-  text: ""
+  text: The requirements apply to the whole system lifecycle, from design and development to handover, support and operation.
   source_hash: a6a160cfd392
   status: machine-draft
 VENDOR-SCOPE-R01:
-  text: ""
+  text: When a vendor or subordinate institution takes part in only part of the lifecycle, the contract or technical specification states which part of this standard they are responsible for.
   source_hash: "776e55747490"
   status: machine-draft
 VENDOR-TECH-P04:
-  text: ""
+  text: The system has no critical security vulnerabilities without a clear remediation plan or a documented risk acceptance.
   source_hash: c5ec1541b562
   status: machine-draft
 VENDOR-TECH-P05:
-  text: ""
+  text: The solution can be deployed and operated without vendor-specific licences, closed dependencies or non-transferable access, unless this was explicitly agreed during procurement or in the contract.
   source_hash: ed2193839ce2
   status: machine-draft
 VENDOR-TECH-R01:
-  text: ""
+  text: When not every chapter of this standard applies to a solution, the technical specification states which chapters are mandatory for that delivery or project.
   source_hash: ff9bc8fa5d39
   status: machine-draft
 VER-ALLOW-P01:
