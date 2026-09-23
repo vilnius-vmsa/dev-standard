@@ -12,24 +12,24 @@ Konkretūs turinio reikalavimai atskiriems dokumentų tipams apibrėžiami atiti
 
 PRIVALOMA:
 
-<!-- DOC-GEN-P01 | ai-reviewable -->
+<!-- DOC-GEN-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Dokumentacija turi būti kuriama, saugoma ir versijuojama kartu su kodu.
-<!-- DOC-GEN-P02 | ai-reviewable -->
+<!-- DOC-GEN-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Turi būti vienas aiškus tiesos šaltinis; draudžiama laikyti lygiagrečias, neversijuojamas ar nekontroliuojamas dokumentacijos kopijas.
-<!-- DOC-GEN-P03 | ai-reviewable -->
+<!-- DOC-GEN-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kodo, architektūros, API, diegimo ar eksploatacijos pakeitimai turi būti lydimi atitinkamo dokumentacijos atnaujinimo tame pačiame PR arba MR.
-<!-- DOC-GEN-P04 | ai-reviewable -->
+<!-- DOC-GEN-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Dokumentacija turi būti pakankama, kad trečioji šalis galėtų suprasti sistemą, ją diegti, eksploatuoti ir toliau vystyti be autoriaus dalyvavimo.
-<!-- DOC-GEN-P05 | ai-reviewable -->
+<!-- DOC-GEN-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Dokumentacijos kalba turi būti pasirinkta projekto pradžioje ir taikoma nuosekliai.
 
 REKOMENDUOJAMA:
 
-<!-- DOC-GEN-R01 | ai-reviewable -->
+<!-- DOC-GEN-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Techninę dokumentaciją rengti taip, kad ji būtų lengvai peržiūrima per diff, review ir versijų istoriją.
-<!-- DOC-GEN-R02 | ai-reviewable -->
+<!-- DOC-GEN-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei sistema turi išorinį tiekėją ar numatomą perdavimą kitai komandai, dokumentacijos detalumo lygį rekomenduojama vertinti pagal realų perėmimo scenarijų.
-<!-- DOC-GEN-R03 | ai-reviewable -->
+<!-- DOC-GEN-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Vengti dokumentacijos dubliavimo tarp skyrių; vietoje to naudoti nuorodas į pagrindinį reikalavimo šaltinį.
 
 > Susiję skyriai: [3 Architektūros ir dizaino principai](03-architektura.md) · [4 Programinio kodo kūrimo ir keitimo gairės](04-kodo-kurimo-gaires.md) · [9 Stebėsena, logai ir eksploatacija](09-stebesena-logai.md)
@@ -40,9 +40,9 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- DOC-REQ-P01 | ai-reviewable -->
+<!-- DOC-REQ-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kiekviena sistema turi turėti bent tokią dokumentaciją, kuri leidžia suprasti jos paskirtį, architektūrą, API ar integracijas, diegimą ir eksploataciją.
-<!-- DOC-REQ-P02 | ai-reviewable -->
+<!-- DOC-REQ-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Dokumentacijos rinkinys turi būti proporcingas sistemos sudėtingumui, tačiau negali būti mažesnis už šiame skyriuje nurodytą minimumą.
 
 ### 10.2.1. Architektūros aprašas
@@ -51,18 +51,18 @@ PRIVALOMA:
 
 <!-- DOC-REQ-P03 | human-reviewable -->
 *   Kiekviena sistema turi turėti architektūros aprašą.
-<!-- DOC-REQ-P04 | ai-reviewable -->
+<!-- DOC-REQ-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Architektūros aprašas turi aiškiai nurodyti sistemos paskirtį, ribas, pagrindinius komponentus, svarbiausias integracijas ir reikšmingus architektūrinius sprendimus.
-<!-- DOC-REQ-P05 | ai-reviewable -->
+<!-- DOC-REQ-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Architektūros aprašas turi būti pakankamas tam, kad kita techninė komanda galėtų suprasti sistemos loginę struktūrą ir pagrindinius sprendimo principus.
-<!-- DOC-REQ-P06 | ai-reviewable -->
+<!-- DOC-REQ-P06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Konkretūs architektūrinių diagramų, sudėtingų procesų dokumentavimo ir techninio onboarding reikalavimai apibrėžti [#3.8](03-architektura.md#38-diagramos-ir-dokumentavimas) skyriuje.
 
 REKOMENDUOJAMA:
 
-<!-- DOC-REQ-R01 | ai-reviewable -->
+<!-- DOC-REQ-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei sistema sudėtinga, architektūros aprašą rekomenduojama struktūruoti taip, kad būtų aiškiai atskirta loginė architektūra, integracijos, diegimo vaizdas ir svarbiausi kompromisai.
-<!-- DOC-REQ-R02 | ai-reviewable -->
+<!-- DOC-REQ-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei sistema turi reikšmingų nefunkcinių reikalavimų, rekomenduojama aiškiai parodyti, kaip architektūriniai sprendimai padeda juos užtikrinti.
 
 > Susiję skyriai: [3.8 Diagramos ir dokumentavimas](03-architektura.md#38-diagramos-ir-dokumentavimas) · [10.4 Architecture Decision Records (ADR)](#104-architecture-decision-records-adr)
@@ -71,18 +71,18 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- DOC-REQ-P07 | ai-reviewable -->
+<!-- DOC-REQ-P07 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Visoms API ir integracijoms turi būti prieinama aktuali ir mašiniškai skaitoma dokumentacija.
-<!-- DOC-REQ-P08 | ai-reviewable -->
+<!-- DOC-REQ-P08 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   API dokumentacijoje turi būti apibrėžta specifikacija, autentifikacijos būdas, versijavimo principas ir pagrindiniai atsakymų bei klaidų scenarijai.
-<!-- DOC-REQ-P09 | ai-reviewable -->
+<!-- DOC-REQ-P09 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   API dokumentacija turi būti versijuojama kartu su kodu ir atnaujinama kartu su kontrakto pakeitimais.
 
 REKOMENDUOJAMA:
 
-<!-- DOC-REQ-R03 | ai-reviewable -->
+<!-- DOC-REQ-R03 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Prie specifikacijos pateikti aiškius naudojimo pavyzdžius ir tipinius scenarijus, kai tai padeda integruojančioms komandoms.
-<!-- DOC-REQ-R04 | ai-reviewable -->
+<!-- DOC-REQ-R04 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Išorinėms ar tarporganizacinėms integracijoms rekomenduojama aiškiai nurodyti deprecation politiką ir suderinamumo ribas.
 
 > Susiję skyriai: [3.3 Backend ir API principai](03-architektura.md#33-backend-ir-api-principai) · [3.4 Duomenys ir integracijos](03-architektura.md#34-duomenys-ir-integracijos)
@@ -91,18 +91,18 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- DOC-REQ-P10 | ai-reviewable -->
+<!-- DOC-REQ-P10 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kiekvienai sistemai turi būti parengtos diegimo ir eksploatacijos instrukcijos.
-<!-- DOC-REQ-P11 | ai-reviewable -->
+<!-- DOC-REQ-P11 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Instrukcijose turi būti aiškiai aprašyta diegimo tvarka, būtina konfigūracija, migracijos, rollback principai ir pagrindiniai eksploataciniai veiksmai.
-<!-- DOC-REQ-P12 | ai-reviewable -->
+<!-- DOC-REQ-P12 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Instrukcijos turi būti pakankamos tam, kad kita techninė komanda galėtų atlikti diegimą ir pagrindinius eksploatacinius veiksmus be papildomo žodinio paaiškinimo.
 
 REKOMENDUOJAMA:
 
-<!-- DOC-REQ-R05 | ai-reviewable -->
+<!-- DOC-REQ-R05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Instrukcijose pateikti nuorodas į runbook’us, stebėsenos dashboardus, alerting taisykles ir kitus eksploatacijos artefaktus.
-<!-- DOC-REQ-R06 | ai-reviewable -->
+<!-- DOC-REQ-R06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei dalis veiksmų yra automatizuoti, instrukcijose rekomenduojama aiškiai atskirti, kas vykdoma per CI/CD, o kas yra rankiniai žingsniai.
 
 > Susiję skyriai: [8 DevOps ir CI/CD reikalavimai](08-devops-ci-cd.md) · [9.8 Eksploatacijos dokumentacija](09-stebesena-logai.md#98-eksploatacijos-dokumentacija)
@@ -111,16 +111,16 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- DOC-REQ-P13 | ai-reviewable -->
+<!-- DOC-REQ-P13 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei sistema turi galutinius naudotojus, turi būti parengta naudotojo dokumentacija arba lygiavertis pagalbos turinys.
-<!-- DOC-REQ-P14 | ai-reviewable -->
+<!-- DOC-REQ-P14 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Naudotojo dokumentacija turi paaiškinti pagrindinius sistemos naudojimo scenarijus, svarbiausius veiksmus ir reikšmingus apribojimus.
 <!-- DOC-REQ-P15 | human-reviewable -->
 *   Klaidų ir pranešimų logika turi būti aprašyta tiek, kiek to reikia naudotojo supratimui ir savarankiškam naudojimui.
 
 REKOMENDUOJAMA:
 
-<!-- DOC-REQ-R07 | ai-reviewable -->
+<!-- DOC-REQ-R07 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Naudotojo dokumentaciją rengti atsižvelgiant į tikslinę auditoriją ir jos skaitmeninį pasirengimą.
 <!-- DOC-REQ-R08 | human-reviewable -->
 *   Jei sistema skirta viešiesiems naudotojams, rekomenduojama įtraukti ir prieinamumo bei pagalbos scenarijus.
@@ -131,24 +131,24 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- DOC-FMT-P01 | ai-reviewable -->
+<!-- DOC-FMT-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Techninė dokumentacija turi būti saugoma formatu, kuris yra tinkamas versijų kontrolei, peržiūrai ir ilgalaikiam palaikymui.
-<!-- DOC-FMT-P02 | ai-reviewable -->
+<!-- DOC-FMT-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Markdown turi būti laikomas numatytuoju formatu techninei dokumentacijai, jei tam nėra pagrįstos išimties.
-<!-- DOC-FMT-P03 | ai-reviewable -->
+<!-- DOC-FMT-P03 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   API specifikacijos turi būti saugomos jų technologijai tinkamu mašiniškai skaitomu formatu.
-<!-- DOC-FMT-P04 | ai-reviewable -->
+<!-- DOC-FMT-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Architektūriniai sprendimai turi būti dokumentuojami struktūrizuotu formatu.
-<!-- DOC-FMT-P05 | ai-reviewable -->
+<!-- DOC-FMT-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Dokumentacijos struktūra turi būti nuosekli visame projekte ir aiškiai suprantama naujam komandos nariui ar perėmėjui.
 
 REKOMENDUOJAMA:
 
-<!-- DOC-FMT-R01 | ai-reviewable -->
+<!-- DOC-FMT-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Diagramoms naudoti tekstinius arba diagrams-as-code formatus, kai tai įmanoma.
-<!-- DOC-FMT-R02 | ai-reviewable -->
+<!-- DOC-FMT-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Grafiniai failai gali būti naudojami, jei kartu saugomas ir jų šaltinis.
-<!-- DOC-FMT-R03 | ai-reviewable -->
+<!-- DOC-FMT-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Dokumentų struktūrą rekomenduojama organizuoti taip, kad būtų aiškiai atskirti architektūros, API, eksploatacijos ir naudotojo dokumentacijos artefaktai.
 
 > Susiję skyriai: [3.8 Diagramos ir dokumentavimas](03-architektura.md#38-diagramos-ir-dokumentavimas) · [10.4 Architecture Decision Records (ADR)](#104-architecture-decision-records-adr)
@@ -161,20 +161,20 @@ Architecture Decision Record yra trumpas ir struktūrizuotas dokumentas, kuriame
 
 PRIVALOMA:
 
-<!-- DOC-ADR-P01 | ai-reviewable -->
+<!-- DOC-ADR-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   ADR turi būti rengiamas, kai pasirenkama ar keičiama esminė technologija, architektūros stilius, integracijų modelis, reikšmingas kompromisas arba nukrypimas nuo standarto.
-<!-- DOC-ADR-P02 | ai-reviewable -->
+<!-- DOC-ADR-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   ADR turi būti saugomas versijų valdymo sistemoje kartu su projektu.
 <!-- DOC-ADR-P03 | process-level -->
 *   ADR turi būti numeruojamas nuosekliai.
 <!-- DOC-ADR-P04 | process-level -->
 *   Pasikeitus sprendimui, turi būti kuriamas naujas ADR, susietas su ankstesniu, o ne perrašomas senasis.
-<!-- DOC-ADR-P05 | ai-reviewable -->
+<!-- DOC-ADR-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   ADR turi būti susietas su atitinkamu PR arba MR, užduotimi ir, jei taikoma, leidimu ar diegimu.
 
 REKOMENDUOJAMA:
 
-<!-- DOC-ADR-R01 | ai-reviewable -->
+<!-- DOC-ADR-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Naudoti vieningą ADR šabloną visos organizacijos mastu.
 <!-- DOC-ADR-R02 | process-level -->
 *   ADR turinį laikyti trumpą, aiškų ir orientuotą į sprendimo esmę, o ne perteklinį aprašymą.
@@ -191,22 +191,22 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- DOC-UPD-P01 | ai-reviewable -->
+<!-- DOC-UPD-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei keičiasi funkcionalumas, architektūra, API, diegimas ar eksploatacijos elgsena, dokumentacija turi būti atnaujinta tame pačiame pakeitime.
-<!-- DOC-UPD-P02 | ai-reviewable -->
+<!-- DOC-UPD-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Dokumentacijos atnaujinimas turi būti peržiūrimas kartu su kodu.
-<!-- DOC-UPD-P03 | ai-reviewable -->
+<!-- DOC-UPD-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Pasenusi arba faktinės sistemos būklės neatitinkanti dokumentacija laikoma defektu ir turi būti taisoma prioritetine tvarka.
-<!-- DOC-UPD-P04 | ai-reviewable -->
+<!-- DOC-UPD-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei projekte naudojami PR arba MR šablonai, juose turi būti aiškus klausimas dėl dokumentacijos atnaujinimo poreikio.
 
 REKOMENDUOJAMA:
 
-<!-- DOC-UPD-R01 | ai-reviewable -->
+<!-- DOC-UPD-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Dokumentacijos tikslumą peržiūrėti ne tik per kodo pakeitimus, bet ir po reikšmingų leidimų, architektūrinių pokyčių ar perdavimo kitai komandai.
-<!-- DOC-UPD-R02 | ai-reviewable -->
+<!-- DOC-UPD-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kai tai įmanoma, naudoti automatines dokumentacijos validavimo patikras, pavyzdžiui, broken links, specifikacijos validaciją ar diagramų generavimo patikrą.
-<!-- DOC-UPD-R03 | ai-reviewable -->
+<!-- DOC-UPD-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Dokumentacijos pasenimą vertinti kaip kokybės signalą, o ne tik kaip redakcinę problemą.
 
 > Susiję skyriai: [4.3.5 Pull Request / Merge Request reikalavimai](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai) · [4.4 Code Review principai](04-kodo-kurimo-gaires.md#44-code-review-principai) · [3.8 Diagramos ir dokumentavimas](03-architektura.md#38-diagramos-ir-dokumentavimas) · [8 DevOps ir CI/CD reikalavimai](08-devops-ci-cd.md)
