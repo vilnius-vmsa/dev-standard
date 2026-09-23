@@ -10,22 +10,22 @@ Konfigūracijos, slaptųjų raktų ir aplinkų politikos reikalavimai apibrėžt
 
 PRIVALOMA:
 
-<!-- OPS-ENV-P01 | ai-reviewable -->
+<!-- OPS-ENV-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Visi diegimai į aplinkas turi būti vykdomi tik per CI/CD procesą; rankiniai pakeitimai aplinkose draudžiami, išskyrus aiškiai dokumentuotus incidentų valdymo atvejus.
-<!-- OPS-ENV-P02 | ai-reviewable -->
+<!-- OPS-ENV-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   CI/CD ir GitOps turi užtikrinti, kad aplinkos būtų izoliuotos ir atitiktų 3.[5.3 skyriaus](05-versijavimas.md#53-bibliotekų-ir-paketų-valdymas) reikalavimus.
-<!-- OPS-ENV-P03 | ai-reviewable -->
+<!-- OPS-ENV-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Diegimo pipeline negali naudoti tos pačios konfigūracijos ar tų pačių kredencialų skirtingoms aplinkoms, jei tai nėra aiškiai aprašyta ir patvirtinta.
 <!-- OPS-ENV-P04 | process-level -->
 *   Aplinkų būsena turi būti valdoma deklaratyviai, o ne per neversijuojamus rankinius pakeitimus.
-<!-- OPS-ENV-P05 | ai-reviewable -->
+<!-- OPS-ENV-P05 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Slaptos reikšmės turi būti gaunamos iš saugios slaptųjų raktų saugyklos; jos negali būti laikomos repozitorijoje, build loguose ar pipeline artefaktuose.
 
 REKOMENDUOJAMA:
 
 <!-- OPS-ENV-R01 | human-reviewable -->
 *   Pasirinkti vieningą aplinkų pavadinimų ir DNS modelį visose sistemose.
-<!-- OPS-ENV-R02 | ai-reviewable -->
+<!-- OPS-ENV-R02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Dokumentuoti aplinkų, branch’ų ir diegimo srautų ryšį projekto diegimo dokumentacijoje.
 <!-- OPS-ENV-R03 | human-reviewable -->
 *   Išskirtinius aplinkų skirtumus laikyti minimalius ir aiškiai aprašytus.
@@ -36,11 +36,11 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- OPS-CI-P01 | ai-reviewable -->
+<!-- OPS-CI-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   CI pipeline turi būti vykdomas kiekvienam PR arba MR ir pagrindinėms šakoms.
-<!-- OPS-CI-P02 | ai-reviewable -->
+<!-- OPS-CI-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Build procesas turi būti pakartojamas, naudojant fiksuotas bazines versijas, lock failus ir kontroliuojamą kešavimą.
-<!-- OPS-CI-P03 | ai-reviewable -->
+<!-- OPS-CI-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   CI turi vykdyti bent šiuos patikrinimus, kai jie taikomi projektui:
     *   build
     *   formatavimo ir linting patikras
@@ -49,14 +49,14 @@ PRIVALOMA:
     *   saugumo ir priklausomybių patikras
 <!-- OPS-CI-P04 | human-reviewable -->
 *   Artefaktai turi būti generuojami su aiškiu ir atsekamu identifikatoriumi.
-<!-- OPS-CI-P05 | ai-reviewable -->
+<!-- OPS-CI-P05 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Nepraėję privalomi kokybės vartai turi blokuoti merge’inimą.
 
 REKOMENDUOJAMA:
 
-<!-- OPS-CI-R01 | ai-reviewable -->
+<!-- OPS-CI-R01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Naudoti pipeline optimizavimą, kuris trumpina grįžtamąjį ryšį, bet nemažina kokybės kontrolės apimties.
-<!-- OPS-CI-R02 | ai-reviewable -->
+<!-- OPS-CI-R02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Kritiniams projektams aiškiai atskirti greitus PR patikrinimus nuo pilnų priešleidiminių patikrinimų.
 
 > Susiję skyriai: [4.2.3 Automatinis formatavimas ir linting](04-kodo-kurimo-gaires.md#423-automatinis-formatavimas-ir-linting) · [4.5 Testai](04-kodo-kurimo-gaires.md#45-testai) · [7.9 Testų vykdymas CI/CD ir ataskaitos](07-testavimas.md#79-testų-vykdymas-ci-cd-ir-ataskaitos)
@@ -65,22 +65,22 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- OPS-CD-P01 | ai-reviewable -->
+<!-- OPS-CD-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Diegimai turi būti atliekami per automatizuotą CD procesą, kuris užtikrina atsekamą ir pakartojamą leidimą į tikslinę aplinką.
 <!-- OPS-CD-P02 | human-reviewable -->
 *   GitOps turi būti laikomas numatytuoju diegimo modeliu ten, kur jis taikomas.
-<!-- OPS-CD-P03 | ai-reviewable -->
+<!-- OPS-CD-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Rollback mechanizmas turi būti apibrėžtas, dokumentuotas ir patikrintas.
-<!-- OPS-CD-P04 | ai-reviewable -->
+<!-- OPS-CD-P04 | ai-reviewable | stacks=infra,db | enforced-by=ai -->
 *   Duomenų bazės migracijos turi būti integruotos į leidimo procesą ir vykdomos kontroliuotai.
-<!-- OPS-CD-P05 | ai-reviewable -->
+<!-- OPS-CD-P05 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Diegimo strategija turi būti aiškiai pasirinkta ir atitikti sistemos riziką bei kritiškumą.
 
 REKOMENDUOJAMA:
 
-<!-- OPS-CD-R01 | ai-reviewable -->
+<!-- OPS-CD-R01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Kritiniams arba aukštos rizikos leidimams taikyti pažangesnes strategijas, tokias kaip canary ar blue-green.
-<!-- OPS-CD-R02 | ai-reviewable -->
+<!-- OPS-CD-R02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Jei organizacijoje taikomi release langai, juos rekomenduojama derinti su eksploatacijos ir verslo poreikiais.
 <!-- OPS-CD-R03 | human-reviewable -->
 *   Rollback scenarijus rekomenduojama tikrinti ne tik teoriškai, bet ir praktiniais bandymais.
@@ -95,16 +95,16 @@ PRIVALOMA:
 *   Kiekvienas leidimas turi turėti aiškią versiją ir atsekamą ryšį su kodo būsena.
 <!-- OPS-VER-P02 | human-reviewable -->
 *   Konteinerių image ir kiti artefaktai turi būti žymimi taip, kad būtų aišku, kokia kodo versija yra įdiegta.
-<!-- OPS-VER-P03 | ai-reviewable -->
+<!-- OPS-VER-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Produkcijoje negali būti remiamasi vien latest tipo žymėjimu.
 <!-- OPS-VER-P04 | human-reviewable -->
 *   Versijavimo ir žymėjimo schema turi būti nuosekli visose projekto dalyse.
 
 REKOMENDUOJAMA:
 
-<!-- OPS-VER-R01 | ai-reviewable -->
+<!-- OPS-VER-R01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Artefaktams naudoti tiek semantinę versiją, tiek nekintamą commit ar build identifikatorių.
-<!-- OPS-VER-R02 | ai-reviewable -->
+<!-- OPS-VER-R02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Release artefaktų ženklinimą suderinti su release notes ir diegimo dokumentacija.
 
 > Susiję skyriai: [5.1 Semantinis versijavimas (SemVer)](05-versijavimas.md#51-semantinis-versijavimas-semver) · [5.2 API versijavimas](05-versijavimas.md#52-api-versijavimas) · [8.9 Leidimų (release) valdymas](#89-leidimų-release-valdymas)
@@ -113,18 +113,18 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- OPS-K8S-P01 | ai-reviewable -->
+<!-- OPS-K8S-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Diegimo manifestai turi apimti resursų limits ir requests, health patikrinimus ir saugaus vykdymo nustatymus.
-<!-- OPS-K8S-P02 | ai-reviewable -->
+<!-- OPS-K8S-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Diegimo konfigūracija turi įgyvendinti [3.6 skyriaus](03-architektura.md#36-patikimumas-ir-atsparumas) reikalavimus dėl replikų, health semantikos ir atsparumo.
-<!-- OPS-K8S-P03 | ai-reviewable -->
+<!-- OPS-K8S-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Įėjimas į sistemą turi būti valdomas saugiai, naudojant TLS ir organizacijos reikalavimus atitinkančią ingress konfigūraciją.
-<!-- OPS-K8S-P04 | ai-reviewable -->
+<!-- OPS-K8S-P04 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Konteinerių ir Kubernetes konfigūracija negali prieštarauti saugumo, patikimumo ir eksploatacijos reikalavimams.
 
 REKOMENDUOJAMA:
 
-<!-- OPS-K8S-R01 | ai-reviewable -->
+<!-- OPS-K8S-R01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Kritinėms sistemoms naudoti papildomas patikimumo priemones, tokias kaip pod disruption budget ar horizontalus scaling, kai to reikalauja NFR.
 <!-- OPS-K8S-R02 | human-reviewable -->
 *   Manifestų kokybę tikrinti dar prieš diegimą, o ne tik klasteryje.
@@ -135,18 +135,18 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- OPS-DEVSEC-P01 | ai-reviewable -->
+<!-- OPS-DEVSEC-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   CI/CD procese turi būti vykdomos saugumo patikros pagal sistemos rizikos lygį.
 <!-- OPS-DEVSEC-P02 | human-reviewable -->
 *   Turi būti tikrinamos priklausomybės, statinė analizė ir, kai taikoma, konteinerių image.
-<!-- OPS-DEVSEC-P03 | ai-reviewable -->
+<!-- OPS-DEVSEC-P03 | ai-reviewable | stacks=infra | enforced-by=tool:gitleaks -->
 *   Repozitorijose ir CI procese turi būti įjungtas slaptųjų raktų aptikimas.
-<!-- OPS-DEVSEC-P04 | ai-reviewable -->
+<!-- OPS-DEVSEC-P04 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Saugumo radiniai, laikomi kritiniais pagal organizacijos politiką, turi blokuoti merge’inimą arba leidimą, kol rizika neišspręsta arba aiškiai nepriimta.
 
 REKOMENDUOJAMA:
 
-<!-- OPS-DEVSEC-R01 | ai-reviewable -->
+<!-- OPS-DEVSEC-R01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   SBOM generuoti automatiškai leidimo metu ir saugoti kartu su release artefaktais.
 <!-- OPS-DEVSEC-R02 | process-level -->
 *   DevSecOps kontrolę derinti ne tik su įrankių rezultatais, bet ir su architektūrine rizikos peržiūra.
@@ -159,18 +159,18 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- OPS-MON-P01 | ai-reviewable -->
+<!-- OPS-MON-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Diegimo ir CI/CD konfigūracija turi užtikrinti, kad sistema atitiktų [9 skyriaus](09-stebesena-logai.md) reikalavimus logams, metrikoms, alertams ir eksploatacinei parengčiai.
-<!-- OPS-MON-P02 | ai-reviewable -->
+<!-- OPS-MON-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Turi būti užtikrintas logų, metrikų ir, jei taikoma, tracing signalų eksportas į centralizuotą stebėsenos platformą.
-<!-- OPS-MON-P03 | ai-reviewable -->
+<!-- OPS-MON-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Diegimo procese turi būti aišku, kada ir kaip tikrinama observability konfigūracija.
-<!-- OPS-MON-P04 | ai-reviewable -->
+<!-- OPS-MON-P04 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Jei release procesas apima rollback ar incidentų veiksmus, jie turi būti suderinti su eksploatacijos tvarka.
 
 REKOMENDUOJAMA:
 
-<!-- OPS-MON-R01 | ai-reviewable -->
+<!-- OPS-MON-R01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Prieš leidimą tikrinti bent minimalią observability parengtį, pvz., health, logų surinkimą ir pagrindines metrikas.
 <!-- OPS-MON-R02 | process-level -->
 *   Release peržiūroje rekomenduojama vertinti ir observability pokyčius, jei pakeitimas daro įtaką diagnostikai.
@@ -183,9 +183,9 @@ PRIVALOMA:
 
 <!-- OPS-IAC-P01 | human-reviewable -->
 *   Infrastruktūros pakeitimai turi būti vykdomi per IaC ir valdomi per versijų kontrolę.
-<!-- OPS-IAC-P02 | ai-reviewable -->
+<!-- OPS-IAC-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   IaC pakeitimai turi būti peržiūrimi per PR arba MR procesą taip pat, kaip ir programinis kodas.
-<!-- OPS-IAC-P03 | ai-reviewable -->
+<!-- OPS-IAC-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Infrastruktūros būsena negali būti valdoma per neversijuojamus rankinius pakeitimus kaip įprastą praktiką.
 <!-- OPS-IAC-P04 | human-reviewable -->
 *   Kritiniai infrastruktūros sprendimai turi būti atsekami ir audituojami.
@@ -203,20 +203,20 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- OPS-REL-P01 | ai-reviewable -->
+<!-- OPS-REL-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Kiekvienas produkcinis leidimas turi turėti aiškų release aprašą.
-<!-- OPS-REL-P02 | ai-reviewable -->
+<!-- OPS-REL-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Prieš leidimą turi būti aišku, kokie pakeitimai įtraukti, kokios rizikos žinomos, kokios migracijos reikalingos ir kaip veikia rollback.
-<!-- OPS-REL-P03 | ai-reviewable -->
+<!-- OPS-REL-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Leidimo patvirtinimo procesas turi būti suderintas su organizacijos atsakomybėmis ir audito poreikiais.
-<!-- OPS-REL-P04 | ai-reviewable -->
+<!-- OPS-REL-P04 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Minimalūs leidimo priėmimo kriterijai turi būti apibrėžti iš anksto.
 
 REKOMENDUOJAMA:
 
-<!-- OPS-REL-R01 | ai-reviewable -->
+<!-- OPS-REL-R01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Produkciniams leidimams naudoti standartizuotą release notes šabloną.
-<!-- OPS-REL-R02 | ai-reviewable -->
+<!-- OPS-REL-R02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Leidimo peržiūroje rekomenduojama įtraukti techninius, eksploatacinius ir verslo pokyčius vienoje vietoje.
 <!-- OPS-REL-R03 | human-reviewable -->
 *   Kritiniams leidimams rekomenduojama aiškiai nurodyti stebėjimo periodą po diegimo.
@@ -231,7 +231,7 @@ PRIVALOMA:
 *   Resursai turi būti identifikuojami taip, kad būtų įmanoma matyti sąnaudas pagal sistemą, projektą ar aplinką.
 <!-- OPS-FIN-P02 | human-reviewable -->
 *   Artefaktų, image, logų ar kitų saugojimo objektų retention turi būti valdomas taip, kad nekauptų nepagrįstų sąnaudų.
-<!-- OPS-FIN-P03 | ai-reviewable -->
+<!-- OPS-FIN-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Sistemos ir infrastruktūros sprendimai turi būti projektuojami ne tik pagal funkcionalumą, bet ir pagal palaikymo bei eksploatacijos efektyvumą.
 
 REKOMENDUOJAMA:
@@ -247,11 +247,11 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- OPS-GITOPS-P01 | ai-reviewable -->
+<!-- OPS-GITOPS-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   GitOps repozitorijų struktūra turi aiškiai atskirti aplikacijų šablonus, aplinkų parametrus ir, jei taikoma, klasterių deklaracijas.
-<!-- OPS-GITOPS-P02 | ai-reviewable -->
+<!-- OPS-GITOPS-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Repo struktūra turi būti nuosekli, kad būtų aišku, kur saugomi bendri šablonai ir kur aplinkų specifiniai parametrai.
-<!-- OPS-GITOPS-P03 | ai-reviewable -->
+<!-- OPS-GITOPS-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Jei naudojamas Helm ar lygiavertės priemonės, jų versijavimas ir validacija turi būti aiškiai apibrėžti.
 
 REKOMENDUOJAMA:
