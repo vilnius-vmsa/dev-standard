@@ -14,7 +14,8 @@
     "test": "node --test \"scripts/**/*.test.mjs\"",
     "rules:validate": "node scripts/standard/cli.mjs validate",
     "rules:accept": "node scripts/standard/cli.mjs accept",
-    "rules:draft": "node scripts/standard/cli.mjs draft"
+    "rules:draft": "node scripts/standard/cli.mjs draft",
+    "rules:bundle": "node scripts/standard/cli.mjs bundle"
   },
   "dependencies": {
     "@docusaurus/core": "^3.7.0",

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import { access, readFile, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildBundle } from './lib/bundle.mjs';
 import { acceptEntries, applyDrafts, checkEnglish, parseEnglish, stringifyEnglish } from './lib/english.mjs';
 import { loadRules } from './lib/rules.mjs';
 import { loadStacks } from './lib/stacks.mjs';
@@ -12,6 +13,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const DOCS_DIR = path.join(ROOT, 'docs');
 const STACKS_FILE = path.join(ROOT, 'standard/stacks.yaml');
 const EN_FILE = path.join(ROOT, 'standard/rules.en.yaml');
+// Keep in sync with url + baseUrl in docusaurus.config.js.
+const SITE_URL = (process.env.DEV_STANDARD_SITE_URL ?? 'https://vilnius-vmsa.github.io/dev-standard').replace(/\/+$/, '');
 
 const [command, ...args] = process.argv.slice(2);
 const flag = (name) => args.includes(`--${name}`);
@@ -65,6 +68,26 @@ const commands = {
     if (drafted.length === 0) return console.log('✓ nothing to draft.');
     await saveEnglish(entries);
     console.log(`✓ drafted ${drafted.length} rule(s) as machine-draft: ${drafted.join(', ')}`);
+  },
+
+  async bundle() {
+    const out = option('out');
+    const version = option('version');
+    if (!out || !version) fail(['bundle needs --out=<dir> and --version=<tag>']);
+    const { rules, stacks, errors } = await loadDocs();
+    const english = (await loadEnglish()) ?? {};
+    // --allow-drafts is for local previews only; releases must use reviewed English.
+    errors.push(...checkEnglish(rules, english, { strict: !flag('allow-drafts') }));
+    if (errors.length) fail(errors);
+
+    const files = buildBundle({ rules, english, stacks, version, siteUrl: SITE_URL });
+    for (const [relPath, content] of files) {
+      const target = path.resolve(ROOT, out, relPath);
+      await mkdir(path.dirname(target), { recursive: true });
+      await writeFile(target, content);
+    }
+    const orgChars = files.get('org-instructions.md').length;
+    console.log(`✓ wrote ${files.size} files to ${out} (org-instructions.md: ${orgChars} characters)`);
   },
 
   async accept() {
