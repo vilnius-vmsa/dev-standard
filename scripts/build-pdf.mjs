@@ -266,6 +266,11 @@ function orderRoutes(docRoutes, sitemapRoutes, basePrefix) {
   }
 
   for (const route of sitemapRoutes) {
+    // The English rules page is non-binding and not part of the official PDF.
+    if (route.endsWith('/rules')) {
+      continue;
+    }
+
     if (!orderedRoutes.includes(route)) {
       orderedRoutes.push(route);
     }

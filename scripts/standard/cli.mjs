@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { buildBundle } from './lib/bundle.mjs';
 import { acceptEntries, applyDrafts, checkEnglish, parseEnglish, stringifyEnglish } from './lib/english.mjs';
 import { loadRules } from './lib/rules.mjs';
+import { buildSiteData } from './lib/site-data.mjs';
 import { loadStacks } from './lib/stacks.mjs';
 import { stubTranslator } from './lib/translators.mjs';
 import { validateRules } from './lib/validate-docs.mjs';
@@ -13,6 +14,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const DOCS_DIR = path.join(ROOT, 'docs');
 const STACKS_FILE = path.join(ROOT, 'standard/stacks.yaml');
 const EN_FILE = path.join(ROOT, 'standard/rules.en.yaml');
+const SITE_DATA_FILE = path.join(ROOT, 'src/data/rules.generated.json');
 // Keep in sync with url + baseUrl in docusaurus.config.js.
 const SITE_URL = (process.env.DEV_STANDARD_SITE_URL ?? 'https://vilnius-vmsa.github.io/dev-standard').replace(/\/+$/, '');
 
@@ -88,6 +90,15 @@ const commands = {
     }
     const orgChars = files.get('org-instructions.md').length;
     console.log(`✓ wrote ${files.size} files to ${out} (org-instructions.md: ${orgChars} characters)`);
+  },
+
+  // Does not fail on validation errors, so a local `npm start` works mid-edit; CI validates separately.
+  async 'site-data'() {
+    const { rules } = await loadRules(DOCS_DIR);
+    const data = buildSiteData({ rules, english: (await loadEnglish()) ?? {} });
+    await mkdir(path.dirname(SITE_DATA_FILE), { recursive: true });
+    await writeFile(SITE_DATA_FILE, `${JSON.stringify(data, null, 2)}\n`);
+    console.log(`✓ wrote ${data.length} rules to ${path.relative(ROOT, SITE_DATA_FILE)}`);
   },
 
   async accept() {
