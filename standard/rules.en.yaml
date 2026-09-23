@@ -735,463 +735,463 @@ ARCH-REL-R15:
   source_hash: 9ad336bfee88
   status: machine-draft
 CODE-AI-P01:
-  text: ""
+  text: "AI-generated code is treated exactly like human-written code: all quality, security, testing and review requirements of this standard apply."
   source_hash: 86791119ae3f
   status: machine-draft
 CODE-AI-P02:
-  text: ""
+  text: AI-generated code passes all standard CI checks (linting, SAST, tests) without exception.
   source_hash: 0562f353322c
   status: machine-draft
 CODE-AI-P07:
-  text: ""
+  text: AI tools are used only through channels and configurations approved by the organisation.
   source_hash: 2386ee02648e
   status: machine-draft
 CODE-AI-P09:
-  text: ""
+  text: Dependencies and imports suggested by AI are checked for existence, maintenance status and security, because AI models can suggest packages that do not exist.
   source_hash: 9a896a48ff3a
   status: machine-draft
 CODE-CONV-P04:
-  text: ""
+  text: Naming conventions are applied consistently across the project.
   source_hash: 210092503dc2
   status: machine-draft
 CODE-CONV-P05:
-  text: ""
+  text: Classes, types and components use PascalCase.
   source_hash: 97916cf4afd7
   status: machine-draft
 CODE-CONV-P06:
-  text: ""
+  text: Methods, functions and variables use camelCase.
   source_hash: 5d7e4f0aab33
   status: machine-draft
 CODE-CONV-P09:
-  text: ""
+  text: URL segments use kebab-case.
   source_hash: 6f1409ace2e9
   status: machine-draft
 CODE-CONV-P11:
-  text: ""
+  text: Languages or technologies not covered by the standard follow their official or most widely accepted community conventions.
   source_hash: 80614763daa1
   status: machine-draft
 CODE-CONV-P12:
-  text: ""
+  text: Deviations from conventions are stated in the project README or other project-level agreements.
   source_hash: d5d6170a1689
   status: machine-draft
 CODE-CONV-P13:
-  text: ""
+  text: Every project uses the formatting and linting rule set provided or approved by the organisation.
   source_hash: 4488189d70a2
   status: machine-draft
 CODE-CONV-P15:
-  text: ""
+  text: The specific tools and their versions are stated in the organisation's technology register or the project's technical description.
   source_hash: 2cd527ec2124
   status: machine-draft
 CODE-CONV-P16:
-  text: ""
+  text: Formatting and linting run both locally before commit and in CI/CD.
   source_hash: 45f522b48ce6
   status: machine-draft
 CODE-CONV-P17:
-  text: ""
+  text: Failed automatic formatting or linting checks block the commit or merge, depending on the process used.
   source_hash: 5b4e88920970
   status: machine-draft
 CODE-CONV-P18:
-  text: ""
+  text: Rule exceptions for a specific line or block are allowed only with a clear explanation in the code.
   source_hash: f30cf74cf947
   status: machine-draft
 CODE-CONV-P20:
-  text: ""
+  text: The decision to refactor is based primarily on the Single Responsibility principle and readability, not just on line counts.
   source_hash: fd9b710d770e
   status: machine-draft
 CODE-CONV-R01:
-  text: ""
+  text: The project structure stays as stable as possible over the project's lifetime.
   source_hash: d4aa6c8981e3
   status: machine-draft
 CODE-CONV-R03:
-  text: ""
+  text: When the stack uses several languages, their conventions are aligned so the whole team can easily follow them.
   source_hash: 72e23a295e4f
   status: machine-draft
 CODE-CONV-R04:
-  text: ""
+  text: URL, database and file naming conventions are aligned with the relevant architecture and API requirements.
   source_hash: 971945a15434
   status: machine-draft
 CODE-CONV-R05:
-  text: ""
+  text: Pre-commit hooks are used as the first line of defence against low-quality code entering the repository.
   source_hash: 93c306fd5a88
   status: machine-draft
 CODE-CONV-R06:
-  text: ""
+  text: Project-specific additions to the base rule set are used only when they do not conflict with the organisation's common rules.
   source_hash: cb2364d8bf50
   status: machine-draft
 CODE-DEBT-P01:
-  text: ""
+  text: Large refactorings are planned separately and agreed with the product owner when they significantly affect scope, deadlines or risk.
   source_hash: 5fae6b3a1acc
   status: machine-draft
 CODE-DEBT-P02:
-  text: ""
+  text: A refactoring that changes the architecture, integration model or core technical patterns is documented in an ADR.
   source_hash: 87cf7f76a476
   status: machine-draft
 CODE-DEBT-P04:
-  text: ""
+  text: Technical debt is not ignored indefinitely; its status is reviewed periodically as part of planning and prioritisation.
   source_hash: 665acc308819
   status: machine-draft
 CODE-DEBT-P05:
-  text: ""
+  text: TODO and FIXME comments are allowed only with a clear link to a task; comments without a link are not acceptable.
   source_hash: f14992fa7340
   status: machine-draft
 CODE-DEBT-P06:
-  text: ""
+  text: Technical debt is assessed not only in code but also in dependencies, architectural trade-offs, unautomated processes, outdated configuration and operational gaps.
   source_hash: 89ec3d511e00
   status: machine-draft
 CODE-DEBT-R01:
-  text: ""
+  text: Small refactorings such as renames, extracting methods or reducing duplication are done together with functional changes.
   source_hash: 26ad17f7cf35
   status: machine-draft
 CODE-DEBT-R02:
-  text: ""
+  text: Leave the code cleaner than you found it, as long as that adds no disproportionate risk or changes the task's scope.
   source_hash: 38d683aee6ef
   status: machine-draft
 CODE-DEBT-R03:
-  text: ""
+  text: Refactoring and technical debt priorities are judged by their impact on maintainability, security, testability, performance and future changes.
   source_hash: 0978ddfa87a8
   status: machine-draft
 CODE-GEN-P04:
-  text: ""
+  text: Methods and functions have one clear responsibility; if a method is hard to describe with a short name, it does too much.
   source_hash: a59cf4c2c646
   status: machine-draft
 CODE-GEN-P05:
-  text: ""
+  text: Comments are written only to explain a non-obvious business rule, non-standard behaviour of an external system, a deliberate trade-off, or the reasoning behind a complex algorithm.
   source_hash: a57e38bf7d5b
   status: machine-draft
 CODE-GEN-P06:
-  text: ""
+  text: Comments about technical debt or temporary solutions link to a task.
   source_hash: 04aac5503ef2
   status: machine-draft
 CODE-GEN-P07:
-  text: ""
+  text: Outdated comments or comments that no longer match the code are updated or removed immediately.
   source_hash: f69a9b3801ef
   status: machine-draft
 CODE-GEN-P08:
-  text: ""
+  text: Commented-out code is not kept.
   source_hash: 48740485d42b
   status: machine-draft
 CODE-GEN-P09:
-  text: ""
+  text: Comments that restate obvious code logic are not written.
   source_hash: 1eb435323570
   status: machine-draft
 CODE-GEN-P10:
-  text: ""
+  text: The repository contains no unreachable code and no unused imports, variables, methods or classes.
   source_hash: cdab9501b011
   status: machine-draft
 CODE-GEN-P11:
-  text: ""
+  text: Temporary debug code never stays in production code or in code merged into main branches.
   source_hash: 19d99e78f642
   status: machine-draft
 CODE-GEN-P12:
-  text: ""
+  text: Dead code is removed immediately.
   source_hash: 39f05b8a7a84
   status: machine-draft
 CODE-GEN-P14:
-  text: ""
+  text: Magic values without context are forbidden.
   source_hash: 435c5eff8dbd
   status: machine-draft
 CODE-GEN-P15:
-  text: ""
+  text: Constants are grouped by domain or feature rather than scattered through the code.
   source_hash: d82e9ab7309e
   status: machine-draft
 CODE-GEN-P16:
-  text: ""
+  text: Environment-specific values such as URLs, limits, feature flags or time intervals are never hardcoded in code.
   source_hash: e9bd77875f96
   status: machine-draft
 CODE-GEN-P17:
-  text: ""
+  text: Such values are managed through environment variables or configuration services.
   source_hash: 2b726eb2af4d
   status: machine-draft
 CODE-GEN-P18:
-  text: ""
+  text: Errors are handled explicitly; silently swallowing exceptions is forbidden.
   source_hash: 705d3c6b01d9
   status: machine-draft
 CODE-GEN-P20:
-  text: ""
+  text: Error messages shown to users are informative but do not reveal internal system details.
   source_hash: 41cfbea482a0
   status: machine-draft
 CODE-GEN-P22:
-  text: ""
+  text: Asynchronous programming is used consistently; blocking calls in an asynchronous context are forbidden.
   source_hash: d3f0c39f9e0d
   status: machine-draft
 CODE-GEN-P23:
-  text: ""
+  text: Shared resources are protected with suitable synchronisation mechanisms.
   source_hash: b259009555fd
   status: machine-draft
 CODE-GEN-P24:
-  text: ""
+  text: Cancellation is passed through the whole chain of asynchronous calls, so operations can be stopped correctly.
   source_hash: 56226fbc4df3
   status: machine-draft
 CODE-GEN-R02:
-  text: ""
+  text: A comment that explains what the code does is a signal to refactor the code rather than expand the comment.
   source_hash: 4e5799888a9d
   status: machine-draft
 CODE-GEN-R03:
-  text: ""
+  text: Linters and IDE inspections detect dead code automatically, and such violations block merging in CI.
   source_hash: 5f5e79bcc433
   status: machine-draft
 CODE-GEN-R04:
-  text: ""
+  text: Configuration values are grouped and documented so it is clear which are shared and which depend on the environment.
   source_hash: e224deb35b39
   status: machine-draft
 CODE-GEN-R05:
-  text: ""
+  text: The configuration, secrets and environment requirements of section 3.5 also apply.
   source_hash: 39f6a5e65274
   status: machine-draft
 CODE-GEN-R08:
-  text: ""
+  text: Asynchronous code is designed to be easy to test and predictable.
   source_hash: 06f3aa8a003c
   status: machine-draft
 CODE-REV-P01:
-  text: ""
+  text: Every PR or MR is reviewed by at least one other team member.
   source_hash: 6fd447ea52cd
   status: machine-draft
 CODE-REV-P02:
-  text: ""
+  text: Complex, high-risk or architecturally significant changes get an additional review by the tech lead or architect.
   source_hash: 93d8012bb768
   status: machine-draft
 CODE-REV-P04:
-  text: ""
+  text: The author is responsible for the quality of the submitted code and for addressing all review comments.
   source_hash: fbc92e7cc552
   status: machine-draft
 CODE-REV-P05:
-  text: ""
+  text: The reviewer is responsible for clearly recording the risks, non-conformities and possible improvements they notice.
   source_hash: 1290e772e9d7
   status: machine-draft
 CODE-REV-P06:
-  text: ""
+  text: Unresolved review discussions block merging.
   source_hash: e3de4b047090
   status: machine-draft
 CODE-REV-R02:
-  text: ""
+  text: "Review comments focus on the solution, not the person: critique the code, not the author."
   source_hash: ea0dc662f4ad
   status: machine-draft
 CODE-REV-R03:
-  text: ""
+  text: When a change covers several topics, reviews clearly separate critical remarks from suggested improvements.
   source_hash: 16003f21c836
   status: machine-draft
 CODE-REV-R04:
-  text: ""
+  text: For large or complex changes, the author points out the highest-risk areas that need extra attention in review.
   source_hash: 2932fe4d5406
   status: machine-draft
 CODE-SEC-P01:
-  text: ""
+  text: Source code contains no passwords, keys, tokens or other sensitive information.
   source_hash: cfdcbbe2fab6
   status: machine-draft
 CODE-SEC-P02:
-  text: ""
+  text: External input is always treated as untrusted and validated on the server, regardless of client-side validation.
   source_hash: 80ad2fd950b3
   status: machine-draft
 CODE-SEC-P03:
-  text: ""
+  text: Queries, commands and other executable fragments are never built directly from unvalidated input.
   source_hash: a64632892cfa
   status: machine-draft
 CODE-SEC-P04:
-  text: ""
+  text: Error messages shown to users do not reveal internal details such as stack traces, SQL structure, file paths or infrastructure information.
   source_hash: 0dd38606417d
   status: machine-draft
 CODE-SEC-P06:
-  text: ""
+  text: New dependencies are not added without assessing their maintenance status, licence and known security risks.
   source_hash: 0a57a228b00b
   status: machine-draft
 CODE-SEC-R02:
-  text: ""
+  text: Validation, authorization and error-handling logic is centralised where the architecture allows.
   source_hash: 36c270e88b7b
   status: machine-draft
 CODE-SEC-R03:
-  text: ""
+  text: Static analysis and other automated secure-coding checks run before merge.
   source_hash: 8ce4f98b8b21
   status: machine-draft
 CODE-SEC-R04:
-  text: ""
+  text: Code review also assesses whether a change increases the attack surface or introduces new risks of leaking sensitive data.
   source_hash: 84dcde119d30
   status: machine-draft
 CODE-TEST-P01:
-  text: ""
+  text: Tests are part of the code, not an add-on; they live in the same repository and are maintained together with the code.
   source_hash: 9de04de3ba56
   status: machine-draft
 CODE-TEST-P02:
-  text: ""
+  text: New functionality has appropriate tests before it is merged.
   source_hash: 86c5d2030f77
   status: machine-draft
 CODE-TEST-P03:
-  text: ""
+  text: Every bug fix includes a test that reproduces the bug and confirms the fix.
   source_hash: 23aefeb7afed
   status: machine-draft
 CODE-TEST-P04:
-  text: ""
+  text: The scope of testing matches the nature and risk of the change.
   source_hash: d9ba95229df6
   status: machine-draft
 CODE-TEST-P05:
-  text: ""
+  text: At minimum the project has unit tests for business logic and isolated components, integration or API tests for contracts between services, and E2E tests for critical user flows (scope defined at project start).
   source_hash: 4eb08af83e14
   status: machine-draft
 CODE-TEST-P06:
-  text: ""
+  text: A PR or MR is not ready to merge if required tests are missing or not updated.
   source_hash: 180424a56bb6
   status: machine-draft
 CODE-TEST-R01:
-  text: ""
+  text: Test readability matters as much as production code readability.
   source_hash: 3da1d3b15742
   status: machine-draft
 CODE-TEST-R02:
-  text: ""
+  text: Tests use clear names, a consistent structure and avoid unnecessary logic.
   source_hash: 30bf5fe51c51
   status: machine-draft
 CODE-TEST-R03:
-  text: ""
+  text: Where it makes sense, tests follow the Arrange-Act-Assert pattern.
   source_hash: 045a4ec9e367
   status: machine-draft
 CODE-TEST-R04:
-  text: ""
+  text: Test coverage is tracked, with minimum thresholds set at project start.
   source_hash: 7efb56efd227
   status: machine-draft
 CODE-TEST-R05:
-  text: ""
+  text: Critical modules are tested more rigorously than supporting or low-risk components.
   source_hash: 9de6374ab662
   status: machine-draft
 CODE-VCS-P01:
-  text: ""
+  text: All application code, infrastructure code, configuration templates and automation scripts are stored in Git.
   source_hash: 6f7228237b77
   status: machine-draft
 CODE-VCS-P02:
-  text: ""
+  text: Repositories are kept on a platform owned or controlled by the municipality; a vendor's private repository must never be the only copy of the code.
   source_hash: a2b8582aa9bf
   status: machine-draft
 CODE-VCS-P03:
-  text: ""
+  text: External vendors work in repositories on the municipality's platform or use automated mirroring with traceable synchronisation.
   source_hash: a784cddc3d05
   status: machine-draft
 CODE-VCS-P04:
-  text: ""
+  text: Repository access is granted and revoked according to responsibilities and contract validity.
   source_hash: 49f10241b86f
   status: machine-draft
 CODE-VCS-P05:
-  text: ""
+  text: Direct changes on servers, file systems or admin interfaces that bypass the repository are forbidden.
   source_hash: 35e6abe9ff06
   status: machine-draft
 CODE-VCS-P06:
-  text: ""
+  text: Projects use a clear, documented branching strategy applied the same way by the whole team.
   source_hash: c895b6739cbc
   status: machine-draft
 CODE-VCS-P07:
-  text: ""
+  text: Branch names follow the format <type>/ticket-<ticket id>-<short description>, for example feature/ticket-123456-add-2fa.
   source_hash: 8c1b0a408656
   status: machine-draft
 CODE-VCS-P09:
-  text: ""
+  text: Changes to these branches are made only through a PR or MR.
   source_hash: 926c41d1ef82
   status: machine-draft
 CODE-VCS-P11:
-  text: ""
+  text: If a PR is changed after review, earlier approvals are reviewed again or automatically dismissed, as the platform allows.
   source_hash: 652fdbadaac7
   status: machine-draft
 CODE-VCS-P12:
-  text: ""
+  text: Each commit contains one clear logical change or fix.
   source_hash: d9e76777072f
   status: machine-draft
 CODE-VCS-P13:
-  text: ""
+  text: Commit messages are clear, traceable and written in English.
   source_hash: 6da2889d7bd8
   status: machine-draft
 CODE-VCS-P14:
-  text: ""
+  text: Automatic formatting or linting commits do not hide functional changes.
   source_hash: bbde62a6ae1a
   status: machine-draft
 CODE-VCS-P15:
-  text: ""
+  text: Commit messages state the change type and reference the related task.
   source_hash: 1080b3a22736
   status: machine-draft
 CODE-VCS-P16:
-  text: ""
+  text: "Commit messages use Conventional Commits v1.0.0: <type>(<scope>): <short description> (ticket-<task id>), for example feat(auth): add 2FA (ticket-45678)."
   source_hash: 56d47ccc8d8a
   status: machine-draft
 CODE-VCS-P18:
-  text: ""
+  text: The scope names the context or area touched, for example auth, api, ui, config or docker.
   source_hash: 013f7b4c1a41
   status: machine-draft
 CODE-VCS-P20:
-  text: ""
+  text: Every PR or MR has a description following the organisation's template.
   source_hash: a91003b07f91
   status: machine-draft
 CODE-VCS-P22:
-  text: ""
+  text: Every PR or MR is linked to a task in the task management system.
   source_hash: f6258fea50ea
   status: machine-draft
 CODE-VCS-P23:
-  text: ""
+  text: The PR states whether the change has breaking changes, migrations, dependency changes or infrastructure impact.
   source_hash: d5b06bfaa8ec
   status: machine-draft
 CODE-VCS-P24:
-  text: ""
+  text: A PR or MR cannot be merged if automated checks fail.
   source_hash: d0f5ab9382f4
   status: machine-draft
 CODE-VCS-P25:
-  text: ""
+  text: The repository has a properly configured .gitignore.
   source_hash: 1bef6ae60af6
   status: machine-draft
 CODE-VCS-P26:
-  text: ""
+  text: Secrets, IDE files, build artefacts and other unneeded files never enter the repository.
   source_hash: 4679ea4a8c88
   status: machine-draft
 CODE-VCS-P27:
-  text: ""
+  text: Secret scanning is enabled, and a detected secret is treated as an incident requiring immediate response.
   source_hash: 431809bc201b
   status: machine-draft
 CODE-VCS-P28:
-  text: ""
+  text: Large binary files are not kept in the repository without clear justification and a suitable management mechanism.
   source_hash: 67cc0d1a2b96
   status: machine-draft
 CODE-VCS-R01:
-  text: ""
+  text: Repository structure, names and responsibilities are consistent across the organisation.
   source_hash: faabe0ea3750
   status: machine-draft
 CODE-VCS-R02:
-  text: ""
+  text: The repository model is documented so it is clear where application code, infrastructure code and shared libraries live.
   source_hash: 017b1fbbcd27
   status: machine-draft
 CODE-VCS-R04:
-  text: ""
+  text: With GitFlow using staging and dev branches, changes flow feature/* → dev → staging → main, and hotfix/* → main and back to dev or staging where applicable.
   source_hash: 189e2dec6483
   status: machine-draft
 CODE-VCS-R05a:
-  text: ""
+  text: release/* branches are used to prepare a release when the project has that stage.
   source_hash: 4a7abff697b2
   status: machine-draft
 CODE-VCS-R06:
-  text: ""
+  text: High-risk or architecturally significant changes require an additional review by the tech lead or architect.
   source_hash: 443dbeca0357
   status: machine-draft
 CODE-VCS-R06a:
-  text: ""
+  text: Stale, inactive branches are archived or deleted periodically.
   source_hash: fffd86173b8e
   status: machine-draft
 CODE-VCS-R07:
-  text: ""
+  text: Large changes are split into several logically coherent commits, to make history review and rollback easier.
   source_hash: 89ead48a38c0
   status: machine-draft
 CODE-VCS-R08:
-  text: ""
+  text: Commit history on main branches stays clean and informative, without unnecessary intermediate commits.
   source_hash: 5bb1482f16b5
   status: machine-draft
 CODE-VCS-R09:
-  text: ""
+  text: Smaller, more frequent PRs are preferred over rare, very large changes.
   source_hash: 1ca783893845
   status: machine-draft
 CODE-VCS-R10:
-  text: ""
+  text: Very large PRs are split where possible.
   source_hash: 48134d5c61ea
   status: machine-draft
 CODE-VCS-R11:
-  text: ""
+  text: Draft PRs or MRs are used for early feedback while the implementation is unfinished.
   source_hash: d2a83dc70678
   status: machine-draft
 CODE-VCS-R13:
-  text: ""
+  text: The repository description, topics and documentation links are kept current.
   source_hash: 47a7b2647c9c
   status: machine-draft
 CODE-VCS-R14:
-  text: ""
+  text: The repository root has a minimal README with the purpose and main links.
   source_hash: d2fb9418be89
   status: machine-draft
 DOC-ADR-P01:
