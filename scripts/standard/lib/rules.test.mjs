@@ -78,3 +78,18 @@ test('every rule in docs/ parses', async () => {
   assert.deepEqual(errors, []);
   assert.ok(rules.length >= 800, `only ${rules.length} rules found`);
 });
+
+test('a rule body continues across blank lines while the content stays indented under the bullet', () => {
+  const md = [
+    '<!-- A-B-P01 | ai-reviewable | stacks=all | enforced-by=ai -->',
+    '*   Formatas:',
+    '',
+    '    `<type>/ticket-<id>-<description>`',
+    '',
+    '    Pavyzdys: feature/ticket-1-x',
+    '',
+    'Kita pastraipa.',
+  ].join('\n');
+  const { rules } = parseRuleFile(md, 'a.md');
+  assert.equal(rules[0].textLt, 'Formatas:\n`<type>/ticket-<id>-<description>`\nPavyzdys: feature/ticket-1-x');
+});

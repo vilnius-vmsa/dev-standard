@@ -268,11 +268,11 @@ PRIVALOMA:
 <!-- CODE-VCS-P07 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Šakų pavadinimai turi atitikti sutartą formatą:
 
-`<type>/ticket-<ticket id>-<short description>`
+    `<type>/ticket-<ticket id>-<short description>`
 
-Pavyzdys:
+    Pavyzdys:
 
-feature/ticket-123456-add-2fa
+    feature/ticket-123456-add-2fa
 
 *   Turi būti aiškiai apibrėžtos bent šios šakų paskirtys:
     *   main – stabilus, išleistas kodas (privaloma visoms strategijoms)

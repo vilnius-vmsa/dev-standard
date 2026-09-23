@@ -45,7 +45,13 @@ function readBulletBody(lines, start) {
   const body = [first[2].trim()];
   for (let i = start + 1; i < lines.length; i++) {
     const line = lines[i];
-    if (!line.trim() || line.match(/^\s*/)[0].length <= indent) break;
+    if (!line.trim()) {
+      // A blank line ends the body unless the next content is still indented under the bullet.
+      const next = lines.slice(i + 1).find((l) => l.trim());
+      if (next === undefined || next.match(/^\s*/)[0].length <= indent) break;
+      continue;
+    }
+    if (line.match(/^\s*/)[0].length <= indent) break;
     body.push(line.trim());
   }
   return body.join('\n');

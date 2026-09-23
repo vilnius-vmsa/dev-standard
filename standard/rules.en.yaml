@@ -1075,8 +1075,8 @@ CODE-VCS-P06:
   source_hash: c895b6739cbc
   status: machine-draft
 CODE-VCS-P07:
-  text: Branch names follow the format <type>/ticket-<ticket id>-<short description>, for example feature/ticket-123456-add-2fa.
-  source_hash: 8c1b0a408656
+  text: Branch names follow the format `<type>/ticket-<ticket id>-<short description>`, for example `feature/ticket-123456-add-2fa`.
+  source_hash: 39be1d1a8e9a
   status: machine-draft
 CODE-VCS-P09:
   text: Changes to these branches are made only through a PR or MR.
