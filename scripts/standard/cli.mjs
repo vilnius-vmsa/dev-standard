@@ -2,9 +2,10 @@
 import { access, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { acceptEntries, checkEnglish, parseEnglish, stringifyEnglish } from './lib/english.mjs';
+import { acceptEntries, applyDrafts, checkEnglish, parseEnglish, stringifyEnglish } from './lib/english.mjs';
 import { loadRules } from './lib/rules.mjs';
 import { loadStacks } from './lib/stacks.mjs';
+import { stubTranslator } from './lib/translators.mjs';
 import { validateRules } from './lib/validate-docs.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -14,6 +15,7 @@ const EN_FILE = path.join(ROOT, 'standard/rules.en.yaml');
 
 const [command, ...args] = process.argv.slice(2);
 const flag = (name) => args.includes(`--${name}`);
+const option = (name, fallback) => args.find((a) => a.startsWith(`--${name}=`))?.split('=')[1] ?? fallback;
 
 function fail(errors) {
   for (const error of errors) console.error(`✗ ${error}`);
@@ -39,6 +41,12 @@ async function saveEnglish(entries) {
   await writeFile(EN_FILE, stringifyEnglish(entries));
 }
 
+function translatorFromArgs() {
+  const name = option('translator', 'stub');
+  if (name === 'stub') return stubTranslator();
+  fail([`unknown translator "${name}"`]);
+}
+
 const commands = {
   async validate() {
     const { rules, errors } = await loadDocs();
@@ -48,6 +56,15 @@ const commands = {
     const reviewable = rules.filter((r) => r.check === 'ai-reviewable').length;
     const scope = english ? ' and their English text' : '';
     console.log(`✓ ${rules.length} rules (${reviewable} ai-reviewable)${scope} are valid.`);
+  },
+
+  async draft() {
+    const { rules, errors } = await loadDocs();
+    if (errors.length) fail(errors);
+    const { entries, drafted } = await applyDrafts(rules, (await loadEnglish()) ?? {}, translatorFromArgs());
+    if (drafted.length === 0) return console.log('✓ nothing to draft.');
+    await saveEnglish(entries);
+    console.log(`✓ drafted ${drafted.length} rule(s) as machine-draft: ${drafted.join(', ')}`);
   },
 
   async accept() {
