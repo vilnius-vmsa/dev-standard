@@ -5,3 +5,7 @@ import { stubTranslator } from './translators.mjs';
 test('stubTranslator returns empty text for every item', async () => {
   assert.deepEqual(await stubTranslator()([{ id: 'A-B-P01' }, { id: 'A-B-P02' }]), { 'A-B-P01': '', 'A-B-P02': '' });
 });
+
+test('stubTranslator keeps the previous English so a stale rule is not blanked', async () => {
+  assert.deepEqual(await stubTranslator()([{ id: 'A-B-P01', previousEn: 'Old English.' }]), { 'A-B-P01': 'Old English.' });
+});
