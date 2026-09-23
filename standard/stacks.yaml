@@ -1,0 +1,26 @@
+# Stacks a rule can be tagged with (stacks=... in the rule's tag comment).
+# applyTo is the Copilot path glob for the generated dev-standard-<stack>.instructions.md file.
+all:
+  description: Rules for every repository
+  applyTo: "**"
+php:
+  description: PHP code
+  applyTo: "**/*.php"
+laravel:
+  description: Laravel applications
+  applyTo: "app/**,bootstrap/**,config/**,database/**,routes/**,resources/views/**"
+symfony:
+  description: Symfony applications
+  applyTo: "src/**,config/**,templates/**,migrations/**"
+frontend:
+  description: Frontend code
+  applyTo: "**/*.js,**/*.jsx,**/*.ts,**/*.tsx,**/*.vue,**/*.svelte,**/*.css,**/*.scss,**/*.html"
+mobile:
+  description: Mobile applications
+  applyTo: "**/*.kt,**/*.kts,**/*.swift,**/*.dart,android/**,ios/**"
+infra:
+  description: Infrastructure, CI/CD and containers
+  applyTo: "**/Dockerfile*,**/docker-compose*.yml,**/*.tf,**/*.tfvars,.github/workflows/**,**/*.yml,**/*.yaml"
+db:
+  description: Database schema, migrations and queries
+  applyTo: "**/migrations/**,database/**,**/*.sql"

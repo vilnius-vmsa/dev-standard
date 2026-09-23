@@ -11,7 +11,8 @@
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "build:pdf": "node scripts/build-pdf.mjs",
-    "test": "node --test \"scripts/**/*.test.mjs\""
+    "test": "node --test \"scripts/**/*.test.mjs\"",
+    "rules:validate": "node scripts/standard/cli.mjs validate"
   },
   "dependencies": {
     "@docusaurus/core": "^3.7.0",
