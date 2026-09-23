@@ -1195,191 +1195,191 @@ CODE-VCS-R14:
   source_hash: d2fb9418be89
   status: machine-draft
 DOC-ADR-P01:
-  text: ""
+  text: An ADR is written when choosing or changing a core technology, architecture style, integration model, significant trade-off or deviation from the standard.
   source_hash: 55be6710687c
   status: machine-draft
 DOC-ADR-P02:
-  text: ""
+  text: ADRs are stored in version control together with the project.
   source_hash: 08e074ff7e67
   status: machine-draft
 DOC-ADR-P05:
-  text: ""
+  text: An ADR is linked to the related PR or MR, task and, where applicable, release or deployment.
   source_hash: 467d2aed63ed
   status: machine-draft
 DOC-ADR-R01:
-  text: ""
+  text: The whole organisation uses one ADR template.
   source_hash: "9e3694809099"
   status: machine-draft
 DOC-FMT-P01:
-  text: ""
+  text: Technical documentation is stored in a format suited to version control, review and long-term maintenance.
   source_hash: 25c3c853c001
   status: machine-draft
 DOC-FMT-P02:
-  text: ""
+  text: Markdown is the default format for technical documentation unless there is a justified exception.
   source_hash: 8db80ca446e9
   status: machine-draft
 DOC-FMT-P03:
-  text: ""
+  text: API specifications are stored in a machine-readable format suited to their technology.
   source_hash: ec37436774af
   status: machine-draft
 DOC-FMT-P04:
-  text: ""
+  text: Architectural decisions are documented in a structured format.
   source_hash: e12e04d05b19
   status: machine-draft
 DOC-FMT-P05:
-  text: ""
+  text: The documentation structure is consistent across the project and easy to follow for a new team member or successor.
   source_hash: 9c34aa6c469d
   status: machine-draft
 DOC-FMT-R01:
-  text: ""
+  text: Diagrams use text-based or diagrams-as-code formats where possible.
   source_hash: 86e259daf1cc
   status: machine-draft
 DOC-FMT-R02:
-  text: ""
+  text: Graphic files may be used if their source is stored alongside them.
   source_hash: 997e6d793822
   status: machine-draft
 DOC-FMT-R03:
-  text: ""
+  text: Documentation is organised so that architecture, API, operations and user documentation are clearly separated.
   source_hash: e087a5de1168
   status: machine-draft
 DOC-GEN-P01:
-  text: ""
+  text: Documentation is created, stored and versioned together with the code.
   source_hash: 2e8a4bce60a1
   status: machine-draft
 DOC-GEN-P02:
-  text: ""
+  text: There is one clear source of truth; parallel, unversioned or uncontrolled copies of documentation are forbidden.
   source_hash: 3f989a9b0058
   status: machine-draft
 DOC-GEN-P03:
-  text: ""
+  text: Changes to code, architecture, APIs, deployment or operations come with the matching documentation update in the same PR or MR.
   source_hash: 268533053bc8
   status: machine-draft
 DOC-GEN-P04:
-  text: ""
+  text: Documentation is sufficient for a third party to understand, deploy, operate and further develop the system without the author.
   source_hash: d6bcb6267724
   status: machine-draft
 DOC-GEN-P05:
-  text: ""
+  text: The documentation language is chosen at project start and used consistently.
   source_hash: e645b06dde52
   status: machine-draft
 DOC-GEN-R01:
-  text: ""
+  text: Technical documentation is written so it is easy to review through diffs, code review and version history.
   source_hash: 8742e2793abf
   status: machine-draft
 DOC-GEN-R02:
-  text: ""
+  text: When the system has an external vendor or will be handed over to another team, the level of documentation detail is set by the realistic handover scenario.
   source_hash: e9030ce3b976
   status: machine-draft
 DOC-GEN-R03:
-  text: ""
+  text: Documentation avoids duplicating content between sections and links to the primary source instead.
   source_hash: 527bd7a37633
   status: machine-draft
 DOC-REQ-P01:
-  text: ""
+  text: Every system has at least the documentation needed to understand its purpose, architecture, APIs or integrations, deployment and operation.
   source_hash: 8ca931830edb
   status: machine-draft
 DOC-REQ-P02:
-  text: ""
+  text: The documentation set is proportional to the system's complexity but never below the minimum in this chapter.
   source_hash: dc56cc60d23f
   status: machine-draft
 DOC-REQ-P04:
-  text: ""
+  text: The architecture description states the system's purpose, boundaries, main components, key integrations and significant architectural decisions.
   source_hash: 4e1764da795e
   status: machine-draft
 DOC-REQ-P05:
-  text: ""
+  text: The architecture description is sufficient for another technical team to understand the system's logical structure and main design principles.
   source_hash: 74f7902e63f6
   status: machine-draft
 DOC-REQ-P06:
-  text: ""
+  text: Specific requirements for architecture diagrams, complex process documentation and technical onboarding are defined in section 3.8.
   source_hash: a2391334b1d1
   status: machine-draft
 DOC-REQ-P07:
-  text: ""
+  text: All APIs and integrations have current, machine-readable documentation.
   source_hash: 7bb1bf7a9e9d
   status: machine-draft
 DOC-REQ-P08:
-  text: ""
+  text: API documentation defines the specification, authentication method, versioning approach and main response and error scenarios.
   source_hash: ca62ba32e66e
   status: machine-draft
 DOC-REQ-P09:
-  text: ""
+  text: API documentation is versioned together with the code and updated together with contract changes.
   source_hash: 34cb64faaee3
   status: machine-draft
 DOC-REQ-P10:
-  text: ""
+  text: Every system has deployment and operation instructions.
   source_hash: a6d9550c67bc
   status: machine-draft
 DOC-REQ-P11:
-  text: ""
+  text: The instructions describe the deployment procedure, required configuration, migrations, rollback approach and main operational tasks.
   source_hash: 1744691e8ac0
   status: machine-draft
 DOC-REQ-P12:
-  text: ""
+  text: The instructions are sufficient for another technical team to deploy and operate the system without extra verbal explanation.
   source_hash: 6538e8953bee
   status: machine-draft
 DOC-REQ-P13:
-  text: ""
+  text: Systems with end users have user documentation or equivalent help content.
   source_hash: 12c033d587a0
   status: machine-draft
 DOC-REQ-P14:
-  text: ""
+  text: User documentation explains the main usage scenarios, key actions and significant limitations.
   source_hash: 75f6b8bdfaac
   status: machine-draft
 DOC-REQ-R01:
-  text: ""
+  text: For complex systems, the architecture description separates the logical architecture, integrations, deployment view and key trade-offs.
   source_hash: d8fa59979044
   status: machine-draft
 DOC-REQ-R02:
-  text: ""
+  text: For systems with significant non-functional requirements, the architecture description shows how architectural decisions support them.
   source_hash: dd2fe7366aa4
   status: machine-draft
 DOC-REQ-R03:
-  text: ""
+  text: The specification comes with clear usage examples and typical scenarios where they help integrating teams.
   source_hash: 9238ebfa80f8
   status: machine-draft
 DOC-REQ-R04:
-  text: ""
+  text: External or cross-organisation integrations state the deprecation policy and compatibility limits.
   source_hash: 973c1942d5f9
   status: machine-draft
 DOC-REQ-R05:
-  text: ""
+  text: The instructions link to runbooks, monitoring dashboards, alerting rules and other operational artefacts.
   source_hash: d48817db9d65
   status: machine-draft
 DOC-REQ-R06:
-  text: ""
+  text: When some steps are automated, the instructions separate what runs in CI/CD from what is done by hand.
   source_hash: 9fd4a9cc6809
   status: machine-draft
 DOC-REQ-R07:
-  text: ""
+  text: User documentation is written for its target audience and their digital skills.
   source_hash: a629602aabfe
   status: machine-draft
 DOC-UPD-P01:
-  text: ""
+  text: When functionality, architecture, APIs, deployment or operational behaviour change, the documentation is updated in the same change.
   source_hash: e63f0e3d8c7a
   status: machine-draft
 DOC-UPD-P02:
-  text: ""
+  text: Documentation updates are reviewed together with the code.
   source_hash: 208c26b2f194
   status: machine-draft
 DOC-UPD-P03:
-  text: ""
+  text: Outdated documentation, or documentation that does not match the actual system, is a defect and is fixed with priority.
   source_hash: 24ae1e4aeebf
   status: machine-draft
 DOC-UPD-P04:
-  text: ""
+  text: PR or MR templates, where used, ask clearly whether documentation needs updating.
   source_hash: c2075fdab353
   status: machine-draft
 DOC-UPD-R01:
-  text: ""
+  text: Documentation accuracy is also reviewed after significant releases, architectural changes or handover to another team, not only with code changes.
   source_hash: b175bbe6ec03
   status: machine-draft
 DOC-UPD-R02:
-  text: ""
+  text: Automated documentation checks such as broken links, specification validation or diagram generation checks are used where possible.
   source_hash: 2b648000a73a
   status: machine-draft
 DOC-UPD-R03:
-  text: ""
+  text: Outdated documentation is treated as a quality signal, not just an editorial problem.
   source_hash: c29b900bd205
   status: machine-draft
 OPS-CD-P01:
@@ -1767,275 +1767,275 @@ STD-VER-P04:
   source_hash: 683f63eb7092
   status: machine-draft
 TEST-A11Y-P01:
-  text: ""
+  text: Systems with a user interface plan and run accessibility testing as part of testing.
   source_hash: 263efb661273
   status: machine-draft
 TEST-A11Y-P03:
-  text: ""
+  text: Accessibility checks cover at least keyboard navigation, focus management, semantics and the main screen reader scenarios.
   source_hash: 5dcba0508be5
   status: machine-draft
 TEST-A11Y-R02:
-  text: ""
+  text: High-risk or widely used systems include accessibility testing in regression testing.
   source_hash: cbebeda80377
   status: machine-draft
 TEST-CICD-P01:
-  text: ""
+  text: Automated tests are integrated into CI/CD as the project needs.
   source_hash: 270eaf72bd5c
   status: machine-draft
 TEST-CICD-P02:
-  text: ""
+  text: Test results are kept as traceable artefacts.
   source_hash: 504fb700907c
   status: machine-draft
 TEST-CICD-P03:
-  text: ""
+  text: Quality gates block the release or merge when mandatory testing requirements are not met.
   source_hash: 885ae46e2261
   status: machine-draft
 TEST-CICD-P04:
-  text: ""
+  text: It is clear which tests run on PRs, which on main builds and which before release.
   source_hash: 55b003bff7d4
   status: machine-draft
 TEST-CICD-R01:
-  text: ""
+  text: Central reports or dashboards show test stability, coverage and quality trends.
   source_hash: 9ee995137148
   status: machine-draft
 TEST-CICD-R02:
-  text: ""
+  text: Critical test results are included in the release review.
   source_hash: 9ebfe83aff51
   status: machine-draft
 TEST-DATA-P01:
-  text: ""
+  text: Test data is deliberately prepared, managed and reproducible.
   source_hash: d2e4ba0148a2
   status: machine-draft
 TEST-DATA-P02:
-  text: ""
+  text: Test environments are separate from production.
   source_hash: c8e49c7811e6
   status: machine-draft
 TEST-DATA-P03:
-  text: ""
+  text: Personal data in test environments is anonymised or pseudonymised, except in clearly justified and lawful cases.
   source_hash: 3ea2897af819
   status: machine-draft
 TEST-DATA-P04:
-  text: ""
+  text: External dependencies in tests are handled through sandboxes, mocks or other controlled mechanisms where possible.
   source_hash: e92c21c447df
   status: machine-draft
 TEST-DATA-R01:
-  text: ""
+  text: Tests use versioned seed data or clearly described test data sets.
   source_hash: 88aa1fce5858
   status: machine-draft
 TEST-DATA-R02:
-  text: ""
+  text: Environment configuration is kept close enough to real conditions when test reliability requires it.
   source_hash: 9c3f903456ce
   status: machine-draft
 TEST-DATA-R03:
-  text: ""
+  text: When external systems are involved, testing windows, limits and responsibility for testing impact are clearly defined.
   source_hash: afe505a2c525
   status: machine-draft
 TEST-DR-P01:
-  text: ""
+  text: Critical systems test backup restoration and, where applicable, disaster recovery scenarios.
   source_hash: 0ba2ad8d40e1
   status: machine-draft
 TEST-DR-P02:
-  text: ""
+  text: Recovery tests are tied to the defined RTO and RPO targets.
   source_hash: 9ecb027885df
   status: machine-draft
 TEST-DR-P03:
-  text: ""
+  text: An untested recovery scenario does not count as proof of readiness.
   source_hash: af4fe62cd5e5
   status: machine-draft
 TEST-DR-R01:
-  text: ""
+  text: Tests regularly cover the full restore process, not only backup creation.
   source_hash: 44f44f2f901e
   status: machine-draft
 TEST-DR-R02:
-  text: ""
+  text: Systems depending on external services or several components also test partial degradation and failover scenarios.
   source_hash: ff0183874955
   status: machine-draft
 TEST-DR-R03:
-  text: ""
+  text: Resilience test results are used to update operational documentation and incident plans.
   source_hash: d4a290e23169
   status: machine-draft
 TEST-GATE-P01:
-  text: ""
+  text: The project defines minimum testing quality gates.
   source_hash: d0cabc5b2234
   status: machine-draft
 TEST-GATE-P02:
-  text: ""
+  text: A PR or MR is not ready to merge if mandatory build, test or other quality checks fail.
   source_hash: a52e83ca65e1
   status: machine-draft
 TEST-GATE-P03:
-  text: ""
+  text: Critical modules have stricter testing requirements than supporting or low-risk components.
   source_hash: 92d1dea93d6d
   status: machine-draft
 TEST-GATE-P04:
-  text: ""
+  text: Flaky tests are not ignored for more than 5 working days; they are identified, marked and fixed.
   source_hash: 2b92559b99b2
   status: machine-draft
 TEST-GATE-P05:
-  text: ""
+  text: The project defines minimum test coverage thresholds and enforces them in CI.
   source_hash: dd9f83aa80dd
   status: machine-draft
 TEST-GATE-R01:
-  text: ""
+  text: Coverage targets are set at project start and assessed not only as an overall percentage but also for critical areas.
   source_hash: 506a6d6b0623
   status: machine-draft
 TEST-GATE-R03:
-  text: ""
+  text: Flaky tests are managed as a separate quality risk, not fixed by disabling them without reason.
   source_hash: bdb1ff27f094
   status: machine-draft
 TEST-GDPR-P01:
-  text: ""
+  text: Testing complies with data protection requirements.
   source_hash: 9862ac5e5107
   status: machine-draft
 TEST-GDPR-P02:
-  text: ""
+  text: Real personal data is not used in test environments without a clear legal basis and safeguards.
   source_hash: efa97b6c22c1
   status: machine-draft
 TEST-GDPR-P03:
-  text: ""
+  text: Tests of privacy, access or data subject rights scenarios are run in a controlled and documented way.
   source_hash: 23d1676d0499
   status: machine-draft
 TEST-GDPR-P04:
-  text: ""
+  text: Logs and test reports contain no unnecessary sensitive data.
   source_hash: c07911aaa5e4
   status: machine-draft
 TEST-GDPR-R01:
-  text: ""
+  text: Privacy scenarios such as consent management, data deletion or export are part of the regular test suites where they apply.
   source_hash: 8469a24e91e1
   status: machine-draft
 TEST-GDPR-R02:
-  text: ""
+  text: The test data lifecycle is managed as carefully as production data protection.
   source_hash: 25aff35e4ae0
   status: machine-draft
 TEST-PERF-P01:
-  text: ""
+  text: Critical and public systems get performance or load tests before significant releases or major architectural changes.
   source_hash: ae5a2052c0b3
   status: machine-draft
 TEST-PERF-P02:
-  text: ""
+  text: Performance test scenarios are tied to clear performance targets and realistic usage patterns.
   source_hash: b2ad04a01be0
   status: machine-draft
 TEST-PERF-P04:
-  text: ""
+  text: Performance test results are kept and used to decide release readiness.
   source_hash: 552a75143df6
   status: machine-draft
 TEST-PERF-R01:
-  text: ""
+  text: Performance testing covers not only typical load but also spikes, long-running operation and resource degradation where relevant.
   source_hash: 16949352135c
   status: machine-draft
 TEST-PERF-R02:
-  text: ""
+  text: Performance results inform not only release decisions but also corrections to architecture, caches, databases or infrastructure.
   source_hash: 76410f048261
   status: machine-draft
 TEST-REG-P02:
-  text: ""
+  text: Critical defects affecting security, data integrity or core functionality are not ignored before release.
   source_hash: 522b71892385
   status: machine-draft
 TEST-REG-P03:
-  text: ""
+  text: The regression suite is maintained as a permanent part of the test suite.
   source_hash: 40e1b7e96910
   status: machine-draft
 TEST-REG-P04:
-  text: ""
+  text: Every significant bug fix adds to the regression suite.
   source_hash: c9cfd659b850
   status: machine-draft
 TEST-STRAT-P01:
-  text: ""
+  text: The testing strategy is based on a clear split of test layers.
   source_hash: 2d7c36ba1118
   status: machine-draft
 TEST-STRAT-P02:
-  text: ""
+  text: Most tests are unit tests, fewer are integration or API tests, and the fewest are E2E tests.
   source_hash: d8d6581c8aa8
   status: machine-draft
 TEST-STRAT-P03:
-  text: ""
+  text: Tests are written and run in every PR/MR, rather than leaving the main checks to UAT or pre-production environments.
   source_hash: a97ff81a9fb8
   status: machine-draft
 TEST-STRAT-P04:
-  text: ""
+  text: The testing scope is proportional to the change's risk, the system's criticality and non-functional requirements.
   source_hash: bde32393678c
   status: machine-draft
 TEST-STRAT-R01:
-  text: ""
+  text: A deliberate departure from the test pyramid is justified and documented.
   source_hash: 0c70d8d87590
   status: machine-draft
 TEST-STRAT-R02:
-  text: ""
+  text: For critical systems the testing strategy is reviewed periodically, based on the kinds of defects actually found and test effectiveness.
   source_hash: 33514d3acca2
   status: machine-draft
 TEST-TOOL-P01:
-  text: ""
+  text: Testing tools match the technology stack and the team's skills.
   source_hash: 89c25669dcd8
   status: machine-draft
 TEST-TOOL-P02:
-  text: ""
+  text: Testing tools are supported, documented and listed in the project or organisation technology register where applicable.
   source_hash: bc60aa617f70
   status: machine-draft
 TEST-TOOL-P03:
-  text: ""
+  text: Automated tests run in CI/CD.
   source_hash: e0d7021e0256
   status: machine-draft
 TEST-TOOL-R01:
-  text: ""
+  text: Unit and integration tests use tools widely accepted in the language or platform community.
   source_hash: e384ca1a448a
   status: machine-draft
 TEST-TOOL-R02:
-  text: ""
+  text: API tests use tools that can check contracts, status codes, response structure and the main scenarios.
   source_hash: c207da1205a2
   status: machine-draft
 TEST-TOOL-R03:
-  text: ""
+  text: Performance and load tests use tools accepted in the organisation.
   source_hash: e0cc42fd934b
   status: machine-draft
 TEST-TOOL-R04:
-  text: ""
+  text: Accessibility testing combines automated tools with manual checks.
   source_hash: 7b549ba50380
   status: machine-draft
 TEST-TYPE-P01:
-  text: ""
+  text: Unit tests cover business logic and isolated components.
   source_hash: e5dbfc0573fc
   status: machine-draft
 TEST-TYPE-P02:
-  text: ""
+  text: Integration tests cover modules and integrations with real or near-real dependencies.
   source_hash: 5d5b8ce197e1
   status: machine-draft
 TEST-TYPE-P03:
-  text: ""
+  text: API tests check contract compliance and the main scenarios.
   source_hash: 9e82fb5cce34
   status: machine-draft
 TEST-TYPE-P04:
-  text: ""
+  text: E2E tests cover critical user journeys.
   source_hash: bb94663e7445
   status: machine-draft
 TEST-TYPE-P05:
-  text: ""
+  text: Regression tests are maintained as a permanent part of the test suite.
   source_hash: 9889328eedc6
   status: machine-draft
 TEST-TYPE-P06:
-  text: ""
+  text: Every bug fix adds a test that reproduces the bug and confirms the fix.
   source_hash: 550c081d0d43
   status: machine-draft
 TEST-TYPE-P07:
-  text: ""
+  text: Security, performance or accessibility tests are added when the system's criticality or the nature of the change requires them.
   source_hash: d175a56e4dac
   status: machine-draft
 TEST-TYPE-R01:
-  text: ""
+  text: Test types are clearly defined, so the team agrees on what counts as a unit, integration, API or E2E test.
   source_hash: 5bbe38bd7732
   status: machine-draft
 TEST-TYPE-R02:
-  text: ""
+  text: Complex integrations and high-risk systems also have resilience or degradation scenario tests.
   source_hash: 4d65fd538e91
   status: machine-draft
 TEST-UAT-P01:
-  text: ""
+  text: User acceptance testing is based on clear acceptance criteria.
   source_hash: 6ba77c563cbe
   status: machine-draft
 TEST-UAT-P03:
-  text: ""
+  text: Significant non-functional criteria such as performance, security or accessibility have clearly defined acceptance thresholds.
   source_hash: 91c6118aa312
   status: machine-draft
 TEST-UAT-R01:
-  text: ""
+  text: UAT scenarios are agreed with the product owner and analyst before active testing starts.
   source_hash: 2dd1179317ec
   status: machine-draft
 VENDOR-ACC-P04:
