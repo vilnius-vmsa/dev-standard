@@ -1914,102 +1914,6 @@ TEST-UAT-R01:
   text: UAT scenarios are agreed with the product owner and analyst before active testing starts.
   source_hash: 2dd1179317ec
   status: machine-draft
-VENDOR-ACC-P04:
-  text: Work is not finally accepted while critical technical or security debt remains without a clear remediation plan.
-  source_hash: 904abffe7db6
-  status: machine-draft
-VENDOR-ACC-R01:
-  text: Acceptance uses a formal handover checklist covering code, documentation, access, deployment and operational readiness.
-  source_hash: ac7ad2cd1ada
-  status: machine-draft
-VENDOR-COMPL-P02:
-  text: Compliance may be assessed through technical reviews, test and security reports, documentation checks and a trial deployment.
-  source_hash: 50d64b6c15b8
-  status: machine-draft
-VENDOR-HAND-P01:
-  text: The complete source code is handed over, including frontend, backend, integrations, infrastructure as code and other related components that are part of the solution.
-  source_hash: 73127099a05a
-  status: machine-draft
-VENDOR-HAND-P02:
-  text: The whole Git repository is handed over with its history, not just an archive of the final version.
-  source_hash: 1f523a26cadc
-  status: machine-draft
-VENDOR-HAND-P03:
-  text: The CI/CD configurations and build or deployment scripts in use are handed over.
-  source_hash: c6f020d632cd
-  status: machine-draft
-VENDOR-HAND-P04:
-  text: Test code and test results or reports (if generated separately) are handed over.
-  source_hash: 956e97cf9958
-  status: machine-draft
-VENDOR-HAND-P05:
-  text: The code contains no hardcoded secrets, has a working build and complies with this standard.
-  source_hash: "103428342264"
-  status: machine-draft
-VENDOR-HAND-P06:
-  text: All mandatory technical documentation defined in chapter 10 is handed over, as far as it applies to the system.
-  source_hash: ecdf11438622
-  status: machine-draft
-VENDOR-HAND-P07:
-  text: At minimum this includes the architecture description, API documentation, deployment and operation instructions, user documentation where applicable, and operational runbooks and other artefacts needed for business continuity.
-  source_hash: a86f37bab851
-  status: machine-draft
-VENDOR-HAND-P08:
-  text: The documentation is current, versioned and sufficient for independent operation and further development of the system.
-  source_hash: 2c84ede90d40
-  status: machine-draft
-VENDOR-HAND-P09:
-  text: Access to the code repositories is handed over if the municipality still needs it after acceptance.
-  source_hash: 22650d500d28
-  status: machine-draft
-VENDOR-HAND-P10:
-  text: Access to CI/CD systems, or their configuration, is handed over if the municipality takes over their management.
-  source_hash: a72909d141a7
-  status: machine-draft
-VENDOR-HAND-P11:
-  text: Cloud and infrastructure configurations, including IaC artefacts where used, are handed over.
-  source_hash: 5a564b20bcc8
-  status: machine-draft
-VENDOR-HAND-P12:
-  text: Administrative access, or a clear procedure for transferring it, is handed over.
-  source_hash: 7224038a7858
-  status: machine-draft
-VENDOR-HAND-P13:
-  text: A rotation plan for passwords, certificates and other secrets is handed over where one applies.
-  source_hash: 7bfc16b34a72
-  status: machine-draft
-VENDOR-HAND-R01:
-  text: At handover, a short explanation of the repository structure is provided when the solution is complex or spans several repositories.
-  source_hash: ed91ef1302c3
-  status: machine-draft
-VENDOR-HAND-R02:
-  text: For complex systems, additional knowledge transfer material is handed over, such as a summary of key decisions, a description of system dependencies or a takeover checklist.
-  source_hash: 4048db5c57fb
-  status: machine-draft
-VENDOR-OWN-P01:
-  text: All software built under the contract, its source code, infrastructure configurations and related artefacts belong to the municipality unless the contract explicitly says otherwise.
-  source_hash: 62e53f9e8e59
-  status: machine-draft
-VENDOR-OWN-P03:
-  text: The vendor does not restrict the municipality's rights through licences, technical choices or non-transferable dependencies, unless this was explicitly agreed during procurement or in the contract.
-  source_hash: ea3f8bbc5b8e
-  status: machine-draft
-VENDOR-OWN-R01:
-  text: When third-party components or licensed dependencies are used, the rights the municipality gets and the restrictions that apply are documented in advance.
-  source_hash: 5dc48d150880
-  status: machine-draft
-VENDOR-SCOPE-P02:
-  text: These requirements apply to municipal subordinate institutions that develop information systems themselves, hire third parties, or hand systems over to the municipality for operation.
-  source_hash: 8c3e4472b185
-  status: machine-draft
-VENDOR-SCOPE-P03:
-  text: The requirements apply to the whole system lifecycle, from design and development to handover, support and operation.
-  source_hash: a6a160cfd392
-  status: machine-draft
-VENDOR-SCOPE-R01:
-  text: When a vendor or subordinate institution takes part in only part of the lifecycle, the contract or technical specification states which part of this standard they are responsible for.
-  source_hash: "776e55747490"
-  status: machine-draft
 VENDOR-TECH-P04:
   text: The system has no critical security vulnerabilities without a clear remediation plan or a documented risk acceptance.
   source_hash: c5ec1541b562
@@ -2017,10 +1921,6 @@ VENDOR-TECH-P04:
 VENDOR-TECH-P05:
   text: The solution can be deployed and operated without vendor-specific licences, closed dependencies or non-transferable access, unless this was explicitly agreed during procurement or in the contract.
   source_hash: ed2193839ce2
-  status: machine-draft
-VENDOR-TECH-R01:
-  text: When not every chapter of this standard applies to a solution, the technical specification states which chapters are mandatory for that delivery or project.
-  source_hash: ff9bc8fa5d39
   status: machine-draft
 VER-ALLOW-P01:
   text: Only actively maintained dependencies with a clear licence and an understandable support model are allowed.
