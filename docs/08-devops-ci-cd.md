@@ -47,7 +47,7 @@ PRIVALOMA:
     *   unit testus
     *   API ar kontraktų validaciją
     *   saugumo ir priklausomybių patikras
-<!-- OPS-CI-P04 | human-reviewable -->
+<!-- OPS-CI-P04 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Artefaktai turi būti generuojami su aiškiu ir atsekamu identifikatoriumi.
 <!-- OPS-CI-P05 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Nepraėję privalomi kokybės vartai turi blokuoti merge’inimą.
@@ -93,7 +93,7 @@ PRIVALOMA:
 
 <!-- OPS-VER-P01 | human-reviewable -->
 *   Kiekvienas leidimas turi turėti aiškią versiją ir atsekamą ryšį su kodo būsena.
-<!-- OPS-VER-P02 | human-reviewable -->
+<!-- OPS-VER-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Konteinerių image ir kiti artefaktai turi būti žymimi taip, kad būtų aišku, kokia kodo versija yra įdiegta.
 <!-- OPS-VER-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Produkcijoje negali būti remiamasi vien latest tipo žymėjimu.
@@ -126,7 +126,7 @@ REKOMENDUOJAMA:
 
 <!-- OPS-K8S-R01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Kritinėms sistemoms naudoti papildomas patikimumo priemones, tokias kaip pod disruption budget ar horizontalus scaling, kai to reikalauja NFR.
-<!-- OPS-K8S-R02 | human-reviewable -->
+<!-- OPS-K8S-R02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Manifestų kokybę tikrinti dar prieš diegimą, o ne tik klasteryje.
 
 > Susiję skyriai: [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [6 Saugumas (Security by Design)](06-saugumas.md) · [9.2 Monitoring ir metrikos](09-stebesena-logai.md#92-monitoring-ir-metrikos)
@@ -137,7 +137,7 @@ PRIVALOMA:
 
 <!-- OPS-DEVSEC-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   CI/CD procese turi būti vykdomos saugumo patikros pagal sistemos rizikos lygį.
-<!-- OPS-DEVSEC-P02 | human-reviewable -->
+<!-- OPS-DEVSEC-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Turi būti tikrinamos priklausomybės, statinė analizė ir, kai taikoma, konteinerių image.
 <!-- OPS-DEVSEC-P03 | ai-reviewable | stacks=infra | enforced-by=tool:gitleaks -->
 *   Repozitorijose ir CI procese turi būti įjungtas slaptųjų raktų aptikimas.
@@ -227,9 +227,9 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- OPS-FIN-P01 | human-reviewable -->
+<!-- OPS-FIN-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Resursai turi būti identifikuojami taip, kad būtų įmanoma matyti sąnaudas pagal sistemą, projektą ar aplinką.
-<!-- OPS-FIN-P02 | human-reviewable -->
+<!-- OPS-FIN-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Artefaktų, image, logų ar kitų saugojimo objektų retention turi būti valdomas taip, kad nekauptų nepagrįstų sąnaudų.
 <!-- OPS-FIN-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Sistemos ir infrastruktūros sprendimai turi būti projektuojami ne tik pagal funkcionalumą, bet ir pagal palaikymo bei eksploatacijos efektyvumą.
@@ -258,7 +258,7 @@ REKOMENDUOJAMA:
 
 <!-- OPS-GITOPS-R01 | human-reviewable -->
 *   Naudoti kuo paprastesnę ir vienodą GitOps repo struktūrą visose sistemose.
-<!-- OPS-GITOPS-R02 | human-reviewable -->
+<!-- OPS-GITOPS-R02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Aplinkų parametrus rekomenduojama laikyti atskirtus nuo bendrų chart ar template dalių.
 <!-- OPS-GITOPS-R03 | process-level -->
 *   GitOps struktūrą rekomenduojama dokumentuoti taip, kad ją suprastų ne tik pradinė komanda, bet ir nauji perėmėjai.

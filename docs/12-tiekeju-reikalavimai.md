@@ -38,7 +38,7 @@ PRIVALOMA:
     *   DevOps ir CI/CD reikalavimams – 8 skyriui
     *   stebėsenai, logams ir eksploatacijai – 9 skyriui
     *   dokumentacijai – 10 skyriui
-<!-- VENDOR-TECH-P03 | human-reviewable -->
+<!-- VENDOR-TECH-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Naudojamos tik palaikomos ir ne end-of-life technologijos.
 <!-- VENDOR-TECH-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Sistemoje negali būti kritinių saugumo pažeidžiamumų be aiškaus sprendimo plano arba dokumentuoto rizikos priėmimo.

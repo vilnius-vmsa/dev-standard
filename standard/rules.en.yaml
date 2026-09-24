@@ -14,6 +14,10 @@ ARCH-API-P04:
   text: The default response type is application/json unless stated otherwise, and Content-Type and Accept headers are required.
   source_hash: afe38eb7b7b3
   status: machine-draft
+ARCH-API-P05:
+  text: Resources are modelled as nouns, not actions (/orders, not /getOrders).
+  source_hash: e1977d472599
+  status: machine-draft
 ARCH-API-P06:
   text: URL segments are kebab-case, with plural nouns for collections (/work-orders/123).
   source_hash: 4cab35d1e10d
@@ -54,9 +58,17 @@ ARCH-API-P16:
   text: All externally received data is validated against the API contract (OpenAPI / GraphQL schema) before it is processed.
   source_hash: 1a7cf52c90ac
   status: machine-draft
+ARCH-API-P17:
+  text: Request size limits apply to both headers and body; requests exceeding them are rejected.
+  source_hash: 597069c2a76b
+  status: machine-draft
 ARCH-API-P18:
   text: SQL/NoSQL injection is prevented by using only parameterised queries; an ORM is not treated as a security guarantee.
   source_hash: 19c8e8a1e4df
+  status: machine-draft
+ARCH-API-P19:
+  text: User-supplied data is never inserted directly into logs, error messages or dynamic query fragments.
+  source_hash: f40241e2afa6
   status: machine-draft
 ARCH-API-P20:
   text: GET, PUT and DELETE methods are idempotent as the HTTP specification requires.
@@ -77,6 +89,10 @@ ARCH-API-P23:
 ARCH-API-P24:
   text: Every error response includes a traceId, used to correlate it with logs and incident analysis.
   source_hash: 602dc0f65e8d
+  status: machine-draft
+ARCH-API-P25:
+  text: End-user error messages (title, detail) are in Lithuanian; technical codes and identifiers (code, type) are in English.
+  source_hash: 70b3bd5b870d
   status: machine-draft
 ARCH-API-P26:
   text: 5xx error responses do not reveal internal system details, exception messages or infrastructure information.
@@ -106,9 +122,21 @@ ARCH-API-R02:
   text: JWTs are short-lived (access token ≤ 1 hour, refresh token ≤ 24 hours).
   source_hash: 454d281c610b
   status: machine-draft
+ARCH-API-R03:
+  text: Conversion to local time happens only in the user interface and reporting layers.
+  source_hash: 4f5d60340e4f
+  status: machine-draft
 ARCH-API-R04:
   text: Validation errors include an errors[] array listing field-level problems.
   source_hash: b771041fbbeb
+  status: machine-draft
+ARCH-API-R05:
+  text: The error type field uses a stable URI or identifier that uniquely identifies the error type.
+  source_hash: c48d2a68ce5d
+  status: machine-draft
+ARCH-API-R06:
+  text: Error codes follow one consistent vocabulary across the system (for example INVALID_DATE_RANGE, RESOURCE_NOT_FOUND, CONFLICT, ACCESS_DENIED).
+  source_hash: 90f97cc925e8
   status: machine-draft
 ARCH-API-R07:
   text: Resources that rarely change use HTTP caching headers (ETag, Cache-Control).
@@ -117,6 +145,10 @@ ARCH-API-R07:
 ARCH-API-R09:
   text: Integrations with external systems use a circuit breaker and retries with exponential backoff.
   source_hash: 9b20021ab5af
+  status: machine-draft
+ARCH-API-R10:
+  text: Large responses are compressed (gzip / br).
+  source_hash: 7e0074ddab60
   status: machine-draft
 ARCH-API-R11:
   text: Files larger than 10 MB (default threshold, adjustable to context) are transferred via a presigned URL to object storage (S3/MinIO etc.), not directly through the API.
@@ -246,6 +278,10 @@ ARCH-DATA-P01:
   text: Every integration point has clearly defined error handling; integrations that leave an undefined state on failure are forbidden.
   source_hash: b6e3fcd47649
   status: machine-draft
+ARCH-DATA-P02:
+  text: Asynchronous consumers are idempotent, because the same message can be delivered more than once (at-least-once delivery).
+  source_hash: fa7114c1fce0
+  status: machine-draft
 ARCH-DATA-P05:
   text: New optional fields may be added, but existing fields are not removed or changed in ways that break compatibility with existing integration consumers.
   source_hash: f572899a379d
@@ -297,6 +333,10 @@ ARCH-DATA-P20:
 ARCH-DATA-P21:
   text: Test environments use official sandboxes or mocks; testing against production state registers or external systems is forbidden.
   source_hash: 5c029d883ade
+  status: machine-draft
+ARCH-DATA-R01:
+  text: Failed messages go to a dead letter queue (DLQ) or an equivalent mechanism, separate from successfully processed ones.
+  source_hash: fd05b22f7652
   status: machine-draft
 ARCH-DATA-R03:
   text: Integrations with external systems have a clear degraded mode or use cached data when the external system is temporarily unavailable.
@@ -370,9 +410,17 @@ ARCH-DATA-R20:
   text: Integrations using sensitive or personal data state which data is received, which is stored and which is passed on.
   source_hash: aec73409b269
   status: machine-draft
+ARCH-DOC-P01:
+  text: Every system, whatever its size, has a System Context diagram (C4 level 1) showing its external users, systems and registers.
+  source_hash: edb717c7d089
+  status: machine-draft
 ARCH-DOC-P02:
   text: "A container diagram (C4 level 2) shows the main application blocks: web application, API, database, queues and external integrations."
   source_hash: cf1e9de8ccac
+  status: machine-draft
+ARCH-DOC-P03:
+  text: There is an infrastructure diagram of physical or virtual components, network segments, firewalls, load balancers and certificates; it may be separate from C4 when infrastructure is managed as code.
+  source_hash: 0dff70efacff
   status: machine-draft
 ARCH-DOC-P04:
   text: Architecture diagrams and ADRs are stored in version control together with the code.
@@ -389,6 +437,14 @@ ARCH-DOC-P06:
 ARCH-DOC-P07:
   text: "The README in the repository root covers at least: the system's purpose and place in the ecosystem, how to run the development environment, the main configuration variables, links to ADRs, architecture diagrams and API documentation, and contacts or the responsible team."
   source_hash: 34fd962c3f96
+  status: machine-draft
+ARCH-DOC-P08:
+  text: The README is checked for accuracy together with system changes.
+  source_hash: 96fb2d98e41d
+  status: machine-draft
+ARCH-DOC-R03:
+  text: Diagrams use diagrams-as-code tools such as Mermaid, PlantUML or Structurizr DSL.
+  source_hash: 18efb4c77b17
   status: machine-draft
 ARCH-DOC-R04:
   text: Graphical drawing tools may be used if the exported result is stored in the repository together with its source file.
@@ -466,6 +522,10 @@ ARCH-FE-R07:
   text: New features are accepted only after passing an accessibility check.
   source_hash: e3d976e1bbf8
   status: machine-draft
+ARCH-FE-R10:
+  text: Network errors are retried automatically with exponential backoff, but 4xx errors are not retried.
+  source_hash: c52653612511
+  status: machine-draft
 ARCH-FE-R11:
   text: Pages and heavy components use code splitting and lazy loading, so they load only when needed.
   source_hash: e6c4ad393c64
@@ -481,6 +541,10 @@ ARCH-FE-R13:
 ARCH-FE-R15:
   text: npm audit or an equivalent runs in CI/CD, and critical vulnerabilities block deployment.
   source_hash: 6f3d8cbc86ac
+  status: machine-draft
+ARCH-FE-R16:
+  text: Avoid dependencies on libraries that duplicate native browser features (Intl, fetch, CSS variables).
+  source_hash: e5268daa559a
   status: machine-draft
 ARCH-FE-R99:
   text: Visual and user-behaviour specifications of components are documented (for example in Storybook or an equivalent).
@@ -550,6 +614,10 @@ ARCH-MOB-P15:
   text: WCAG 2.2 AA principles apply to mobile interfaces as a supplementary standard.
   source_hash: d8154b56eff8
   status: machine-draft
+ARCH-MOB-P16:
+  text: All interactive elements are accessible through VoiceOver and TalkBack.
+  source_hash: 6777e72d29cd
+  status: machine-draft
 ARCH-MOB-P17:
   text: Dynamic font size is supported so the UI stays functional and accessible.
   source_hash: bd240059483a
@@ -602,6 +670,18 @@ ARCH-MOB-R03:
   text: Apps using internal APIs apply certificate pinning where a risk assessment justifies it.
   source_hash: 5e893a0957ea
   status: machine-draft
+ARCH-MOB-R04:
+  text: Screenshots are disabled on sensitive screens.
+  source_hash: 03ecf0208cc8
+  status: machine-draft
+ARCH-MOB-R05:
+  text: Sensitive data is not copied to the clipboard without an explicit user action.
+  source_hash: 938e8e47ca4c
+  status: machine-draft
+ARCH-MOB-R06:
+  text: Sensitive data is cleared from memory after logout or when the app goes to the background.
+  source_hash: 0c6b71c3b977
+  status: machine-draft
 ARCH-MOB-R07:
   text: The app uses basic integrity checks and root/jailbreak detection, and informs the user about the risk.
   source_hash: 89cb3d10ca1e
@@ -609,6 +689,10 @@ ARCH-MOB-R07:
 ARCH-MOB-R08:
   text: Conflicts are resolved with a clearly chosen model, for example server wins, client wins, last write wins or merge.
   source_hash: 91511de9caaa
+  status: machine-draft
+ARCH-MOB-R09:
+  text: Background work runs through WorkManager on Android and BGAppRefreshTask or BGProcessingTask on iOS, within OS limits.
+  source_hash: 2d188b95552f
   status: machine-draft
 ARCH-MOB-R10:
   text: When sync is critical to a business process, it has its own metrics and technical monitoring.
@@ -706,6 +790,14 @@ ARCH-REL-R03:
   text: Synchronous integrations use a circuit breaker, so after a defined number of errors they fail fast instead of cascading.
   source_hash: 85e4dc0aee3b
   status: machine-draft
+ARCH-REL-R04:
+  text: Retries use exponential backoff with jitter to avoid synchronised retry storms.
+  source_hash: 2064bd89ec0a
+  status: machine-draft
+ARCH-REL-R05:
+  text: Asynchronous consumers retry a limited number of times and route failed messages to a DLQ or equivalent.
+  source_hash: 53c0d316a039
+  status: machine-draft
 ARCH-REL-R07:
   text: When a downstream service is down, the consumer pauses processing or switches to a clearly defined degraded mode instead of piling up uncontrolled errors.
   source_hash: 5437f6bd7e1d
@@ -746,9 +838,17 @@ CODE-AI-P07:
   text: AI tools are used only through channels and configurations approved by the organisation.
   source_hash: 2386ee02648e
   status: machine-draft
+CODE-AI-P08:
+  text: AI-generated tests are checked for meaningful assertions; tests that only raise coverage without real checks are forbidden.
+  source_hash: b162cd5356a0
+  status: machine-draft
 CODE-AI-P09:
   text: Dependencies and imports suggested by AI are checked for existence, maintenance status and security, because AI models can suggest packages that do not exist.
   source_hash: 9a896a48ff3a
+  status: machine-draft
+CODE-CONV-P02:
+  text: New files and modules follow the project's established structure, not individual convenience.
+  source_hash: 6103cee61096
   status: machine-draft
 CODE-CONV-P04:
   text: Naming conventions are applied consistently across the project.
@@ -762,9 +862,21 @@ CODE-CONV-P06:
   text: Methods, functions and variables use camelCase.
   source_hash: 5d7e4f0aab33
   status: machine-draft
+CODE-CONV-P07:
+  text: Constants and enum values use UPPER_SNAKE_CASE.
+  source_hash: 05a31ee906e8
+  status: machine-draft
+CODE-CONV-P08:
+  text: Database tables and columns use snake_case.
+  source_hash: 9c7145ba517e
+  status: machine-draft
 CODE-CONV-P09:
   text: URL segments use kebab-case.
   source_hash: 6f1409ace2e9
+  status: machine-draft
+CODE-CONV-P10:
+  text: File names follow the most widely accepted practice for the language or technology.
+  source_hash: 0eba50d23fdb
   status: machine-draft
 CODE-CONV-P11:
   text: Languages or technologies not covered by the standard follow their official or most widely accepted community conventions.
@@ -818,6 +930,14 @@ CODE-CONV-R06:
   text: Project-specific additions to the base rule set are used only when they do not conflict with the organisation's common rules.
   source_hash: cb2364d8bf50
   status: machine-draft
+CODE-CONV-R08:
+  text: Files longer than roughly 300–500 lines are reviewed as a possible sign of too much responsibility.
+  source_hash: 324687f753da
+  status: machine-draft
+CODE-CONV-R09:
+  text: Methods longer than roughly 30–50 lines are candidates for splitting into helper methods or smaller responsibilities.
+  source_hash: 20353b7e4ea2
+  status: machine-draft
 CODE-DEBT-P01:
   text: Large refactorings are planned separately and agreed with the product owner when they significantly affect scope, deadlines or risk.
   source_hash: 5fae6b3a1acc
@@ -849,6 +969,14 @@ CODE-DEBT-R02:
 CODE-DEBT-R03:
   text: Refactoring and technical debt priorities are judged by their impact on maintainability, security, testability, performance and future changes.
   source_hash: 0978ddfa87a8
+  status: machine-draft
+CODE-GEN-P02:
+  text: Names of variables, methods, classes, modules and packages clearly reflect their purpose and context.
+  source_hash: 79a7d5e13318
+  status: machine-draft
+CODE-GEN-P03:
+  text: Abbreviations without clear context are avoided, except widely accepted ones such as id, url or dto.
+  source_hash: 92b3aec35b6a
   status: machine-draft
 CODE-GEN-P04:
   text: Methods and functions have one clear responsibility; if a method is hard to describe with a short name, it does too much.
@@ -886,6 +1014,10 @@ CODE-GEN-P12:
   text: Dead code is removed immediately.
   source_hash: 39f05b8a7a84
   status: machine-draft
+CODE-GEN-P13:
+  text: Numbers, strings and other values with business meaning, or used in more than one place, are extracted into named constants or enums.
+  source_hash: b19836d573d6
+  status: machine-draft
 CODE-GEN-P14:
   text: Magic values without context are forbidden.
   source_hash: 435c5eff8dbd
@@ -906,9 +1038,17 @@ CODE-GEN-P18:
   text: Errors are handled explicitly; silently swallowing exceptions is forbidden.
   source_hash: 705d3c6b01d9
   status: machine-draft
+CODE-GEN-P19:
+  text: Lower-level exceptions are wrapped in domain-level exceptions with added context where that is justified.
+  source_hash: 23f64f4acda9
+  status: machine-draft
 CODE-GEN-P20:
   text: Error messages shown to users are informative but do not reveal internal system details.
   source_hash: 41cfbea482a0
+  status: machine-draft
+CODE-GEN-P21:
+  text: Technical error details appear only in logs.
+  source_hash: 9c2575f17d75
   status: machine-draft
 CODE-GEN-P22:
   text: Asynchronous programming is used consistently; blocking calls in an asynchronous context are forbidden.
@@ -937,6 +1077,14 @@ CODE-GEN-R04:
 CODE-GEN-R05:
   text: The configuration, secrets and environment requirements of section 3.5 also apply.
   source_hash: 39f6a5e65274
+  status: machine-draft
+CODE-GEN-R06:
+  text: Avoid returning null; use explicit result types or exceptions instead.
+  source_hash: 8aaad0441137
+  status: machine-draft
+CODE-GEN-R07:
+  text: Minimise shared mutable state.
+  source_hash: c437949a08c5
   status: machine-draft
 CODE-GEN-R08:
   text: Asynchronous code is designed to be easy to test and predictable.
@@ -990,9 +1138,17 @@ CODE-SEC-P04:
   text: Error messages shown to users do not reveal internal details such as stack traces, SQL structure, file paths or infrastructure information.
   source_hash: 0dd38606417d
   status: machine-draft
+CODE-SEC-P05:
+  text: Technical error details appear only in logs, following the logging and sensitive-data rules.
+  source_hash: 5ea2130df296
+  status: machine-draft
 CODE-SEC-P06:
   text: New dependencies are not added without assessing their maintenance status, licence and known security risks.
   source_hash: 0a57a228b00b
+  status: machine-draft
+CODE-SEC-R01:
+  text: Use the secure mechanisms of standard libraries and frameworks instead of home-made cryptographic or security solutions.
+  source_hash: a64bcbcfbe9f
   status: machine-draft
 CODE-SEC-R02:
   text: Validation, authorization and error-handling logic is centralised where the architecture allows.
@@ -1106,13 +1262,25 @@ CODE-VCS-P16:
   text: "Commit messages use Conventional Commits v1.0.0: <type>(<scope>): <short description> (ticket-<task id>), for example feat(auth): add 2FA (ticket-45678)."
   source_hash: 56d47ccc8d8a
   status: machine-draft
+CODE-VCS-P17:
+  text: Allowed commit types are feat, fix, chore, docs, style, refactor, perf, test, build and ci.
+  source_hash: d3ed1cda1aac
+  status: machine-draft
 CODE-VCS-P18:
   text: The scope names the context or area touched, for example auth, api, ui, config or docker.
   source_hash: 013f7b4c1a41
   status: machine-draft
+CODE-VCS-P19:
+  text: The commit's short description is imperative, lower case and has no full stop at the end.
+  source_hash: 7d747ade98c2
+  status: machine-draft
 CODE-VCS-P20:
   text: Every PR or MR has a description following the organisation's template.
   source_hash: a91003b07f91
+  status: machine-draft
+CODE-VCS-P21:
+  text: The PR description states what changes, why, how to verify it, and whether documentation, configuration or data migrations need changes.
+  source_hash: b56f0c3b50d2
   status: machine-draft
 CODE-VCS-P22:
   text: Every PR or MR is linked to a task in the task management system.
@@ -1186,6 +1354,10 @@ CODE-VCS-R11:
   text: Draft PRs or MRs are used for early feedback while the implementation is unfinished.
   source_hash: d2a83dc70678
   status: machine-draft
+CODE-VCS-R12:
+  text: Large binary files are managed with git-lfs or an equivalent mechanism.
+  source_hash: ff99dfd52ec6
+  status: machine-draft
 CODE-VCS-R13:
   text: The repository description, topics and documentation links are kept current.
   source_hash: 47a7b2647c9c
@@ -1201,6 +1373,14 @@ DOC-ADR-P01:
 DOC-ADR-P02:
   text: ADRs are stored in version control together with the project.
   source_hash: 08e074ff7e67
+  status: machine-draft
+DOC-ADR-P03:
+  text: ADRs are numbered sequentially.
+  source_hash: 139f5595a913
+  status: machine-draft
+DOC-ADR-P04:
+  text: When a decision changes, a new ADR linked to the previous one is written instead of rewriting the old one.
+  source_hash: 6a6a26b97865
   status: machine-draft
 DOC-ADR-P05:
   text: An ADR is linked to the related PR or MR, task and, where applicable, release or deployment.
@@ -1281,6 +1461,10 @@ DOC-REQ-P01:
 DOC-REQ-P02:
   text: The documentation set is proportional to the system's complexity but never below the minimum in this chapter.
   source_hash: dc56cc60d23f
+  status: machine-draft
+DOC-REQ-P03:
+  text: Every system has an architecture description.
+  source_hash: 7b16edb5935c
   status: machine-draft
 DOC-REQ-P04:
   text: The architecture description states the system's purpose, boundaries, main components, key integrations and significant architectural decisions.
@@ -1418,6 +1602,10 @@ OPS-CI-P03:
   text: "Where applicable, CI runs at least: the build, formatting and linting checks, unit tests, API or contract validation, and security and dependency checks."
   source_hash: 5105f66dd7f7
   status: machine-draft
+OPS-CI-P04:
+  text: Build artefacts get a clear, traceable identifier.
+  source_hash: aacc70787810
+  status: machine-draft
 OPS-CI-P05:
   text: Failed mandatory quality gates block merging.
   source_hash: e51688346d00
@@ -1433,6 +1621,10 @@ OPS-CI-R02:
 OPS-DEVSEC-P01:
   text: CI/CD runs security checks appropriate to the system's risk level.
   source_hash: bcc2673184c1
+  status: machine-draft
+OPS-DEVSEC-P02:
+  text: CI checks dependencies, runs static analysis and, where applicable, scans container images.
+  source_hash: 1990b59f6c4b
   status: machine-draft
 OPS-DEVSEC-P03:
   text: Secret detection is enabled in repositories and in CI.
@@ -1466,6 +1658,14 @@ OPS-ENV-R02:
   text: The project's deployment documentation describes how environments, branches and deployment flows relate.
   source_hash: afef1865f877
   status: machine-draft
+OPS-FIN-P01:
+  text: Resources are labelled so costs can be seen per system, project or environment.
+  source_hash: df3b4756b98d
+  status: machine-draft
+OPS-FIN-P02:
+  text: Retention of artefacts, images, logs and other stored objects is managed so it does not accumulate unjustified costs.
+  source_hash: 4ea019580e2d
+  status: machine-draft
 OPS-FIN-P03:
   text: System and infrastructure solutions are designed for support and operating efficiency, not only for functionality.
   source_hash: 4d24168e43e1
@@ -1481,6 +1681,10 @@ OPS-GITOPS-P02:
 OPS-GITOPS-P03:
   text: When Helm or an equivalent is used, how charts are versioned and validated is clearly defined.
   source_hash: a01eb5f5c1ba
+  status: machine-draft
+OPS-GITOPS-R02:
+  text: Environment parameters are kept separate from shared chart or template parts.
+  source_hash: f787b0cd45f0
   status: machine-draft
 OPS-IAC-P02:
   text: IaC changes are reviewed through a PR or MR just like application code.
@@ -1509,6 +1713,10 @@ OPS-K8S-P04:
 OPS-K8S-R01:
   text: Critical systems use extra reliability measures such as a pod disruption budget or horizontal scaling when the non-functional requirements call for it.
   source_hash: 79660e428e65
+  status: machine-draft
+OPS-K8S-R02:
+  text: Manifest quality is checked before deployment, not only in the cluster.
+  source_hash: 52a4a5245a12
   status: machine-draft
 OPS-MON-P01:
   text: Deployment and CI/CD configuration make sure the system meets chapter 9 requirements for logs, metrics, alerts and operational readiness.
@@ -1553,6 +1761,10 @@ OPS-REL-R01:
 OPS-REL-R02:
   text: Release reviews cover technical, operational and business changes in one place.
   source_hash: 87ae31a1b852
+  status: machine-draft
+OPS-VER-P02:
+  text: Container images and other artefacts are tagged so it is clear which code version is deployed.
+  source_hash: 5afec404997e
   status: machine-draft
 OPS-VER-P03:
   text: Production never relies only on a latest-style tag.
@@ -1846,6 +2058,10 @@ TEST-UAT-R01:
   text: UAT scenarios are agreed with the product owner and analyst before active testing starts.
   source_hash: 2dd1179317ec
   status: machine-draft
+VENDOR-TECH-P03:
+  text: Only supported, non-end-of-life technologies are used.
+  source_hash: c92cb8885d9b
+  status: machine-draft
 VENDOR-TECH-P04:
   text: The system has no critical security vulnerabilities without a clear remediation plan or a documented risk acceptance.
   source_hash: c5ec1541b562
@@ -1902,6 +2118,10 @@ VER-API-R03:
   text: Systems with external consumers support at least two API versions at the same time when the product lifecycle justifies it.
   source_hash: 398eeb8cf364
   status: machine-draft
+VER-PKG-P01:
+  text: All dependencies are declared in the project's dependency manifest files.
+  source_hash: 3af773feb404
+  status: machine-draft
 VER-PKG-P02:
   text: Lock files are used and committed to the repository.
   source_hash: ccde041aa02f
@@ -1922,9 +2142,17 @@ VER-PKG-P06:
   text: The Dependabot configuration covers application libraries, container images, CI/CD workflows and other project dependencies where they are used.
   source_hash: a751f5886b44
   status: machine-draft
+VER-PKG-P07:
+  text: Automated dependency updates are handled on a separate long-lived `dependencies` branch, where Dependabot or equivalent updates are tested and integrated.
+  source_hash: 82bad66c491c
+  status: machine-draft
 VER-PKG-P08:
   text: The dependencies branch is kept in sync with main, so dependency updates are evaluated against the current code base and configuration.
   source_hash: ff796426df85
+  status: machine-draft
+VER-PKG-P09:
+  text: Dependency updates are never merged into main automatically without review, a compatibility check and testing by a responsible person.
+  source_hash: 5354fc7dab86
   status: machine-draft
 VER-PKG-P12:
   text: Pull requests from Dependabot or an equivalent tool state the dependency being updated, its current and proposed version, its ecosystem (for example npm, Composer, Docker, GitHub Actions) and the update type (patch, minor or major).
@@ -1945,6 +2173,10 @@ VER-PKG-R02:
 VER-PKG-R03:
   text: The dependencies branch is synced with main automatically after every change to main, so developers never have to move main changes into it by hand.
   source_hash: e72f9e73fc91
+  status: machine-draft
+VER-SEC-P03:
+  text: Automated dependency security checks are in place.
+  source_hash: "9522203e8568"
   status: machine-draft
 VER-SEC-R01:
   text: An SBOM is generated for every release and stored with the release artefacts.

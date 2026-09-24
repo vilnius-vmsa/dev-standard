@@ -49,7 +49,7 @@ PRIVALOMA:
 
 PRIVALOMA:
 
-<!-- DOC-REQ-P03 | human-reviewable -->
+<!-- DOC-REQ-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kiekviena sistema turi turėti architektūros aprašą.
 <!-- DOC-REQ-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Architektūros aprašas turi aiškiai nurodyti sistemos paskirtį, ribas, pagrindinius komponentus, svarbiausias integracijas ir reikšmingus architektūrinius sprendimus.
@@ -165,9 +165,9 @@ PRIVALOMA:
 *   ADR turi būti rengiamas, kai pasirenkama ar keičiama esminė technologija, architektūros stilius, integracijų modelis, reikšmingas kompromisas arba nukrypimas nuo standarto.
 <!-- DOC-ADR-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   ADR turi būti saugomas versijų valdymo sistemoje kartu su projektu.
-<!-- DOC-ADR-P03 | process-level -->
+<!-- DOC-ADR-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   ADR turi būti numeruojamas nuosekliai.
-<!-- DOC-ADR-P04 | process-level -->
+<!-- DOC-ADR-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Pasikeitus sprendimui, turi būti kuriamas naujas ADR, susietas su ankstesniu, o ne perrašomas senasis.
 <!-- DOC-ADR-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   ADR turi būti susietas su atitinkamu PR arba MR, užduotimi ir, jei taikoma, leidimu ar diegimu.

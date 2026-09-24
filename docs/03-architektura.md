@@ -206,7 +206,7 @@ REKOMENDUOJAMA:
 *   BFF (_Backend for Frontend_) modelis - atskiras backend sluoksnis, skirtas konkrečiam UI klientui; sumažina over-fetching problemą ir slepia vidinę sistemų struktūrą
 <!-- ARCH-FE-R09 | human-reviewable -->
 *   Užklausų kešavimas (React Query, SWR ar ekvivalentas) serverio duomenims - mažina bereikalingus tinklo kvietimus
-<!-- ARCH-FE-R10 | human-reviewable -->
+<!-- ARCH-FE-R10 | ai-reviewable | stacks=frontend | enforced-by=ai -->
 *   Automatiniai pakartotiniai bandymai (retries) su eksponentiniu atsitraukimu tinklo klaidoms, bet ne 4xx klaidoms
 
 Frontend API komunikacija privalo atitikti [#3.3](#33-backend-ir-api-principai) skyriuje apibrėžtus API projektavimo, versijavimo ir klaidų standartus.
@@ -249,7 +249,7 @@ REKOMENDUOJAMA:
 
 <!-- ARCH-FE-R15 | ai-reviewable | stacks=frontend | enforced-by=tool:npm-audit -->
 *   npm audit ar ekvivalentas vykdomas CI/CD proceso metu - kritiniai pažeidžiamumai blokuoja diegimą
-<!-- ARCH-FE-R16 | human-reviewable -->
+<!-- ARCH-FE-R16 | ai-reviewable | stacks=frontend | enforced-by=ai -->
 *   Vengti priklausomybių nuo bibliotekų, kurios dubliuoja naršyklės natyvias galimybes (Intl, fetch, CSS variables)
 
 Priklausomybių saugumo patikrinimų vykdymas CI/CD pipeline’uose apibrėžtas [#8](08-devops-ci-cd.md) skyriuje.
@@ -282,7 +282,7 @@ API specifikacijos ir jų generuojama dokumentacija yra projekto dokumentacijos 
 
 PRIVALOMA:
 
-<!-- ARCH-API-P05 | human-reviewable -->
+<!-- ARCH-API-P05 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Resursai modeliuojami kaip daiktavardžiai, ne veiksmai (/orders, ne /getOrders)
 <!-- ARCH-API-P06 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   URL segmentai - kebab-case, daugiskaita kolekcijai (/work-orders/123)
@@ -330,7 +330,7 @@ PRIVALOMA:
 
 REKOMENDUOJAMA:
 
-<!-- ARCH-API-R03 | human-reviewable -->
+<!-- ARCH-API-R03 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Lokalaus laiko konvertavimas atliekamas tik naudotojo sąsajos (UI) ir ataskaitų (reporting) sluoksnyje
 
 Laiko žymeklių naudojimas ir formatas turi būti suderinti su [#9](09-stebesena-logai.md) skyriuje apibrėžtais loginimo ir stebėsenos reikalavimais.
@@ -341,11 +341,11 @@ PRIVALOMA:
 
 <!-- ARCH-API-P16 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Visi išoriškai gaunami duomenys validuojami pagal API kontraktą (OpenAPI / GraphQL schema) prieš apdorojimą (schema validation)
-<!-- ARCH-API-P17 | human-reviewable -->
+<!-- ARCH-API-P17 | ai-reviewable | stacks=php,infra | enforced-by=ai -->
 *   Užklausų dydžio limitai taikomi tiek antraštėms (headers), tiek užklausos kūnui (body); viršijus limitus užklausa atmetama
 <!-- ARCH-API-P18 | ai-reviewable | stacks=php,db | enforced-by=ai -->
 *   SQL / NoSQL injekcijų prevencija – naudojamos tik parametrizuotos užklausos; ORM nenaudojamas kaip saugumo garantija
-<!-- ARCH-API-P19 | human-reviewable -->
+<!-- ARCH-API-P19 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Vartotojo įvesti duomenys niekada tiesiogiai neįterpiami į logus, klaidos pranešimus ar dinaminius užklausų fragmentus
 
 Loginimo ir klaidų pranešimų reikalavimai detalizuoti [#9](09-stebesena-logai.md) skyriuje.
@@ -376,7 +376,7 @@ PRIVALOMA:
 *   Klaidos atsakyme privalomi bent šie laukai: type, title, status, traceId, code
 <!-- ARCH-API-P24 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   traceId privalomas visuose klaidų atsakymuose ir naudojamas susiejimui su logais bei incidentų analize
-<!-- ARCH-API-P25 | human-reviewable -->
+<!-- ARCH-API-P25 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Klaidos pranešimai, skirti galutiniam naudotojui (title, detail), pateikiami lietuvių kalba; techniniai kodai ir identifikatoriai (code, type) – anglų kalba
 <!-- ARCH-API-P26 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   5xx klaidų atsakymuose neatskleidžiamos vidinės sistemos detalės, išimčių tekstai ar infrastruktūros informacija
@@ -385,9 +385,9 @@ REKOMENDUOJAMA:
 
 <!-- ARCH-API-R04 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Validacijos klaidoms pateikti papildomą `errors[]` masyvą su laukų lygmens neatitikimais
-<!-- ARCH-API-R05 | human-reviewable -->
+<!-- ARCH-API-R05 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   type laukui naudoti stabilų URI / identifikatorių, kuris leidžia vienareikšmiškai identifikuoti klaidos tipą
-<!-- ARCH-API-R06 | human-reviewable -->
+<!-- ARCH-API-R06 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Naudoti nuoseklų klaidų kodų žodyną visos sistemos mastu (pvz., `INVALID_DATE_RANGE`, `RESOURCE_NOT_FOUND`, `CONFLICT`, `ACCESS_DENIED`)
 
 **Pavyzdys (application/problem+json):**
@@ -428,7 +428,7 @@ REKOMENDUOJAMA:
 *   Read-through kešai DB apkrovos mažinimui
 <!-- ARCH-API-R09 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Circuit breaker ir retry su eksponentiniu atsitraukimu (exponential backoff) integracijose su išorinėmis sistemomis
-<!-- ARCH-API-R10 | human-reviewable -->
+<!-- ARCH-API-R10 | ai-reviewable | stacks=php,infra | enforced-by=ai -->
 *   Atsakymų suspaudimas (gzip / br) dideliems atsakymams
 
 ### 3.3.10. Failų tvarkymas
@@ -496,14 +496,14 @@ PRIVALOMA:
 
 <!-- ARCH-DATA-P01 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Visi integracijų taškai turi turėti aiškiai apibrėžtą klaidų apdorojimą; draudžiamos integracijos, kurios nesėkmės atveju palieka neapibrėžtą būseną.
-<!-- ARCH-DATA-P02 | human-reviewable -->
+<!-- ARCH-DATA-P02 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Asinchroniniai vartotojai (consumers) turi būti idempotentiniai, nes tas pats pranešimas gali būti pristatytas daugiau nei vieną kartą (at-least-once delivery).
 <!-- ARCH-DATA-P03 | human-reviewable -->
 *   Kiekviena failų ar paketinio apdorojimo siunta turi turėti unikalų identifikatorių ir aiškų apdorojimo statusą.
 
 REKOMENDUOJAMA:
 
-<!-- ARCH-DATA-R01 | human-reviewable -->
+<!-- ARCH-DATA-R01 | ai-reviewable | stacks=php,infra | enforced-by=ai -->
 *   Nepavykusių pranešimų apdorojimui naudoti Dead Letter Queue (DLQ) arba lygiavertį mechanizmą, kad klaidingi pranešimai būtų atskirti nuo sėkmingai apdorojamų.
 <!-- ARCH-DATA-R02 | human-reviewable -->
 *   Naudoti Outbox pattern tais atvejais, kai reikia patikimai suderinti duomenų bazės pakeitimą ir pranešimo išsiuntimą.
@@ -744,9 +744,9 @@ REKOMENDUOJAMA:
 
 <!-- ARCH-REL-R03 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Sinchroninėms integracijoms taikyti circuit breaker mechanizmą, kad po apibrėžto klaidų skaičiaus būtų grąžinama greita klaida, o ne kaupiamas kaskadinis gedimas.
-<!-- ARCH-REL-R04 | human-reviewable -->
+<!-- ARCH-REL-R04 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Retry mechanizmuose naudoti eksponentinį atsitraukimą ir jitter, kad būtų išvengta sinchronizuotų pakartotinių bandymų audros.
-<!-- ARCH-REL-R05 | human-reviewable -->
+<!-- ARCH-REL-R05 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Asinchroniniams vartotojams taikyti retry politiką su ribotu bandymų skaičiumi ir nepavykusius pranešimus nukreipti į DLQ arba lygiavertį mechanizmą.
 <!-- ARCH-REL-R06 | human-reviewable -->
 *   Vartotojų concurrency turi būti ribojamas taip, kad gedimo atveju nebūtų perkraunamos priklausomybės.
@@ -843,11 +843,11 @@ C4 modelis naudojamas kaip standartinis architektūros vizualizavimo formatas. S
 
 PRIVALOMA:
 
-<!-- ARCH-DOC-P01 | human-reviewable -->
+<!-- ARCH-DOC-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   System Context diagrama (C4 L1) – sistema ir jos aplinka: kokie išoriniai vartotojai, sistemos ir registrai su ja sąveikauja. Privaloma bet kokiai sistemai, nepaisant dydžio.
 <!-- ARCH-DOC-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Container diagrama (C4 L2) – pagrindiniai aplikacijos blokai: web aplikacija, API, duomenų bazė, eilės, išorinės integracijos.
-<!-- ARCH-DOC-P03 | human-reviewable -->
+<!-- ARCH-DOC-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Infrastruktūros diagrama – fiziniai arba virtualūs komponentai, tinklų segmentai, ugniasienės, load balanceriai, sertifikatai. Gali būti atskira nuo C4, jei infrastruktūra valdoma kaip kodas.
 
 REKOMENDUOJAMA:
@@ -881,7 +881,7 @@ PRIVALOMA:
 
 REKOMENDUOJAMA:
 
-<!-- ARCH-DOC-R03 | human-reviewable -->
+<!-- ARCH-DOC-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Diagramoms naudoti diagrams-as-code įrankius, tokius kaip Mermaid, PlantUML arba Structurizr DSL.
 <!-- ARCH-DOC-R04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Grafiniai braižymo įrankiai gali būti naudojami, jei galutinis rezultatas eksportuojamas ir saugomas repozitorijoje kartu su šaltinio failu.
@@ -903,7 +903,7 @@ PRIVALOMA:
     *   pagrindinių konfigūracijos kintamųjų aprašą
     *   nuorodas į ADR, architektūros diagramas ir API dokumentaciją
     *   kontaktus arba atsakingą komandą
-<!-- ARCH-DOC-P08 | human-reviewable -->
+<!-- ARCH-DOC-P08 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   README aktualumas turi būti tikrinamas kartu su sistemos pakeitimais.
 
 ## 3.9. Mobilios aplikacijos (jei taikoma)
@@ -957,11 +957,11 @@ REKOMENDUOJAMA:
 
 <!-- ARCH-MOB-R03 | ai-reviewable | stacks=mobile | enforced-by=ai -->
 *   Vidaus API naudojančioms aplikacijoms taikyti sertifikatų prisegimą, jei tai pagrįsta rizikos vertinimu.
-<!-- ARCH-MOB-R04 | human-reviewable -->
+<!-- ARCH-MOB-R04 | ai-reviewable | stacks=mobile | enforced-by=ai -->
 *   Jautriems ekranams išjungti ekrano kopijas.
-<!-- ARCH-MOB-R05 | human-reviewable -->
+<!-- ARCH-MOB-R05 | ai-reviewable | stacks=mobile | enforced-by=ai -->
 *   Jautrių duomenų nekopijuoti į clipboard be aiškaus vartotojo veiksmo.
-<!-- ARCH-MOB-R06 | human-reviewable -->
+<!-- ARCH-MOB-R06 | ai-reviewable | stacks=mobile | enforced-by=ai -->
 *   Po atsijungimo arba perėjimo į foninį režimą jautrūs duomenys turėtų būti išvalomi iš atminties.
 <!-- ARCH-MOB-R07 | ai-reviewable | stacks=mobile | enforced-by=ai -->
 *   Naudoti bazinius aplikacijos integralumo tikrinimo mechanizmus ir root arba jailbreak aptikimą, apie riziką informuojant vartotoją.
@@ -985,7 +985,7 @@ REKOMENDUOJAMA:
 
 <!-- ARCH-MOB-R08 | ai-reviewable | stacks=mobile | enforced-by=ai -->
 *   Konfliktų sprendimui naudoti aiškiai pasirinktą modelį, pvz. server wins, client wins, last write wins arba merge.
-<!-- ARCH-MOB-R09 | human-reviewable -->
+<!-- ARCH-MOB-R09 | ai-reviewable | stacks=mobile | enforced-by=ai -->
 *   Foninius darbus Android platformoje vykdyti per WorkManager, o iOS platformoje – per BGAppRefreshTask arba BGProcessingTask, atsižvelgiant į OS apribojimus.
 <!-- ARCH-MOB-R10 | ai-reviewable | stacks=mobile | enforced-by=ai -->
 *   Jei sinchronizacija kritinė verslo procesui, rekomenduojama turėti atskiras metrikas ir techninę stebėseną.
@@ -1002,7 +1002,7 @@ PRIVALOMA:
 *   Laikomasi Apple Human Interface Guidelines ir Android Accessibility gairių.
 <!-- ARCH-MOB-P15 | ai-reviewable | stacks=mobile | enforced-by=ai -->
 *   WCAG 2.2 AA principai taikomi kaip papildomas standartas mobilioms sąsajoms.
-<!-- ARCH-MOB-P16 | human-reviewable -->
+<!-- ARCH-MOB-P16 | ai-reviewable | stacks=mobile | enforced-by=ai -->
 *   Visi interaktyvūs elementai turi būti prieinami per VoiceOver ir TalkBack.
 <!-- ARCH-MOB-P17 | ai-reviewable | stacks=mobile | enforced-by=ai -->
 *   Dinaminis šrifto dydis turi būti palaikomas taip, kad UI išliktų funkcionalus ir prieinamas.

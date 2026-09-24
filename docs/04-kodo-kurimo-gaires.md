@@ -14,9 +14,9 @@ PRIVALOMA:
 
 <!-- CODE-GEN-P01 | human-reviewable -->
 *   Kodas pirmiausia skirtas žmonėms skaityti, tik po to – kompiuteriui vykdyti; trumpumas neturi būti aukojamas skaitomumo sąskaita.
-<!-- CODE-GEN-P02 | human-reviewable -->
+<!-- CODE-GEN-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kintamųjų, metodų, klasių, modulių ir paketų pavadinimai turi aiškiai atspindėti paskirtį ir kontekstą.
-<!-- CODE-GEN-P03 | human-reviewable -->
+<!-- CODE-GEN-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Vengiamos santrumpos be aiškaus konteksto, išskyrus visuotinai priimtas santrumpas, tokias kaip id, url, dto.
 <!-- CODE-GEN-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Metodai ir funkcijos turi turėti vieną aiškią atsakomybę; jei metodą sunku apibūdinti trumpu pavadinimu, tai signalas, kad jis daro per daug.
@@ -68,7 +68,7 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- CODE-GEN-P13 | human-reviewable -->
+<!-- CODE-GEN-P13 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Skaičiai, eilutės ir kitos reikšmės, turinčios verslo prasmę arba naudojamos daugiau nei vienoje vietoje, turi būti išskiriamos į pavadintas konstantas arba enum tipus.
 <!-- CODE-GEN-P14 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Draudžiamos magiškos reikšmės be konteksto.
@@ -97,16 +97,16 @@ PRIVALOMA:
 
 <!-- CODE-GEN-P18 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Klaidos turi būti valdomos eksplicitiškai; draudžiama tyliai ignoruoti išimtis.
-<!-- CODE-GEN-P19 | human-reviewable -->
+<!-- CODE-GEN-P19 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Žemesnio lygio išimtys turi būti apvyniojamos į domeno lygmens išimtis, pridedant kontekstą, kai tai pagrįsta.
 <!-- CODE-GEN-P20 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Klaidų pranešimai vartotojui turi būti informatyvūs, bet neatskleisti vidinės sistemos detalių.
-<!-- CODE-GEN-P21 | human-reviewable -->
+<!-- CODE-GEN-P21 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Techninės klaidų detalės pateikiamos tik loguose.
 
 REKOMENDUOJAMA:
 
-<!-- CODE-GEN-R06 | human-reviewable -->
+<!-- CODE-GEN-R06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Null reikšmių grąžinimo vengti; vietoje to naudoti aiškius rezultatų tipus arba išimtis.
 
 ### 4.1.7. Asinchroninis kodas
@@ -122,7 +122,7 @@ PRIVALOMA:
 
 REKOMENDUOJAMA:
 
-<!-- CODE-GEN-R07 | human-reviewable -->
+<!-- CODE-GEN-R07 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Bendros kintamos būsenos naudojimą minimizuoti.
 <!-- CODE-GEN-R08 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Asinchroninį kodą projektuoti taip, kad jis būtų lengvai testuojamas ir nuspėjamas.
@@ -139,7 +139,7 @@ PRIVALOMA:
 
 <!-- CODE-CONV-P01 | human-reviewable -->
 *   Katalogų ir paketų struktūra turi būti vieninga visame projekte ir atspindėti domeno arba architektūros sluoksnių suskirstymą.
-<!-- CODE-CONV-P02 | human-reviewable -->
+<!-- CODE-CONV-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Nauji failai ir moduliai kuriami pagal nusistovėjusią projekto struktūrą, o ne pagal individualų patogumą.
 <!-- CODE-CONV-P03 | process-level -->
 *   Struktūros pakeitimai, kurie daro įtaką projekto organizavimui, turi būti aptarti komandoje ir, jei reikšmingi, dokumentuoti.
@@ -161,13 +161,13 @@ PRIVALOMA:
 *   Klasės, tipai ir komponentai – PascalCase
 <!-- CODE-CONV-P06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Metodai, funkcijos ir kintamieji – camelCase
-<!-- CODE-CONV-P07 | human-reviewable -->
+<!-- CODE-CONV-P07 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Konstantos ir enum reikšmės – UPPER\_SNAKE\_CASE
-<!-- CODE-CONV-P08 | human-reviewable -->
+<!-- CODE-CONV-P08 | ai-reviewable | stacks=db | enforced-by=ai -->
 *   Duomenų bazės lentelės ir stulpeliai – snake\_case
 <!-- CODE-CONV-P09 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   URL segmentai – kebab-case
-<!-- CODE-CONV-P10 | human-reviewable -->
+<!-- CODE-CONV-P10 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Failai – pagal kalbos ar technologijos plačiausiai priimtą praktiką
 <!-- CODE-CONV-P11 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kalboms ar technologijoms, neaptartoms šiame dokumente, taikoma oficiali arba plačiausiai priimta bendruomenės konvencija.
@@ -222,9 +222,9 @@ PRIVALOMA:
 
 REKOMENDUOJAMA:
 
-<!-- CODE-CONV-R08 | process-level -->
+<!-- CODE-CONV-R08 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Failai, viršijantys maždaug 300–500 eilučių, turėtų būti peržiūrimi kaip galimas per didelės atsakomybės požymis.
-<!-- CODE-CONV-R09 | human-reviewable -->
+<!-- CODE-CONV-R09 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Metodai, viršijantys maždaug 30–50 eilučių, turėtų būti vertinami kaip kandidatai išskaidymui į pagalbinius metodus ar mažesnes atsakomybes.
 <!-- CODE-CONV-R10 | process-level -->
 *   Dydžio ribos turėtų būti taikomos kaip peržiūros signalas, o ne mechaniškas draudimas.
@@ -337,7 +337,7 @@ PRIVALOMA:
 *   Naudojamas [Conventional Commits v1.0.0](https://www.conventionalcommits.org/) formatas:
     *   `<tipas>(<apimtis>): <trumpas aprašas> (ticket-<užduoties_id>)`
     *   Pvz.: `feat(auth): add 2FA (ticket-45678)`
-<!-- CODE-VCS-P17 | human-reviewable -->
+<!-- CODE-VCS-P17 | ai-reviewable | stacks=all | enforced-by=tool:commitlint -->
 *   Leidžiami tipai:
     *   **feat:** Įdiegta nauja funkcija
     *   **fix:** Ištaisoma klaida
@@ -351,7 +351,7 @@ PRIVALOMA:
     *   **ci:** Nuolatinės integracijos (CI) ir operaciniai pakeitimai, pvz., diegimo skriptai ar infrastruktūros konfigūracijos pakeitimai
 <!-- CODE-VCS-P18 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Apimtis turi nurodyti kontekstą arba paliestą sritį, pvz. auth, api, ui, config, docker.
-<!-- CODE-VCS-P19 | human-reviewable -->
+<!-- CODE-VCS-P19 | ai-reviewable | stacks=all | enforced-by=tool:commitlint -->
 *   Trumpas aprašas turi būti imperatyvus, rašomas mažosiomis raidėmis ir be taško sakinio gale.
 
 REKOMENDUOJAMA:
@@ -367,7 +367,7 @@ PRIVALOMA:
 
 <!-- CODE-VCS-P20 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kiekvienas PR arba MR turi turėti aprašą pagal organizacijos šabloną.
-<!-- CODE-VCS-P21 | human-reviewable -->
+<!-- CODE-VCS-P21 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Apraše turi būti nurodyta:
     *   kas keičiama
     *   kodėl keičiama
@@ -408,7 +408,7 @@ PRIVALOMA:
 
 REKOMENDUOJAMA:
 
-<!-- CODE-VCS-R12 | human-reviewable -->
+<!-- CODE-VCS-R12 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Didelius dvejetainius failus valdyti per git-lfs arba lygiavertį mechanizmą.
 <!-- CODE-VCS-R13 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Repozitorijos aprašą, temas ir nuorodas į dokumentaciją laikyti aktualias.
@@ -510,14 +510,14 @@ PRIVALOMA:
 *   Draudžiama formuoti užklausas, komandas ar kitus vykdomus fragmentus tiesiogiai iš nevaliduoto įvedimo.
 <!-- CODE-SEC-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Klaidų pranešimai vartotojui negali atskleisti vidinės sistemos detalių, tokių kaip stack trace, SQL struktūra, failų keliai ar infrastruktūros informacija.
-<!-- CODE-SEC-P05 | human-reviewable -->
+<!-- CODE-SEC-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Techninės klaidų detalės gali būti pateikiamos tik loguose, laikantis logavimo ir jautrių duomenų apsaugos reikalavimų.
 <!-- CODE-SEC-P06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Naujos priklausomybės negali būti įtraukiamos neįvertinus jų palaikymo būklės, licencijos ir žinomų saugumo rizikų.
 
 REKOMENDUOJAMA:
 
-<!-- CODE-SEC-R01 | human-reviewable -->
+<!-- CODE-SEC-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Naudoti standartinių bibliotekų ir framework’ų saugius mechanizmus vietoje savarankiškai kuriamų kriptografinių ar saugumo sprendimų.
 <!-- CODE-SEC-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Validacijos, autorizacijos ir klaidų apdorojimo logiką centralizuoti, kai tai leidžia architektūra.
@@ -601,7 +601,7 @@ PRIVALOMA:
 
 PRIVALOMA:
 
-<!-- CODE-AI-P08 | human-reviewable -->
+<!-- CODE-AI-P08 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   DI sugeneruoti testai turi būti peržiūrimi dėl prasmingų tikrinimų (assertions); testai, kurie tik didina aprėptį be realaus tikrinimo, yra draudžiami.
 <!-- CODE-AI-P09 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   DI sugeneruotos priklausomybės ir importai turi būti tikrinami dėl egzistavimo, palaikymo būklės ir saugumo — DI modeliai gali siūlyti neegzistuojančius paketus.

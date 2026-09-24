@@ -54,7 +54,7 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- VER-PKG-P01 | human-reviewable -->
+<!-- VER-PKG-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Visos priklausomybės turi būti deklaruotos projekto valdymo failuose.
 <!-- VER-PKG-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Lock failai turi būti naudojami ir saugomi repozitorijoje.
@@ -66,11 +66,11 @@ PRIVALOMA:
 *   Dependabot arba lygiavertis automatizuotas priklausomybių naujinimo įrankis turi būti sukonfigūruotas visoms projekte naudojamoms priklausomybių valdymo ekosistemoms, įskaitant Composer, npm, Yarn, pnpm, Maven, Gradle, pip, Docker ir GitHub Actions, jei jos naudojamos projekte.
 <!-- VER-PKG-P06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Dependabot konfigūracija turi apimti aplikacijos bibliotekų, konteinerių vaizdų, CI/CD darbo eigų ir kitų projekto priklausomybių atnaujinimus, jei tokios priklausomybės naudojamos.
-<!-- VER-PKG-P07 | human-reviewable -->
+<!-- VER-PKG-P07 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Automatiniams priklausomybių atnaujinimams valdyti turi būti naudojama atskira ilgalaikė `dependencies` šaka, skirta Dependabot arba lygiaverčio įrankio siūlomiems atnaujinimams testuoti ir integruoti.
 <!-- VER-PKG-P08 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   `dependencies` šaka turi būti nuolat sinchronizuojama su pagrindine `main` šaka, kad priklausomybių atnaujinimai būtų vertinami pagal aktualią projekto kodo bazės ir konfigūracijos būseną.
-<!-- VER-PKG-P09 | human-reviewable -->
+<!-- VER-PKG-P09 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Priklausomybių atnaujinimai neturi būti automatiškai suliejami į `main` šaką be atsakingo asmens peržiūros, suderinamumo įvertinimo ir testavimo.
 <!-- VER-PKG-P10 | human-reviewable -->
 *   Atsakingas kūrėjas, gavęs Dependabot arba lygiaverčio įrankio pasiūlytą atnaujinimą, turi lokaliai atsisiųsti `dependencies` šaką, pritaikyti siūlomą pakeitimą ir atlikti suderinamumo, testų bei veikimo patikrą.
@@ -120,7 +120,7 @@ PRIVALOMA:
 *   Turi būti aišku, kuri sistemos versija naudoja kurias priklausomybes.
 <!-- VER-SEC-P02 | process-level -->
 *   Kritiniai pažeidžiamumai priklausomybėse turi būti sprendžiami nedelsiant arba turi būti dokumentuotas sprendimo planas.
-<!-- VER-SEC-P03 | human-reviewable -->
+<!-- VER-SEC-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Turi būti naudojamos automatinės priklausomybių saugumo tikrinimo priemonės.
 
 REKOMENDUOJAMA:
