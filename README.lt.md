@@ -69,8 +69,13 @@ faile `standard/review-method.md`. Leidimo metu šis tekstas įdedamas į `dev-s
 `dev-standard` skill, todėl Copilot PR peržiūra ir vietiniai DI agentai naudoja tą patį formatą. `rules:validate`
 nepraeina, jei jame nurodytas neegzistuojantis reikalavimo ID ar skyriaus numeris.
 
-Prie kiekvieno leidimo pridedamas `dev-standard-agent-bundle.zip` (Copilot instrukcijų failai, `dev-standard` skill,
-`AGENTS.md` fragmentas, `rules.json`). Angliškas reikalavimų sąrašas svetainėje – `/rules`.
+Prie kiekvieno leidimo pridedamas `dev-standard-agent-bundle.zip` (Copilot instrukcijų failai, `dev-standard` ir
+`dev-standard-docs` skill, `AGENTS.md` fragmentas, `rules.json`). Angliškas reikalavimų sąrašas svetainėje – `/rules`.
+
+`dev-standard` skill generuojamas. Rankiniu būdu rašomi skill laikomi `standard/skills/<pavadinimas>/` ir į paketą
+patenka nepakeisti; `rules:validate` tikrina jų antraštę (frontmatter), santykines nuorodas, reikalavimų ID, skyrių
+numerius ir nuorodas į svetainę. `dev-standard-docs` DI agentams perteikia G priedo dokumentacijos rengimo metodiką
+(`docs/priedai/dokumentacijos-rengimo-metodika.md`), kartu su šablonais ir nuorodų tikrintuvu `check-docs.py`.
 
 GitHub organizacijos Copilot nurodymai (custom instructions) nustatomi vieną kartą rankiniu būdu ir tik nukreipia į
 reikalavimų failus (Copilot kodo peržiūra neatidaro nuorodų, o laukas leidžia 4 000 simbolių):

@@ -69,8 +69,13 @@ How AI reviewers should review (severity labels, finding format, summary) is wri
 `dev-standard` skill, so Copilot pull request reviews and local agent reviews use the same format. `rules:validate`
 fails if it cites a rule ID or section number that does not exist.
 
-Each release attaches `dev-standard-agent-bundle.zip` (Copilot instruction files, the `dev-standard` skill,
-`AGENTS.md` snippet, `rules.json`). The English rule list is at `/rules` on the site.
+Each release attaches `dev-standard-agent-bundle.zip` (Copilot instruction files, the `dev-standard` and
+`dev-standard-docs` skills, `AGENTS.md` snippet, `rules.json`). The English rule list is at `/rules` on the site.
+
+The `dev-standard` skill is generated. Hand-written skills live in `standard/skills/<name>/` and go into the bundle
+unchanged; `rules:validate` checks their frontmatter, relative links, rule IDs, section numbers and links into the
+published site. `dev-standard-docs` carries the documentation methodology of appendix G
+(`docs/priedai/dokumentacijos-rengimo-metodika.md`) for agents, with templates and the `check-docs.py` link checker.
 
 The GitHub organization's Copilot custom instructions are set once by hand and only point to the rule files
 (Copilot code review cannot follow links, and the field allows 4,000 characters):
@@ -102,13 +107,19 @@ The GitHub organization's Copilot custom instructions are set once by hand and o
 
 3. Open **Actions → Dev standard sync → Run workflow** and enter your stacks (`php`, `laravel`, `symfony`,
    `frontend`, `mobile`, `infra`, `db`; `all` is always included). Merge the pull request it opens.
-4. Paste the section from the pull request's warning into your `AGENTS.md` (sync never edits it).
+4. Paste the section from the pull request's warning into your `AGENTS.md` (sync never edits it). When a release
+   changes that section, the sync pull request warns again and shows the new version.
 
 Sync pins the version in `.dev-standard/config.json`. The weekly run opens a pull request when a new release
 exists; a manual run without input restores the pinned files; a manual run with `stacks` changes the stacks.
 Vendor repositories that must stay on their contract version remove the `schedule` trigger. Put
 repository-specific rules in `.github/instructions/dev-standard-local.instructions.md`; sync never touches it.
 Pull requests opened by sync do not start your CI on their own; close and reopen one if required checks must run.
+
+Sync installs each skill of the bundle in `.agents/skills/<name>` with a `.claude/skills/<name>` link, and removes
+skills a release dropped. Names starting with `dev-standard` in those two folders belong to sync; give your own
+skills other names. To document a repository, ask your agent to use the `dev-standard-docs` skill; check the docs
+with `python3 .agents/skills/dev-standard-docs/check-docs.py`.
 
 ## CI/CD and releases
 
