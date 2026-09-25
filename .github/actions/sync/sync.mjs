@@ -126,7 +126,11 @@ export async function applyBundle({ repoDir, bundleDir, version, stacks }) {
   return { stacks: resolved, skills: [...wantedSkills] };
 }
 
-// Sync never edits AGENTS.md; it asks the team to paste the pointer section once.
+// A pasted AGENTS.md section carries this marker; bundles up to v1.2.7 have none (revision 0).
+const AGENTS_SECTION = /<!-- dev-standard:agents-section (\d+) -->/;
+const revision = (text) => Number(text?.match(AGENTS_SECTION)?.[1] ?? 0);
+
+// Sync never edits AGENTS.md; it asks the team to paste the pointer section, and to replace it when it is outdated.
 export async function agentsWarning(repoDir, bundleDir) {
   let text = null;
   try {
@@ -134,18 +138,13 @@ export async function agentsWarning(repoDir, bundleDir) {
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
   }
-  if (text?.includes('dev-standard')) return null;
   const snippet = await readFile(path.join(bundleDir, 'agents-snippet.md'), 'utf8');
-  const problem = text === null ? 'This repository has no `AGENTS.md`.' : '`AGENTS.md` does not mention the dev standard.';
-  return [
-    '> [!WARNING]',
-    `> ${problem} Add this section to it so agents find the rules:`,
-    '',
-    '```markdown',
-    snippet.trimEnd(),
-    '```',
-    '',
-  ].join('\n');
+  let problem;
+  if (text === null) problem = 'This repository has no `AGENTS.md`. Add this section to it so agents find the rules:';
+  else if (!text.includes('dev-standard')) problem = '`AGENTS.md` does not mention the dev standard. Add this section to it so agents find the rules:';
+  else if (revision(text) < revision(snippet)) problem = '`AGENTS.md` has an outdated dev standard section. Replace it with this one:';
+  else return null;
+  return ['> [!WARNING]', `> ${problem}`, '', '```markdown', snippet.trimEnd(), '```', ''].join('\n');
 }
 
 async function setOutputs(values) {

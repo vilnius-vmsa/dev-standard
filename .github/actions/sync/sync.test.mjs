@@ -272,3 +272,22 @@ test('applyBundle removes dropped dev-standard skills but keeps the team\'s own 
   assert.deepEqual((await readdir(path.join(repo, '.agents/skills'))).sort(), ['dev-standard', 'team-release']);
   assert.deepEqual((await readdir(path.join(repo, '.claude/skills'))).sort(), ['dev-standard', 'team-local']);
 });
+
+test('agentsWarning asks to replace a section pasted from an older release', async () => {
+  const bundle = await makeBundle();
+  const repo = await tempDir();
+  const old = '## Vilnius dev standard\n\nThe `dev-standard` skill describes how to apply and review them.\n';
+  await writeFile(path.join(repo, 'AGENTS.md'), `# Team notes\n\n${old}`);
+  const warning = await agentsWarning(repo, bundle);
+  assert.match(warning, /`AGENTS\.md` has an outdated dev standard section\. Replace it with this one/);
+  assert.ok(warning.includes('<!-- dev-standard:agents-section 2 -->'));
+
+  await writeFile(path.join(repo, 'AGENTS.md'), `# Team notes\n\n${old.replace('\n\n', '\n\n<!-- dev-standard:agents-section 3 -->\n')}`);
+  assert.equal(await agentsWarning(repo, bundle), null, 'a newer section is not outdated');
+});
+
+test('agentsWarning accepts any pasted section when the bundle has no revision marker', async () => {
+  const repo = await tempDir();
+  await writeFile(path.join(repo, 'AGENTS.md'), 'See dev-standard.\n');
+  assert.equal(await agentsWarning(repo, await makeLegacyBundle()), null);
+});

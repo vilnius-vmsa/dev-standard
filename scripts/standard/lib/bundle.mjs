@@ -67,6 +67,7 @@ Read those files from disk. Never state a rule from memory.
 1. List the files you will touch. Read \`dev-standard-all.instructions.md\` and every rules file whose \`applyTo\` matches one of them.
 2. Follow every MUST rule. If you cannot, stop and tell the user which rule ID blocks you and why.
 3. Before you report the task as done, check your own changes against the same rules and fix every MUST violation.
+4. If the change alters behaviour, commands, configuration or an API that the repository's documentation describes, run the \`dev-standard-docs\` skill in update mode before you report the task as done.
 
 ## When asked to review
 
@@ -77,10 +78,15 @@ ${reviewMethod.trimEnd()}
 `;
 }
 
+// Raise when teams must re-paste the section; sync warns repositories whose AGENTS.md carries a lower number.
+const AGENTS_SECTION_REVISION = 2;
+
 const AGENTS_SNIPPET = `## Vilnius dev standard
 
+<!-- dev-standard:agents-section ${AGENTS_SECTION_REVISION} -->
 This repository follows the Vilnius City Municipality software development standard.
 Before changing code, read the rules in \`.github/instructions/dev-standard-*.instructions.md\` whose \`applyTo\` matches the files you are changing, plus \`.github/instructions/dev-standard-local.instructions.md\` if it exists. The \`dev-standard\` skill describes how to apply and review them. Cite rule IDs (for example \`CODE-SEC-P01\`) when you report violations.
+When a change affects what the documentation describes, or when asked to write or check documentation, use the \`dev-standard-docs\` skill.
 `;
 
 // `skills`: hand-written skills from standard/skills, name → (path inside the skill → content), copied unchanged.

@@ -87,6 +87,9 @@ test('skill, snippet, rules.json and manifest', () => {
   const files = build();
   assert.ok(files.get('skills/dev-standard/SKILL.md').startsWith('---\nname: dev-standard\ndescription: '));
   assert.ok(files.get('agents-snippet.md').includes('.github/instructions/dev-standard-'));
+  assert.ok(files.get('skills/dev-standard/SKILL.md').includes('run the `dev-standard-docs` skill in update mode'));
+  assert.ok(files.get('agents-snippet.md').includes('<!-- dev-standard:agents-section 2 -->'));
+  assert.ok(files.get('agents-snippet.md').includes('`dev-standard-docs`'));
   const json = JSON.parse(files.get('rules.json'));
   assert.equal(json.version, 'v1.5.0');
   assert.deepEqual(json.rules.find((x) => x.id === 'CODE-PHP-P01'), {
