@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildBundle } from './lib/bundle.mjs';
 import { acceptEntries, applyDrafts, checkEnglish, parseEnglish, stringifyEnglish } from './lib/english.mjs';
+import { checkReferences, loadSectionNumbers } from './lib/references.mjs';
 import { loadRules } from './lib/rules.mjs';
 import { buildSiteData } from './lib/site-data.mjs';
 import { loadStacks } from './lib/stacks.mjs';
@@ -14,6 +15,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const DOCS_DIR = path.join(ROOT, 'docs');
 const STACKS_FILE = path.join(ROOT, 'standard/stacks.yaml');
 const EN_FILE = path.join(ROOT, 'standard/rules.en.yaml');
+const REVIEW_METHOD_FILE = path.join(ROOT, 'standard/review-method.md');
 const SITE_DATA_FILE = path.join(ROOT, 'src/data/rules.generated.json');
 // Keep in sync with url + baseUrl in docusaurus.config.js.
 const SITE_URL = (process.env.DEV_STANDARD_SITE_URL ?? 'https://vilnius-vmsa.github.io/dev-standard').replace(/\/+$/, '');
@@ -42,6 +44,13 @@ async function loadEnglish() {
   return parseEnglish(await readFile(EN_FILE, 'utf8'));
 }
 
+/** The hand-written review method and any rule IDs or section numbers it cites that do not exist. */
+async function loadReviewMethod(rules) {
+  const text = await readFile(REVIEW_METHOD_FILE, 'utf8');
+  const known = { ruleIds: new Set(rules.map((r) => r.id)), sections: await loadSectionNumbers(DOCS_DIR) };
+  return { text, errors: checkReferences(text, known).map((e) => `standard/review-method.md ${e}`) };
+}
+
 async function saveEnglish(entries) {
   await writeFile(EN_FILE, stringifyEnglish(entries));
 }
@@ -57,6 +66,7 @@ const commands = {
     const { rules, errors } = await loadDocs();
     const english = flag('docs-only') ? null : await loadEnglish();
     if (english) errors.push(...checkEnglish(rules, english, { strict: flag('strict') }));
+    errors.push(...(await loadReviewMethod(rules)).errors);
     if (errors.length) fail(errors);
     const reviewable = rules.filter((r) => r.check === 'ai-reviewable').length;
     const scope = english ? ' and their English text' : '';
@@ -80,16 +90,17 @@ const commands = {
     const english = (await loadEnglish()) ?? {};
     // --allow-drafts is for local previews only; releases must use reviewed English.
     errors.push(...checkEnglish(rules, english, { strict: !flag('allow-drafts') }));
+    const method = await loadReviewMethod(rules);
+    errors.push(...method.errors);
     if (errors.length) fail(errors);
 
-    const files = buildBundle({ rules, english, stacks, version, siteUrl: SITE_URL });
+    const files = buildBundle({ rules, english, stacks, version, siteUrl: SITE_URL, reviewMethod: method.text });
     for (const [relPath, content] of files) {
       const target = path.resolve(ROOT, out, relPath);
       await mkdir(path.dirname(target), { recursive: true });
       await writeFile(target, content);
     }
-    const orgChars = files.get('org-instructions.md').length;
-    console.log(`✓ wrote ${files.size} files to ${out} (org-instructions.md: ${orgChars} characters)`);
+    console.log(`✓ wrote ${files.size} files to ${out}`);
   },
 
   // Does not fail on validation errors, so a local `npm start` works mid-edit; CI validates separately.

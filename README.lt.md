@@ -64,8 +64,19 @@ Kai pridedate ar keičiate `ai-reviewable` reikalavimą:
    Kol angliško teksto nėra arba jis pasenęs, CI blokuoja pakeitimą.
 3. Turi praeiti `npm run rules:validate -- --strict`.
 
+Kaip DI peržiūros įrankiai turi atlikti peržiūrą (svarbos žymos, pastabų formatas, santrauka), aprašyta vieną kartą
+faile `standard/review-method.md`. Leidimo metu šis tekstas įdedamas į `dev-standard-all.instructions.md` pradžią ir į
+`dev-standard` skill, todėl Copilot PR peržiūra ir vietiniai DI agentai naudoja tą patį formatą. `rules:validate`
+nepraeina, jei jame nurodytas neegzistuojantis reikalavimo ID ar skyriaus numeris.
+
 Prie kiekvieno leidimo pridedamas `dev-standard-agent-bundle.zip` (Copilot instrukcijų failai, `dev-standard` skill,
-`AGENTS.md` fragmentas, `rules.json`) ir `org-instructions.md`. Angliškas reikalavimų sąrašas svetainėje – `/rules`.
+`AGENTS.md` fragmentas, `rules.json`). Angliškas reikalavimų sąrašas svetainėje – `/rules`.
+
+GitHub organizacijos Copilot nurodymai (custom instructions) nustatomi vieną kartą rankiniu būdu ir tik nukreipia į
+reikalavimų failus (Copilot kodo peržiūra neatidaro nuorodų, o laukas leidžia 4 000 simbolių):
+
+> Repositories follow the VMS dev standard. Its rules are in `.github/instructions/dev-standard-*.instructions.md`;
+> apply them. If they are missing, say so in the review summary.
 
 ## CI/CD ir versijos išleidimas
 

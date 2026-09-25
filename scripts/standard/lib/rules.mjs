@@ -109,7 +109,7 @@ export function parseRuleFile(markdown, relPath) {
   return { rules, errors };
 }
 
-async function listMarkdownFiles(dir, base = dir) {
+export async function listMarkdownFiles(dir, base = dir) {
   const entries = await readdir(dir, { withFileTypes: true });
   const files = [];
   for (const entry of entries) {

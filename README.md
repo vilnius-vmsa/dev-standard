@@ -64,8 +64,19 @@ When you add or change an `ai-reviewable` rule:
    CI blocks the change while the English is missing or out of date.
 3. `npm run rules:validate -- --strict` must pass.
 
+How AI reviewers should review (severity labels, finding format, summary) is written once in
+`standard/review-method.md`. The release puts it at the top of `dev-standard-all.instructions.md` and into the
+`dev-standard` skill, so Copilot pull request reviews and local agent reviews use the same format. `rules:validate`
+fails if it cites a rule ID or section number that does not exist.
+
 Each release attaches `dev-standard-agent-bundle.zip` (Copilot instruction files, the `dev-standard` skill,
-`AGENTS.md` snippet, `rules.json`) and `org-instructions.md`. The English rule list is at `/rules` on the site.
+`AGENTS.md` snippet, `rules.json`). The English rule list is at `/rules` on the site.
+
+The GitHub organization's Copilot custom instructions are set once by hand and only point to the rule files
+(Copilot code review cannot follow links, and the field allows 4,000 characters):
+
+> Repositories follow the VMS dev standard. Its rules are in `.github/instructions/dev-standard-*.instructions.md`;
+> apply them. If they are missing, say so in the review summary.
 
 ## CI/CD and releases
 
