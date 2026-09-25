@@ -11,7 +11,7 @@ const STACKS = new Map([
 ]);
 const r = (id, stacks, check = 'ai-reviewable') => ({
   id, level: id.match(/-([PR])\d/)[1], check, stacks, enforcedBy: check === 'ai-reviewable' ? 'ai' : null,
-  textLt: `LT **${id}**`, file: 'a.md', line: 1, heading: 'H', anchor: 'h', route: '/kodas',
+  textLt: `LT **${id}**`, file: 'a.md', line: 1, heading: '4.6. Saugumas', anchor: 'h', route: '/kodas',
 });
 const RULES = [
   r('CODE-SEC-R01', ['all']),
@@ -20,7 +20,8 @@ const RULES = [
   r('ORG-X-P01', [], 'process-level'),
 ];
 const EN = Object.fromEntries(RULES.filter((x) => x.check === 'ai-reviewable').map((x) => [x.id, { text: `EN ${x.id}`, source_hash: 'h' }]));
-const build = () => buildBundle({ rules: RULES, english: EN, stacks: STACKS, version: 'v1.5.0', siteUrl: SITE });
+const METHOD = '## How to review\n\nUse `[BLOCKING]` for MUST violations.\n';
+const build = () => buildBundle({ rules: RULES, english: EN, stacks: STACKS, version: 'v1.5.0', siteUrl: SITE, reviewMethod: METHOD });
 
 test('ruleUrl points at the lower-case anchor on the rules page', () => {
   assert.equal(ruleUrl(SITE, 'CODE-VCS-R05a'), `${SITE}/rules#code-vcs-r05a`);
@@ -34,7 +35,6 @@ test('produces one instructions file per stack plus the shared files', () => {
     'instructions/dev-standard-mobile.instructions.md',
     'instructions/dev-standard-php.instructions.md',
     'manifest.json',
-    'org-instructions.md',
     'rules.json',
     'skill/SKILL.md',
   ]);
@@ -45,7 +45,7 @@ test('instructions files have applyTo, the generated notice, MUST before SHOULD 
   assert.ok(all.startsWith('---\napplyTo: "**"\n---\n'));
   assert.ok(all.includes('GENERATED from vilnius-vmsa/dev-standard v1.5.0. Do not edit'));
   assert.ok(all.indexOf('CODE-SEC-P01') < all.indexOf('CODE-SEC-R01'), 'MUST section comes first');
-  assert.ok(all.includes(`- **CODE-SEC-P01**: EN CODE-SEC-P01 ([rule](${SITE}/rules#code-sec-p01))`));
+  assert.ok(all.includes(`- **CODE-SEC-P01** (4.6): EN CODE-SEC-P01 ([rule](${SITE}/rules#code-sec-p01))`));
   assert.ok(!all.includes('ORG-X-P01'));
 });
 
@@ -56,12 +56,22 @@ test('a multi-stack rule appears in each stack; an empty stack still gets a file
   assert.ok(files.get('instructions/dev-standard-mobile.instructions.md').includes('No rules are assigned to this stack in this version.'));
 });
 
-test('org instructions carry only MUST rules of the all stack and no version', () => {
-  const org = build().get('org-instructions.md');
-  assert.ok(org.includes('CODE-SEC-P01'));
-  assert.ok(!org.includes('CODE-SEC-R01'));
-  assert.ok(!org.includes('CODE-PHP-P01'));
-  assert.ok(!org.includes('v1.5.0'));
+test('the review method goes into the all file and the skill; other stacks point to it', () => {
+  const files = build();
+  const all = files.get('instructions/dev-standard-all.instructions.md');
+  assert.ok(all.includes(METHOD));
+  assert.ok(all.indexOf(METHOD) < all.indexOf('## MUST'), 'method comes before the rules');
+  assert.ok(files.get('skill/SKILL.md').includes(METHOD));
+  const php = files.get('instructions/dev-standard-php.instructions.md');
+  assert.ok(!php.includes(METHOD));
+  assert.ok(php.includes('Review method and severity labels: see `dev-standard-all.instructions.md`.'));
+});
+
+test('a rule under an unnumbered heading has no section in its line', () => {
+  const rules = [{ ...RULES[1], heading: 'C.6 Spragų aptikimas' }];
+  const all = buildBundle({ rules, english: EN, stacks: STACKS, version: 'v1', siteUrl: SITE, reviewMethod: METHOD })
+    .get('instructions/dev-standard-all.instructions.md');
+  assert.ok(all.includes('- **CODE-SEC-P01**: EN CODE-SEC-P01'));
 });
 
 test('skill, snippet, rules.json and manifest', () => {
@@ -72,7 +82,7 @@ test('skill, snippet, rules.json and manifest', () => {
   assert.equal(json.version, 'v1.5.0');
   assert.deepEqual(json.rules.find((x) => x.id === 'CODE-PHP-P01'), {
     id: 'CODE-PHP-P01', level: 'MUST', stacks: ['php', 'laravel'], enforcedBy: 'ai',
-    en: 'EN CODE-PHP-P01', lt: 'LT CODE-PHP-P01', url: `${SITE}/rules#code-php-p01`, source: `${SITE}/kodas#h`,
+    section: '4.6', en: 'EN CODE-PHP-P01', lt: 'LT CODE-PHP-P01', url: `${SITE}/rules#code-php-p01`, source: `${SITE}/kodas#h`,
   });
   assert.deepEqual(JSON.parse(files.get('manifest.json')).stacks, ['all', 'php', 'laravel', 'mobile']);
 });
@@ -83,7 +93,7 @@ test('output is deterministic', () => {
 
 test('missing English for an ai-reviewable rule is an error', () => {
   assert.throws(
-    () => buildBundle({ rules: RULES, english: {}, stacks: STACKS, version: 'v1', siteUrl: SITE }),
+    () => buildBundle({ rules: RULES, english: {}, stacks: STACKS, version: 'v1', siteUrl: SITE, reviewMethod: METHOD }),
     /CODE-SEC-R01.*no English text/,
   );
 });

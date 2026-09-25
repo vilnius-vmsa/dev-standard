@@ -1,4 +1,5 @@
 import { toPlainText } from './markdown.mjs';
+import { sectionOf } from './references.mjs';
 
 const REPO = 'vilnius-vmsa/dev-standard';
 
@@ -8,18 +9,21 @@ const notice = (version) =>
   `<!-- GENERATED from ${REPO} ${version}. Do not edit: the next sync overwrites this file. ` +
   `To change a rule, propose a change to the standard: https://github.com/${REPO} -->`;
 
-const ruleLine = (rule, siteUrl) => `- **${rule.id}**: ${rule.en} ([rule](${ruleUrl(siteUrl, rule.id)}))`;
+function ruleLine(rule, siteUrl) {
+  const section = sectionOf(rule.heading);
+  return `- **${rule.id}**${section ? ` (${section})` : ''}: ${rule.en} ([rule](${ruleUrl(siteUrl, rule.id)}))`;
+}
 
 function ruleSections(rules, siteUrl) {
   const lines = [];
-  for (const [title, level] of [['MUST (must-fix)', 'P'], ['SHOULD (suggestion)', 'R']]) {
+  for (const [title, level] of [['MUST (IDs with -P)', 'P'], ['SHOULD (IDs with -R)', 'R']]) {
     const matching = rules.filter((r) => r.level === level);
     if (matching.length) lines.push(`## ${title}`, '', ...matching.map((r) => ruleLine(r, siteUrl)), '');
   }
   return lines;
 }
 
-function instructionsFile(stack, info, rules, version, siteUrl) {
+function instructionsFile(stack, info, rules, version, siteUrl, reviewMethod) {
   return [
     '---',
     `applyTo: "${info.applyTo}"`,
@@ -30,8 +34,10 @@ function instructionsFile(stack, info, rules, version, siteUrl) {
     `# Vilnius dev standard: ${info.description} (${version})`,
     '',
     'English, non-binding summary of the Lithuanian standard; the Lithuanian text behind each link is binding.',
-    'MUST rules (IDs with -P) are must-fix. SHOULD rules (IDs with -R) are suggestions. Cite the rule ID whenever you flag a violation.',
     '',
+    ...(stack === 'all'
+      ? [reviewMethod.trimEnd(), '']
+      : ['Review method and severity labels: see `dev-standard-all.instructions.md`.', '']),
     ...(info.implies?.length
       ? [`This stack builds on ${info.implies.join(', ')}: also follow ${info.implies.map((s) => `\`dev-standard-${s}.instructions.md\``).join(', ')}.`, '']
       : []),
@@ -39,7 +45,7 @@ function instructionsFile(stack, info, rules, version, siteUrl) {
   ].join('\n');
 }
 
-function skillFile(version) {
+function skillFile(version, reviewMethod) {
   return `---
 name: dev-standard
 description: Vilnius City Municipality software development standard. Use when writing, changing or reviewing code in this repository, when asked to check changes against the dev standard, or when asked whether something complies with it.
@@ -65,26 +71,10 @@ Read those files from disk. Never state a rule from memory.
 ## When asked to review
 
 1. Get the diff against the base branch (\`git diff origin/main...HEAD\` unless the user names another base).
-2. Check each changed file against the matching rules files.
-3. Report MUST violations first, then SHOULD suggestions, one per line: \`RULE-ID (must-fix|suggestion) path:line: what is wrong\`, followed by the rule link from the rules file.
-4. Report only what you can check from the code. Say nothing about rules that need a person's judgement.
-`;
-}
+2. Review it as described below.
 
-function orgInstructions(allStackMust, siteUrl) {
-  return [
-    'Repositories in this organization follow the Vilnius City Municipality software development standard.',
-    '',
-    'When reviewing pull requests:',
-    '- If the repository has `.github/instructions/dev-standard-*.instructions.md`, those files are the detailed, version-pinned rules for that repository and take precedence over this summary.',
-    '- Cite rule IDs, for example `CODE-SEC-P01 (must-fix)`. IDs with -P are must-fix; IDs with -R are suggestions.',
-    `- The binding Lithuanian standard is at ${siteUrl}/ and the English rule list at ${siteUrl}/rules.`,
-    '',
-    'Baseline rules for every repository:',
-    '',
-    ...allStackMust.map((r) => ruleLine(r, siteUrl)),
-    '',
-  ].join('\n');
+${reviewMethod.trimEnd()}
+`;
 }
 
 const AGENTS_SNIPPET = `## Vilnius dev standard
@@ -93,7 +83,7 @@ This repository follows the Vilnius City Municipality software development stand
 Before changing code, read the rules in \`.github/instructions/dev-standard-*.instructions.md\` whose \`applyTo\` matches the files you are changing, plus \`.github/instructions/dev-standard-local.instructions.md\` if it exists. The \`dev-standard\` skill describes how to apply and review them. Cite rule IDs (for example \`CODE-SEC-P01\`) when you report violations.
 `;
 
-export function buildBundle({ rules, english, stacks, version, siteUrl }) {
+export function buildBundle({ rules, english, stacks, version, siteUrl, reviewMethod }) {
   const reviewable = rules
     .filter((r) => r.check === 'ai-reviewable')
     .map((r) => {
@@ -105,10 +95,9 @@ export function buildBundle({ rules, english, stacks, version, siteUrl }) {
   const files = new Map();
   for (const [stack, info] of stacks) {
     const stackRules = reviewable.filter((r) => r.stacks.includes(stack));
-    files.set(`instructions/dev-standard-${stack}.instructions.md`, instructionsFile(stack, info, stackRules, version, siteUrl));
+    files.set(`instructions/dev-standard-${stack}.instructions.md`, instructionsFile(stack, info, stackRules, version, siteUrl, reviewMethod));
   }
-  files.set('skill/SKILL.md', skillFile(version));
-  files.set('org-instructions.md', orgInstructions(reviewable.filter((r) => r.stacks.includes('all') && r.level === 'P'), siteUrl));
+  files.set('skill/SKILL.md', skillFile(version, reviewMethod));
   files.set('agents-snippet.md', AGENTS_SNIPPET);
   files.set('rules.json', `${JSON.stringify({
     version,
@@ -117,6 +106,7 @@ export function buildBundle({ rules, english, stacks, version, siteUrl }) {
       level: r.level === 'P' ? 'MUST' : 'SHOULD',
       stacks: r.stacks,
       enforcedBy: r.enforcedBy,
+      section: sectionOf(r.heading),
       en: r.en,
       lt: toPlainText(r.textLt.replace(/^[*-]\s+/gm, '')),
       url: ruleUrl(siteUrl, r.id),
