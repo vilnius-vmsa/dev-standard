@@ -16,7 +16,7 @@ runs:
   steps:
     - uses: actions/checkout@v6
       with:
-        ref: ${{ github.event.repository.default_branch }}
+        ref: ${{ github.event.repository.default_branch || github.ref_name }}
         token: ${{ inputs.token }}
 
     - name: Choose version
@@ -26,12 +26,22 @@ runs:
         GH_TOKEN: ${{ inputs.token }}
         EVENT_NAME: ${{ github.event_name }}
         STACKS: ${{ inputs.stacks }}
+        BRANCH: dev-standard/sync
       run: |
         set -euo pipefail
         latest="$(gh release view --repo vilnius-vmsa/dev-standard --json tagName --jq .tagName)"
-        node "$GITHUB_ACTION_PATH/sync.mjs" plan --latest="$latest" --event="$EVENT_NAME" --stacks="$STACKS"
+        # An open sync pull request holds the newest intent (a stacks change or a version bump); build on it.
+        config_args=()
+        pending="$RUNNER_TEMP/dev-standard-pending-config.json"
+        if [[ -n "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')" ]] \
+          && git fetch -q origin "$BRANCH" \
+          && git show FETCH_HEAD:.dev-standard/config.json > "$pending" 2>/dev/null; then
+          config_args=(--config="$pending")
+        fi
+        node "$GITHUB_ACTION_PATH/sync.mjs" plan "${config_args[@]}" --latest="$latest" --event="$EVENT_NAME" --stacks="$STACKS"
 
     - name: Install bundle
+      if: steps.plan.outputs.skip != 'true'
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.token }}
@@ -51,11 +61,12 @@ runs:
         cat "$RUNNER_TEMP/dev-standard-warning.md" >> "$GITHUB_STEP_SUMMARY"
 
     - name: Open or update pull request
+      if: steps.plan.outputs.skip != 'true'
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.token }}
         VERSION: ${{ steps.plan.outputs.version }}
-        BASE: ${{ github.event.repository.default_branch }}
+        BASE: ${{ github.event.repository.default_branch || github.ref_name }}
         BRANCH: dev-standard/sync
       run: |
         set -euo pipefail

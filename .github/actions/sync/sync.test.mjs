@@ -42,7 +42,7 @@ test('readConfig rejects invalid JSON, a malformed version and bad stacks', asyn
 });
 
 test('planRun: first setup needs stacks and uses the latest release', () => {
-  assert.throws(() => planRun({ config: null, stacksInput: '', event: 'schedule', latest: 'v1.4.0' }), /Run this workflow manually with the "stacks" input/);
+  assert.throws(() => planRun({ config: null, stacksInput: '', event: 'workflow_dispatch', latest: 'v1.4.0' }), /Run this workflow manually with the "stacks" input/);
   assert.deepEqual(planRun({ config: null, stacksInput: 'laravel', event: 'workflow_dispatch', latest: 'v1.4.0' }), { version: 'v1.4.0', stacks: ['laravel'] });
   assert.deepEqual(planRun({ config: null, stacksInput: 'all', event: 'workflow_dispatch', latest: 'v1.4.0' }), { version: 'v1.4.0', stacks: [] });
 });
@@ -206,7 +206,27 @@ test('CLI apply installs the bundle and writes the warning file', async () => {
 
 test('CLI reports errors as workflow annotations', async () => {
   await assert.rejects(
-    run(['plan', `--repo=${await tempDir()}`, '--latest=v1.4.0', '--event=schedule', '--stacks=']),
+    run(['plan', `--repo=${await tempDir()}`, '--latest=v1.4.0', '--event=workflow_dispatch', '--stacks=']),
     (error) => error.code === 1 && error.stdout.includes('::error::.dev-standard/config.json not found'),
   );
+});
+
+test('planRun: a scheduled run before setup is merged skips instead of failing', () => {
+  assert.equal(planRun({ config: null, stacksInput: '', event: 'schedule', latest: 'v1.4.0' }), null);
+});
+
+test('CLI plan reports skip when a scheduled run finds no config', async () => {
+  const out = path.join(await tempDir(), 'output');
+  const { stdout } = await run(['plan', `--repo=${await tempDir()}`, '--latest=v1.4.0', '--event=schedule', '--stacks='], { GITHUB_OUTPUT: out });
+  assert.match(stdout, /::notice::.*not set up yet/);
+  assert.equal(await readFile(out, 'utf8'), 'skip=true\n');
+});
+
+test('CLI plan prefers the config of an open sync pull request', async () => {
+  const repo = await repoWithConfig('{ "version": "v1.3.0", "stacks": ["laravel"] }');
+  const pending = path.join(await tempDir(), 'pending.json');
+  await writeFile(pending, '{ "version": "v1.4.0", "stacks": ["laravel", "db"] }');
+  const out = path.join(await tempDir(), 'output');
+  await run(['plan', `--repo=${repo}`, `--config=${pending}`, '--latest=v1.4.0', '--event=workflow_dispatch', '--stacks='], { GITHUB_OUTPUT: out });
+  assert.equal(await readFile(out, 'utf8'), 'version=v1.4.0\nstacks=laravel,db\n');
 });

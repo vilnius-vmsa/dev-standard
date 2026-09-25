@@ -18,10 +18,11 @@ export function parseStacks(input) {
   return [...new Set(names)];
 }
 
-export async function readConfig(repoDir) {
+// `file` overrides the location, e.g. the config on an open sync pull request's branch.
+export async function readConfig(repoDir, file = path.join(repoDir, CONFIG_FILE)) {
   let text;
   try {
-    text = await readFile(path.join(repoDir, CONFIG_FILE), 'utf8');
+    text = await readFile(file, 'utf8');
   } catch (error) {
     if (error.code === 'ENOENT') return null;
     throw error;
@@ -40,8 +41,10 @@ export async function readConfig(repoDir) {
 }
 
 // Scheduled runs follow the latest release; manual runs re-sync the pinned one.
+// Returns null when a scheduled run finds no config yet (setup pull request not merged).
 export function planRun({ config, stacksInput, event, latest }) {
   const given = (stacksInput ?? '').trim() !== '';
+  if (!config && !given && event === 'schedule') return null;
   if (!config && !given) {
     throw new Error(`${CONFIG_FILE} not found. Run this workflow manually with the "stacks" input (for example laravel,frontend) to set up the repository.`);
   }
@@ -129,12 +132,18 @@ async function setOutputs(values) {
 async function main() {
   const { positionals: [command], values } = parseArgs({
     allowPositionals: true,
-    options: Object.fromEntries(['repo', 'latest', 'event', 'stacks', 'bundle', 'version', 'warning'].map((name) => [name, { type: 'string' }])),
+    options: Object.fromEntries(['repo', 'config', 'latest', 'event', 'stacks', 'bundle', 'version', 'warning'].map((name) => [name, { type: 'string' }])),
   });
   const repoDir = values.repo ?? '.';
   if (command === 'plan') {
-    const plan = planRun({ config: await readConfig(repoDir), stacksInput: values.stacks, event: values.event, latest: values.latest });
-    await setOutputs({ version: plan.version, stacks: plan.stacks.join(',') });
+    const config = await readConfig(repoDir, values.config);
+    const plan = planRun({ config, stacksInput: values.stacks, event: values.event, latest: values.latest });
+    if (plan) {
+      await setOutputs({ version: plan.version, stacks: plan.stacks.join(',') });
+    } else {
+      console.log(`::notice::This repository is not set up yet: ${CONFIG_FILE} is missing. Merge the setup pull request, or run this workflow manually with the "stacks" input.`);
+      await setOutputs({ skip: 'true' });
+    }
   } else if (command === 'apply') {
     const { stacks } = await applyBundle({ repoDir, bundleDir: values.bundle, version: values.version, stacks: parseStacks(values.stacks) });
     await writeFile(values.warning, (await agentsWarning(repoDir, values.bundle)) ?? '');

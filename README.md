@@ -80,6 +80,7 @@ Each release attaches `dev-standard-agent-bundle.zip` (Copilot instruction files
        inputs:
          stacks: { description: "First setup only, e.g. laravel,frontend", required: false }
    permissions: { contents: write, pull-requests: write }
+   concurrency: { group: dev-standard-sync, cancel-in-progress: false }
    jobs:
      sync:
        runs-on: ubuntu-latest
