@@ -67,6 +67,37 @@ When you add or change an `ai-reviewable` rule:
 Each release attaches `dev-standard-agent-bundle.zip` (Copilot instruction files, the `dev-standard` skill,
 `AGENTS.md` snippet, `rules.json`) and `org-instructions.md`. The English rule list is at `/rules` on the site.
 
+### Using the standard in your repository
+
+1. An org owner enables **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests** (once per org).
+2. Commit `.github/workflows/dev-standard-sync.yml`:
+
+   ```yaml
+   name: Dev standard sync
+   on:
+     schedule: [{ cron: "0 6 * * 1" }]
+     workflow_dispatch:
+       inputs:
+         stacks: { description: "First setup only, e.g. laravel,frontend", required: false }
+   permissions: { contents: write, pull-requests: write }
+   jobs:
+     sync:
+       runs-on: ubuntu-latest
+       steps:
+         - uses: vilnius-vmsa/dev-standard/.github/actions/sync@main
+           with: { stacks: "${{ inputs.stacks }}" }
+   ```
+
+3. Open **Actions → Dev standard sync → Run workflow** and enter your stacks (`php`, `laravel`, `symfony`,
+   `frontend`, `mobile`, `infra`, `db`; `all` is always included). Merge the pull request it opens.
+4. Paste the section from the pull request's warning into your `AGENTS.md` (sync never edits it).
+
+Sync pins the version in `.dev-standard/config.json`. The weekly run opens a pull request when a new release
+exists; a manual run without input restores the pinned files; a manual run with `stacks` changes the stacks.
+Vendor repositories that must stay on their contract version remove the `schedule` trigger. Put
+repository-specific rules in `.github/instructions/dev-standard-local.instructions.md`; sync never touches it.
+Pull requests opened by sync do not start your CI on their own; close and reopen one if required checks must run.
+
 ## CI/CD and releases
 
 A pull request targeting the `main` branch automatically runs a dependency
