@@ -1,7 +1,9 @@
 // Installs a vilnius-vmsa/dev-standard release bundle into a consuming repository.
 // Node built-ins only: the action runs without npm ci.
-import { copyFile, mkdir, readdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { appendFile, copyFile, mkdir, readdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
 
 export const CONFIG_FILE = '.dev-standard/config.json';
 const VERSION = /^v\d+\.\d+\.\d+$/;
@@ -94,4 +96,57 @@ export async function applyBundle({ repoDir, bundleDir, version, stacks }) {
   await mkdir(path.join(repoDir, path.dirname(CONFIG_FILE)), { recursive: true });
   await writeFile(path.join(repoDir, CONFIG_FILE), `${JSON.stringify({ version, stacks }, null, 2)}\n`);
   return { stacks: resolved };
+}
+
+// Sync never edits AGENTS.md; it asks the team to paste the pointer section once.
+export async function agentsWarning(repoDir, bundleDir) {
+  let text = null;
+  try {
+    text = await readFile(path.join(repoDir, 'AGENTS.md'), 'utf8');
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+  if (text?.includes('dev-standard')) return null;
+  const snippet = await readFile(path.join(bundleDir, 'agents-snippet.md'), 'utf8');
+  const problem = text === null ? 'This repository has no `AGENTS.md`.' : '`AGENTS.md` does not mention the dev standard.';
+  return [
+    '> [!WARNING]',
+    `> ${problem} Add this section to it so agents find the rules:`,
+    '',
+    '```markdown',
+    snippet.trimEnd(),
+    '```',
+    '',
+  ].join('\n');
+}
+
+async function setOutputs(values) {
+  const lines = Object.entries(values).map(([key, value]) => `${key}=${value}\n`).join('');
+  if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT, lines);
+  else process.stdout.write(lines);
+}
+
+async function main() {
+  const { positionals: [command], values } = parseArgs({
+    allowPositionals: true,
+    options: Object.fromEntries(['repo', 'latest', 'event', 'stacks', 'bundle', 'version', 'warning'].map((name) => [name, { type: 'string' }])),
+  });
+  const repoDir = values.repo ?? '.';
+  if (command === 'plan') {
+    const plan = planRun({ config: await readConfig(repoDir), stacksInput: values.stacks, event: values.event, latest: values.latest });
+    await setOutputs({ version: plan.version, stacks: plan.stacks.join(',') });
+  } else if (command === 'apply') {
+    const { stacks } = await applyBundle({ repoDir, bundleDir: values.bundle, version: values.version, stacks: parseStacks(values.stacks) });
+    await writeFile(values.warning, (await agentsWarning(repoDir, values.bundle)) ?? '');
+    console.log(`Installed ${values.version} for stacks: ${stacks.join(', ')}`);
+  } else {
+    throw new Error(`unknown command "${command}"; use plan or apply`);
+  }
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.log(`::error::${error.message}`);
+    process.exit(1);
+  });
 }

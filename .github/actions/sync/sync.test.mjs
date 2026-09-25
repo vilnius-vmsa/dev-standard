@@ -1,12 +1,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { execFile } from 'node:child_process';
 import { lstat, mkdir, mkdtemp, readdir, readFile, readlink, symlink, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 import { buildBundle } from '../../../scripts/standard/lib/bundle.mjs';
-import { applyBundle, CONFIG_FILE, parseStacks, planRun, readConfig, resolveStacks } from './sync.mjs';
+import { agentsWarning, applyBundle, CONFIG_FILE, parseStacks, planRun, readConfig, resolveStacks } from './sync.mjs';
 
 const tempDir = () => mkdtemp(path.join(os.tmpdir(), 'dev-standard-sync-'));
+const SYNC = fileURLToPath(new URL('./sync.mjs', import.meta.url));
+const run = (args, env = {}) => promisify(execFile)(process.execPath, [SYNC, ...args], { env: { ...process.env, ...env } });
 
 async function repoWithConfig(content) {
   const repo = await tempDir();
@@ -166,5 +171,42 @@ test('applyBundle rejects a bundle built for another version', async () => {
   await assert.rejects(
     applyBundle({ repoDir: await tempDir(), bundleDir: await makeBundle('v1.2.0'), version: 'v1.3.0', stacks: [] }),
     /bundle is v1\.2\.0 but v1\.3\.0 was requested/,
+  );
+});
+
+test('agentsWarning asks for the snippet when AGENTS.md is missing or lacks the pointer', async () => {
+  const bundle = await makeBundle();
+  const snippet = await readFile(path.join(bundle, 'agents-snippet.md'), 'utf8');
+
+  const missing = await agentsWarning(await tempDir(), bundle);
+  assert.match(missing, /This repository has no `AGENTS\.md`/);
+  assert.ok(missing.includes(snippet.trimEnd()));
+
+  const repo = await tempDir();
+  await writeFile(path.join(repo, 'AGENTS.md'), '# Team notes\n');
+  assert.match(await agentsWarning(repo, bundle), /`AGENTS\.md` does not mention the dev standard/);
+
+  await writeFile(path.join(repo, 'AGENTS.md'), `# Team notes\n\n${snippet}`);
+  assert.equal(await agentsWarning(repo, bundle), null);
+});
+
+test('CLI plan writes version and stacks to GITHUB_OUTPUT', async () => {
+  const out = path.join(await tempDir(), 'output');
+  await run(['plan', `--repo=${await tempDir()}`, '--latest=v1.4.0', '--event=workflow_dispatch', '--stacks=Laravel,frontend'], { GITHUB_OUTPUT: out });
+  assert.equal(await readFile(out, 'utf8'), 'version=v1.4.0\nstacks=laravel,frontend\n');
+});
+
+test('CLI apply installs the bundle and writes the warning file', async () => {
+  const repo = await tempDir();
+  const warning = path.join(await tempDir(), 'warning.md');
+  const { stdout } = await run(['apply', `--repo=${repo}`, `--bundle=${await makeBundle()}`, '--version=v1.3.0', '--stacks=laravel', `--warning=${warning}`]);
+  assert.match(stdout, /Installed v1\.3\.0 for stacks: all, laravel, php/);
+  assert.match(await readFile(warning, 'utf8'), /no `AGENTS\.md`/);
+});
+
+test('CLI reports errors as workflow annotations', async () => {
+  await assert.rejects(
+    run(['plan', `--repo=${await tempDir()}`, '--latest=v1.4.0', '--event=schedule', '--stacks=']),
+    (error) => error.code === 1 && error.stdout.includes('::error::.dev-standard/config.json not found'),
   );
 });
