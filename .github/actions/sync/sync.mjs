@@ -10,7 +10,7 @@ const VERSION = /^v\d+\.\d+\.\d+$/;
 const INSTRUCTIONS_DIR = '.github/instructions';
 const SKILLS_DIR = '.agents/skills';
 const CLAUDE_SKILLS_DIR = '.claude/skills';
-const GENERATED_SKILL = /^dev-standard(-.+)?$/;
+const GENERATED_SKILL = /^dev-standard(-[a-z0-9]+)*$/;
 const LOCAL_INSTRUCTIONS = 'dev-standard-local.instructions.md';
 const GENERATED_INSTRUCTIONS = /^dev-standard-.+\.instructions\.md$/;
 
@@ -72,10 +72,13 @@ export function resolveStacks(stacks, manifest) {
 }
 
 // Bundles up to v1.2.7 hold one skill in skill/ and list no skills in the manifest.
+// Only dev-standard names: sync removes dropped skills by that prefix, and a name never leaves the skills folder.
 export function bundleSkills(manifest) {
-  return manifest.skills
-    ? manifest.skills.map((name) => ({ name, source: `skills/${name}` }))
-    : [{ name: 'dev-standard', source: 'skill' }];
+  if (!manifest.skills) return [{ name: 'dev-standard', source: 'skill' }];
+  return manifest.skills.map((name) => {
+    if (!GENERATED_SKILL.test(name)) throw new Error(`skill name "${name}" must start with dev-standard and use lower-case words`);
+    return { name, source: `skills/${name}` };
+  });
 }
 
 async function removeDroppedSkills(dir, wanted) {

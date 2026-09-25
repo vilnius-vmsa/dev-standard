@@ -29,6 +29,8 @@ const SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 
 /** Problems in one hand-written skill; `known` = { ruleIds, sections, pages, siteUrl }. */
 export function checkSkill(name, files, known) {
+  // Sync removes dropped skills by this prefix (.github/actions/sync/sync.mjs, GENERATED_SKILL).
+  if (!/^dev-standard(-[a-z0-9]+)+$/.test(name)) return [`${name}: skill name must match dev-standard-<lower-case-words>`];
   const skillMd = files.get('SKILL.md');
   if (skillMd === undefined) return [`${name}: has no SKILL.md`];
   const errors = [];

@@ -7,7 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { buildBundle } from '../../../scripts/standard/lib/bundle.mjs';
-import { agentsWarning, applyBundle, CONFIG_FILE, parseStacks, planRun, readConfig, resolveStacks } from './sync.mjs';
+import { agentsWarning, applyBundle, bundleSkills, CONFIG_FILE, parseStacks, planRun, readConfig, resolveStacks } from './sync.mjs';
 
 const tempDir = () => mkdtemp(path.join(os.tmpdir(), 'dev-standard-sync-'));
 const SYNC = fileURLToPath(new URL('./sync.mjs', import.meta.url));
@@ -290,4 +290,10 @@ test('agentsWarning accepts any pasted section when the bundle has no revision m
   const repo = await tempDir();
   await writeFile(path.join(repo, 'AGENTS.md'), 'See dev-standard.\n');
   assert.equal(await agentsWarning(repo, await makeLegacyBundle()), null);
+});
+
+test('bundleSkills rejects skill names sync could not remove later or that leave the skills folder', () => {
+  assert.deepEqual(bundleSkills({ skills: ['dev-standard', 'dev-standard-docs'] }).map((s) => s.source), ['skills/dev-standard', 'skills/dev-standard-docs']);
+  assert.throws(() => bundleSkills({ skills: ['team-tools'] }), /skill name "team-tools" must start with dev-standard/);
+  assert.throws(() => bundleSkills({ skills: ['dev-standard-../../x'] }), /skill name "dev-standard-\.\.\/\.\.\/x"/);
 });

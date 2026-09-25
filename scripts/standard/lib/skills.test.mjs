@@ -40,5 +40,10 @@ test('checkSkill reports frontmatter, links, rule IDs, sections and site links',
     'dev-standard-docs/SKILL.md: cites unknown section 10.9',
     'dev-standard-docs/SKILL.md: links to missing anchor /priedai/m#nope',
   ]);
-  assert.deepEqual(checkSkill('x', new Map(), KNOWN), ['x: has no SKILL.md']);
+  assert.deepEqual(checkSkill('dev-standard-x', new Map(), KNOWN), ['dev-standard-x: has no SKILL.md']);
+});
+
+test('a hand-written skill name must start with dev-standard- so sync can remove it when dropped', () => {
+  const md = '---\nname: team-tools\ndescription: Tools.\n---\n';
+  assert.deepEqual(checkSkill('team-tools', skill(md), KNOWN), ['team-tools: skill name must match dev-standard-<lower-case-words>']);
 });
