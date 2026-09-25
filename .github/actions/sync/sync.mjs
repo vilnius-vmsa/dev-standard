@@ -1,10 +1,15 @@
 // Installs a vilnius-vmsa/dev-standard release bundle into a consuming repository.
 // Node built-ins only: the action runs without npm ci.
-import { readFile } from 'node:fs/promises';
+import { copyFile, mkdir, readdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 export const CONFIG_FILE = '.dev-standard/config.json';
 const VERSION = /^v\d+\.\d+\.\d+$/;
+const INSTRUCTIONS_DIR = '.github/instructions';
+const SKILL_DIR = '.agents/skills/dev-standard';
+const CLAUDE_SKILL_LINK = '.claude/skills/dev-standard';
+const LOCAL_INSTRUCTIONS = 'dev-standard-local.instructions.md';
+const GENERATED_INSTRUCTIONS = /^dev-standard-.+\.instructions\.md$/;
 
 export function parseStacks(input) {
   const names = (input ?? '').split(',').map((s) => s.trim().toLowerCase()).filter((s) => s && s !== 'all');
@@ -42,4 +47,51 @@ export function planRun({ config, stacksInput, event, latest }) {
     version: !config || event === 'schedule' ? latest : config.version,
     stacks: parseStacks(given ? stacksInput : config.stacks.join(',')),
   };
+}
+
+export function resolveStacks(stacks, manifest) {
+  const unknown = stacks.filter((s) => !manifest.stacks.includes(s));
+  if (unknown.length) {
+    const valid = manifest.stacks.filter((s) => s !== 'all');
+    throw new Error(`unknown stack(s): ${unknown.join(', ')}. Valid stacks: ${valid.join(', ')}`);
+  }
+  const resolved = new Set(['all']);
+  const add = (stack) => {
+    if (resolved.has(stack)) return;
+    resolved.add(stack);
+    for (const implied of manifest.implies?.[stack] ?? []) add(implied);
+  };
+  stacks.forEach(add);
+  return [...resolved];
+}
+
+// Writes the generated paths only; everything else in the repository is left alone.
+export async function applyBundle({ repoDir, bundleDir, version, stacks }) {
+  const manifest = JSON.parse(await readFile(path.join(bundleDir, 'manifest.json'), 'utf8'));
+  if (manifest.version !== version) throw new Error(`bundle is ${manifest.version} but ${version} was requested`);
+  const resolved = resolveStacks(stacks, manifest);
+
+  const instructionsDir = path.join(repoDir, INSTRUCTIONS_DIR);
+  await mkdir(instructionsDir, { recursive: true });
+  const wanted = new Set(resolved.map((stack) => `dev-standard-${stack}.instructions.md`));
+  for (const name of await readdir(instructionsDir)) {
+    if (GENERATED_INSTRUCTIONS.test(name) && name !== LOCAL_INSTRUCTIONS && !wanted.has(name)) {
+      await rm(path.join(instructionsDir, name));
+    }
+  }
+  for (const name of wanted) await copyFile(path.join(bundleDir, 'instructions', name), path.join(instructionsDir, name));
+
+  const skillDir = path.join(repoDir, SKILL_DIR);
+  await rm(skillDir, { recursive: true, force: true });
+  await mkdir(skillDir, { recursive: true });
+  await copyFile(path.join(bundleDir, 'skill/SKILL.md'), path.join(skillDir, 'SKILL.md'));
+
+  const link = path.join(repoDir, CLAUDE_SKILL_LINK);
+  await rm(link, { recursive: true, force: true });
+  await mkdir(path.dirname(link), { recursive: true });
+  await symlink(path.relative(path.dirname(link), skillDir), link);
+
+  await mkdir(path.join(repoDir, path.dirname(CONFIG_FILE)), { recursive: true });
+  await writeFile(path.join(repoDir, CONFIG_FILE), `${JSON.stringify({ version, stacks }, null, 2)}\n`);
+  return { stacks: resolved };
 }
