@@ -75,11 +75,27 @@ async function makeBundle(version = 'v1.3.0') {
   const files = buildBundle({
     rules: RULES, english: { 'CODE-SEC-P01': { text: 'EN', source_hash: 'h' } }, stacks: STACKS,
     version, siteUrl: 'https://example.test', reviewMethod: '## How to review\n',
+    skills: new Map([['dev-standard-docs', new Map([
+      ['SKILL.md', '---\nname: dev-standard-docs\ndescription: Docs.\n---\n'],
+      ['templates/glossary.md', '# Glossary\n'],
+    ])]]),
   });
   for (const [rel, content] of files) {
     await mkdir(path.dirname(path.join(dir, rel)), { recursive: true });
     await writeFile(path.join(dir, rel), content);
   }
+  return dir;
+}
+
+// The layout of v1.2.7 and earlier: one skill in skill/, no skills list in the manifest.
+async function makeLegacyBundle(version = 'v1.2.7') {
+  const dir = await tempDir();
+  await mkdir(path.join(dir, 'instructions'), { recursive: true });
+  await mkdir(path.join(dir, 'skill'), { recursive: true });
+  await writeFile(path.join(dir, 'manifest.json'), JSON.stringify({ version, stacks: ['all'], implies: {} }));
+  await writeFile(path.join(dir, 'instructions/dev-standard-all.instructions.md'), 'all');
+  await writeFile(path.join(dir, 'skill/SKILL.md'), 'legacy skill');
+  await writeFile(path.join(dir, 'agents-snippet.md'), '## Vilnius dev standard\n');
   return dir;
 }
 
@@ -107,10 +123,16 @@ test('applyBundle installs instructions, skill, symlink and config on first setu
   );
   assert.equal(
     await readFile(path.join(repo, '.agents/skills/dev-standard/SKILL.md'), 'utf8'),
-    await readFile(path.join(bundle, 'skill/SKILL.md'), 'utf8'),
+    await readFile(path.join(bundle, 'skills/dev-standard/SKILL.md'), 'utf8'),
   );
   assert.equal(await readlink(path.join(repo, '.claude/skills/dev-standard')), '../../.agents/skills/dev-standard');
   assert.ok(await readFile(path.join(repo, '.claude/skills/dev-standard/SKILL.md'), 'utf8'));
+  assert.deepEqual(result.skills, ['dev-standard', 'dev-standard-docs']);
+  assert.equal(
+    await readFile(path.join(repo, '.agents/skills/dev-standard-docs/templates/glossary.md'), 'utf8'),
+    await readFile(path.join(bundle, 'skills/dev-standard-docs/templates/glossary.md'), 'utf8'),
+  );
+  assert.equal(await readlink(path.join(repo, '.claude/skills/dev-standard-docs')), '../../.agents/skills/dev-standard-docs');
   assert.deepEqual(JSON.parse(await readFile(path.join(repo, CONFIG_FILE), 'utf8')), { version: 'v1.3.0', stacks: ['laravel'] });
 });
 
@@ -146,7 +168,7 @@ test('applyBundle overwrites manual edits in generated files', async () => {
 
   await applyBundle({ repoDir: repo, bundleDir: bundle, version: 'v1.3.0', stacks: [] });
 
-  assert.equal(await readFile(skill, 'utf8'), await readFile(path.join(bundle, 'skill/SKILL.md'), 'utf8'));
+  assert.equal(await readFile(skill, 'utf8'), await readFile(path.join(bundle, 'skills/dev-standard/SKILL.md'), 'utf8'));
   assert.deepEqual(await readdir(path.join(repo, '.agents/skills/dev-standard')), ['SKILL.md']);
 });
 
@@ -229,4 +251,24 @@ test('CLI plan prefers the config of an open sync pull request', async () => {
   const out = path.join(await tempDir(), 'output');
   await run(['plan', `--repo=${repo}`, `--config=${pending}`, '--latest=v1.4.0', '--event=workflow_dispatch', '--stacks='], { GITHUB_OUTPUT: out });
   assert.equal(await readFile(out, 'utf8'), 'version=v1.4.0\nstacks=laravel,db\n');
+});
+
+test('applyBundle installs a legacy single-skill bundle', async () => {
+  const repo = await tempDir();
+  const result = await applyBundle({ repoDir: repo, bundleDir: await makeLegacyBundle(), version: 'v1.2.7', stacks: [] });
+  assert.deepEqual(result.skills, ['dev-standard']);
+  assert.equal(await readFile(path.join(repo, '.agents/skills/dev-standard/SKILL.md'), 'utf8'), 'legacy skill');
+  assert.equal(await readlink(path.join(repo, '.claude/skills/dev-standard')), '../../.agents/skills/dev-standard');
+});
+
+test('applyBundle removes dropped dev-standard skills but keeps the team\'s own skills', async () => {
+  const repo = await tempDir();
+  await applyBundle({ repoDir: repo, bundleDir: await makeBundle(), version: 'v1.3.0', stacks: [] });
+  await mkdir(path.join(repo, '.agents/skills/team-release'), { recursive: true });
+  await mkdir(path.join(repo, '.claude/skills/team-local'), { recursive: true });
+
+  await applyBundle({ repoDir: repo, bundleDir: await makeLegacyBundle('v1.3.0'), version: 'v1.3.0', stacks: [] });
+
+  assert.deepEqual((await readdir(path.join(repo, '.agents/skills'))).sort(), ['dev-standard', 'team-release']);
+  assert.deepEqual((await readdir(path.join(repo, '.claude/skills'))).sort(), ['dev-standard', 'team-local']);
 });

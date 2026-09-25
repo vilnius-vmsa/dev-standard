@@ -83,7 +83,9 @@ This repository follows the Vilnius City Municipality software development stand
 Before changing code, read the rules in \`.github/instructions/dev-standard-*.instructions.md\` whose \`applyTo\` matches the files you are changing, plus \`.github/instructions/dev-standard-local.instructions.md\` if it exists. The \`dev-standard\` skill describes how to apply and review them. Cite rule IDs (for example \`CODE-SEC-P01\`) when you report violations.
 `;
 
-export function buildBundle({ rules, english, stacks, version, siteUrl, reviewMethod }) {
+// `skills`: hand-written skills from standard/skills, name → (path inside the skill → content), copied unchanged.
+export function buildBundle({ rules, english, stacks, version, siteUrl, reviewMethod, skills = new Map() }) {
+  if (skills.has('dev-standard')) throw new Error('skill dev-standard is generated; a hand-written skill cannot use that name');
   const reviewable = rules
     .filter((r) => r.check === 'ai-reviewable')
     .map((r) => {
@@ -97,7 +99,10 @@ export function buildBundle({ rules, english, stacks, version, siteUrl, reviewMe
     const stackRules = reviewable.filter((r) => r.stacks.includes(stack));
     files.set(`instructions/dev-standard-${stack}.instructions.md`, instructionsFile(stack, info, stackRules, version, siteUrl, reviewMethod));
   }
-  files.set('skill/SKILL.md', skillFile(version, reviewMethod));
+  files.set('skills/dev-standard/SKILL.md', skillFile(version, reviewMethod));
+  for (const [name, skillFiles] of skills) {
+    for (const [rel, content] of skillFiles) files.set(`skills/${name}/${rel}`, content);
+  }
   files.set('agents-snippet.md', AGENTS_SNIPPET);
   files.set('rules.json', `${JSON.stringify({
     version,
@@ -114,6 +119,6 @@ export function buildBundle({ rules, english, stacks, version, siteUrl, reviewMe
     })),
   }, null, 2)}\n`);
   const implies = Object.fromEntries([...stacks].filter(([, info]) => info.implies?.length).map(([name, info]) => [name, info.implies]));
-  files.set('manifest.json', `${JSON.stringify({ version, stacks: [...stacks.keys()], implies, files: [...files.keys()].sort() }, null, 2)}\n`);
+  files.set('manifest.json', `${JSON.stringify({ version, stacks: [...stacks.keys()], implies, skills: ['dev-standard', ...skills.keys()], files: [...files.keys()].sort() }, null, 2)}\n`);
   return files;
 }
