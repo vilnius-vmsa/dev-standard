@@ -10,7 +10,7 @@
 
 PRIVALOMA:
 
-<!-- ORG-GEN-P01 | ai-reviewable -->
+<!-- ORG-GEN-P01 | process-level -->
 *   Atsakomybės turi būti aiškiai apibrėžtos ir suprantamos visiems projekto dalyviams.
 <!-- ORG-GEN-P02 | process-level -->
 *   Reikalavimai, sprendimai ir pakeitimai turi būti dokumentuoti ir atsekami.
@@ -18,7 +18,7 @@ PRIVALOMA:
 *   Techniniai ir verslo sprendimai turi būti priimami bendradarbiaujant, o ne perduodami tarp komandų be aiškaus konteksto.
 <!-- ORG-GEN-P04 | human-reviewable -->
 *   Kiekvienas reikšmingas pakeitimas turi turėti ryšį su reikalavimu, užduotimi, techniniu sprendimu ir įgyvendinimu.
-<!-- ORG-GEN-P05 | ai-reviewable -->
+<!-- ORG-GEN-P05 | process-level -->
 *   Darbo organizavimas turi sudaryti sąlygas kokybiškam planavimui, peržiūrai, testavimui ir perdavimui.
 
 REKOMENDUOJAMA:
@@ -27,7 +27,7 @@ REKOMENDUOJAMA:
 *   Organizuoti darbą taip, kad sprendimų priėmimas būtų kuo skaidresnis ir mažiau priklausomas nuo vieno asmens žinių.
 <!-- ORG-GEN-R02 | process-level -->
 *   Komandos darbo modelį periodiškai peržiūrėti, jei praktikoje atsiranda neaiškumų dėl atsakomybių ar sprendimų priėmimo ribų.
-<!-- ORG-GEN-R03 | ai-reviewable -->
+<!-- ORG-GEN-R03 | process-level -->
 *   Svarbius susitarimus fiksuoti ne tik susitikimuose, bet ir užduočių sistemoje, PR/MR ar dokumentacijoje.
 
 > Susiję skyriai: [2.4 Reikalavimų lygiai](02-paskirtis-ir-taikymo-sritis.md#24-reikalavimų-lygiai) · [2.5 Nukrypimai nuo standarto](02-paskirtis-ir-taikymo-sritis.md#25-nukrypimai-nuo-standarto) · [3.1.5 Architecture Decision Records (ADR)](03-architektura.md#315-architecture-decision-records-adr) · [10.4 Architecture Decision Records (ADR)](10-dokumentacija.md#104-architecture-decision-records-adr) · [10.5 Dokumentacijos atnaujinimo taisyklės](10-dokumentacija.md#105-dokumentacijos-atnaujinimo-taisyklės)
@@ -44,9 +44,9 @@ PRIVALOMA:
 
 <!-- ORG-ROLE-P01 | process-level -->
 *   Programuotojas atsakingas už programinio kodo kūrimą pagal nustatytus standartus.
-<!-- ORG-ROLE-P02 | ai-reviewable -->
+<!-- ORG-ROLE-P02 | process-level -->
 *   Programuotojas atsakingas už testų rašymą ir palaikymą kartu su kodo pakeitimais.
-<!-- ORG-ROLE-P03 | ai-reviewable -->
+<!-- ORG-ROLE-P03 | process-level -->
 *   Programuotojas privalo atnaujinti dokumentaciją, jei pakeitimas ją paveikia.
 <!-- ORG-ROLE-P04 | human-reviewable -->
 *   Programuotojas privalo dalyvauti code review procese tiek kaip autorius, tiek kaip reviewer, kai tai taikoma.
@@ -64,18 +64,18 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- ORG-ROLE-P06 | ai-reviewable -->
+<!-- ORG-ROLE-P06 | process-level -->
 *   DevOps arba infrastruktūros inžinierius atsakingas už CI/CD, aplinkų, diegimo mechanizmų ir infrastruktūros palaikymą.
-<!-- ORG-ROLE-P07 | ai-reviewable -->
+<!-- ORG-ROLE-P07 | process-level -->
 *   Jis atsakingas už diegimo procesų patikimumą, stebėsenos, loginimo ir alerting integraciją.
-<!-- ORG-ROLE-P08 | ai-reviewable -->
+<!-- ORG-ROLE-P08 | process-level -->
 *   Jis dalyvauja incidentų valdyme kartu su kitomis komandomis, kai incidentas susijęs su diegimu, infrastruktūra ar eksploatacija.
-<!-- ORG-ROLE-P09 | ai-reviewable -->
+<!-- ORG-ROLE-P09 | process-level -->
 *   Jis atsakingas už susijusios techninės dokumentacijos ir runbook’ų aktualumą pagal savo atsakomybės ribas.
 
 REKOMENDUOJAMA:
 
-<!-- ORG-ROLE-R03 | ai-reviewable -->
+<!-- ORG-ROLE-R03 | process-level -->
 *   DevOps arba infrastruktūros inžinierius turėtų būti įtraukiamas anksti, jei projektas turi specifinių infrastruktūrinių, eksploatacinių ar platforminių poreikių.
 
 ### 11.2.3. Product Owner (PO)
@@ -84,9 +84,9 @@ PRIVALOMA:
 
 <!-- ORG-ROLE-P10 | process-level -->
 *   Product Owner atsakingas už produkto viziją, prioritetus ir backlog valdymą.
-<!-- ORG-ROLE-P11 | ai-reviewable -->
+<!-- ORG-ROLE-P11 | process-level -->
 *   Product Owner tvirtina priėmimo kriterijus ir sprendžia funkcinių pakeitimų prioritetus.
-<!-- ORG-ROLE-P12 | ai-reviewable -->
+<!-- ORG-ROLE-P12 | process-level -->
 *   Product Owner dalyvauja UAT ir galutinio funkcionalumo priėmime.
 <!-- ORG-ROLE-P13 | process-level -->
 *   Product Owner negali vienašališkai keisti techninių sprendimų neįtraukdamas atsakingų techninių rolų.
@@ -102,38 +102,38 @@ PRIVALOMA:
 
 <!-- ORG-ROLE-P14 | process-level -->
 *   Analitikas atsakingas už reikalavimų analizę, struktūravimą ir aiškų jų perdavimą komandai.
-<!-- ORG-ROLE-P15 | ai-reviewable -->
+<!-- ORG-ROLE-P15 | process-level -->
 *   Analitikas turi aprašyti procesus, naudotojų scenarijus, duomenų srautus ir integracinius poreikius tiek, kiek to reikia sprendimo sukūrimui.
 <!-- ORG-ROLE-P16 | human-reviewable -->
 *   Analitikas palaiko ryšį tarp verslo ir techninės komandos, kad reikalavimai būtų vienodai suprasti.
-<!-- ORG-ROLE-P17 | ai-reviewable -->
+<!-- ORG-ROLE-P17 | process-level -->
 *   Analitikas atsakingas už reikalavimų dokumentacijos aktualumą pagal savo rolės ribas.
 
 REKOMENDUOJAMA:
 
-<!-- ORG-ROLE-R05 | ai-reviewable -->
+<!-- ORG-ROLE-R05 | process-level -->
 *   Sudėtingiems projektams analitikas turėtų padėti aiškiai susieti verslo reikalavimus su priėmimo kriterijais, duomenų srautais ir integraciniais scenarijais.
 
 ## 11.3. Reikalavimų valdymas
 
 PRIVALOMA:
 
-<!-- ORG-REQ-P01 | ai-reviewable -->
+<!-- ORG-REQ-P01 | process-level -->
 *   Reikalavimai turi būti dokumentuojami kaip user stories, use cases, funkciniai reikalavimai ar lygiaverčiai artefaktai.
-<!-- ORG-REQ-P02 | ai-reviewable -->
+<!-- ORG-REQ-P02 | process-level -->
 *   Priėmimo kriterijai turi būti aiškūs, testuojami ir patvirtinti prieš pradedant įgyvendinimą.
-<!-- ORG-REQ-P03 | ai-reviewable -->
+<!-- ORG-REQ-P03 | process-level -->
 *   Neaprašyti ar nepatvirtinti reikalavimai negali būti tyliai įtraukiami į įgyvendinimą.
 <!-- ORG-REQ-P04 | human-reviewable -->
 *   Reikalavimų pakeitimai turi būti valdomi per aiškų ir atsekamą procesą.
-<!-- ORG-REQ-P05 | ai-reviewable -->
+<!-- ORG-REQ-P05 | process-level -->
 *   Reikalavimai turi būti pakankamai detalūs, kad komanda galėtų įvertinti apimtį, riziką ir priklausomybes.
 
 REKOMENDUOJAMA:
 
-<!-- ORG-REQ-R01 | ai-reviewable -->
+<!-- ORG-REQ-R01 | process-level -->
 *   Sudėtingiems ar integraciniams scenarijams papildomai aprašyti naudotojų srautus, duomenų srautus ar kraštinius atvejus.
-<!-- ORG-REQ-R02 | ai-reviewable -->
+<!-- ORG-REQ-R02 | process-level -->
 *   Reikalavimų neapibrėžtumą identifikuoti kuo anksčiau, o ne palikti jį spręsti tik programavimo metu.
 
 > Susiję skyriai: [3 Architektūros ir dizaino principai](03-architektura.md) · [7 Testavimo reikalavimai ir principai](07-testavimas.md)
@@ -142,20 +142,20 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- ORG-BACKLOG-P01 | ai-reviewable -->
+<!-- ORG-BACKLOG-P01 | process-level -->
 *   Kiekviena sistema turi turėti vieną aiškų oficialų backlog’ą.
-<!-- ORG-BACKLOG-P02 | ai-reviewable -->
+<!-- ORG-BACKLOG-P02 | process-level -->
 *   Pakeitimai turi būti vertinami pagal poveikį apimčiai, terminams, rizikai ir priklausomybėms.
 <!-- ORG-BACKLOG-P03 | process-level -->
 *   Pakeitimų prioritetai turi būti nustatomi atsakingai ir dokumentuotai.
-<!-- ORG-BACKLOG-P04 | ai-reviewable -->
+<!-- ORG-BACKLOG-P04 | process-level -->
 *   Nenumatyti pakeitimai negali būti įgyvendinami neoficialiai, apeinant backlog ar change valdymo procesą.
-<!-- ORG-BACKLOG-P05 | ai-reviewable -->
+<!-- ORG-BACKLOG-P05 | process-level -->
 *   Skubūs pakeitimai leidžiami tik tada, kai jie pagrįsti incidentu, teisiniu reikalavimu arba kitu aiškiai dokumentuotu poreikiu.
 
 REKOMENDUOJAMA:
 
-<!-- ORG-BACKLOG-R01 | ai-reviewable -->
+<!-- ORG-BACKLOG-R01 | process-level -->
 *   Didelius ar rizikingus pakeitimus prieš įtraukiant į backlog rekomenduojama papildomai įvertinti techniniu požiūriu.
 <!-- ORG-BACKLOG-R02 | process-level -->
 *   Backlog’ą periodiškai peržiūrėti, kad jame neliktų neaktualių, dubliuojančių ar nebeprioritetinių uždavinių.
@@ -168,7 +168,7 @@ PRIVALOMA:
 
 <!-- ORG-DECISION-P01 | human-reviewable -->
 *   Reikšmingi techniniai sprendimai turi būti priimami aiškiai ir atsekamai.
-<!-- ORG-DECISION-P02 | ai-reviewable -->
+<!-- ORG-DECISION-P02 | process-level -->
 *   Prie techninių sprendimų priskiriami architektūros stiliaus, technologijų pasirinkimo, integracijų modelio, saugumo ar našumo sprendimai.
 <!-- ORG-DECISION-P03 | human-reviewable -->
 *   Smulkūs techniniai sprendimai gali būti priimami komandos lygiu, jei jie neturi reikšmingo poveikio kitoms sistemos dalims.
@@ -192,11 +192,11 @@ PRIVALOMA:
 
 <!-- ORG-COMM-P01 | human-reviewable -->
 *   Svarbūs susitarimai, sprendimai ir pokyčiai turi būti užfiksuojami raštu.
-<!-- ORG-COMM-P02 | ai-reviewable -->
+<!-- ORG-COMM-P02 | process-level -->
 *   Komunikacija tarp verslo, analitikų, programuotojų, DevOps ir kitų dalyvių turi būti pakankama tam, kad nebūtų sprendimų ar reikalavimų interpretavimo spragų.
-<!-- ORG-COMM-P03 | ai-reviewable -->
+<!-- ORG-COMM-P03 | process-level -->
 *   Reikšmingi techniniai ar organizaciniai sprendimai negali likti tik žodiniuose susitarimuose.
-<!-- ORG-COMM-P04 | ai-reviewable -->
+<!-- ORG-COMM-P04 | process-level -->
 *   Jei susitikime priimamas sprendimas, kuris daro įtaką architektūrai, terminams, apimčiai ar rizikai, jis turi būti perkeliamas į atsekamą artefaktą.
 
 REKOMENDUOJAMA:
@@ -205,7 +205,7 @@ REKOMENDUOJAMA:
 *   Naudoti reguliarius planavimo, peržiūros ir retrospektyvos susitikimus, jei tai padeda komandai dirbti nuosekliau.
 <!-- ORG-COMM-R02 | process-level -->
 *   Reikšmingiems techniniams klausimams organizuoti atskiras technines peržiūras ar trumpus sprendimų aptarimus.
-<!-- ORG-COMM-R03 | ai-reviewable -->
+<!-- ORG-COMM-R03 | process-level -->
 *   Komunikaciją organizuoti taip, kad svarbi informacija būtų lengvai randama ir nepasimestų pokalbių istorijoje.
 
 > Susiję skyriai: [4.4 Code Review principai](04-kodo-kurimo-gaires.md#44-code-review-principai) · [10 Dokumentacija](10-dokumentacija.md) · [13 Standarto priežiūra ir atnaujinimas](13-standarto-prieziura.md)

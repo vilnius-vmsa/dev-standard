@@ -135,6 +135,15 @@ s
 | `human-reviewable` | Reikalavimas reikalauja žmogaus vertinimo: architektūrinė peržiūra, kontekstinis sprendimas, kokybės vertinimas |
 | `process-level` | Organizacinis ar procesinis reikalavimas, netikrinamas kodo lygmeniu (pvz., komunikacijos, tvirtinimo, planavimo procesai) |
 
+Automatiškai tikrinamų (`ai-reviewable`) reikalavimų žymose papildomai nurodoma:
+
+`<!-- IDENTIFIKATORIUS | ai-reviewable | stacks=<sritys> | enforced-by=<priemonė> -->`
+
+*   `stacks` – kableliais atskirtas technologijų sričių sąrašas, kurioms reikalavimas taikomas: `all` (visos sistemos), `php`, `laravel`, `symfony`, `frontend`, `mobile`, `infra` (CI/CD, konteineriai, infrastruktūra), `db`. Sričių aprašai ir failų šablonai pateikti `standard/stacks.yaml`.
+*   `enforced-by` – kaip reikalavimas tikrinamas: `ai` (DI kodo peržiūra) arba `tool:<pavadinimas>` (pvz., `tool:gitleaks`), kai jį patikimai patikrina automatinė priemonė.
+
+`human-reviewable` ir `process-level` žymose šie laukai nenaudojami.
+
 Šios žymos naudojamos:
 
 *   planuojant automatizuotas atitikties patikras CI/CD procese;

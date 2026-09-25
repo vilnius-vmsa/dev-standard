@@ -12,14 +12,14 @@ PRIVALOMA:
 
 <!-- VENDOR-SCOPE-P01 | process-level -->
 *   Šio skyriaus reikalavimai taikomi išoriniams tiekėjams, dirbantiems pagal viešuosius pirkimus, sutartis ar kitus savivaldybės užsakymus.
-<!-- VENDOR-SCOPE-P02 | ai-reviewable -->
+<!-- VENDOR-SCOPE-P02 | process-level -->
 *   Šio skyriaus reikalavimai taikomi pavaldžioms savivaldybės įstaigoms, kurios pačios kuria informacines sistemas, samdo trečiąsias šalis arba perduoda sistemas savivaldybei eksploatacijai.
-<!-- VENDOR-SCOPE-P03 | ai-reviewable -->
+<!-- VENDOR-SCOPE-P03 | process-level -->
 *   Reikalavimai taikomi visam sistemos gyvavimo ciklui – nuo projektavimo ir kūrimo iki perdavimo, palaikymo ir eksploatacijos.
 
 REKOMENDUOJAMA:
 
-<!-- VENDOR-SCOPE-R01 | ai-reviewable -->
+<!-- VENDOR-SCOPE-R01 | process-level -->
 *   Jei tiekėjas ar pavaldžioji įstaiga dalyvauja tik dalyje gyvavimo ciklo, rekomenduojama sutartyje ar techninėje specifikacijoje aiškiai apibrėžti, kuri šio standarto dalis taikoma jų atsakomybei.
 
 ## 12.2. Minimalūs techniniai reikalavimai
@@ -38,16 +38,16 @@ PRIVALOMA:
     *   DevOps ir CI/CD reikalavimams – 8 skyriui
     *   stebėsenai, logams ir eksploatacijai – 9 skyriui
     *   dokumentacijai – 10 skyriui
-<!-- VENDOR-TECH-P03 | human-reviewable -->
+<!-- VENDOR-TECH-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Naudojamos tik palaikomos ir ne end-of-life technologijos.
-<!-- VENDOR-TECH-P04 | ai-reviewable -->
+<!-- VENDOR-TECH-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Sistemoje negali būti kritinių saugumo pažeidžiamumų be aiškaus sprendimo plano arba dokumentuoto rizikos priėmimo.
-<!-- VENDOR-TECH-P05 | ai-reviewable -->
+<!-- VENDOR-TECH-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Sprendimas turi būti diegiamas ir eksploatuojamas be tiekėjo unikalių licencijų, uždarų priklausomybių ar neperduodamų prieigų, išskyrus atvejus, kai tai aiškiai suderinta pirkimo ar sutarties etape.
 
 REKOMENDUOJAMA:
 
-<!-- VENDOR-TECH-R01 | ai-reviewable -->
+<!-- VENDOR-TECH-R01 | process-level -->
 *   Jei sprendimui taikomi ne visi šio standarto skyriai, rekomenduojama techninėje specifikacijoje aiškiai nurodyti, kurie skyriai yra privalomi konkrečiam tiekimui ar projektui.
 <!-- VENDOR-TECH-R02 | process-level -->
 *   Tikslinį [brandos lygį](02-paskirtis-ir-taikymo-sritis.md#26-standarto-įgyvendinimo-brandos-lygiai) rekomenduojama nurodyti techninėje specifikacijoje arba sutartyje; minimaliai – 1 lygis (Bazinis), kritinėms viešosioms sistemoms – 2 lygis (Standartinis).
@@ -60,56 +60,56 @@ Prieš darbų priėmimą tiekėjas ar pavaldžioji įstaiga privalo perduoti sav
 
 PRIVALOMA:
 
-<!-- VENDOR-HAND-P01 | ai-reviewable -->
+<!-- VENDOR-HAND-P01 | process-level -->
 *   Turi būti perduotas pilnas šaltinio kodas, apimantis frontend, backend, integracijas, infrastruktūrą kaip kodą ir kitus susijusius komponentus, jei jie yra sprendimo dalis.
-<!-- VENDOR-HAND-P02 | ai-reviewable -->
+<!-- VENDOR-HAND-P02 | process-level -->
 *   Turi būti perduota visa Git repozitorija su istorija, o ne tik archyvuota galutinė versija.
-<!-- VENDOR-HAND-P03 | ai-reviewable -->
+<!-- VENDOR-HAND-P03 | process-level -->
 *   Turi būti perduotos naudojamos CI/CD konfigūracijos, build ar diegimo scenarijai.
-<!-- VENDOR-HAND-P04 | ai-reviewable -->
+<!-- VENDOR-HAND-P04 | process-level -->
 *   Turi būti perduotas testų kodas ir testavimo rezultatai arba ataskaitos, jei jos generuojamos atskirai.
-<!-- VENDOR-HAND-P05 | ai-reviewable -->
+<!-- VENDOR-HAND-P05 | process-level -->
 *   Kodas turi būti be hardcoded paslapčių, su veikiančiu build procesu ir atitikti šio standarto reikalavimus.
 
 REKOMENDUOJAMA:
 
-<!-- VENDOR-HAND-R01 | ai-reviewable -->
+<!-- VENDOR-HAND-R01 | process-level -->
 *   Perdavimo metu rekomenduojama pateikti ir trumpą repozitorijos struktūros paaiškinimą, jei sprendimas yra sudėtingas arba susideda iš kelių repozitorijų.
 
 ### 12.3.2. Dokumentacija
 
 PRIVALOMA:
 
-<!-- VENDOR-HAND-P06 | ai-reviewable -->
+<!-- VENDOR-HAND-P06 | process-level -->
 *   Turi būti perduota visa privaloma techninė dokumentacija, nustatyta [10 skyriuje](10-dokumentacija.md), tiek, kiek ji taikoma konkrečiai sistemai.
-<!-- VENDOR-HAND-P07 | ai-reviewable -->
+<!-- VENDOR-HAND-P07 | process-level -->
 *   Minimaliai tai apima:
     *   architektūros aprašą
     *   API dokumentaciją
     *   diegimo ir eksploatacijos instrukcijas
     *   naudotojo dokumentaciją, jei taikoma
     *   su eksploatacija susijusius runbook’us ir kitus būtinus veiklos tęstinumui reikalingus artefaktus
-<!-- VENDOR-HAND-P08 | ai-reviewable -->
+<!-- VENDOR-HAND-P08 | process-level -->
 *   Dokumentacija turi būti aktuali, versijuota ir pakankama savarankiškai sistemos eksploatacijai bei tolesniam vystymui.
 
 REKOMENDUOJAMA:
 
-<!-- VENDOR-HAND-R02 | ai-reviewable -->
+<!-- VENDOR-HAND-R02 | process-level -->
 *   Jei sistema sudėtinga, rekomenduojama perduoti ir papildomą žinių perdavimo medžiagą, pavyzdžiui, svarbiausių sprendimų santrauką, sistemų priklausomybių aprašą ar perėmimo kontrolinį sąrašą.
 
 ### 12.3.3. Prieigas ir administravimą
 
 PRIVALOMA:
 
-<!-- VENDOR-HAND-P09 | ai-reviewable -->
+<!-- VENDOR-HAND-P09 | process-level -->
 *   Turi būti perduotos prieigos prie kodo repozitorijų, jei jos vis dar reikalingos savivaldybei po darbų priėmimo.
-<!-- VENDOR-HAND-P10 | ai-reviewable -->
+<!-- VENDOR-HAND-P10 | process-level -->
 *   Turi būti perduotos CI/CD sistemų prieigos arba jų konfigūracijos, jei savivaldybė perima jų valdymą.
-<!-- VENDOR-HAND-P11 | ai-reviewable -->
+<!-- VENDOR-HAND-P11 | process-level -->
 *   Turi būti perduotos debesijos ir infrastruktūros konfigūracijos, įskaitant IaC artefaktus, jei jie naudojami.
-<!-- VENDOR-HAND-P12 | ai-reviewable -->
+<!-- VENDOR-HAND-P12 | process-level -->
 *   Turi būti perduotos administracinės prieigos arba aiški jų perdavimo procedūra.
-<!-- VENDOR-HAND-P13 | ai-reviewable -->
+<!-- VENDOR-HAND-P13 | process-level -->
 *   Turi būti perduotas slaptažodžių, sertifikatų ar kitų paslapčių rotacijos planas, jei toks taikomas.
 <!-- VENDOR-HAND-P14 | process-level -->
 *   Po perdavimo tiekėjas negali likti vieninteliu administratoriumi ar vieninteliu techninių prieigų turėtoju.
@@ -123,16 +123,16 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- VENDOR-OWN-P01 | ai-reviewable -->
+<!-- VENDOR-OWN-P01 | process-level -->
 *   Visa pagal sutartį sukurta programinė įranga, jos šaltinio kodas, infrastruktūros konfigūracijos ir susiję artefaktai laikomi savivaldybės nuosavybe, jei sutartyje aiškiai nenumatyta kitaip.
 <!-- VENDOR-OWN-P02 | process-level -->
 *   Savivaldybė turi teisę naudoti, keisti, perduoti palaikymą kitam tiekėjui ir, jei tai neprieštarauja teisės aktams ar sutartims, viešinti kodą ar jo dalis.
-<!-- VENDOR-OWN-P03 | ai-reviewable -->
+<!-- VENDOR-OWN-P03 | process-level -->
 *   Tiekėjas negali riboti savivaldybės teisių per licencijas, techninius sprendimus ar neperduodamas priklausomybes, išskyrus atvejus, kai tai aiškiai suderinta pirkimo ar sutarties etape.
 
 REKOMENDUOJAMA:
 
-<!-- VENDOR-OWN-R01 | ai-reviewable -->
+<!-- VENDOR-OWN-R01 | process-level -->
 *   Jei naudojami trečiųjų šalių komponentai ar licencinės priklausomybės, rekomenduojama iš anksto aiškiai dokumentuoti, kokias teises savivaldybė įgyja ir kokie ribojimai galioja.
 
 ## 12.5. Atitikimas šiam standartui (Compliance)
@@ -141,7 +141,7 @@ PRIVALOMA:
 
 <!-- VENDOR-COMPL-P01 | process-level -->
 *   Tiekėjas ar pavaldžioji įstaiga turi patvirtinti, kad sprendimas atitinka šį standartą arba turi aiškiai dokumentuotas bei patvirtintas išimtis.
-<!-- VENDOR-COMPL-P02 | ai-reviewable -->
+<!-- VENDOR-COMPL-P02 | process-level -->
 *   Atitiktis gali būti vertinama techninių peržiūrų, testavimo ir saugumo ataskaitų, dokumentacijos patikros bei bandomojo diegimo metu.
 <!-- VENDOR-COMPL-P03 | process-level -->
 *   Savivaldybė turi teisę atlikti auditą, reikalauti nustatytų neatitikimų ištaisymo ir sustabdyti darbų priėmimą iki atitikties užtikrinimo.
@@ -179,12 +179,12 @@ PRIVALOMA:
 *   Darbai laikomi priimtais tik tada, kai sistema atitinka šį standartą arba turi patvirtintas išimtis.
 <!-- VENDOR-ACC-P03 | human-reviewable -->
 *   Darbai laikomi priimtais tik tada, kai savivaldybė gali savarankiškai diegti, paleisti, prižiūrėti ir eksploatuoti sistemą pagal perduotus artefaktus.
-<!-- VENDOR-ACC-P04 | ai-reviewable -->
+<!-- VENDOR-ACC-P04 | process-level -->
 *   Darbai negali būti laikomi galutinai priimtais, jei yra kritinių techninių ar saugumo skolų be aiškaus sprendimo plano.
 
 REKOMENDUOJAMA:
 
-<!-- VENDOR-ACC-R01 | ai-reviewable -->
+<!-- VENDOR-ACC-R01 | process-level -->
 *   Darbų priėmimo metu rekomenduojama naudoti formalų perdavimo kontrolinį sąrašą, apimantį kodą, dokumentaciją, prieigas, diegimą ir eksploatacijos parengtį.
 <!-- VENDOR-ACC-R02 | process-level -->
 *   Priėmimo metu rekomenduojama įvertinti sistemos atitiktį tiksliniam [brandos lygiui](02-paskirtis-ir-taikymo-sritis.md#26-standarto-įgyvendinimo-brandos-lygiai) pagal [2.6](02-paskirtis-ir-taikymo-sritis.md#26-standarto-įgyvendinimo-brandos-lygiai) kriterijus.

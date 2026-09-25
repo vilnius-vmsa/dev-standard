@@ -3,3 +3,4 @@ build/
 artifacts/
 .docusaurus/
 .cache-loader/
+src/data/rules.generated.json

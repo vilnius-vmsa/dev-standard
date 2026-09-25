@@ -51,6 +51,22 @@ npm audit --audit-level=high
 The command fails if it finds vulnerabilities with a `high` or `critical`
 severity level.
 
+## Rules for AI agents
+
+Every `ai-reviewable` rule in `docs/` has a tag like
+`<!-- CODE-SEC-P01 | ai-reviewable | stacks=all | enforced-by=ai -->` and an English sentence in
+`standard/rules.en.yaml`. The Lithuanian text is binding; the English is what agents and Copilot review read.
+
+When you add or change an `ai-reviewable` rule:
+
+1. Add or update the tag (`stacks` from `standard/stacks.yaml`, `enforced-by` is `ai` or `tool:<name>`).
+2. Write the English in `standard/rules.en.yaml`, then run `npm run rules:accept -- <RULE-ID>`.
+   CI blocks the change while the English is missing or out of date.
+3. `npm run rules:validate -- --strict` must pass.
+
+Each release attaches `dev-standard-agent-bundle.zip` (Copilot instruction files, the `dev-standard` skill,
+`AGENTS.md` snippet, `rules.json`) and `org-instructions.md`. The English rule list is at `/rules` on the site.
+
 ## CI/CD and releases
 
 A pull request targeting the `main` branch automatically runs a dependency

@@ -10,20 +10,20 @@ Testavimas laikomas ne papildoma veikla projekto pabaigoje, o integralia kūrimo
 
 PRIVALOMA:
 
-<!-- TEST-STRAT-P01 | ai-reviewable -->
+<!-- TEST-STRAT-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testavimo strategija turi būti paremta aiškiu testų sluoksnių paskirstymu.
-<!-- TEST-STRAT-P02 | ai-reviewable -->
+<!-- TEST-STRAT-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Daugiausia turi būti naudojami unit testai, mažiau integration arba API testai, o mažiausiai – E2E testai.
-<!-- TEST-STRAT-P03 | ai-reviewable -->
+<!-- TEST-STRAT-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testai turi būti kuriami ir vykdomi kiekviename PR/MR procese, nepaliekant pagrindinio tikrinimo tik UAT ar priešprodukcinėms aplinkoms.
-<!-- TEST-STRAT-P04 | ai-reviewable -->
+<!-- TEST-STRAT-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testavimo apimtis turi būti proporcinga pakeitimo rizikai, sistemos kritiškumui ir nefunkciniams reikalavimams.
 
 REKOMENDUOJAMA:
 
-<!-- TEST-STRAT-R01 | ai-reviewable -->
+<!-- TEST-STRAT-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei projekte sąmoningai nukrypstama nuo testavimo piramidės principo, toks sprendimas rekomenduojamas pagrįsti ir dokumentuoti.
-<!-- TEST-STRAT-R02 | ai-reviewable -->
+<!-- TEST-STRAT-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kritinėms sistemoms testavimo strategiją rekomenduojama periodiškai peržiūrėti, vertinant realiai randamų defektų pobūdį ir testų efektyvumą.
 
 > Susiję skyriai: [4.5 Testai](04-kodo-kurimo-gaires.md#45-testai) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai)
@@ -32,26 +32,26 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- TEST-TYPE-P01 | ai-reviewable -->
+<!-- TEST-TYPE-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Unit testai turi būti taikomi verslo logikai ir izoliuotiems komponentams.
-<!-- TEST-TYPE-P02 | ai-reviewable -->
+<!-- TEST-TYPE-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Integration testai turi būti taikomi moduliams ir integracijoms su realiomis arba joms artimomis priklausomybėmis.
-<!-- TEST-TYPE-P03 | ai-reviewable -->
+<!-- TEST-TYPE-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   API testai turi tikrinti sutarčių laikymąsi ir pagrindinių scenarijų veikimą.
-<!-- TEST-TYPE-P04 | ai-reviewable -->
+<!-- TEST-TYPE-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   E2E testai turi būti taikomi kritiniams naudotojo keliams.
-<!-- TEST-TYPE-P05 | ai-reviewable -->
+<!-- TEST-TYPE-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Regresijos testai turi būti palaikomi kaip nuolatinė testų bazės dalis.
-<!-- TEST-TYPE-P06 | ai-reviewable -->
+<!-- TEST-TYPE-P06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kiekvienas bug fix turi papildyti testų rinkinį testu, kuris atkartoja klaidą ir patvirtina jos pataisymą.
-<!-- TEST-TYPE-P07 | ai-reviewable -->
+<!-- TEST-TYPE-P07 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Saugumo, našumo ar prieinamumo testai turi būti taikomi tais atvejais, kai jų reikia pagal sistemos kritiškumą ar pakeitimo pobūdį.
 
 REKOMENDUOJAMA:
 
-<!-- TEST-TYPE-R01 | ai-reviewable -->
+<!-- TEST-TYPE-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Naudoti aiškų testų tipų priskyrimą, kad komanda vienodai suprastų, kas laikoma unit, integration, API ar E2E testu.
-<!-- TEST-TYPE-R02 | ai-reviewable -->
+<!-- TEST-TYPE-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Sudėtingoms integracijoms ar aukštos rizikos sistemoms papildomai taikyti atsparumo ar degradacijos scenarijų testus.
 
 > Susiję skyriai: [3.3.1 Specifikacija ir dokumentacija](03-architektura.md#331-specifikacija-ir-dokumentacija) · [3.3.2 Versijavimas](03-architektura.md#332-versijavimas) · [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [3.9.6 Testavimas](03-architektura.md#396-testavimas)
@@ -60,22 +60,22 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- TEST-TOOL-P01 | ai-reviewable -->
+<!-- TEST-TOOL-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Pasirinkti testavimo įrankiai turi būti suderinti su naudojamu technologijų rinkiniu ir komandos kompetencija.
-<!-- TEST-TOOL-P02 | ai-reviewable -->
+<!-- TEST-TOOL-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Naudojami testavimo įrankiai turi būti palaikomi, dokumentuoti ir įtraukti į projekto ar organizacijos technologijų registrą, kai tai taikoma.
-<!-- TEST-TOOL-P03 | ai-reviewable -->
+<!-- TEST-TOOL-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Automatizuotų testų vykdymas turi būti integruojamas į CI/CD procesą.
 
 REKOMENDUOJAMA:
 
-<!-- TEST-TOOL-R01 | ai-reviewable -->
+<!-- TEST-TOOL-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Unit ir integration testams naudoti kalbos ar platformos bendruomenėje plačiai priimtus įrankius.
-<!-- TEST-TOOL-R02 | ai-reviewable -->
+<!-- TEST-TOOL-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   API testams naudoti priemones, leidžiančias tikrinti kontraktus, statusus, atsakymų struktūrą ir pagrindinius scenarijus.
-<!-- TEST-TOOL-R03 | ai-reviewable -->
+<!-- TEST-TOOL-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Našumo ir apkrovos testams naudoti organizacijoje priimtus įrankius.
-<!-- TEST-TOOL-R04 | ai-reviewable -->
+<!-- TEST-TOOL-R04 | ai-reviewable | stacks=frontend,mobile | enforced-by=ai -->
 *   Prieinamumo testams derinti automatinius įrankius su rankiniu tikrinimu.
 
 > Susiję skyriai: [4.2.3 Automatinis formatavimas ir linting](04-kodo-kurimo-gaires.md#423-automatinis-formatavimas-ir-linting) · [8 DevOps ir CI/CD reikalavimai](08-devops-ci-cd.md)
@@ -84,18 +84,18 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- TEST-GATE-P01 | ai-reviewable -->
+<!-- TEST-GATE-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Projektui turi būti apibrėžti minimalūs testavimo kokybės vartai.
-<!-- TEST-GATE-P02 | ai-reviewable -->
+<!-- TEST-GATE-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   PR arba MR negali būti laikomas paruoštu merge’inimui, jei nepraeina privalomi build, testų ar kiti kokybės patikrinimai.
-<!-- TEST-GATE-P03 | ai-reviewable -->
+<!-- TEST-GATE-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kritinių modulių testavimo reikalavimai turi būti griežtesni negu pagalbinių ar mažos rizikos komponentų.
-<!-- TEST-GATE-P04 | ai-reviewable -->
+<!-- TEST-GATE-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Nestabilūs testai negali būti ignoruojami ilgiau kaip 5 darbo dienas; jie turi būti identifikuojami, pažymimi ir taisomi.
 
 ### 7.4.1. Numatytieji aprėpties slenksčiai
 
-<!-- TEST-GATE-P05 | ai-reviewable -->
+<!-- TEST-GATE-P05 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Projektas privalo apibrėžti ir CI procese tikrinti minimalius testų aprėpties slenksčius.
 Šioje lentelėje pateikiami numatytieji testų aprėpties tikslai pagal komponento tipą. Tai yra pradiniai orientyrai, kuriuos kiekvienas projektas gali koreguoti (aukštyn arba žemyn su pagrindimu) projekto pradžioje.
 
@@ -111,11 +111,11 @@ PRIVALOMA:
 *   Konkrečios reikšmės turi būti patvirtintos projekto pradžioje ir peržiūrimos periodiškai.
 REKOMENDUOJAMA:
 
-<!-- TEST-GATE-R01 | ai-reviewable -->
+<!-- TEST-GATE-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testų aprėpties tikslus nustatyti projekto pradžioje ir vertinti ne tik bendrą procentą, bet ir kritinių sričių padengimą.
 <!-- TEST-GATE-R02 | human-reviewable -->
 *   Aprėpties slenksčius naudoti kaip kokybės signalą, o ne vien formalų skaičių.
-<!-- TEST-GATE-R03 | ai-reviewable -->
+<!-- TEST-GATE-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Flaky testų problematiką rekomenduojama valdyti kaip atskirą kokybės riziką, o ne spręsti jų išjungimu be priežasties.
 
 > Susiję skyriai: [4.5 Testai](04-kodo-kurimo-gaires.md#45-testai) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai) · [6.6 OWASP Top 10](06-saugumas.md#66-owasp-top-10)
@@ -124,22 +124,22 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- TEST-DATA-P01 | ai-reviewable -->
+<!-- TEST-DATA-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testavimo duomenys turi būti aiškiai parengti, valdomi ir pakartojami.
-<!-- TEST-DATA-P02 | ai-reviewable -->
+<!-- TEST-DATA-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testavimo aplinkos turi būti atskirtos nuo produkcijos.
-<!-- TEST-DATA-P03 | ai-reviewable -->
+<!-- TEST-DATA-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Asmens duomenys testavimo aplinkose turi būti anonimizuoti arba pseudonimizuoti, išskyrus aiškiai pagrįstus ir teisėtus atvejus.
-<!-- TEST-DATA-P04 | ai-reviewable -->
+<!-- TEST-DATA-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Išorinės priklausomybės testavimo metu turi būti valdomos per sandbox, mock arba kitus kontroliuojamus mechanizmus, kai tai įmanoma.
 
 REKOMENDUOJAMA:
 
-<!-- TEST-DATA-R01 | ai-reviewable -->
+<!-- TEST-DATA-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Naudoti versijuotus seed duomenis arba aiškiai aprašytus testinių duomenų rinkinius.
-<!-- TEST-DATA-R02 | ai-reviewable -->
+<!-- TEST-DATA-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Aplinkų konfigūraciją laikyti pakankamai artimą realiam scenarijui, kai to reikia testų patikimumui.
-<!-- TEST-DATA-R03 | ai-reviewable -->
+<!-- TEST-DATA-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei naudojamos išorinės sistemos, rekomenduojama aiškiai apibrėžti testavimo langus, ribas ir atsakomybę už testavimo poveikį.
 
 > Susiję skyriai: [3.5 Konfigūracija, slaptieji raktai ir aplinkos](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [3.9.6 Testavimas](03-architektura.md#396-testavimas)
@@ -148,20 +148,20 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- TEST-PERF-P01 | ai-reviewable -->
+<!-- TEST-PERF-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kritinėms ir viešosioms sistemoms turi būti atliekami našumo arba apkrovos testai prieš reikšmingus leidimus ar esminius architektūrinius pokyčius.
-<!-- TEST-PERF-P02 | ai-reviewable -->
+<!-- TEST-PERF-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testavimo scenarijai turi būti susieti su aiškiais našumo tikslais ir realiais naudojimo modeliais.
 <!-- TEST-PERF-P03 | human-reviewable -->
 *   Turi būti aišku, kokia apkrova, kokie duomenų kiekiai ir kokie atsako laikai laikomi priimtinais.
-<!-- TEST-PERF-P04 | ai-reviewable -->
+<!-- TEST-PERF-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Našumo testų rezultatai turi būti išsaugomi ir naudojami sprendžiant apie leidimo pasirengimą.
 
 REKOMENDUOJAMA:
 
-<!-- TEST-PERF-R01 | ai-reviewable -->
+<!-- TEST-PERF-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Atlikti ne tik tipinės apkrovos, bet ir staigaus šuolio, ilgalaikio veikimo ar resursų degradacijos scenarijus, kai tai aktualu.
-<!-- TEST-PERF-R02 | ai-reviewable -->
+<!-- TEST-PERF-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Našumo testų rezultatus naudoti ne tik leidimo sprendimui, bet ir architektūros, talpyklų, duomenų bazių ar infrastruktūros korekcijai.
 
 > Susiję skyriai: [3.1.1 Kokybės atributai (NFR)](03-architektura.md#311-kokybės-atributai-nfr) · [3.3.9 Greitaveika, patikimumas ir talpyklos](03-architektura.md#339-greitaveika-patikimumas-ir-talpyklos) · [9.5 SLA, SLO ir SLI](09-stebesena-logai.md#95-sla-slo-ir-sli)
@@ -174,18 +174,18 @@ Saugumo testavimo reikalavimai apibrėžti [#6.7](06-saugumas.md#67-security-tes
 
 PRIVALOMA:
 
-<!-- TEST-A11Y-P01 | ai-reviewable -->
+<!-- TEST-A11Y-P01 | ai-reviewable | stacks=frontend,mobile | enforced-by=ai -->
 *   Jei sistema turi naudotojo sąsają, prieinamumo testavimas turi būti planuojamas ir vykdomas kaip testavimo dalis.
 <!-- TEST-A11Y-P02 | human-reviewable -->
 *   Automatiniai prieinamumo patikrinimai turi būti derinami su rankiniu tikrinimu bent kritiniuose scenarijuose.
-<!-- TEST-A11Y-P03 | ai-reviewable -->
+<!-- TEST-A11Y-P03 | ai-reviewable | stacks=frontend,mobile | enforced-by=ai -->
 *   Prieinamumo tikrinimas turi apimti bent klaviatūros navigaciją, fokusų valdymą, semantiką ir ekrano skaitytuvų pagrindinius scenarijus.
 
 REKOMENDUOJAMA:
 
 <!-- TEST-A11Y-R01 | human-reviewable -->
 *   Prieinamumo tikrinimą vykdyti ne tik prieš leidimą, bet ir po reikšmingų UI pokyčių.
-<!-- TEST-A11Y-R02 | ai-reviewable -->
+<!-- TEST-A11Y-R02 | ai-reviewable | stacks=frontend,mobile | enforced-by=ai -->
 *   Aukštos rizikos ar plačiai naudojamoms sistemoms prieinamumo testavimą rekomenduojama įtraukti į regresijos procesą.
 
 > Susiję skyriai: [3.2.5 Prieinamumas (A11y)](03-architektura.md#325-prieinamumas-a11y) · [3.9.4 Prieinamumas ir lokalizacija](03-architektura.md#394-prieinamumas-ir-lokalizacija)
@@ -194,20 +194,20 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- TEST-CICD-P01 | ai-reviewable -->
+<!-- TEST-CICD-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Automatizuoti testai turi būti integruoti į CI/CD procesą pagal projekto poreikį.
-<!-- TEST-CICD-P02 | ai-reviewable -->
+<!-- TEST-CICD-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testų rezultatai turi būti saugomi kaip atsekami artefaktai.
-<!-- TEST-CICD-P03 | ai-reviewable -->
+<!-- TEST-CICD-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kokybės vartai turi blokuoti leidimą ar merge’inimą, jei neįvykdomi privalomi testavimo reikalavimai.
-<!-- TEST-CICD-P04 | ai-reviewable -->
+<!-- TEST-CICD-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Turi būti aišku, kurie testai vykdomi per PR, kurie per pagrindinius build’us, o kurie prieš leidimą.
 
 REKOMENDUOJAMA:
 
-<!-- TEST-CICD-R01 | ai-reviewable -->
+<!-- TEST-CICD-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Naudoti centralizuotas ataskaitas ar suvestines, leidžiančias matyti testų stabilumą, aprėptį ir kokybės tendencijas.
-<!-- TEST-CICD-R02 | ai-reviewable -->
+<!-- TEST-CICD-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kritinių testų rezultatus rekomenduojama įtraukti į release peržiūrą.
 
 > Susiję skyriai: [4.3.5 Pull Request / Merge Request reikalavimai](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai) · [8.9 Leidimų (release) valdymas](08-devops-ci-cd.md#89-leidimų-release-valdymas)
@@ -216,16 +216,16 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- TEST-UAT-P01 | ai-reviewable -->
+<!-- TEST-UAT-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Naudotojų priėmimo testavimas turi būti grindžiamas aiškiais priėmimo kriterijais.
 <!-- TEST-UAT-P02 | process-level -->
 *   Kritiniai naudotojų scenarijai turi būti patvirtinti prieš leidimą, kai to reikalauja sistemos paskirtis.
-<!-- TEST-UAT-P03 | ai-reviewable -->
+<!-- TEST-UAT-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Nefunkciniai kriterijai, tokie kaip našumas, saugumas ar prieinamumas, turi turėti aiškiai apibrėžtas priėmimo ribas, jei jie yra reikšmingi sistemai.
 
 REKOMENDUOJAMA:
 
-<!-- TEST-UAT-R01 | ai-reviewable -->
+<!-- TEST-UAT-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   UAT scenarijus derinti su product owner ir analitiku dar prieš aktyvų testavimo etapą.
 <!-- TEST-UAT-R02 | process-level -->
 *   UAT radinius aiškiai atskirti nuo techninių defektų ir naudoti kaip įvestį regresijos bei release planavimui.
@@ -238,11 +238,11 @@ PRIVALOMA:
 
 <!-- TEST-REG-P01 | process-level -->
 *   Defektai turi būti registruojami, prioritetizuojami ir atsekami.
-<!-- TEST-REG-P02 | ai-reviewable -->
+<!-- TEST-REG-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kritiniai defektai, darantys poveikį saugumui, duomenų vientisumui ar pagrindiniam funkcionalumui, negali būti ignoruojami prieš leidimą.
-<!-- TEST-REG-P03 | ai-reviewable -->
+<!-- TEST-REG-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Regresijos rinkinys turi būti palaikomas kaip nuolatinė testų bazės dalis.
-<!-- TEST-REG-P04 | ai-reviewable -->
+<!-- TEST-REG-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kiekvienas reikšmingas bug fix turi papildyti regresijos rinkinį.
 
 REKOMENDUOJAMA:
@@ -258,20 +258,20 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- TEST-GDPR-P01 | ai-reviewable -->
+<!-- TEST-GDPR-P01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testavimo metu turi būti laikomasi duomenų apsaugos reikalavimų.
-<!-- TEST-GDPR-P02 | ai-reviewable -->
+<!-- TEST-GDPR-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testų aplinkose negali būti naudojami realūs asmens duomenys be aiškaus teisinio pagrindo ir apsaugos priemonių.
-<!-- TEST-GDPR-P03 | ai-reviewable -->
+<!-- TEST-GDPR-P03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei testuojami privatumo, prieigos ar duomenų subjektų teisių scenarijai, jie turi būti tikrinami kontroliuotai ir dokumentuotai.
-<!-- TEST-GDPR-P04 | ai-reviewable -->
+<!-- TEST-GDPR-P04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Loguose ir testų ataskaitose negali būti perteklinių jautrių duomenų.
 
 REKOMENDUOJAMA:
 
-<!-- TEST-GDPR-R01 | ai-reviewable -->
+<!-- TEST-GDPR-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Privatumo scenarijus, tokius kaip sutikimų valdymas, duomenų trynimas ar eksportas, įtraukti į reguliarius testavimo rinkinius, jei tai taikoma sistemai.
-<!-- TEST-GDPR-R02 | ai-reviewable -->
+<!-- TEST-GDPR-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Testavimo duomenų gyvavimo ciklą rekomenduojama valdyti taip pat nuosekliai kaip ir produkcinių duomenų apsaugos priemones.
 
 > Susiję skyriai: [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [3.4.5 Asmens duomenų apsauga (BDAR / GDPR)](03-architektura.md#345-asmens-duomenų-apsauga-bdar-gdpr) · [9.7 Audit trail (audito pėdsakas)](09-stebesena-logai.md#97-audit-trail-audito-pėdsakas)
@@ -280,20 +280,20 @@ REKOMENDUOJAMA:
 
 PRIVALOMA:
 
-<!-- TEST-DR-P01 | ai-reviewable -->
+<!-- TEST-DR-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Kritinėms sistemoms turi būti testuojamas atsarginių kopijų atkūrimas ir, kai taikoma, atkūrimo po sutrikimo scenarijai.
-<!-- TEST-DR-P02 | ai-reviewable -->
+<!-- TEST-DR-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Atkūrimo testai turi būti siejami su nustatytais RTO ir RPO tikslais.
-<!-- TEST-DR-P03 | ai-reviewable -->
+<!-- TEST-DR-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Netestuotas atkūrimo scenarijus nelaikomas pakankamu pasirengimo įrodymu.
 
 REKOMENDUOJAMA:
 
-<!-- TEST-DR-R01 | ai-reviewable -->
+<!-- TEST-DR-R01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Reguliariai testuoti ne tik atsarginių kopijų sukūrimą, bet ir pilną atkūrimo eigą.
-<!-- TEST-DR-R02 | ai-reviewable -->
+<!-- TEST-DR-R02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Jei sistema priklauso nuo išorinių paslaugų ar kelių komponentų, rekomenduojama testuoti ir dalinio degradavimo bei failover scenarijus.
-<!-- TEST-DR-R03 | ai-reviewable -->
+<!-- TEST-DR-R03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Atsparumo testų rezultatus rekomenduojama naudoti koreguojant eksploatacijos dokumentaciją ir incidentų planus.
 
 > Susiję skyriai: [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas) · [9.8 Eksploatacijos dokumentacija](09-stebesena-logai.md#98-eksploatacijos-dokumentacija)

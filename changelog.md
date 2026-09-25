@@ -4,6 +4,13 @@ Visi reikšmingi standarto pakeitimai dokumentuojami šiame faile.
 
 Formatas paremtas [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versijavimas – [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Pridėta
+
+- Automatiškai tikrinamų reikalavimų žymose nurodomos technologijų sritys (`stacks`) ir tikrinimo priemonė (`enforced-by`) (2.4.1 poskyris).
+- Reikalavimų vertimas į anglų kalbą DI agentams (`standard/rules.en.yaml`), neprivalomas angliškas reikalavimų sąrašas svetainėje (`/rules`) ir DI agentų paketas prie kiekvieno leidimo.
+
 ## [1.0.0] - 2026-04-20
 
 ### Pridėta
