@@ -1,0 +1,89 @@
+name: Dev standard sync
+description: Installs the pinned vilnius-vmsa/dev-standard release in this repository and opens a pull request when files change.
+
+inputs:
+  stacks:
+    description: Comma-separated stacks, for example laravel,frontend. Required on the first run; replaces the configured stacks when given.
+    required: false
+    default: ""
+  token:
+    description: Token that pushes the sync branch and opens the pull request.
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v6
+      with:
+        ref: ${{ github.event.repository.default_branch }}
+        token: ${{ inputs.token }}
+
+    - name: Choose version
+      id: plan
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        EVENT_NAME: ${{ github.event_name }}
+        STACKS: ${{ inputs.stacks }}
+      run: |
+        set -euo pipefail
+        latest="$(gh release view --repo vilnius-vmsa/dev-standard --json tagName --jq .tagName)"
+        node "$GITHUB_ACTION_PATH/sync.mjs" plan --latest="$latest" --event="$EVENT_NAME" --stacks="$STACKS"
+
+    - name: Install bundle
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        VERSION: ${{ steps.plan.outputs.version }}
+        STACKS: ${{ steps.plan.outputs.stacks }}
+      run: |
+        set -euo pipefail
+        bundle="$RUNNER_TEMP/dev-standard-bundle"
+        rm -rf "$bundle" && mkdir -p "$bundle"
+        if ! gh release download "$VERSION" --repo vilnius-vmsa/dev-standard --pattern dev-standard-agent-bundle.zip --dir "$bundle"; then
+          echo "::error::Release $VERSION of vilnius-vmsa/dev-standard has no dev-standard-agent-bundle.zip. Check \"version\" in .dev-standard/config.json."
+          exit 1
+        fi
+        unzip -q "$bundle/dev-standard-agent-bundle.zip" -d "$bundle"
+        node "$GITHUB_ACTION_PATH/sync.mjs" apply --bundle="$bundle" --version="$VERSION" --stacks="$STACKS" \
+          --warning="$RUNNER_TEMP/dev-standard-warning.md"
+        cat "$RUNNER_TEMP/dev-standard-warning.md" >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Open or update pull request
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        VERSION: ${{ steps.plan.outputs.version }}
+        BASE: ${{ github.event.repository.default_branch }}
+        BRANCH: dev-standard/sync
+      run: |
+        set -euo pipefail
+        git add -A
+        if git diff --cached --quiet; then
+          echo "Already in sync with $VERSION."
+          exit 0
+        fi
+        git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+          commit -q -m "chore: sync dev standard $VERSION"
+
+        body="$RUNNER_TEMP/dev-standard-pr.md"
+        {
+          printf 'Updates the generated dev standard files to [%s](https://github.com/vilnius-vmsa/dev-standard/releases/tag/%s).\n\n' "$VERSION" "$VERSION"
+          printf 'These files are generated; the next sync overwrites manual edits. Repository-specific rules go in `.github/instructions/dev-standard-local.instructions.md`.\n\n'
+          cat "$RUNNER_TEMP/dev-standard-warning.md"
+        } > "$body"
+
+        if git fetch -q origin "$BRANCH" 2>/dev/null && git diff --quiet HEAD FETCH_HEAD; then
+          echo "$BRANCH already has these changes."
+        else
+          git push -q --force origin "HEAD:refs/heads/$BRANCH"
+        fi
+
+        pr="$(gh pr list --head "$BRANCH" --base "$BASE" --state open --json number --jq '.[0].number // empty')"
+        if [[ -n "$pr" ]]; then
+          gh pr edit "$pr" --title "Dev standard $VERSION" --body-file "$body"
+        elif ! gh pr create --base "$BASE" --head "$BRANCH" --title "Dev standard $VERSION" --body-file "$body"; then
+          echo "::error::Could not open the pull request. An org owner must enable Settings → Actions → General → \"Allow GitHub Actions to create and approve pull requests\"."
+          exit 1
+        fi
