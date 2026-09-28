@@ -10,6 +10,8 @@ Formatas paremtas [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), vers
 
 - Automatiškai tikrinamų reikalavimų žymose nurodomos technologijų sritys (`stacks`) ir tikrinimo priemonė (`enforced-by`) (2.4.1 poskyris).
 - Reikalavimų vertimas į anglų kalbą DI agentams (`standard/rules.en.yaml`), neprivalomas angliškas reikalavimų sąrašas svetainėje (`/rules`) ir DI agentų paketas prie kiekvieno leidimo.
+- G priedas „Dokumentacijos rengimo metodika“: kaip rengti, tikrinti ir palaikyti sistemų dokumentaciją, kad ja galėtų naudotis DI agentai, vidinės ir išorinės komandos (10 skyrius).
+- DI agentų pakete – `dev-standard-docs` įgūdis dokumentacijai kurti, atnaujinti ir tikrinti, su šablonais ir nuorodų tikrintuvu `check-docs.py`; sinchronizavimas diegia visus paketo įgūdžius ir įspėja apie pasenusią `AGENTS.md` skiltį.
 
 ## [1.0.0] - 2026-04-20
 

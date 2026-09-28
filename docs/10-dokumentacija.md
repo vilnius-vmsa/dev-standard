@@ -8,6 +8,8 @@ Dokumentacija laikoma ne papildomu darbu po kūrimo, o neatsiejama sistemos dali
 
 Konkretūs turinio reikalavimai atskiriems dokumentų tipams apibrėžiami atitinkamuose teminiuose skyriuose, pavyzdžiui, architektūros, API, saugumo, testavimo, DevOps ir eksploatacijos dalyse.
 
+Kaip dokumentaciją parengti, tikrinti ir palaikyti praktikoje, kad ja galėtų naudotis DI agentai, vidinės ir išorinės komandos, aprašyta [G priede. Dokumentacijos rengimo metodika](priedai/dokumentacijos-rengimo-metodika.md).
+
 ## 10.1. Bendrieji dokumentacijos principai
 
 PRIVALOMA:
@@ -32,7 +34,7 @@ REKOMENDUOJAMA:
 <!-- DOC-GEN-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Vengti dokumentacijos dubliavimo tarp skyrių; vietoje to naudoti nuorodas į pagrindinį reikalavimo šaltinį.
 
-> Susiję skyriai: [3 Architektūros ir dizaino principai](03-architektura.md) · [4 Programinio kodo kūrimo ir keitimo gairės](04-kodo-kurimo-gaires.md) · [9 Stebėsena, logai ir eksploatacija](09-stebesena-logai.md)
+> Susiję skyriai: [3 Architektūros ir dizaino principai](03-architektura.md) · [4 Programinio kodo kūrimo ir keitimo gairės](04-kodo-kurimo-gaires.md) · [9 Stebėsena, logai ir eksploatacija](09-stebesena-logai.md) · [G priedas. Dokumentacijos rengimo metodika](priedai/dokumentacijos-rengimo-metodika.md)
 
 ## 10.2. Privaloma dokumentacija
 
@@ -65,7 +67,7 @@ REKOMENDUOJAMA:
 <!-- DOC-REQ-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Jei sistema turi reikšmingų nefunkcinių reikalavimų, rekomenduojama aiškiai parodyti, kaip architektūriniai sprendimai padeda juos užtikrinti.
 
-> Susiję skyriai: [3.8 Diagramos ir dokumentavimas](03-architektura.md#38-diagramos-ir-dokumentavimas) · [10.4 Architecture Decision Records (ADR)](#104-architecture-decision-records-adr)
+> Susiję skyriai: [3.8 Diagramos ir dokumentavimas](03-architektura.md#38-diagramos-ir-dokumentavimas) · [10.4 Architecture Decision Records (ADR)](#104-architecture-decision-records-adr) · [G priedas. Dokumentacijos rengimo metodika](priedai/dokumentacijos-rengimo-metodika.md)
 
 ### 10.2.2. API dokumentacija
 
@@ -209,4 +211,4 @@ REKOMENDUOJAMA:
 <!-- DOC-UPD-R03 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Dokumentacijos pasenimą vertinti kaip kokybės signalą, o ne tik kaip redakcinę problemą.
 
-> Susiję skyriai: [4.3.5 Pull Request / Merge Request reikalavimai](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai) · [4.4 Code Review principai](04-kodo-kurimo-gaires.md#44-code-review-principai) · [3.8 Diagramos ir dokumentavimas](03-architektura.md#38-diagramos-ir-dokumentavimas) · [8 DevOps ir CI/CD reikalavimai](08-devops-ci-cd.md)
+> Susiję skyriai: [4.3.5 Pull Request / Merge Request reikalavimai](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai) · [4.4 Code Review principai](04-kodo-kurimo-gaires.md#44-code-review-principai) · [3.8 Diagramos ir dokumentavimas](03-architektura.md#38-diagramos-ir-dokumentavimas) · [8 DevOps ir CI/CD reikalavimai](08-devops-ci-cd.md) · [G priedas. Dokumentacijos rengimo metodika](priedai/dokumentacijos-rengimo-metodika.md)

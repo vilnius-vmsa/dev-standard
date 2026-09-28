@@ -1,0 +1,15 @@
+name: Docs check
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check documentation links and paths
+        run: python3 .agents/skills/dev-standard-docs/check-docs.py

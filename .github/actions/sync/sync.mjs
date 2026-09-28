@@ -1,6 +1,6 @@
 // Installs a vilnius-vmsa/dev-standard release bundle into a consuming repository.
 // Node built-ins only: the action runs without npm ci.
-import { appendFile, copyFile, mkdir, readdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { appendFile, copyFile, cp, mkdir, readdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -8,8 +8,9 @@ import { parseArgs } from 'node:util';
 export const CONFIG_FILE = '.dev-standard/config.json';
 const VERSION = /^v\d+\.\d+\.\d+$/;
 const INSTRUCTIONS_DIR = '.github/instructions';
-const SKILL_DIR = '.agents/skills/dev-standard';
-const CLAUDE_SKILL_LINK = '.claude/skills/dev-standard';
+const SKILLS_DIR = '.agents/skills';
+const CLAUDE_SKILLS_DIR = '.claude/skills';
+const GENERATED_SKILL = /^dev-standard(-[a-z0-9]+)*$/;
 const LOCAL_INSTRUCTIONS = 'dev-standard-local.instructions.md';
 const GENERATED_INSTRUCTIONS = /^dev-standard-.+\.instructions\.md$/;
 
@@ -70,6 +71,29 @@ export function resolveStacks(stacks, manifest) {
   return [...resolved];
 }
 
+// Bundles up to v1.2.7 hold one skill in skill/ and list no skills in the manifest.
+// Only dev-standard names: sync removes dropped skills by that prefix, and a name never leaves the skills folder.
+export function bundleSkills(manifest) {
+  if (!manifest.skills) return [{ name: 'dev-standard', source: 'skill' }];
+  return manifest.skills.map((name) => {
+    if (!GENERATED_SKILL.test(name)) throw new Error(`skill name "${name}" must start with dev-standard and use lower-case words`);
+    return { name, source: `skills/${name}` };
+  });
+}
+
+async function removeDroppedSkills(dir, wanted) {
+  let names;
+  try {
+    names = await readdir(dir);
+  } catch (error) {
+    if (error.code === 'ENOENT') return;
+    throw error;
+  }
+  for (const name of names) {
+    if (GENERATED_SKILL.test(name) && !wanted.has(name)) await rm(path.join(dir, name), { recursive: true, force: true });
+  }
+}
+
 // Writes the generated paths only; everything else in the repository is left alone.
 export async function applyBundle({ repoDir, bundleDir, version, stacks }) {
   const manifest = JSON.parse(await readFile(path.join(bundleDir, 'manifest.json'), 'utf8'));
@@ -86,22 +110,30 @@ export async function applyBundle({ repoDir, bundleDir, version, stacks }) {
   }
   for (const name of wanted) await copyFile(path.join(bundleDir, 'instructions', name), path.join(instructionsDir, name));
 
-  const skillDir = path.join(repoDir, SKILL_DIR);
-  await rm(skillDir, { recursive: true, force: true });
-  await mkdir(skillDir, { recursive: true });
-  await copyFile(path.join(bundleDir, 'skill/SKILL.md'), path.join(skillDir, 'SKILL.md'));
-
-  const link = path.join(repoDir, CLAUDE_SKILL_LINK);
-  await rm(link, { recursive: true, force: true });
-  await mkdir(path.dirname(link), { recursive: true });
-  await symlink(path.relative(path.dirname(link), skillDir), link);
+  const skills = bundleSkills(manifest);
+  const wantedSkills = new Set(skills.map((skill) => skill.name));
+  await removeDroppedSkills(path.join(repoDir, SKILLS_DIR), wantedSkills);
+  await removeDroppedSkills(path.join(repoDir, CLAUDE_SKILLS_DIR), wantedSkills);
+  for (const { name, source } of skills) {
+    const skillDir = path.join(repoDir, SKILLS_DIR, name);
+    await rm(skillDir, { recursive: true, force: true });
+    await cp(path.join(bundleDir, source), skillDir, { recursive: true });
+    const link = path.join(repoDir, CLAUDE_SKILLS_DIR, name);
+    await rm(link, { recursive: true, force: true });
+    await mkdir(path.dirname(link), { recursive: true });
+    await symlink(path.relative(path.dirname(link), skillDir), link);
+  }
 
   await mkdir(path.join(repoDir, path.dirname(CONFIG_FILE)), { recursive: true });
   await writeFile(path.join(repoDir, CONFIG_FILE), `${JSON.stringify({ version, stacks }, null, 2)}\n`);
-  return { stacks: resolved };
+  return { stacks: resolved, skills: [...wantedSkills] };
 }
 
-// Sync never edits AGENTS.md; it asks the team to paste the pointer section once.
+// A pasted AGENTS.md section carries this marker; bundles up to v1.2.7 have none (revision 0).
+const AGENTS_SECTION = /<!-- dev-standard:agents-section (\d+) -->/;
+const revision = (text) => Number(text?.match(AGENTS_SECTION)?.[1] ?? 0);
+
+// Sync never edits AGENTS.md; it asks the team to paste the pointer section, and to replace it when it is outdated.
 export async function agentsWarning(repoDir, bundleDir) {
   let text = null;
   try {
@@ -109,18 +141,13 @@ export async function agentsWarning(repoDir, bundleDir) {
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
   }
-  if (text?.includes('dev-standard')) return null;
   const snippet = await readFile(path.join(bundleDir, 'agents-snippet.md'), 'utf8');
-  const problem = text === null ? 'This repository has no `AGENTS.md`.' : '`AGENTS.md` does not mention the dev standard.';
-  return [
-    '> [!WARNING]',
-    `> ${problem} Add this section to it so agents find the rules:`,
-    '',
-    '```markdown',
-    snippet.trimEnd(),
-    '```',
-    '',
-  ].join('\n');
+  let problem;
+  if (text === null) problem = 'This repository has no `AGENTS.md`. Add this section to it so agents find the rules:';
+  else if (!text.includes('dev-standard')) problem = '`AGENTS.md` does not mention the dev standard. Add this section to it so agents find the rules:';
+  else if (revision(text) < revision(snippet)) problem = '`AGENTS.md` has an outdated dev standard section. Replace it with this one:';
+  else return null;
+  return ['> [!WARNING]', `> ${problem}`, '', '```markdown', snippet.trimEnd(), '```', ''].join('\n');
 }
 
 async function setOutputs(values) {
@@ -145,9 +172,9 @@ async function main() {
       await setOutputs({ skip: 'true' });
     }
   } else if (command === 'apply') {
-    const { stacks } = await applyBundle({ repoDir, bundleDir: values.bundle, version: values.version, stacks: parseStacks(values.stacks) });
+    const { stacks, skills } = await applyBundle({ repoDir, bundleDir: values.bundle, version: values.version, stacks: parseStacks(values.stacks) });
     await writeFile(values.warning, (await agentsWarning(repoDir, values.bundle)) ?? '');
-    console.log(`Installed ${values.version} for stacks: ${stacks.join(', ')}`);
+    console.log(`Installed ${values.version} for stacks: ${stacks.join(', ')}; skills: ${skills.join(', ')}`);
   } else {
     throw new Error(`unknown command "${command}"; use plan or apply`);
   }
