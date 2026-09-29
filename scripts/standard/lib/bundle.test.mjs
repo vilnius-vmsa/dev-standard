@@ -91,7 +91,7 @@ test('a rule under an unnumbered heading has no section in its line', () => {
 test('skill, snippet, rules.json and manifest', () => {
   const files = build();
   assert.ok(files.get('agents-snippet.md').includes('.github/instructions/dev-standard-'));
-  assert.ok(files.get('agents-snippet.md').includes('<!-- dev-standard:agents-section 2 -->'));
+  assert.ok(files.get('agents-snippet.md').includes('<!-- dev-standard:agents-section 3 -->'));
   assert.ok(files.get('agents-snippet.md').includes('`dev-standard-docs`'));
   const json = JSON.parse(files.get('rules.json'));
   assert.equal(json.version, 'v1.5.0');

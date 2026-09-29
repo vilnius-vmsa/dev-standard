@@ -13,7 +13,7 @@ Every sentence you write in documentation is a **claim**. A claim is done when y
 
 ## Rules for every mode
 
-1. Describe current behaviour. Plans and intentions go into an ADR with a status, or a coverage row marked "Not yet".
+1. Describe current behaviour. Plans and intentions go into an ADR with status `Proposed`, or a coverage row marked "Not yet".
 2. Point at code by path and symbol: `src/Service/StorageService.php`, method `bind()`. Line numbers go stale; leave them out.
 3. Link to the one place a fact lives (setup in README, big picture in `docs/architecture.md`) and keep each fact in one doc.
 4. Write terse, checkable sentences; prefer tables and lists.

@@ -6,6 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
+import { buildBundle } from './bundle.mjs';
 
 const CHECKER = fileURLToPath(new URL('../../../standard/skills/dev-standard-docs/check-docs.py', import.meta.url));
 
@@ -75,6 +76,17 @@ test('a missing path that git ignores (a local key, a build output) is not repor
     'README.md': 'Keys are generated in `src/keys/private.pem`.\n',
   });
   await promisify(execFile)('git', ['init', '-q', root]);
+  const result = await check(root);
+  assert.equal(result.code, 0, result.out);
+});
+
+test('the AGENTS.md section sync asks repositories to paste passes without a local rules file', async () => {
+  const snippet = buildBundle({ rules: [], english: {}, stacks: new Map(), version: 'v1', siteUrl: 'https://x.test', reviewMethod: '' })
+    .get('agents-snippet.md');
+  const root = await repo({
+    'AGENTS.md': `# Agents\n\n${snippet}`,
+    '.github/instructions/dev-standard-all.instructions.md': 'rules\n',
+  });
   const result = await check(root);
   assert.equal(result.code, 0, result.out);
 });

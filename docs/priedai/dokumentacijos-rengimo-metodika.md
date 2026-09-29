@@ -11,7 +11,7 @@
 ## G.1. Principai
 
 - **Vienas tiesos šaltinis** ([10.1](../10-dokumentacija.md#101-bendrieji-dokumentacijos-principai)). Kiekvienas faktas aprašomas vienoje vietoje; kiti dokumentai į jį nurodo, o ne kartoja.
-- **Aprašoma tik esama elgsena.** Planai ir ketinimai į dokumentaciją nerašomi kaip faktai. Jie fiksuojami ADR su būsena (pvz., „Siūlomas“, „Atidėtas“) arba dengimo lentelėje (žr. [G.2](#g2-repozitorijos-dokumentacijos-struktūra)).
+- **Aprašoma tik esama elgsena.** Planai ir ketinimai į dokumentaciją nerašomi kaip faktai. Jie fiksuojami ADR su būsena „Proposed“ (siūlomas) arba dengimo lentelėje (žr. [G.2](#g2-repozitorijos-dokumentacijos-struktūra)).
 - **Nuorodos į kodą – kelias ir simbolis**, pvz., `src/Service/StorageService.php` ir metodas `bind()`. Eilučių numeriai nenaudojami, nes jie pasensta po pirmo pakeitimo.
 - **Nuoroda vietoje kopijos** (DOC-GEN-R03). Diegimo žingsniai lieka README, architektūra – `docs/architecture.md`; AGENTS.md į juos tik nurodo.
 - **Trumpai ir faktiškai.** Lentelės ir sąrašai vietoje pasakojimo; kiekvienas sakinys turi būti patikrinamas.
