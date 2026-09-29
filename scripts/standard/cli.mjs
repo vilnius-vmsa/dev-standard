@@ -7,6 +7,7 @@ import { acceptEntries, applyDrafts, checkEnglish, parseEnglish, stringifyEnglis
 import { checkReferences, loadPages, loadSectionNumbers } from './lib/references.mjs';
 import { loadRules } from './lib/rules.mjs';
 import { buildSiteData } from './lib/site-data.mjs';
+import { loadSkillFiles, mergeSkillFiles } from './lib/skill-files.mjs';
 import { checkSkill, loadSkills } from './lib/skills.mjs';
 import { loadStacks } from './lib/stacks.mjs';
 import { stubTranslator } from './lib/translators.mjs';
@@ -53,9 +54,11 @@ async function loadReviewMethod(rules) {
   return { text, errors: checkReferences(text, known).map((e) => `standard/review-method.md ${e}`) };
 }
 
-/** Hand-written skills (copied into the bundle unchanged) and their problems. */
+/** Hand-written skills (copied into the bundle unchanged), plus template blocks marked in docs, and their problems. */
 async function loadHandwrittenSkills(rules) {
   const skills = await loadSkills(SKILLS_DIR);
+  const marked = await loadSkillFiles(DOCS_DIR);
+  const mergeErrors = [...marked.errors, ...mergeSkillFiles(skills, marked.files)].map((e) => `docs/${e}`);
   const known = {
     ruleIds: new Set(rules.map((r) => r.id)),
     sections: await loadSectionNumbers(DOCS_DIR),
@@ -63,7 +66,7 @@ async function loadHandwrittenSkills(rules) {
     siteUrl: SITE_URL,
   };
   const errors = [...skills].flatMap(([name, files]) => checkSkill(name, files, known).map((e) => `standard/skills/${e}`));
-  return { skills, errors };
+  return { skills, errors: [...mergeErrors, ...errors] };
 }
 
 async function saveEnglish(entries) {

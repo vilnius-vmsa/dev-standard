@@ -1,99 +1,100 @@
 # F priedas. Runbook šablonas (Operational Runbook Template)
 
 > **Paskirtis:** standartizuotas runbook formatas pagal [9.8 Eksploatacijos dokumentacija](../09-stebesena-logai.md#98-eksploatacijos-dokumentacija).
-> **Naudojimas:** kopijuoti šabloną į projekto `docs/runbooks/` katalogą ir pildyti kiekvienam eksploataciniam scenarijui.
+> **Naudojimas:** kopijuoti šabloną į projekto `docs/runbooks/` katalogą ir pildyti kiekvienam eksploataciniam scenarijui. Šablonas pateikiamas angliškai, kaip rekomenduojama repozitorijos dokumentacijai ([G.2](dokumentacijos-rengimo-metodika.md#g2-repozitorijos-dokumentacijos-struktūra)); jei projekto dokumentacija rašoma lietuviškai (DOC-GEN-P05), antraštes ir laukus galima išversti.
 
 ---
 
 ## Šablono struktūra
 
-```markdown
-# Runbook: [Scenarijaus pavadinimas]
+<!-- skill-file: dev-standard-docs/templates/runbook.md -->
+````markdown
+# Runbook: [Scenario name]
 
-**Service:** [Paslaugos / sistemos pavadinimas]
+**Service:** [Service / system name]
 **Last updated:** YYYY-MM-DD
-**Owner:** [Komanda / atsakingas asmuo]
-**SLO Tier:** [1 | 2 | 3] (pagal 9.5.1)
+**Owner:** [Team / responsible person]
+**SLO Tier:** [1 | 2 | 3] (see 9.5.1)
 **Severity:** [P1 Critical | P2 High | P3 Medium | P4 Low]
 
 ---
 
 ## Overview
 
-[Trumpas scenarijaus aprašymas — kada šis runbook naudojamas.]
+[Short description of the scenario: when this runbook is used.]
 
 ## Prerequisites
 
-- Prieiga prie: [cluster, dashboard, secrets manager, ...]
-- Reikalingi įrankiai: [kubectl, terraform, ssh, ...]
-- Reikalingos rolės / teisės: [admin, operator, ...]
+- Access to: [cluster, dashboard, secrets manager, ...]
+- Tools: [kubectl, terraform, ssh, ...]
+- Roles / permissions: [admin, operator, ...]
 
 ## Detection
 
-- **Alert name:** [Alerting taisyklės pavadinimas]
-- **Dashboard:** [Nuoroda į monitoring dashboard]
-- **Symptoms:** [Kaip problema pasireiškia — error rate, latency spike, health check fail, ...]
+- **Alert name:** [Alerting rule name]
+- **Dashboard:** [Link to the monitoring dashboard]
+- **Symptoms:** [How the problem shows: error rate, latency spike, failing health check, ...]
 
 ## Steps
 
-### 1. Diagnozė / Diagnosis
+### 1. Diagnosis
 
-[Žingsniai, kaip patikrinti ir patvirtinti problemą.]
+[Steps to check and confirm the problem.]
 
 ```bash
-# Pavyzdys: patikrinti pod būseną
+# Example: check pod status
 kubectl get pods -n <namespace> -l app=<service>
 kubectl logs -n <namespace> <pod-name> --tail=100
 ```
 
-### 2. Sprendimas / Resolution
+### 2. Resolution
 
-[Konkretūs veiksmai problemai išspręsti.]
+[Concrete actions that resolve the problem.]
 
 ```bash
-# Pavyzdys: restart deployment
+# Example: restart the deployment
 kubectl rollout restart deployment/<service> -n <namespace>
 ```
 
-### 3. Rollback (jei taikoma)
+### 3. Rollback (if applicable)
 
-[Grįžimo į ankstesnę versiją žingsniai.]
+[Steps to return to the previous version.]
 
 ```bash
-# Pavyzdys: rollback prie ankstesnės versijos
+# Example: roll back to the previous version
 kubectl rollout undo deployment/<service> -n <namespace>
 ```
 
-### 4. Verifikacija / Verification
+### 4. Verification
 
-[Kaip patikrinti, kad problema išspręsta.]
+[How to check that the problem is resolved.]
 
-- [ ] Health endpoint grąžina 200
-- [ ] Error rate grįžo į normalų lygį
-- [ ] Alertas resolved
+- [ ] Health endpoint returns 200
+- [ ] Error rate is back to normal
+- [ ] Alert resolved
 
 ## Escalation
 
-| Lygis | Kas | Kontaktas | Kada eskalatuoti |
+| Level | Who | Contact | When to escalate |
 |---|---|---|---|
-| L1 | On-call inžinierius | [kontaktas] | Pirmas reagavimas |
-| L2 | Komandos tech lead | [kontaktas] | Jei neišspręsta per 30 min |
-| L3 | Architektūros atstovas | [kontaktas] | Jei paveiktas SLO |
+| L1 | On-call engineer | [contact] | First response |
+| L2 | Team tech lead | [contact] | Not resolved within 30 min |
+| L3 | Architecture representative | [contact] | SLO affected |
 
 ## Post-Incident
 
-- [ ] Incident report sukurtas
-- [ ] Root cause identifikuotas
-- [ ] Prevenciniai veiksmai suplanuoti
-- [ ] Runbook atnaujintas (jei reikia)
+- [ ] Incident report created
+- [ ] Root cause identified
+- [ ] Preventive actions planned
+- [ ] Runbook updated (if needed)
 
 ## Related
 
-- Architecture: [nuoroda į architektūros aprašą]
-- Deployment: [nuoroda į diegimo instrukciją]
-- Alerts: [nuoroda į alerting konfigūraciją]
-- Other runbooks: [nuorodos į susijusius runbooks]
-```
+- Architecture: [link to the architecture description]
+- Deployment: [link to the deployment instructions]
+- Alerts: [link to the alerting configuration]
+- Other runbooks: [links to related runbooks]
+````
 
 ---
 

@@ -2,55 +2,55 @@
 
 > **Paskirtis:** vieningas ADR formatas pagal [10.4](../10-dokumentacija.md#104-architecture-decision-records-adr) ir [3.1.5](../03-architektura.md#315-architecture-decision-records-adr).
 > **Formatas:** [Michael Nygard](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions) klasikinis stilius.
-> **Naudojimas:** kopijuoti šabloną į projekto `docs/adr/` katalogą ir pildyti pagal sprendimą.
+> **Naudojimas:** kopijuoti šabloną į projekto `docs/adr/` katalogą ir pildyti pagal sprendimą. Šablonas pateikiamas angliškai, kaip rekomenduojama repozitorijos dokumentacijai ([G.2](dokumentacijos-rengimo-metodika.md#g2-repozitorijos-dokumentacijos-struktūra)); jei projekto dokumentacija rašoma lietuviškai (DOC-GEN-P05), antraštes ir laukus galima išversti.
 
 ---
 
 ## Šablono struktūra
 
+<!-- skill-file: dev-standard-docs/templates/adr.md -->
 ```markdown
-# ADR-NNNN: [Sprendimo pavadinimas]
+# ADR-NNNN: [Decision title]
 
-**Data:** YYYY-MM-DD
+**Date:** YYYY-MM-DD
 **Status:** Proposed | Accepted | Deprecated | Superseded by ADR-XXXX
-**Autoriai:** [Vardas Pavardė, rolė]
 
 ## Context
 
-[Aprašykite situaciją, problemą ar galimybę, kuri paskatino šį sprendimą.
-Kokios jėgos (forces) veikia? Kokie apribojimai? Kokie verslo ar techniniai poreikiai?]
+[Describe the situation, problem or opportunity that led to this decision.
+What forces are at play? What constraints apply? What business or technical needs drive it?]
 
 ## Decision
 
-[Aiškiai suformuluokite sprendimą. Pradėkite nuo "We will..." arba "Nuspręsta...".
-Būkite konkretūs — ne "naudosime cache", o "naudosime Redis 7.x kaip distribuotą cache L2 lygmeniu".]
+[State the decision clearly. Start with "We will...".
+Be specific: not "we will use a cache", but "we will use Redis 7.x as a distributed L2 cache".]
 
 ## Consequences
 
 ### Positive
-- [Teigiama pasekmė 1]
-- [Teigiama pasekmė 2]
+- [Positive consequence 1]
+- [Positive consequence 2]
 
 ### Negative
-- [Neigiama pasekmė / trade-off 1]
-- [Neigiama pasekmė / trade-off 2]
+- [Negative consequence / trade-off 1]
+- [Negative consequence / trade-off 2]
 
 ### Risks
-- [Rizika, jei ji identifikuota, ir planuojama mitigacija]
+- [Risk, if identified, and the planned mitigation]
 
 ## Alternatives Considered
 
-| Alternatyva | Priežastis, kodėl atmesta |
+| Alternative | Why it was rejected |
 |---|---|
-| [Alternatyva A] | [Trumpas pagrindimas] |
-| [Alternatyva B] | [Trumpas pagrindimas] |
+| [Alternative A] | [Short justification] |
+| [Alternative B] | [Short justification] |
 
 ## Related
 
 - PR/MR: [#NNN](link)
 - Task: [PROJ-NNN](link)
-- Supersedes: ADR-XXXX (jei taikoma)
-- Susiję ADR: ADR-YYYY (jei taikoma)
+- Supersedes: ADR-XXXX (if any)
+- Related ADRs: ADR-YYYY (if any)
 ```
 
 ---
@@ -77,46 +77,45 @@ Būkite konkretūs — ne "naudosime cache", o "naudosime Redis 7.x kaip distrib
 ## Pavyzdys
 
 ```markdown
-# ADR-0003: PostgreSQL kaip pagrindinė RDBMS
+# ADR-0003: PostgreSQL as the primary RDBMS
 
-**Data:** 2026-03-15
+**Date:** 2026-03-15
 **Status:** Accepted
-**Autoriai:** Jonas Jonaitis, tech lead
 
 ## Context
 
-Reikia pasirinkti pagrindinę reliacinę duomenų bazę naujai kuriamam
-piliečių aptarnavimo portalui. Sistema turės ~50k aktyvių naudotojų,
-reikės pilno teksto paieškos ir GIS duomenų palaikymo. Organizacijos
-technologijų registre patvirtintas PostgreSQL ≥ 15.x.
+We need to choose the primary relational database for a new citizen
+service portal. The system will have ~50k active users and needs
+full-text search and GIS data support. The organization's technology
+register approves PostgreSQL ≥ 15.x.
 
 ## Decision
 
-Nuspręsta naudoti PostgreSQL 16 su PostGIS plėtiniu GIS duomenims
-ir tsvector / tsquery pilno teksto paieškai lietuvių kalbai.
+We will use PostgreSQL 16 with the PostGIS extension for GIS data
+and tsvector / tsquery for Lithuanian full-text search.
 
 ## Consequences
 
 ### Positive
-- Atitinka organizacijos tech stack (A priedas)
-- PostGIS + tsvector eliminuoja papildomų search/GIS paslaugų poreikį
-- Stipri bendruomenė, ilgalaikis LTS palaikymas
+- Matches the organization's tech stack (appendix A)
+- PostGIS and tsvector remove the need for separate search and GIS services
+- Strong community, long-term LTS support
 
 ### Negative
-- Pilno teksto paieškos kokybė lietuvių kalbai ribota be papildomo
-  leksikos konfigūravimo
-- Didelės apimties GIS užklausos gali reikalauti specializuotų indeksų
+- Full-text search quality for Lithuanian is limited without extra
+  lexicon configuration
+- Large GIS queries may need specialised indexes
 
 ### Risks
-- Jei pilno teksto poreikiai augs, gali tekti integruoti Elasticsearch
-  (rizika žema, mitigacija: stebėti paieškos latency SLI)
+- If full-text needs grow, we may have to add Elasticsearch
+  (low risk; mitigation: monitor the search latency SLI)
 
 ## Alternatives Considered
 
-| Alternatyva | Priežastis, kodėl atmesta |
+| Alternative | Why it was rejected |
 |---|---|
-| MySQL 8 | Silpnesnis GIS palaikymas, nėra tech registre |
-| PostgreSQL + Elasticsearch | Per didelis sudėtingumas pradiniam etapui |
+| MySQL 8 | Weaker GIS support, not in the technology register |
+| PostgreSQL + Elasticsearch | Too complex for the initial phase |
 
 ## Related
 

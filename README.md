@@ -76,6 +76,8 @@ The `dev-standard` skill is generated. Hand-written skills live in `standard/ski
 unchanged; `rules:validate` checks their frontmatter, relative links, rule IDs, section numbers and links into the
 published site. `dev-standard-docs` carries the documentation methodology of appendix G
 (`docs/priedai/dokumentacijos-rengimo-metodika.md`) for agents, with templates and the `check-docs.py` link checker.
+A code block in `docs/` preceded by `<!-- skill-file: <skill>/templates/<file> -->` is copied into that skill when the
+bundle is built, so the ADR and runbook templates in appendices D and F have one source.
 
 The GitHub organization's Copilot custom instructions are set once by hand and only point to the rule files
 (Copilot code review cannot follow links, and the field allows 4,000 characters):
