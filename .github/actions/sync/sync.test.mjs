@@ -282,9 +282,9 @@ test('agentsWarning asks to replace a section pasted from an older release', asy
   await writeFile(path.join(repo, 'AGENTS.md'), `# Team notes\n\n${old}`);
   const warning = await agentsWarning(repo, bundle);
   assert.match(warning, /`AGENTS\.md` has an outdated dev standard section\. Replace it with this one/);
-  assert.ok(warning.includes('<!-- dev-standard:agents-section 2 -->'));
+  assert.ok(warning.includes('<!-- dev-standard:agents-section 3 -->'));
 
-  await writeFile(path.join(repo, 'AGENTS.md'), `# Team notes\n\n${old.replace('\n\n', '\n\n<!-- dev-standard:agents-section 3 -->\n')}`);
+  await writeFile(path.join(repo, 'AGENTS.md'), `# Team notes\n\n${old.replace('\n\n', '\n\n<!-- dev-standard:agents-section 4 -->\n')}`);
   assert.equal(await agentsWarning(repo, bundle), null, 'a newer section is not outdated');
 });
 

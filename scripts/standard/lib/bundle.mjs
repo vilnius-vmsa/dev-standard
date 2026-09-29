@@ -46,13 +46,13 @@ function instructionsFile(stack, info, rules, version, siteUrl, reviewMethod) {
 }
 
 // Raise when teams must re-paste the section; sync warns repositories whose AGENTS.md carries a lower number.
-const AGENTS_SECTION_REVISION = 2;
+const AGENTS_SECTION_REVISION = 3;
 
 const AGENTS_SNIPPET = `## Vilnius dev standard
 
 <!-- dev-standard:agents-section ${AGENTS_SECTION_REVISION} -->
 This repository follows the Vilnius City Municipality software development standard.
-Before changing code, read the rules in \`.github/instructions/dev-standard-*.instructions.md\` whose \`applyTo\` matches the files you are changing, plus \`.github/instructions/dev-standard-local.instructions.md\` if it exists. The \`dev-standard\` skill describes how to apply and review them. Cite rule IDs (for example \`CODE-SEC-P01\`) when you report violations.
+Before changing code, read the rules in \`.github/instructions/dev-standard-*.instructions.md\` whose \`applyTo\` matches the files you are changing, plus the repository's own \`dev-standard-local\` rules file in the same folder, if present. The \`dev-standard\` skill describes how to apply and review them. Cite rule IDs (for example \`CODE-SEC-P01\`) when you report violations.
 When a change affects what the documentation describes, or when asked to write or check documentation, use the \`dev-standard-docs\` skill.
 `;
 
