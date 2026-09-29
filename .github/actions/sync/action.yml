@@ -1,9 +1,13 @@
 name: Dev standard sync
-description: Installs the pinned vilnius-vmsa/dev-standard release in this repository and opens a pull request when files change.
+description: Installs a vilnius-vmsa/dev-standard release in this repository and opens a pull request when files change.
 
 inputs:
   stacks:
     description: Comma-separated stacks, for example laravel,frontend. Required on the first run; replaces the configured stacks when given.
+    required: false
+    default: ""
+  version:
+    description: Release to install, "latest" or an exact tag such as v1.3.1. When empty, manual runs keep the pinned version and scheduled runs take the latest.
     required: false
     default: ""
   token:
@@ -26,6 +30,7 @@ runs:
         GH_TOKEN: ${{ inputs.token }}
         EVENT_NAME: ${{ github.event_name }}
         STACKS: ${{ inputs.stacks }}
+        REQUESTED_VERSION: ${{ inputs.version }}
         BRANCH: dev-standard/sync
       run: |
         set -euo pipefail
@@ -38,7 +43,7 @@ runs:
           && git show FETCH_HEAD:.dev-standard/config.json > "$pending" 2>/dev/null; then
           config_args=(--config="$pending")
         fi
-        node "$GITHUB_ACTION_PATH/sync.mjs" plan "${config_args[@]}" --latest="$latest" --event="$EVENT_NAME" --stacks="$STACKS"
+        node "$GITHUB_ACTION_PATH/sync.mjs" plan "${config_args[@]}" --latest="$latest" --event="$EVENT_NAME" --stacks="$STACKS" --version="$REQUESTED_VERSION"
 
     - name: Install bundle
       if: steps.plan.outputs.skip != 'true'
@@ -52,7 +57,7 @@ runs:
         bundle="$RUNNER_TEMP/dev-standard-bundle"
         rm -rf "$bundle" && mkdir -p "$bundle"
         if ! gh release download "$VERSION" --repo vilnius-vmsa/dev-standard --pattern dev-standard-agent-bundle.zip --dir "$bundle"; then
-          echo "::error::Release $VERSION of vilnius-vmsa/dev-standard has no dev-standard-agent-bundle.zip. Check \"version\" in .dev-standard/config.json."
+          echo "::error::Release $VERSION of vilnius-vmsa/dev-standard has no dev-standard-agent-bundle.zip. Check the \"version\" input or \"version\" in .dev-standard/config.json."
           exit 1
         fi
         unzip -q "$bundle/dev-standard-agent-bundle.zip" -d "$bundle"

@@ -97,6 +97,7 @@ The GitHub organization's Copilot custom instructions are set once by hand and o
      workflow_dispatch:
        inputs:
          stacks: { description: "First setup only, e.g. laravel,frontend", required: false }
+         version: { description: "latest or a release such as v1.3.1; empty keeps the pinned one", required: false }
    permissions: { contents: write, pull-requests: write }
    concurrency: { group: dev-standard-sync, cancel-in-progress: false }
    jobs:
@@ -104,7 +105,7 @@ The GitHub organization's Copilot custom instructions are set once by hand and o
        runs-on: ubuntu-latest
        steps:
          - uses: vilnius-vmsa/dev-standard/.github/actions/sync@main
-           with: { stacks: "${{ inputs.stacks }}" }
+           with: { stacks: "${{ inputs.stacks }}", version: "${{ inputs.version }}" }
    ```
 
 3. Open **Actions → Dev standard sync → Run workflow** and enter your stacks (`php`, `laravel`, `symfony`,
@@ -113,7 +114,9 @@ The GitHub organization's Copilot custom instructions are set once by hand and o
    changes that section, the sync pull request warns again and shows the new version.
 
 Sync pins the version in `.dev-standard/config.json`. The weekly run opens a pull request when a new release
-exists; a manual run without input restores the pinned files; a manual run with `stacks` changes the stacks.
+exists; a manual run without input restores the pinned files; a manual run with `version` set to `latest` (or a
+release such as `v1.3.1`) moves to that release now; a manual run with `stacks` changes the stacks. Repositories
+set up before the `version` input existed add it to their workflow to get the field.
 Vendor repositories that must stay on their contract version remove the `schedule` trigger. Put
 repository-specific rules in `.github/instructions/dev-standard-local.instructions.md`; sync never touches it.
 Pull requests opened by sync do not start your CI on their own; close and reopen one if required checks must run.

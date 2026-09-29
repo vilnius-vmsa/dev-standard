@@ -53,6 +53,14 @@ test('planRun: a scheduled run moves to the latest release, a manual run keeps t
   assert.deepEqual(planRun({ config, stacksInput: '', event: 'workflow_dispatch', latest: 'v1.4.0' }), { version: 'v1.3.0', stacks: ['laravel'] });
 });
 
+test('planRun: a version input moves a manual run to the latest or an exact release', () => {
+  const config = { version: 'v1.3.0', stacks: ['laravel'] };
+  assert.deepEqual(planRun({ config, stacksInput: '', versionInput: ' Latest ', event: 'workflow_dispatch', latest: 'v1.4.0' }), { version: 'v1.4.0', stacks: ['laravel'] });
+  assert.deepEqual(planRun({ config, stacksInput: '', versionInput: 'v1.2.9', event: 'workflow_dispatch', latest: 'v1.4.0' }), { version: 'v1.2.9', stacks: ['laravel'] });
+  assert.deepEqual(planRun({ config: null, stacksInput: 'laravel', versionInput: 'v1.3.1', event: 'workflow_dispatch', latest: 'v1.4.0' }), { version: 'v1.3.1', stacks: ['laravel'] });
+  assert.throws(() => planRun({ config, stacksInput: '', versionInput: '1.3', event: 'workflow_dispatch', latest: 'v1.4.0' }), /"version" input must be "latest" or look like v1\.2\.3/);
+});
+
 test('planRun: a stacks input replaces the configured stacks', () => {
   const config = { version: 'v1.3.0', stacks: ['laravel'] };
   assert.deepEqual(planRun({ config, stacksInput: 'symfony,db', event: 'workflow_dispatch', latest: 'v1.4.0' }), { version: 'v1.3.0', stacks: ['symfony', 'db'] });
@@ -218,6 +226,13 @@ test('CLI plan writes version and stacks to GITHUB_OUTPUT', async () => {
   const out = path.join(await tempDir(), 'output');
   await run(['plan', `--repo=${await tempDir()}`, '--latest=v1.4.0', '--event=workflow_dispatch', '--stacks=Laravel,frontend'], { GITHUB_OUTPUT: out });
   assert.equal(await readFile(out, 'utf8'), 'version=v1.4.0\nstacks=laravel,frontend\n');
+});
+
+test('CLI plan takes the version input', async () => {
+  const repo = await repoWithConfig('{ "version": "v1.3.0", "stacks": ["laravel"] }');
+  const out = path.join(await tempDir(), 'output');
+  await run(['plan', `--repo=${repo}`, '--latest=v1.4.0', '--event=workflow_dispatch', '--stacks=', '--version=latest'], { GITHUB_OUTPUT: out });
+  assert.equal(await readFile(out, 'utf8'), 'version=v1.4.0\nstacks=laravel\n');
 });
 
 test('CLI apply installs the bundle and writes the warning file', async () => {
