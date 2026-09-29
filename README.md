@@ -65,15 +65,15 @@ When you add or change an `ai-reviewable` rule:
 3. `npm run rules:validate -- --strict` must pass.
 
 How AI reviewers should review (severity labels, finding format, summary) is written once in
-`standard/review-method.md`. The release puts it at the top of `dev-standard-all.instructions.md` and into the
-`dev-standard` skill, so Copilot pull request reviews and local agent reviews use the same format. `rules:validate`
-fails if it cites a rule ID or section number that does not exist.
+`standard/skills/dev-standard/review-method.md`. The release puts it at the top of `dev-standard-all.instructions.md`,
+and the `dev-standard` skill ships it as a file next to `SKILL.md`, so Copilot pull request reviews and local agent
+reviews use the same format. `rules:validate` fails if it cites a rule ID or section number that does not exist.
 
 Each release attaches `dev-standard-agent-bundle.zip` (Copilot instruction files, the `dev-standard` and
 `dev-standard-docs` skills, `AGENTS.md` snippet, `rules.json`). The English rule list is at `/rules` on the site.
 
-The `dev-standard` skill is generated. Hand-written skills live in `standard/skills/<name>/` and go into the bundle
-unchanged; `rules:validate` checks their frontmatter, relative links, rule IDs, section numbers and links into the
+Skills live in `standard/skills/<name>/` (`dev-standard`, `dev-standard-docs`) and go into the bundle unchanged;
+`rules:validate` checks their frontmatter, relative links, rule IDs, section numbers and links into the
 published site. `dev-standard-docs` carries the documentation methodology of appendix G
 (`docs/priedai/dokumentacijos-rengimo-metodika.md`) for agents, with templates and the `check-docs.py` link checker.
 A code block in `docs/` preceded by `<!-- skill-file: <skill>/templates/<file> -->` is copied into that skill when the

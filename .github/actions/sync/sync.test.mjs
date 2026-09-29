@@ -75,7 +75,9 @@ async function makeBundle(version = 'v1.3.0') {
   const files = buildBundle({
     rules: RULES, english: { 'CODE-SEC-P01': { text: 'EN', source_hash: 'h' } }, stacks: STACKS,
     version, siteUrl: 'https://example.test', reviewMethod: '## How to review\n',
-    skills: new Map([['dev-standard-docs', new Map([
+    skills: new Map([['dev-standard', new Map([
+      ['SKILL.md', '---\nname: dev-standard\ndescription: Rules.\n---\n'],
+    ])], ['dev-standard-docs', new Map([
       ['SKILL.md', '---\nname: dev-standard-docs\ndescription: Docs.\n---\n'],
       ['templates/glossary.md', '# Glossary\n'],
     ])]]),

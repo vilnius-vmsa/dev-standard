@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildBundle } from './lib/bundle.mjs';
 import { acceptEntries, applyDrafts, checkEnglish, parseEnglish, stringifyEnglish } from './lib/english.mjs';
-import { checkReferences, loadPages, loadSectionNumbers } from './lib/references.mjs';
+import { loadPages, loadSectionNumbers } from './lib/references.mjs';
 import { loadRules } from './lib/rules.mjs';
 import { buildSiteData } from './lib/site-data.mjs';
 import { loadSkillFiles, mergeSkillFiles } from './lib/skill-files.mjs';
@@ -17,7 +17,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const DOCS_DIR = path.join(ROOT, 'docs');
 const STACKS_FILE = path.join(ROOT, 'standard/stacks.yaml');
 const EN_FILE = path.join(ROOT, 'standard/rules.en.yaml');
-const REVIEW_METHOD_FILE = path.join(ROOT, 'standard/review-method.md');
+// Also the dev-standard skill's review-method.md; its references are checked with the skill.
+const REVIEW_METHOD_FILE = path.join(ROOT, 'standard/skills/dev-standard/review-method.md');
 const SKILLS_DIR = path.join(ROOT, 'standard/skills');
 const SITE_DATA_FILE = path.join(ROOT, 'src/data/rules.generated.json');
 // Keep in sync with url + baseUrl in docusaurus.config.js.
@@ -47,14 +48,7 @@ async function loadEnglish() {
   return parseEnglish(await readFile(EN_FILE, 'utf8'));
 }
 
-/** The hand-written review method and any rule IDs or section numbers it cites that do not exist. */
-async function loadReviewMethod(rules) {
-  const text = await readFile(REVIEW_METHOD_FILE, 'utf8');
-  const known = { ruleIds: new Set(rules.map((r) => r.id)), sections: await loadSectionNumbers(DOCS_DIR) };
-  return { text, errors: checkReferences(text, known).map((e) => `standard/review-method.md ${e}`) };
-}
-
-/** Hand-written skills (copied into the bundle unchanged), plus template blocks marked in docs, and their problems. */
+/** Skills (copied into the bundle unchanged), plus template blocks marked in docs, and their problems. */
 async function loadHandwrittenSkills(rules) {
   const skills = await loadSkills(SKILLS_DIR);
   const marked = await loadSkillFiles(DOCS_DIR);
@@ -84,13 +78,12 @@ const commands = {
     const { rules, errors } = await loadDocs();
     const english = flag('docs-only') ? null : await loadEnglish();
     if (english) errors.push(...checkEnglish(rules, english, { strict: flag('strict') }));
-    errors.push(...(await loadReviewMethod(rules)).errors);
     const { skills, errors: skillErrors } = await loadHandwrittenSkills(rules);
     errors.push(...skillErrors);
     if (errors.length) fail(errors);
     const reviewable = rules.filter((r) => r.check === 'ai-reviewable').length;
     const scope = english ? ' and their English text' : '';
-    console.log(`✓ ${rules.length} rules (${reviewable} ai-reviewable)${scope} and ${skills.size} hand-written skill(s) are valid.`);
+    console.log(`✓ ${rules.length} rules (${reviewable} ai-reviewable)${scope} and ${skills.size} skill(s) are valid.`);
   },
 
   async draft() {
@@ -110,13 +103,11 @@ const commands = {
     const english = (await loadEnglish()) ?? {};
     // --allow-drafts is for local previews only; releases must use reviewed English.
     errors.push(...checkEnglish(rules, english, { strict: !flag('allow-drafts') }));
-    const method = await loadReviewMethod(rules);
-    errors.push(...method.errors);
     const { skills, errors: skillErrors } = await loadHandwrittenSkills(rules);
     errors.push(...skillErrors);
     if (errors.length) fail(errors);
 
-    const files = buildBundle({ rules, english, stacks, version, siteUrl: SITE_URL, reviewMethod: method.text, skills });
+    const files = buildBundle({ rules, english, stacks, version, siteUrl: SITE_URL, reviewMethod: await readFile(REVIEW_METHOD_FILE, 'utf8'), skills });
     for (const [relPath, content] of files) {
       const target = path.resolve(ROOT, out, relPath);
       await mkdir(path.dirname(target), { recursive: true });

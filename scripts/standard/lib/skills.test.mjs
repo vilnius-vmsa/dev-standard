@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { checkSkill, loadSkills } from './skills.mjs';
 
 const KNOWN = {
@@ -43,7 +44,20 @@ test('checkSkill reports frontmatter, links, rule IDs, sections and site links',
   assert.deepEqual(checkSkill('dev-standard-x', new Map(), KNOWN), ['dev-standard-x: has no SKILL.md']);
 });
 
-test('a hand-written skill name must start with dev-standard- so sync can remove it when dropped', () => {
+test('a skill name must start with dev-standard so sync can remove it when dropped', () => {
   const md = '---\nname: team-tools\ndescription: Tools.\n---\n';
-  assert.deepEqual(checkSkill('team-tools', skill(md), KNOWN), ['team-tools: skill name must match dev-standard-<lower-case-words>']);
+  assert.deepEqual(checkSkill('team-tools', skill(md), KNOWN), ['team-tools: skill name must be dev-standard or dev-standard-<lower-case-words>']);
+});
+
+test('the core skill may be called dev-standard', () => {
+  const md = '---\nname: dev-standard\ndescription: Rules.\n---\n';
+  assert.deepEqual(checkSkill('dev-standard', skill(md), KNOWN), []);
+});
+
+test('the dev-standard skill hands documentation work to dev-standard-docs and links its review method', async () => {
+  const skills = await loadSkills(fileURLToPath(new URL('../../../standard/skills/', import.meta.url)));
+  const core = skills.get('dev-standard');
+  assert.ok(core.get('SKILL.md').includes('run the `dev-standard-docs` skill in update mode'));
+  assert.ok(core.get('SKILL.md').includes('[review-method.md](review-method.md)'));
+  assert.ok(core.get('review-method.md').startsWith('## How to review'));
 });

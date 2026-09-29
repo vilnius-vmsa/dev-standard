@@ -38,7 +38,7 @@ test('reports unknown rule IDs and section numbers', () => {
 test('the repository review method cites only existing rules and sections', async () => {
   const root = new URL('../../../', import.meta.url);
   const docsDir = fileURLToPath(new URL('docs/', root));
-  const method = await readFile(new URL('standard/review-method.md', root), 'utf8');
+  const method = await readFile(new URL('standard/skills/dev-standard/review-method.md', root), 'utf8');
   const { rules } = await loadRules(docsDir);
   assert.deepEqual(checkReferences(method, { ruleIds: new Set(rules.map((r) => r.id)), sections: await loadSectionNumbers(docsDir) }), []);
 });

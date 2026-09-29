@@ -65,15 +65,15 @@ Kai pridedate ar keičiate `ai-reviewable` reikalavimą:
 3. Turi praeiti `npm run rules:validate -- --strict`.
 
 Kaip DI peržiūros įrankiai turi atlikti peržiūrą (svarbos žymos, pastabų formatas, santrauka), aprašyta vieną kartą
-faile `standard/review-method.md`. Leidimo metu šis tekstas įdedamas į `dev-standard-all.instructions.md` pradžią ir į
-`dev-standard` skill, todėl Copilot PR peržiūra ir vietiniai DI agentai naudoja tą patį formatą. `rules:validate`
+faile `standard/skills/dev-standard/review-method.md`. Leidimo metu šis tekstas įdedamas į
+`dev-standard-all.instructions.md` pradžią, o `dev-standard` skill jį pateikia kaip failą šalia `SKILL.md`, todėl Copilot PR peržiūra ir vietiniai DI agentai naudoja tą patį formatą. `rules:validate`
 nepraeina, jei jame nurodytas neegzistuojantis reikalavimo ID ar skyriaus numeris.
 
 Prie kiekvieno leidimo pridedamas `dev-standard-agent-bundle.zip` (Copilot instrukcijų failai, `dev-standard` ir
 `dev-standard-docs` skill, `AGENTS.md` fragmentas, `rules.json`). Angliškas reikalavimų sąrašas svetainėje – `/rules`.
 
-`dev-standard` skill generuojamas. Rankiniu būdu rašomi skill laikomi `standard/skills/<pavadinimas>/` ir į paketą
-patenka nepakeisti; `rules:validate` tikrina jų antraštę (frontmatter), santykines nuorodas, reikalavimų ID, skyrių
+Skill laikomi `standard/skills/<pavadinimas>/` (`dev-standard`, `dev-standard-docs`) ir į paketą patenka
+nepakeisti; `rules:validate` tikrina jų antraštę (frontmatter), santykines nuorodas, reikalavimų ID, skyrių
 numerius ir nuorodas į svetainę. `dev-standard-docs` DI agentams perteikia G priedo dokumentacijos rengimo metodiką
 (`docs/priedai/dokumentacijos-rengimo-metodika.md`), kartu su šablonais ir nuorodų tikrintuvu `check-docs.py`.
 Kodo blokas `docs/` kataloge, prieš kurį yra `<!-- skill-file: <skill>/templates/<failas> -->`, kuriant paketą

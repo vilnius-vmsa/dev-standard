@@ -21,13 +21,17 @@ const RULES = [
 ];
 const EN = Object.fromEntries(RULES.filter((x) => x.check === 'ai-reviewable').map((x) => [x.id, { text: `EN ${x.id}`, source_hash: 'h' }]));
 const METHOD = '## How to review\n\nUse `[BLOCKING]` for MUST violations.\n';
+const CORE_SKILL = new Map([
+  ['SKILL.md', '---\nname: dev-standard\ndescription: Rules.\n---\n\nReview as in [review-method.md](review-method.md).\n'],
+  ['review-method.md', METHOD],
+]);
 const DOCS_SKILL = new Map([
   ['SKILL.md', '---\nname: dev-standard-docs\ndescription: Docs.\n---\n\n# Docs\n'],
   ['templates/glossary.md', '# Glossary\n'],
 ]);
 const build = () => buildBundle({
   rules: RULES, english: EN, stacks: STACKS, version: 'v1.5.0', siteUrl: SITE, reviewMethod: METHOD,
-  skills: new Map([['dev-standard-docs', DOCS_SKILL]]),
+  skills: new Map([['dev-standard', CORE_SKILL], ['dev-standard-docs', DOCS_SKILL]]),
 });
 
 test('ruleUrl points at the lower-case anchor on the rules page', () => {
@@ -46,6 +50,7 @@ test('produces one instructions file per stack plus the shared files', () => {
     'skills/dev-standard-docs/SKILL.md',
     'skills/dev-standard-docs/templates/glossary.md',
     'skills/dev-standard/SKILL.md',
+    'skills/dev-standard/review-method.md',
   ]);
 });
 
@@ -70,7 +75,7 @@ test('the review method goes into the all file and the skill; other stacks point
   const all = files.get('instructions/dev-standard-all.instructions.md');
   assert.ok(all.includes(METHOD));
   assert.ok(all.indexOf(METHOD) < all.indexOf('## MUST'), 'method comes before the rules');
-  assert.ok(files.get('skills/dev-standard/SKILL.md').includes(METHOD));
+  assert.equal(files.get('skills/dev-standard/review-method.md'), METHOD);
   const php = files.get('instructions/dev-standard-php.instructions.md');
   assert.ok(!php.includes(METHOD));
   assert.ok(php.includes('Review method and severity labels: see `dev-standard-all.instructions.md`.'));
@@ -85,9 +90,7 @@ test('a rule under an unnumbered heading has no section in its line', () => {
 
 test('skill, snippet, rules.json and manifest', () => {
   const files = build();
-  assert.ok(files.get('skills/dev-standard/SKILL.md').startsWith('---\nname: dev-standard\ndescription: '));
   assert.ok(files.get('agents-snippet.md').includes('.github/instructions/dev-standard-'));
-  assert.ok(files.get('skills/dev-standard/SKILL.md').includes('run the `dev-standard-docs` skill in update mode'));
   assert.ok(files.get('agents-snippet.md').includes('<!-- dev-standard:agents-section 2 -->'));
   assert.ok(files.get('agents-snippet.md').includes('`dev-standard-docs`'));
   const json = JSON.parse(files.get('rules.json'));
@@ -117,16 +120,16 @@ test('a stack that builds on another points to it, and the manifest lists implie
   assert.deepEqual(JSON.parse(files.get('manifest.json')).implies, { laravel: ['php'] });
 });
 
-test('hand-written skills are copied unchanged and listed in the manifest', () => {
+test('skills are copied unchanged and listed in the manifest', () => {
   const files = build();
+  assert.equal(files.get('skills/dev-standard/SKILL.md'), CORE_SKILL.get('SKILL.md'));
   assert.equal(files.get('skills/dev-standard-docs/SKILL.md'), DOCS_SKILL.get('SKILL.md'));
   assert.equal(files.get('skills/dev-standard-docs/templates/glossary.md'), '# Glossary\n');
   assert.deepEqual(JSON.parse(files.get('manifest.json')).skills, ['dev-standard', 'dev-standard-docs']);
 });
 
-test('a hand-written skill cannot replace the generated one', () => {
-  assert.throws(
-    () => buildBundle({ rules: RULES, english: EN, stacks: STACKS, version: 'v1', siteUrl: SITE, reviewMethod: METHOD, skills: new Map([['dev-standard', DOCS_SKILL]]) }),
-    /dev-standard is generated/,
-  );
+test('a bundle without skills lists none', () => {
+  const files = buildBundle({ rules: RULES, english: EN, stacks: STACKS, version: 'v1', siteUrl: SITE, reviewMethod: METHOD });
+  assert.deepEqual(JSON.parse(files.get('manifest.json')).skills, []);
+  assert.ok(![...files.keys()].some((key) => key.startsWith('skills/')));
 });
