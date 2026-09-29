@@ -12,7 +12,7 @@ async function listFiles(dir, prefix = '') {
   return files;
 }
 
-/** Hand-written skills in standard/skills: name → (path inside the skill → content). */
+/** Skills in standard/skills: name → (path inside the skill → content). */
 export async function loadSkills(skillsDir) {
   const skills = new Map();
   const names = (await readdir(skillsDir, { withFileTypes: true })).filter((e) => e.isDirectory()).map((e) => e.name).sort();
@@ -30,7 +30,7 @@ const SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 /** Problems in one hand-written skill; `known` = { ruleIds, sections, pages, siteUrl }. */
 export function checkSkill(name, files, known) {
   // Sync removes dropped skills by this prefix (.github/actions/sync/sync.mjs, GENERATED_SKILL).
-  if (!/^dev-standard(-[a-z0-9]+)+$/.test(name)) return [`${name}: skill name must match dev-standard-<lower-case-words>`];
+  if (!/^dev-standard(-[a-z0-9]+)*$/.test(name)) return [`${name}: skill name must be dev-standard or dev-standard-<lower-case-words>`];
   const skillMd = files.get('SKILL.md');
   if (skillMd === undefined) return [`${name}: has no SKILL.md`];
   const errors = [];
