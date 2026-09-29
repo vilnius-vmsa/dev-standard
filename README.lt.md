@@ -76,6 +76,8 @@ Prie kiekvieno leidimo pridedamas `dev-standard-agent-bundle.zip` (Copilot instr
 patenka nepakeisti; `rules:validate` tikrina jų antraštę (frontmatter), santykines nuorodas, reikalavimų ID, skyrių
 numerius ir nuorodas į svetainę. `dev-standard-docs` DI agentams perteikia G priedo dokumentacijos rengimo metodiką
 (`docs/priedai/dokumentacijos-rengimo-metodika.md`), kartu su šablonais ir nuorodų tikrintuvu `check-docs.py`.
+Kodo blokas `docs/` kataloge, prieš kurį yra `<!-- skill-file: <skill>/templates/<failas> -->`, kuriant paketą
+nukopijuojamas į tą skill, todėl D ir F priedų ADR ir runbook šablonai turi vieną šaltinį.
 
 GitHub organizacijos Copilot nurodymai (custom instructions) nustatomi vieną kartą rankiniu būdu ir tik nukreipia į
 reikalavimų failus (Copilot kodo peržiūra neatidaro nuorodų, o laukas leidžia 4 000 simbolių):

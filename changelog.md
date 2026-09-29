@@ -13,6 +13,10 @@ Formatas paremtas [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), vers
 - G priedas „Dokumentacijos rengimo metodika“: kaip rengti, tikrinti ir palaikyti sistemų dokumentaciją, kad ja galėtų naudotis DI agentai, vidinės ir išorinės komandos (10 skyrius).
 - DI agentų pakete – `dev-standard-docs` įgūdis dokumentacijai kurti, atnaujinti ir tikrinti, su šablonais ir nuorodų tikrintuvu `check-docs.py`; sinchronizavimas diegia visus paketo įgūdžius ir įspėja apie pasenusią `AGENTS.md` skiltį.
 
+### Pakeista
+
+- D ir F priedų šablonai (ADR, runbook) pateikiami angliškai ir įtraukiami į `dev-standard-docs` įgūdį; F priedo šablono atvaizdavimas pataisytas.
+
 ## [1.0.0] - 2026-04-20
 
 ### Pridėta
