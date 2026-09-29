@@ -14,7 +14,6 @@
 
 **Date:** YYYY-MM-DD
 **Status:** Proposed | Accepted | Deprecated | Superseded by ADR-XXXX
-**Authors:** [Name Surname, role]
 
 ## Context
 
@@ -82,7 +81,6 @@ Be specific: not "we will use a cache", but "we will use Redis 7.x as a distribu
 
 **Date:** 2026-03-15
 **Status:** Accepted
-**Authors:** Jonas Jonaitis, tech lead
 
 ## Context
 
