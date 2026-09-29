@@ -41,18 +41,27 @@ export async function readConfig(repoDir, file = path.join(repoDir, CONFIG_FILE)
   return { version: config.version, stacks: config.stacks };
 }
 
-// Scheduled runs follow the latest release; manual runs re-sync the pinned one.
+// Scheduled runs follow the latest release; manual runs re-sync the pinned one unless the version input
+// asks for "latest" or an exact release.
 // Returns null when a scheduled run finds no config yet (setup pull request not merged).
-export function planRun({ config, stacksInput, event, latest }) {
+export function planRun({ config, stacksInput, versionInput, event, latest }) {
   const given = (stacksInput ?? '').trim() !== '';
   if (!config && !given && event === 'schedule') return null;
   if (!config && !given) {
     throw new Error(`${CONFIG_FILE} not found. Run this workflow manually with the "stacks" input (for example laravel,frontend) to set up the repository.`);
   }
   return {
-    version: !config || event === 'schedule' ? latest : config.version,
+    version: requestedVersion(versionInput, latest) ?? (!config || event === 'schedule' ? latest : config.version),
     stacks: parseStacks(given ? stacksInput : config.stacks.join(',')),
   };
+}
+
+function requestedVersion(input, latest) {
+  const version = (input ?? '').trim();
+  if (version === '') return null;
+  if (version.toLowerCase() === 'latest') return latest;
+  if (!VERSION.test(version)) throw new Error(`the "version" input must be "latest" or look like v1.2.3, not "${version}"`);
+  return version;
 }
 
 export function resolveStacks(stacks, manifest) {
@@ -164,7 +173,7 @@ async function main() {
   const repoDir = values.repo ?? '.';
   if (command === 'plan') {
     const config = await readConfig(repoDir, values.config);
-    const plan = planRun({ config, stacksInput: values.stacks, event: values.event, latest: values.latest });
+    const plan = planRun({ config, stacksInput: values.stacks, versionInput: values.version, event: values.event, latest: values.latest });
     if (plan) {
       await setOutputs({ version: plan.version, stacks: plan.stacks.join(',') });
     } else {

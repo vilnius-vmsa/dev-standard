@@ -15,6 +15,7 @@ Formatas paremtas [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), vers
 
 ### Pakeista
 
+- Sinchronizavimo darbo eigą paleidžiant rankiniu būdu galima nurodyti `version` (`latest` arba konkretų leidimą), kad saugykla atnaujintų standartą iš karto, nelaukiant savaitinio paleidimo.
 - D ir F priedų šablonai (ADR, runbook) pateikiami angliškai ir įtraukiami į `dev-standard-docs` įgūdį; F priedo šablono atvaizdavimas pataisytas.
 
 ## [1.0.0] - 2026-04-20
