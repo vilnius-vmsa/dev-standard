@@ -1,7 +1,7 @@
 # G priedas. Dokumentacijos rengimo metodika
 
 > **Paskirtis:** kaip parengti, patikrinti ir palaikyti sistemos dokumentaciją, kad ja galėtų naudotis DI agentai, vidinės ir išorinės komandos. Priedas įgyvendina [10 skyriaus](../10-dokumentacija.md) reikalavimus ir naujų reikalavimų nenustato.
-> **Naudojimas:** taikyti rengiant pradinę sistemos dokumentaciją, keičiant kodą ir tikrinant esamą dokumentaciją. DI agentams ši metodika pateikiama angliškame `dev-standard-docs` įgūdyje (žr. [G.10](#g10-di-agentams-dev-standard-docs)); jei įgūdis ir šis priedas skiriasi, galioja šis priedas.
+> **Naudojimas:** taikyti rengiant pradinę sistemos dokumentaciją, keičiant kodą ir tikrinant esamą dokumentaciją. DI agentams ši metodika pateikiama angliškame `dev-standard-docs` įgūdyje (žr. [G.9](#g9-di-agentams-dev-standard-docs)); jei įgūdis ir šis priedas skiriasi, galioja šis priedas.
 > **Susiję skyriai:** [10 Dokumentacija](../10-dokumentacija.md) · [3.8 Diagramos ir dokumentavimas](../03-architektura.md#38-diagramos-ir-dokumentavimas) · [9.8 Eksploatacijos dokumentacija](../09-stebesena-logai.md#98-eksploatacijos-dokumentacija) · [D priedas. ADR šablonas](adr-sablonas.md) · [E priedas. PR / MR šablonas](pr-mr-sablonas.md) · [F priedas. Runbook šablonas](runbook-sablonas.md)
 
 Šis priedas yra metodinės gairės: jame nėra PRIVALOMA ar REKOMENDUOJAMA reikalavimų. Jis aiškina, kaip praktiškai įvykdyti jau galiojančius reikalavimus. Praktikoje pasiteisinusios gairės vėliau gali būti pasiūlytos kaip reikalavimai pagal [13.2.3](../13-standarto-prieziura.md#1323-pakeitimų-tvirtinimas).
@@ -19,6 +19,8 @@
 - **Srities faktus patvirtina žmogus.** Kam sistema skirta, kas ja naudojasi, kaip susijusios išorinės sistemos – to iš kodo pavadinimų ar komentarų įrodyti negalima. Tokie teiginiai pateikiami sąraše „Faktai patvirtinimui“ (žr. [G.7](#g7-pradinės-dokumentacijos-parengimas)).
 - **Žinomos keistenybės aprašomos, o ne „ištaisomos“ tekste.** Jei kodas elgiasi netikėtai, dokumentacija aprašo, kaip jis elgiasi iš tikrųjų, ir nurodo, kur tai matyti.
 - **Saugumo spragos aprašomos kaip stebima elgsena su nuoroda į kodą**, niekada kaip išnaudojimo instrukcija.
+- **Pakeitimas taiso ir kitus dokumentus.** Jei rašant ar tikrinant paaiškėja, kad kitas dokumentas klaidingas, jis ištaisomas tame pačiame pakeitime.
+- **Nuorodos tik į esamus dokumentus.** Dar neparašyti dokumentai minimi paprastu tekstu.
 
 ## G.2. Repozitorijos dokumentacijos struktūra
 
@@ -66,7 +68,7 @@ Aprašo pradžioje nurodoma nuoroda į `docs/architecture.md` bendram vaizdui. N
 
 ## G.5. Žodynas
 
-`docs/glossary.md` – lentelė `Terminas | Reikšmė | Kodas`, po vieną eilutę terminui. Stulpelyje „Kodas“ nurodoma vieta, kur terminas apibrėžtas arba aiškiausiai naudojamas, ir, jei yra, posistemio aprašas. Lietuviški srities terminai (pvz., *Licencijavimas*) paliekami kaip yra ir trumpai paaiškinami. Prieš pavadinant naują esybę, lauką ar galinį tašką, pirmiausia peržiūrimas žodynas.
+`docs/glossary.md` – lentelė `Terminas | Reikšmė | Kodas`, po vieną eilutę terminui. Stulpelyje „Kodas“ nurodoma vieta, kur terminas apibrėžtas arba aiškiausiai naudojamas, ir, jei yra, posistemio aprašas. Lietuviški srities terminai paliekami kaip yra ir trumpai paaiškinami. Prieš pavadinant naują esybę, lauką ar galinį tašką, pirmiausia peržiūrimas žodynas.
 
 ## G.6. AGENTS.md
 
@@ -91,14 +93,6 @@ AGENTS.md nekartoja README ar architektūros aprašo – tik nurodo į juos.
 5. **Tikrintuvas.** Paleidžiamas nuorodų ir kelių tikrintuvas (G.8).
 6. **„Faktai patvirtinimui“.** PR aprašyme pateikiamas sąrašas srities teiginių, kurie nustatyti iš pavadinimų, komentarų ar commit žinučių, o ne iš elgsenos. Žmogus juos patvirtina prieš sujungiant PR.
 
-Patirtis, kuria remiasi šie žingsniai:
-
-- Pirminės apžvalgos faktai dažnai buvo klaidingi: tikrinant pagal kodą rasta neegzistuojanti esybė, neteisingas exchange pavadinimas, klaidingai aprašyta klasės paskirtis, neteisingi maršrutai, 401 vietoje 403 ir kaip nesanti aprašyta apsauga, kuri iš tikrųjų buvo.
-- Agentas iš kodo pavadinimų padarė išvadą, kad Avilys ir DVS yra dvi sistemos ir kad Avilys – pasenusi sistema; abu teiginiai klaidingi. Srities faktams reikia žmogaus.
-- Nepriklausoma peržiūra rado klaidų beveik kiekviename posistemio apraše, kurių rašantysis nepastebėjo.
-- Rašant naują aprašą paaiškėjo klaidingų teiginių senesniuose dokumentuose. Pakeitimas turi ištaisyti prieštaravimus ir kitur, o ne tik pridėti naują dokumentą.
-- Nuorodos į dar neparašytus dokumentus rašomos paprastu tekstu, ne nuorodomis: tikrintuvas atmeta neveikiančias nuorodas.
-
 ## G.8. Dokumentacijos palaikymas
 
 - **Tame pačiame PR** ([10.5](../10-dokumentacija.md#105-dokumentacijos-atnaujinimo-taisyklės), DOC-GEN-P03). Jei pakeitimas liečia dengimo lentelės šaltinio kelius, atitinkamas dokumentas atnaujinamas tame pačiame PR.
@@ -112,14 +106,9 @@ Patirtis, kuria remiasi šie žingsniai:
 
   Repozitorijos, kurios jau naudoja kitą nuorodų tikrintuvą, gali jį palikti.
 - **DI agentas** prieš pranešdamas, kad užduotis atlikta, paleidžia `dev-standard-docs` atnaujinimo režimą.
-- **Copilot PR peržiūra** pažymi kodo pakeitimus, kurie liečia dengimo lentelės šaltinio kelius, bet neturi atitinkamo dokumentacijos pakeitimo.
 - Naudojamos tik patvirtintos DI priemonės ([4.8](../04-kodo-kurimo-gaires.md#48-di-priemonių-naudojimas-ai-coding-assistants)).
 
-## G.9. Pavyzdys: eservices-backend
-
-Šios metodikos pavyzdys yra `eservices-backend` repozitorija (šaka `docs/project-documentation`, kol nesujungta): AGENTS.md su maršrutų lentele ir dokumentacijos taisyklėmis, `docs/README.md` su rodykle ir dengimo lentele, `docs/glossary.md`, posistemių aprašai (storage, forms, camunda, messenger, security), penki ADR, į repozitoriją įtraukta `docs/openapi.json` su komanda `composer openapi:dump` ir nuorodų tikrintuvas.
-
-## G.10. DI agentams: dev-standard-docs
+## G.9. DI agentams: dev-standard-docs
 
 DI agentų pakete kartu su standarto leidimu pateikiamas angliškas `dev-standard-docs` įgūdis. Sinchronizavimo veiksmas jį įdiegia į `.agents/skills/dev-standard-docs/` kartu su šablonais ir tikrintuvu `check-docs.py`. Įgūdis turi tris režimus:
 
