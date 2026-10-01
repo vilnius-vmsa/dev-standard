@@ -54,7 +54,7 @@ A subsystem needs a deep dive when a new developer could not understand it in 30
 1. **Inventory.** List the existing docs (README, `docs/`, wiki exports, API spec), the top-level folders, the CI workflows and the build and test commands. Note every existing claim that the code contradicts.
 2. **Scope.** Propose to the user: which subsystems get deep dives, which gaps become coverage rows, which language. When a person is available, wait for their agreement.
 3. **Write**, verifying each claim as you go, in this order: `docs/glossary.md`, `docs/architecture.md`, deep dives, `docs/README.md` with the coverage table, then `AGENTS.md`. Keep the team's existing `AGENTS.md` content and its pasted "Vilnius dev standard" section; add the routing table and the documentation rules.
-4. Copy [docs-check.yml](templates/docs-check.yml) to `.github/workflows/docs-check.yml` unless the repository already runs a link checker.
+4. Copy [docs-check.yml](templates/docs-check.yml) to `.github/workflows/docs-check.yml` unless the repository already runs a link checker. Keep it running on every pull request: the checker also verifies source paths named in the docs, so a code-only change can break them. If the team must save CI minutes, add a `paths` filter for `docs/**` and `**/*.md`; a code-only change that breaks a documented path is then caught only when someone runs the checker locally.
 5. Run the **review pass**, then the **checker**.
 6. Put the **Facts to confirm** list in the pull request description.
 
