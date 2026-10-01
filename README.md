@@ -92,20 +92,35 @@ The GitHub organization's Copilot custom instructions are set once by hand and o
 
    ```yaml
    name: Dev standard sync
+
    on:
-     schedule: [{ cron: "0 6 * * 1" }]
+     schedule:
+       - cron: "0 6 * * 1"
      workflow_dispatch:
        inputs:
-         stacks: { description: "First setup only, e.g. laravel,frontend", required: false }
-         version: { description: "latest or a release such as v1.3.1; empty keeps the pinned one", required: false }
-   permissions: { contents: write, pull-requests: write }
-   concurrency: { group: dev-standard-sync, cancel-in-progress: false }
+         stacks:
+           description: "First setup only, e.g. laravel,frontend"
+           required: false
+         version:
+           description: "latest or a release such as v1.3.1; empty keeps the pinned one"
+           required: false
+
+   permissions:
+     contents: write
+     pull-requests: write
+
+   concurrency:
+     group: dev-standard-sync
+     cancel-in-progress: false
+
    jobs:
      sync:
        runs-on: ubuntu-latest
        steps:
          - uses: vilnius-vmsa/dev-standard/.github/actions/sync@main
-           with: { stacks: "${{ inputs.stacks }}", version: "${{ inputs.version }}" }
+           with:
+             stacks: "${{ inputs.stacks }}"
+             version: "${{ inputs.version }}"
    ```
 
 3. Open **Actions → Dev standard sync → Run workflow** and enter your stacks (`php`, `laravel`, `symfony`,
