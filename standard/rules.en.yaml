@@ -634,6 +634,15 @@ CODE-AI-P08:
 CODE-AI-P09:
   text: Dependencies and imports suggested by AI are checked for existence, maintenance status and security, because AI models can suggest packages that do not exist.
   source_hash: 9a896a48ff3a
+CODE-AI-P10:
+  text: A repository's own instructions for AI agents are written once, in AGENTS.md (at the root or in the directory they apply to), outside any block a tool generates; this includes the pasted "Vilnius dev standard" section.
+  source_hash: 9806d5968888
+CODE-AI-P11:
+  text: CLAUDE.md is optional; any CLAUDE.md in the repository (at the root, in .claude/, or in any subdirectory) contains exactly @AGENTS.md and nothing else.
+  source_hash: 9e620c30f16a
+CODE-AI-P12:
+  text: "Tools that generate instructions for AI agents are configured to write them into AGENTS.md, not CLAUDE.md, and that configuration is committed to the repository (for Laravel Boost: agents.claude_code.guidelines_path set to AGENTS.md in config/boost.php)."
+  source_hash: cc4476591262
 CODE-CONV-P02:
   text: New files and modules follow the project's established structure, not individual convenience.
   source_hash: 6103cee61096

@@ -12,6 +12,7 @@ Formatas paremtas [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), vers
 - Reikalavimų vertimas į anglų kalbą DI agentams (`standard/rules.en.yaml`), neprivalomas angliškas reikalavimų sąrašas svetainėje (`/rules`) ir DI agentų paketas prie kiekvieno leidimo.
 - G priedas „Dokumentacijos rengimo metodika“: kaip rengti, tikrinti ir palaikyti sistemų dokumentaciją, kad ja galėtų naudotis DI agentai, vidinės ir išorinės komandos (10 skyrius).
 - DI agentų pakete – `dev-standard-docs` įgūdis dokumentacijai kurti, atnaujinti ir tikrinti, su šablonais ir nuorodų tikrintuvu `check-docs.py`; sinchronizavimas diegia visus paketo įgūdžius ir įspėja apie pasenusią `AGENTS.md` skiltį.
+- 4.8.4 poskyris „DI agentų instrukcijos“: repozitorijos instrukcijos DI agentams laikomos `AGENTS.md` už generuojamų blokų ribų, `CLAUDE.md` – tik `@AGENTS.md`, instrukcijas generuojantys įrankiai (pvz., Laravel Boost) nukreipiami į `AGENTS.md` (CODE-AI-P10–P12).
 
 ### Pakeista
 

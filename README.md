@@ -125,8 +125,9 @@ The GitHub organization's Copilot custom instructions are set once by hand and o
 
 3. Open **Actions → Dev standard sync → Run workflow** and enter your stacks (`php`, `laravel`, `symfony`,
    `frontend`, `mobile`, `infra`, `db`; `all` is always included). Merge the pull request it opens.
-4. Paste the section from the pull request's warning into your `AGENTS.md` (sync never edits it). When a release
-   changes that section, the sync pull request warns again and shows the new version.
+4. Paste the section from the pull request's warning into your `AGENTS.md`, outside any block a tool generates (sync
+   never edits it). Laravel Boost repositories also pin Claude Code's guidelines to `AGENTS.md` (CODE-AI-P12); the sync
+   pull request shows how. When a release changes that section, the sync pull request warns again and shows the new version.
 
 Sync pins the version in `.dev-standard/config.json`. The weekly run opens a pull request when a new release
 exists; a manual run without input restores the pinned files; a manual run with `version` set to `latest` (or a
