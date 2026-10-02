@@ -141,22 +141,69 @@ export async function applyBundle({ repoDir, bundleDir, version, stacks }) {
 // A pasted AGENTS.md section carries this marker; bundles up to v1.2.7 have none (revision 0).
 const AGENTS_SECTION = /<!-- dev-standard:agents-section (\d+) -->/;
 const revision = (text) => Number(text?.match(AGENTS_SECTION)?.[1] ?? 0);
+// Laravel Boost's generated block in AGENTS.md; boost:update overwrites everything inside it.
+const BOOST_BLOCK = /<laravel-boost-guidelines>[\s\S]*?<\/laravel-boost-guidelines>/;
 
-// Sync never edits AGENTS.md; it asks the team to paste the pointer section, and to replace it when it is outdated.
-export async function agentsWarning(repoDir, bundleDir) {
-  let text = null;
+const readIfExists = async (file) => {
   try {
-    text = await readFile(path.join(repoDir, 'AGENTS.md'), 'utf8');
+    return await readFile(file, 'utf8');
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
+    return null;
   }
+};
+const callout = (problem, ...rest) => ['> [!WARNING]', `> ${problem}`, '', ...rest].join('\n');
+
+// Sync never edits AGENTS.md; it asks the team to paste the pointer section, and to replace it when it is outdated.
+async function sectionWarning(repoDir, bundleDir) {
+  const text = await readIfExists(path.join(repoDir, 'AGENTS.md'));
   const snippet = await readFile(path.join(bundleDir, 'agents-snippet.md'), 'utf8');
+  const generated = text?.match(BOOST_BLOCK)?.[0] ?? '';
+  const own = text?.replace(generated, '');
   let problem;
   if (text === null) problem = 'This repository has no `AGENTS.md`. Add this section to it so agents find the rules:';
-  else if (!text.includes('dev-standard')) problem = '`AGENTS.md` does not mention the dev standard. Add this section to it so agents find the rules:';
-  else if (revision(text) < revision(snippet)) problem = '`AGENTS.md` has an outdated dev standard section. Replace it with this one:';
+  else if (!own.includes('dev-standard') && generated.includes('dev-standard')) problem = "`AGENTS.md` has the dev standard section only inside Boost's generated block, where `boost:update` overwrites it. Remove it from `.ai/guidelines/` and add this section to `AGENTS.md` outside the block (`CODE-AI-P10`):";
+  else if (!own.includes('dev-standard')) problem = '`AGENTS.md` does not mention the dev standard. Add this section to it so agents find the rules:';
+  else if (revision(own) < revision(snippet)) problem = '`AGENTS.md` has an outdated dev standard section. Replace it with this one:';
   else return null;
-  return ['> [!WARNING]', `> ${problem}`, '', '```markdown', snippet.trimEnd(), '```', ''].join('\n');
+  return callout(problem, '```markdown', snippet.trimEnd(), '```', '');
+}
+
+// Sync never edits CLAUDE.md; any CLAUDE.md other than exactly `@AGENTS.md` duplicates or hides AGENTS.md.
+async function claudeWarning(repoDir, file) {
+  const text = await readIfExists(path.join(repoDir, file));
+  if (text === null || text.trim() === '@AGENTS.md') return null;
+  const boost = BOOST_BLOCK.test(text) ? " Boost's generated block does not need moving: once Claude Code is pinned to `AGENTS.md`, `boost:update` writes it there." : '';
+  return callout(`\`${file}\` holds instructions of its own. Codex does not read it, and Copilot reads it on top of \`AGENTS.md\`. Move the repository's instructions into \`AGENTS.md\`, then delete \`${file}\` or make it exactly \`@AGENTS.md\`.${boost} (\`CODE-AI-P11\`)`);
+}
+
+// A repository uses Laravel Boost when composer.json requires it; only claude_code would point guidelines_path at AGENTS.md.
+const BOOST_PIN = /['"]guidelines_path['"]\s*=>\s*['"]AGENTS\.md['"]/;
+
+async function pinWarning(repoDir) {
+  let composer;
+  try {
+    composer = JSON.parse(await readIfExists(path.join(repoDir, 'composer.json')) ?? '{}');
+  } catch {
+    return null; // composer itself reports a broken composer.json; the advisory check stays quiet
+  }
+  if (!composer.require?.['laravel/boost'] && !composer['require-dev']?.['laravel/boost']) return null;
+  if (BOOST_PIN.test(await readIfExists(path.join(repoDir, 'config/boost.php')) ?? '')) return null;
+  return callout(
+    "This repository uses Laravel Boost (`composer.json` requires `laravel/boost`), but Claude Code's guidelines are not pinned to `AGENTS.md`, so Boost writes them into `CLAUDE.md`. Add this to `config/boost.php` (if the file is missing, run `php artisan vendor:publish --tag=boost-config` first), then run `php artisan boost:update`. (`CODE-AI-P12`)",
+    '```php', "'agents' => [", "    'claude_code' => ['guidelines_path' => 'AGENTS.md'],", '],', '```', '',
+  );
+}
+
+// Advisory only: one callout per problem, or null when the repository follows the agent instruction rules.
+export async function agentsWarning(repoDir, bundleDir) {
+  const callouts = [
+    await sectionWarning(repoDir, bundleDir),
+    await claudeWarning(repoDir, 'CLAUDE.md'),
+    await claudeWarning(repoDir, '.claude/CLAUDE.md'),
+    await pinWarning(repoDir),
+  ].filter(Boolean);
+  return callouts.length ? callouts.join('\n') : null;
 }
 
 async function setOutputs(values) {
