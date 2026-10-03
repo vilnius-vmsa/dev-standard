@@ -309,6 +309,91 @@ test('agentsWarning accepts any pasted section when the bundle has no revision m
   assert.equal(await agentsWarning(repo, await makeLegacyBundle()), null);
 });
 
+const boostBlock = (body) => `<laravel-boost-guidelines>\n${body}\n</laravel-boost-guidelines>\n`;
+
+test('agentsWarning flags a section that sits only inside Boost\'s generated block', async () => {
+  const bundle = await makeBundle();
+  const snippet = await readFile(path.join(bundle, 'agents-snippet.md'), 'utf8');
+  const repo = await tempDir();
+  await writeFile(path.join(repo, 'AGENTS.md'), `# Team notes\n\n${boostBlock(snippet)}`);
+  const warning = await agentsWarning(repo, bundle);
+  assert.match(warning, /^> \[!WARNING\]\n> `AGENTS\.md` has the dev standard section only inside Boost's generated block, where `boost:update` overwrites it\. Remove it from `\.ai\/guidelines\/` and add this section to `AGENTS\.md` outside the block \(`CODE-AI-P10`\):/);
+  assert.ok(warning.includes(snippet.trimEnd()));
+
+  await writeFile(path.join(repo, 'AGENTS.md'), `# Team notes\n\n${boostBlock('Laravel rules.')}\n${snippet}`);
+  assert.equal(await agentsWarning(repo, bundle), null, 'a section outside the block passes');
+});
+
+// A repository whose AGENTS.md already carries the current section, so only the check under test can warn.
+async function repoWithSection(bundle) {
+  const repo = await tempDir();
+  await writeFile(path.join(repo, 'AGENTS.md'), await readFile(path.join(bundle, 'agents-snippet.md'), 'utf8'));
+  return repo;
+}
+
+test('agentsWarning asks to move a CLAUDE.md with its own instructions into AGENTS.md', async () => {
+  const bundle = await makeBundle();
+  const repo = await repoWithSection(bundle);
+  await writeFile(path.join(repo, 'CLAUDE.md'), '@AGENTS.md\n\nAlways run the linter.\n');
+  assert.equal(await agentsWarning(repo, bundle), [
+    '> [!WARNING]',
+    '> `CLAUDE.md` holds instructions of its own. Codex does not read it, and Copilot reads it on top of `AGENTS.md`. Move the repository\'s instructions into `AGENTS.md`, then delete `CLAUDE.md` or make it exactly `@AGENTS.md`. (`CODE-AI-P11`)',
+    '',
+  ].join('\n'));
+
+  await writeFile(path.join(repo, 'CLAUDE.md'), '  @AGENTS.md\n\n');
+  assert.equal(await agentsWarning(repo, bundle), null, 'exactly @AGENTS.md passes');
+});
+
+test('agentsWarning checks .claude/CLAUDE.md too, one callout per file', async () => {
+  const bundle = await makeBundle();
+  const repo = await repoWithSection(bundle);
+  await writeFile(path.join(repo, 'CLAUDE.md'), 'Root notes.\n');
+  await mkdir(path.join(repo, '.claude'));
+  await writeFile(path.join(repo, '.claude/CLAUDE.md'), '@./AGENTS.md\n');
+  const warning = await agentsWarning(repo, bundle);
+  assert.equal(warning.match(/> \[!WARNING\]/g).length, 2);
+  assert.match(warning, /> `CLAUDE\.md` holds instructions[\s\S]*> `\.claude\/CLAUDE\.md` holds instructions of its own\..*then delete `\.claude\/CLAUDE\.md` or make it exactly `@AGENTS\.md`/);
+});
+
+test('agentsWarning tells the team a Boost block in CLAUDE.md need not be moved', async () => {
+  const bundle = await makeBundle();
+  const repo = await repoWithSection(bundle);
+  await writeFile(path.join(repo, 'CLAUDE.md'), boostBlock('Laravel rules.'));
+  assert.match(
+    await agentsWarning(repo, bundle),
+    /make it exactly `@AGENTS\.md`\. Boost's generated block does not need moving: once Claude Code is pinned to `AGENTS\.md`, `boost:update` writes it there\. \(`CODE-AI-P11`\)\n$/,
+  );
+});
+
+test('agentsWarning asks a Boost repository to pin Claude Code\'s guidelines to AGENTS.md', async () => {
+  const bundle = await makeBundle();
+  const repo = await repoWithSection(bundle);
+  await writeFile(path.join(repo, 'composer.json'), JSON.stringify({ 'require-dev': { 'laravel/boost': '^2.4' } }));
+  assert.equal(await agentsWarning(repo, bundle), [
+    '> [!WARNING]',
+    '> This repository uses Laravel Boost (`composer.json` requires `laravel/boost`), but Claude Code\'s guidelines are not pinned to `AGENTS.md`, so Boost writes them into `CLAUDE.md`. Add this to `config/boost.php` (if the file is missing, run `php artisan vendor:publish --tag=boost-config` first), then run `php artisan boost:update`. (`CODE-AI-P12`)',
+    '',
+    '```php',
+    "'agents' => [",
+    "    'claude_code' => ['guidelines_path' => 'AGENTS.md'],",
+    '],',
+    '```',
+    '',
+  ].join('\n'));
+
+  await mkdir(path.join(repo, 'config'));
+  await writeFile(path.join(repo, 'config/boost.php'), "<?php\n\nreturn [\n    'agents' => [\n        'claude_code' => [\"guidelines_path\"  =>  'AGENTS.md'],\n    ],\n];\n");
+  assert.equal(await agentsWarning(repo, bundle), null, 'a pinned repository passes');
+});
+
+test('agentsWarning does not fail the run over a composer.json it cannot parse', async () => {
+  const bundle = await makeBundle();
+  const repo = await repoWithSection(bundle);
+  await writeFile(path.join(repo, 'composer.json'), '{ "require": { "laravel/boost": "^2.4", } }');
+  assert.equal(await agentsWarning(repo, bundle), null);
+});
+
 test('bundleSkills rejects skill names sync could not remove later or that leave the skills folder', () => {
   assert.deepEqual(bundleSkills({ skills: ['dev-standard', 'dev-standard-docs'] }).map((s) => s.source), ['skills/dev-standard', 'skills/dev-standard-docs']);
   assert.throws(() => bundleSkills({ skills: ['team-tools'] }), /skill name "team-tools" must start with dev-standard/);
