@@ -24,7 +24,7 @@ import unicodedata
 from urllib.parse import unquote
 
 DEFAULT_TARGETS = ["README.md", "AGENTS.md", "docs"]
-FENCE = re.compile(r"^\s*(```|~~~)")
+FENCE = re.compile(r"^\s*(`{3,}|~{3,})")
 HEADING = re.compile(r"^#{1,6}\s+(.+?)\s*#*\s*$")
 HTML_ANCHOR = re.compile(r"<a\s+[^>]*(?:id|name)=[\"']([^\"']+)[\"']")
 CODE_SPAN = re.compile(r"`([^`]+)`")
@@ -44,12 +44,17 @@ def slug(heading):
 
 def prose_lines(path):
     """(line number, line) for every line outside fenced code blocks."""
-    in_fence = False
+    opener = None
     for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-        if FENCE.match(line):
-            in_fence = not in_fence
+        match = FENCE.match(line)
+        if match:
+            fence = match.group(1)
+            if opener is None:
+                opener = fence
+            elif fence[0] == opener[0] and len(fence) >= len(opener):
+                opener = None
             continue
-        if not in_fence:
+        if opener is None:
             yield number, line
 
 
@@ -58,16 +63,18 @@ _anchors = {}
 
 def anchors(path):
     if path not in _anchors:
-        found, seen = set(), {}
+        html, headings, seen = set(), set(), {}
         for _, line in prose_lines(path):
-            found.update(HTML_ANCHOR.findall(line))
+            html.update(HTML_ANCHOR.findall(line))
             match = HEADING.match(line)
             if match:
                 base = slug(match.group(1))
-                count = seen.get(base, 0)
-                seen[base] = count + 1
-                found.add(base if count == 0 else f"{base}-{count}")
-        _anchors[path] = found
+                candidate = base
+                while candidate in headings:
+                    seen[base] = seen.get(base, 0) + 1
+                    candidate = f"{base}-{seen[base]}"
+                headings.add(candidate)
+        _anchors[path] = html | headings
     return _anchors[path]
 
 
@@ -75,7 +82,7 @@ def check_link(root, doc, target):
     path_part, _, anchor = target.partition("#")
     if LINE_ANCHOR.match(anchor):
         return f"links to a line number ({target}); reference the path and symbol instead"
-    path_part = unquote(path_part)
+    path_part = unquote(path_part.partition("?")[0])
     if not path_part:
         resolved = doc
     elif path_part.startswith("/"):
@@ -99,6 +106,8 @@ def git_ignores(root, path):
 def check_code_path(root, top_dirs, token):
     if NOT_A_PATH.search(token) or "/" not in token or token.split("/", 1)[0] not in top_dirs:
         return None
+    if LINE_ANCHOR.match(token.partition("#")[2]):
+        return f"refers to a line number ({token}); reference the path and symbol instead"
     token = re.split(r"::|#", token, maxsplit=1)[0]
     if LINE_SUFFIX.search(token):
         return f"refers to a line number ({token}); reference the path and symbol instead"
