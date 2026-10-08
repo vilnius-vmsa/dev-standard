@@ -90,3 +90,35 @@ test('the AGENTS.md section sync asks repositories to paste passes without a loc
   const result = await check(root);
   assert.equal(result.code, 0, result.out);
 });
+
+test('a fence closes only on the same character with at least the opener length', async () => {
+  const root = await repo({
+    ...BASE,
+    'README.md': '````md\n```\n[dead](nowhere.md)\n```\n````\n\n~~~\n```\n`src/Nope.php`\n~~~\n',
+  });
+  const result = await check(root);
+  assert.equal(result.code, 0, result.out);
+});
+
+test('a repeated heading skips ids other headings already took', async () => {
+  const root = await repo({
+    ...BASE,
+    'docs/api.md': '# API\n\n## API-1\n\n## API\n',
+    'README.md': '[a](docs/api.md#api) [b](docs/api.md#api-1) [c](docs/api.md#api-2)\n',
+  });
+  const result = await check(root);
+  assert.equal(result.code, 0, result.out);
+});
+
+test('a query string in a relative link is not part of the file name', async () => {
+  const root = await repo({ ...BASE, 'README.md': '[raw](docs/storage.md?plain=1#notes)\n' });
+  const result = await check(root);
+  assert.equal(result.code, 0, result.out);
+});
+
+test('a backticked path with a #L fragment is reported as a line number', async () => {
+  const root = await repo({ ...BASE, 'README.md': '`src/Service/Foo.php#L12`\n' });
+  const result = await check(root);
+  assert.equal(result.code, 1);
+  assert.equal(result.out.trim(), 'README.md:1: refers to a line number (src/Service/Foo.php#L12); reference the path and symbol instead');
+});
