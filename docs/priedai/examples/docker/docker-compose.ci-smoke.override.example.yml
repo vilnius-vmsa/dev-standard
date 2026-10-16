@@ -1,0 +1,43 @@
+# Inactive example. Apply only to published-image smoke tests. It must never
+# be used with production data or production secret paths.
+
+services:
+  mysql:
+    environment:
+      MYSQL_DATABASE: ci_application
+      MYSQL_USER: ci_application
+    volumes:
+      - ci_mysql_data:/var/lib/mysql
+    ports: []
+
+  redis:
+    volumes:
+      - ci_redis_data:/data
+    ports: []
+
+  php:
+    image: ${PHP_IMAGE_REF:?PHP_IMAGE_REF is required}
+    build: !reset null
+    env_file: !reset []
+    environment:
+      APP_ENV: testing
+      APP_DEBUG: "false"
+      DB_HOST: mysql
+      REDIS_HOST: redis
+    volumes: !reset []
+
+  worker:
+    image: ${PHP_IMAGE_REF:?PHP_IMAGE_REF is required}
+    build: !reset null
+    env_file: !reset []
+    volumes: !reset []
+
+  nginx:
+    image: ${NGINX_IMAGE_REF:?NGINX_IMAGE_REF is required}
+    build: !reset null
+    ports:
+      - "127.0.0.1:${CI_HTTP_PORT:-8443}:8080"
+
+volumes:
+  ci_mysql_data:
+  ci_redis_data:

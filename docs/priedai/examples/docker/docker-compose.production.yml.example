@@ -1,118 +1,122 @@
-# Reference production stack. Keep this file outside .github/workflows/ and
-# replace every required environment value before use.
+# Inactive example. Copy to the application root as
+# docker-compose.production.yml and replace every placeholder. Production
+# never builds from the checkout.
 
-name: ${COMPOSE_PROJECT_NAME:-application}
+name: ${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME is required}
+
+x-runtime-defaults: &runtime-defaults
+  restart: unless-stopped
+  read_only: true
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,nodev,size=32m,mode=1777
+  networks: [internal]
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "3"
+
+x-php-defaults: &php-defaults
+  <<: *runtime-defaults
+  image: ${PHP_IMAGE_REF:?PHP_IMAGE_REF must be an immutable digest reference}
+  environment:
+    DB_HOST: mysql
+    REDIS_HOST: redis
+  secrets:
+    - source: application_env
+      target: /var/www/.env
+  depends_on:
+    mysql:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
 
 services:
-  app:
-    image: ${APP_IMAGE:?set APP_IMAGE to a tested immutable digest}
-    restart: unless-stopped
-    read_only: true
-    env_file:
-      - ${RUNTIME_ENV_FILE:?set RUNTIME_ENV_FILE}
-    tmpfs:
-      - /tmp:size=64m,noexec,nosuid
-    volumes:
-      - app_storage:/var/www/storage
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "php artisan about --no-ansi >/dev/null || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-    networks: [backend]
-
-  worker:
-    image: ${APP_IMAGE:?set APP_IMAGE to a tested immutable digest}
-    restart: unless-stopped
-    read_only: true
-    env_file:
-      - ${RUNTIME_ENV_FILE:?set RUNTIME_ENV_FILE}
-    tmpfs:
-      - /tmp:size=64m,noexec,nosuid
-    volumes:
-      - app_storage:/var/www/storage
-    command: ["php", "artisan", "queue:work", "redis", "--sleep=3", "--tries=3", "--max-time=3600"]
-    depends_on:
-      app:
-        condition: service_healthy
-    networks: [backend]
-
-  nginx:
-    image: ${NGINX_IMAGE:?set NGINX_IMAGE to a tested immutable digest}
-    restart: unless-stopped
-    read_only: true
-    ports:
-      - "127.0.0.1:8080:8080"
-    volumes:
-      - app_storage:/var/www/storage:ro
-      - ${NGINX_CONFIG_DIR:?set NGINX_CONFIG_DIR}/default.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      app:
-        condition: service_healthy
-    networks: [backend]
-
-  alloy:
-    image: ${ALLOY_IMAGE:?set ALLOY_IMAGE to a reviewed immutable digest}
-    restart: unless-stopped
-    profiles: [observability]
-    command: ["run", "/etc/alloy/config.alloy", "--storage.path=/var/lib/alloy/data"]
-    volumes:
-      - ${ALLOY_CONFIG_DIR:?set ALLOY_CONFIG_DIR}/config.alloy:/etc/alloy/config.alloy:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - alloy_data:/var/lib/alloy/data
-    networks: [backend]
-
   mysql:
-    image: ${MYSQL_IMAGE:?set MYSQL_IMAGE to a reviewed immutable digest}
+    image: mysql:8.4@sha256:REPLACE_WITH_CURRENT_DIGEST
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE:?set DB_DATABASE}
-      MYSQL_USER: ${DB_USERNAME:?set DB_USERNAME}
-      MYSQL_PASSWORD_FILE: /run/secrets/db_password
-      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
-    secrets: [db_password, db_root_password]
+      MYSQL_DATABASE: ${DB_DATABASE:?DB_DATABASE is required}
+      MYSQL_USER: ${DB_USERNAME:?DB_USERNAME is required}
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+    secrets: [mysql_password, mysql_root_password]
     volumes:
       - mysql_data:/var/lib/mysql
+    networks: [internal]
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p\"$$(cat /run/secrets/db_root_password)\" --silent"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p\"$$(cat /run/secrets/mysql_root_password)\" --silent"]
       interval: 10s
       timeout: 5s
       retries: 12
-    networks: [backend]
 
   redis:
-    image: ${REDIS_IMAGE:?set REDIS_IMAGE to a reviewed immutable digest}
-    restart: unless-stopped
-    command: ["redis-server", "/run/secrets/redis.conf"]
-    secrets: [redis.conf]
+    image: redis:7.4-alpine@sha256:REPLACE_WITH_CURRENT_DIGEST
+    <<: *runtime-defaults
+    command: ["sh", "-ec", "exec redis-server --requirepass \"$$(cat /run/secrets/redis_password)\""]
+    secrets: [redis_password]
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -a \"$$(sed -n 's/^requirepass //p' /run/secrets/redis.conf)\" ping | grep -q PONG"]
+      test: ["CMD-SHELL", "redis-cli -a \"$$(cat /run/secrets/redis_password)\" ping | grep -q PONG"]
       interval: 10s
       timeout: 5s
       retries: 12
-    networks: [backend]
+
+  php:
+    <<: *php-defaults
+    expose: [9000]
+    healthcheck:
+      test: ["CMD", "php-fpm", "-t"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  worker:
+    <<: *php-defaults
+    command: ["php", "artisan", "queue:work", "redis", "--sleep=1", "--tries=3"]
+
+  nginx:
+    <<: *runtime-defaults
+    image: ${NGINX_IMAGE_REF:?NGINX_IMAGE_REF must be an immutable digest reference}
+    depends_on:
+      php:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  alloy:
+    <<: *runtime-defaults
+    image: ${ALLOY_IMAGE_REF:?ALLOY_IMAGE_REF must be an immutable digest reference}
+    profiles: [observability]
+    command: ["run", "/etc/alloy/config.alloy", "--storage.path=/var/lib/alloy/data"]
+    volumes:
+      - ${ALLOY_CONFIG_DIR:?ALLOY_CONFIG_DIR is required}/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloy_data:/var/lib/alloy/data
+
+networks:
+  internal:
+    internal: true
 
 volumes:
-  app_storage:
   mysql_data:
   redis_data:
   alloy_data:
 
-networks:
-  backend:
-    driver: bridge
-
 secrets:
-  db_password:
-    file: ${RUNTIME_SECRETS_DIR:?set RUNTIME_SECRETS_DIR}/db_password
-  db_root_password:
-    file: ${RUNTIME_SECRETS_DIR:?set RUNTIME_SECRETS_DIR}/db_root_password
-  redis.conf:
-    file: ${RUNTIME_SECRETS_DIR:?set RUNTIME_SECRETS_DIR}/redis.conf
+  application_env:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/application.env
+  mysql_password:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/mysql_password
+  mysql_root_password:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/mysql_root_password
+  redis_password:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/redis_password

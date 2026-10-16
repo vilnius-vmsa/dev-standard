@@ -12,9 +12,11 @@
 
 ## Docker
 
-* [Production multi-stage Dockerfile](docker/Dockerfile.prod.example)
-* [Production multi-stage Nginx/frontend Dockerfile](docker/Dockerfile.nginx.prod.example)
-* [Production Compose su app, worker, Nginx, MySQL ir Redis](docker/docker-compose.production.yml.example)
+* [Production multi-stage PHP-FPM Dockerfile](docker/Dockerfile.prod.example)
+* [Production multi-stage Nginx Dockerfile](docker/Dockerfile.nginx.prod.example)
+* [Development Compose](docker/docker-compose.development.example.yml)
+* [Production Compose su PHP-FPM, worker, Nginx, MySQL, Redis ir Alloy](docker/docker-compose.production.yml.example)
+* [Published-image CI smoke Compose override](docker/docker-compose.ci-smoke.override.example.yml)
 
 ## GitHub Actions
 
