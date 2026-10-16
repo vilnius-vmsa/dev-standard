@@ -53,7 +53,10 @@ A subsystem needs a deep dive when a new developer could not understand it in 30
 
 1. **Inventory.** List the existing docs (README, `docs/`, wiki exports, API spec), the top-level folders, the CI workflows and the build and test commands. Note every existing claim that the code contradicts.
 2. **Scope.** Propose to the user: which subsystems get deep dives, which gaps become coverage rows, which language. When a person is available, wait for their agreement.
-3. **Write**, verifying each claim as you go, in this order: `docs/glossary.md`, `docs/architecture.md`, deep dives, `docs/README.md` with the coverage table, then `AGENTS.md`. Keep the team's existing `AGENTS.md` content and its pasted "Vilnius dev standard" section; add the routing table and the documentation rules.
+3. **Write**, verifying each claim as you go, in this order: `docs/glossary.md`, `docs/architecture.md`, deep dives, `docs/README.md` with the coverage table, then `AGENTS.md`. Keep the team's existing `AGENTS.md` content and its pasted "Vilnius dev standard" section; add the routing table and the documentation rules. Then make `AGENTS.md` the one source of agent instructions (CODE-AI-P10 to P12):
+   - Move the content of every `CLAUDE.md` (root, `.claude/`, subdirectories) into the `AGENTS.md` of the same directory, outside any generated block, then delete the `CLAUDE.md`. Leave one that is exactly `@AGENTS.md`.
+   - Move instructions that exist only inside a generated block, or in the files it is generated from (Laravel Boost: `.ai/guidelines/`), into `AGENTS.md` outside the block.
+   - If `composer.json` requires `laravel/boost`, set `agents.claude_code.guidelines_path` to `AGENTS.md` in `config/boost.php` (create the file with `php artisan vendor:publish --tag=boost-config`), then run `php artisan boost:update`. If you cannot run it, say so in the pull request description.
 4. Copy [docs-check.yml](templates/docs-check.yml) to `.github/workflows/docs-check.yml` unless the repository already runs a link checker. Keep it running on every pull request: the checker also verifies source paths named in the docs, so a code-only change can break them. If the team must save CI minutes, add a `paths` filter for `docs/**` and `**/*.md`; a code-only change that breaks a documented path is then caught only when someone runs the checker locally.
 5. Run the **review pass**, then the **checker**.
 6. Put the **Facts to confirm** list in the pull request description.
@@ -62,7 +65,7 @@ A subsystem needs a deep dive when a new developer could not understand it in 30
 
 1. List the changed files: `git diff --name-only origin/main...HEAD` (use the base branch the user names, if any).
 2. Match them against the source-paths column of the coverage table in `docs/README.md`. Every matching doc is affected.
-3. Also check: new or renamed domain terms (glossary), API changes (regenerate the API spec with the repository's command), new commands or environment variables (`AGENTS.md`, README, deployment docs), and whether the change is a decision that needs an ADR (10.4: new technology, architecture style, integration model, significant trade-off, deviation from the standard); write it from [adr.md](templates/adr.md).
+3. Also check: new or renamed domain terms (glossary), API changes (regenerate the API spec with the repository's command), new commands or environment variables (`AGENTS.md`, README, deployment docs), and whether the change is a decision that needs an ADR (10.4: new technology, architecture style, integration model, significant trade-off, deviation from the standard); write it from [adr.md](templates/adr.md). Edit `AGENTS.md` outside any block a tool generates; never add content to a `CLAUDE.md`.
 4. Update every affected doc in the same branch. A changed area with no coverage row gets a row.
 5. Run the **review pass** on the changed docs, then the **checker**.
 6. Report which docs you changed and why, or which coverage rows you checked and why none needed a change.
@@ -72,8 +75,9 @@ A subsystem needs a deep dive when a new developer could not understand it in 30
 1. For each doc under `docs/`, plus README and `AGENTS.md`, verify claims against the code: every claim in docs under about 200 lines, otherwise every table row and a sample of at least ten claims per section.
 2. Compare the docs against the layout table above and the maturity level in appendix G.3; list missing artifacts.
 3. Check the coverage table: every source path exists, and every top-level source folder is covered or listed as a gap.
-4. Run the **checker**.
-5. Report findings one per line, grouped as Wrong, Missing, Stale and Checker: `path: problem (evidence: file and symbol)`. End with the **Facts to confirm** list. Change files only when the user asks.
+4. Check CODE-AI-P10 to P12: the repository's own agent instructions are in `AGENTS.md` outside generated blocks; every `CLAUDE.md` at any depth is exactly `@AGENTS.md`; tools that generate instructions are pinned to `AGENTS.md`. Report each finding with its rule ID.
+5. Run the **checker**.
+6. Report findings one per line, grouped as Wrong, Missing, Stale and Checker: `path: problem (evidence: file and symbol)`. End with the **Facts to confirm** list. Change files only when the user asks.
 
 ## Review pass
 
