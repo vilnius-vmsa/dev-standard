@@ -108,7 +108,7 @@ Svarbios sąlygos:
 
 ## D.6. Tag-based srauto pavyzdys
 
-Šis modelis tinka, kai production leidimai turi būti aiškiai versijuoti ir patvirtinti. Pritaikomas workflow pavyzdys: [tag-based/ci.release.yml.example](examples/github-actions/tag-based/ci.release.yml.example).
+Šis modelis tinka, kai production leidimai turi būti aiškiai versijuoti ir patvirtinti. Jį sudaro atskiras candidate build etapas ([tag-based/ci.build.yml.example](examples/github-actions/tag-based/ci.build.yml.example)) ir tag'o promotion/release etapas ([tag-based/ci.release.yml.example](examples/github-actions/tag-based/ci.release.yml.example)).
 
 ```text
 PR/main ── lint/validate/test ── candidate build ── scan/SBOM/provenance

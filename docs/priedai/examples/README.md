@@ -20,6 +20,7 @@
 * [Bendras lint ir validation vartas](github-actions/ci.lint.yml.example)
 * [Branch-based build ir deploy](github-actions/branch-based/ci.build.yml.example)
 * [Branch-based reusable deploy](github-actions/cd.deploy.yml.example)
+* [Tag-based candidate build, scan ir attestation](github-actions/tag-based/ci.build.yml.example)
 * [Tag-based tested-image promotion ir release](github-actions/tag-based/ci.release.yml.example)
 
 Branch-based modelis naudoja `stage → staging` ir `main → production`. Tag-based modelis pirmiausia sukuria ir patikrina candidate image, o apsaugotas `vX.Y.Z` tag paaukština tą patį nekintamą digest į leidimą ir produkciją.

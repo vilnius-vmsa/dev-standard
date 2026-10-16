@@ -1,0 +1,149 @@
+name: Example - CI Build (tag candidate)
+
+on:
+  workflow_run:
+    workflows: ["CI: Lint and Validate"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: tag-candidate-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+jobs:
+  build-test-attest:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact linted main revision
+        uses: actions/checkout@<reviewed-commit-sha>
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 1
+
+      - name: Resolve candidate metadata
+        id: meta
+        env:
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          printf 'source_sha=%s\n' "$SOURCE_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to the container registry
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: echo "$GH_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build and push immutable candidate images
+        id: image
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
+          APP_REPOSITORY: ghcr.io/<owner>/<application>-image-php
+          NGINX_REPOSITORY: ghcr.io/<owner>/<application>-image-nginx
+        run: |
+          set -euo pipefail
+          CANDIDATE_TAG="candidate-${SOURCE_SHA}-${GITHUB_RUN_ID}"
+          docker buildx build --push --file docker/php-fpm/Dockerfile.prod \
+            --tag "$APP_REPOSITORY:$CANDIDATE_TAG" --metadata-file app-metadata.json .
+          docker buildx build --push --file docker/nginx/Dockerfile.prod \
+            --tag "$NGINX_REPOSITORY:$CANDIDATE_TAG" --metadata-file nginx-metadata.json .
+          APP_DIGEST="$(jq -r '."containerimage.digest"' app-metadata.json)"
+          NGINX_DIGEST="$(jq -r '."containerimage.digest"' nginx-metadata.json)"
+          [[ "$APP_DIGEST" == sha256:* && "$NGINX_DIGEST" == sha256:* ]]
+          echo "app_repository=$APP_REPOSITORY" >> "$GITHUB_OUTPUT"
+          echo "app_digest=$APP_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "nginx_repository=$NGINX_REPOSITORY" >> "$GITHUB_OUTPUT"
+          echo "nginx_digest=$NGINX_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "app_image=$APP_REPOSITORY@$APP_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "nginx_image=$NGINX_REPOSITORY@$NGINX_DIGEST" >> "$GITHUB_OUTPUT"
+
+      - name: Scan candidate application image
+        uses: aquasecurity/trivy-action@<reviewed-commit-sha>
+        with:
+          image-ref: ${{ steps.image.outputs.app_image }}
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          format: table
+
+      - name: Scan candidate Nginx image
+        uses: aquasecurity/trivy-action@<reviewed-commit-sha>
+        with:
+          image-ref: ${{ steps.image.outputs.nginx_image }}
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          format: table
+
+      - name: Generate candidate SBOMs
+        uses: anchore/sbom-action@<reviewed-commit-sha>
+        with:
+          image: ${{ steps.image.outputs.app_image }}
+          format: spdx-json
+          output-file: sbom-app.spdx.json
+
+      - name: Generate candidate Nginx SBOM
+        uses: anchore/sbom-action@<reviewed-commit-sha>
+        with:
+          image: ${{ steps.image.outputs.nginx_image }}
+          format: spdx-json
+          output-file: sbom-nginx.spdx.json
+
+      - name: Attest candidate application image
+        uses: actions/attest@<reviewed-commit-sha>
+        with:
+          subject-name: ${{ steps.image.outputs.app_repository }}
+          subject-digest: ${{ steps.image.outputs.app_digest }}
+          push-to-registry: true
+          create-storage-record: false
+
+      - name: Attest candidate Nginx image
+        uses: actions/attest@<reviewed-commit-sha>
+        with:
+          subject-name: ${{ steps.image.outputs.nginx_repository }}
+          subject-digest: ${{ steps.image.outputs.nginx_digest }}
+          push-to-registry: true
+          create-storage-record: false
+
+      - name: Smoke-test candidate application image
+        env:
+          APP_IMAGE: ${{ steps.image.outputs.app_image }}
+        run: docker run --rm "$APP_IMAGE" php artisan about --no-ansi
+
+      - name: Publish tested image metadata
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
+          APP_DIGEST: ${{ steps.image.outputs.app_digest }}
+          NGINX_DIGEST: ${{ steps.image.outputs.nginx_digest }}
+        run: |
+          set -euo pipefail
+          jq -n \
+            --arg source_sha "$SOURCE_SHA" \
+            --arg app_digest "$APP_DIGEST" \
+            --arg nginx_digest "$NGINX_DIGEST" \
+            '{source_sha: $source_sha, app_digest: $app_digest, nginx_digest: $nginx_digest}' \
+            > metadata.json
+
+      - name: Upload tested image metadata
+        uses: actions/upload-artifact@<reviewed-commit-sha>
+        with:
+          name: image-metadata
+          path: metadata.json
+          if-no-files-found: error
+
+      - name: Upload SBOMs
+        uses: actions/upload-artifact@<reviewed-commit-sha>
+        with:
+          name: image-sboms
+          path: sbom-*.spdx.json
+          if-no-files-found: error
