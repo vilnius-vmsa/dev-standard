@@ -177,8 +177,26 @@ async function claudeWarning(repoDir, file) {
   return callout(`\`${file}\` holds instructions of its own. Codex does not read it, and Copilot reads it on top of \`AGENTS.md\`. Move the repository's instructions into \`AGENTS.md\`, then delete \`${file}\` or make it exactly \`@AGENTS.md\`.${boost} (\`CODE-AI-P11\`)`);
 }
 
-// A repository uses Laravel Boost when composer.json requires it; only claude_code would point guidelines_path at AGENTS.md.
+// A repository uses Laravel Boost when composer.json requires it. Other agents may also set guidelines_path to
+// AGENTS.md, so only a live (uncommented) value inside the claude_code entry counts as the pin.
+const PHP_COMMENT = /('(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*")|\/\*[\s\S]*?\*\/|(?:\/\/|#)[^\n]*/g;
+const CLAUDE_CODE_ENTRY = /['"]claude_code['"]\s*=>\s*(\[|array\s*\()/;
 const BOOST_PIN = /['"]guidelines_path['"]\s*=>\s*['"]AGENTS\.md['"]/;
+
+function claudeCodePinned(php) {
+  const code = php.replace(PHP_COMMENT, (_, string) => string ?? '');
+  const entry = code.match(CLAUDE_CODE_ENTRY);
+  if (!entry) return false;
+  const start = entry.index + entry[0].length;
+  let depth = 1;
+  let end = start;
+  // Strings are left intact, so brackets inside them can skew the count; good enough for an advisory check.
+  for (; end < code.length && depth > 0; end++) {
+    if ('[('.includes(code[end])) depth++;
+    else if ('])'.includes(code[end])) depth--;
+  }
+  return BOOST_PIN.test(code.slice(start, end));
+}
 
 async function pinWarning(repoDir) {
   let composer;
@@ -188,7 +206,7 @@ async function pinWarning(repoDir) {
     return null; // composer itself reports a broken composer.json; the advisory check stays quiet
   }
   if (!composer.require?.['laravel/boost'] && !composer['require-dev']?.['laravel/boost']) return null;
-  if (BOOST_PIN.test(await readIfExists(path.join(repoDir, 'config/boost.php')) ?? '')) return null;
+  if (claudeCodePinned(await readIfExists(path.join(repoDir, 'config/boost.php')) ?? '')) return null;
   return callout(
     "This repository uses Laravel Boost (`composer.json` requires `laravel/boost`), but Claude Code's guidelines are not pinned to `AGENTS.md`, so Boost writes them into `CLAUDE.md`. Add this to `config/boost.php` (if the file is missing, run `php artisan vendor:publish --tag=boost-config` first), then run `php artisan boost:update`. (`CODE-AI-P12`)",
     '```php', "'agents' => [", "    'claude_code' => ['guidelines_path' => 'AGENTS.md'],", '],', '```', '',

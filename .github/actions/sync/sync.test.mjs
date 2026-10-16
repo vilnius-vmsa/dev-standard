@@ -387,6 +387,23 @@ test('agentsWarning asks a Boost repository to pin Claude Code\'s guidelines to 
   assert.equal(await agentsWarning(repo, bundle), null, 'a pinned repository passes');
 });
 
+test('agentsWarning only accepts a live guidelines_path under claude_code', async () => {
+  const bundle = await makeBundle();
+  const repo = await repoWithSection(bundle);
+  await writeFile(path.join(repo, 'composer.json'), JSON.stringify({ require: { 'laravel/boost': '^2.4' } }));
+  await mkdir(path.join(repo, 'config'));
+  const pinned = async (agents) => {
+    await writeFile(path.join(repo, 'config/boost.php'), `<?php\n\nreturn [\n    'agents' => [\n${agents}\n    ],\n];\n`);
+    return (await agentsWarning(repo, bundle)) === null;
+  };
+  assert.equal(await pinned("        'claude_code' => [\n            // 'guidelines_path' => 'AGENTS.md',\n        ],"), false, 'a line comment');
+  assert.equal(await pinned("        # 'claude_code' => ['guidelines_path' => 'AGENTS.md'],"), false, 'a hash comment');
+  assert.equal(await pinned("        /* 'claude_code' => ['guidelines_path' => 'AGENTS.md'], */"), false, 'a block comment');
+  assert.equal(await pinned("        'codex' => ['guidelines_path' => 'AGENTS.md'],\n        'claude_code' => ['enabled' => true],"), false, 'another agent');
+  assert.equal(await pinned("        'claude_code' => ['enabled' => true],\n        'codex' => ['guidelines_path' => 'AGENTS.md'],"), false, 'another agent after claude_code');
+  assert.equal(await pinned("        'claude_code' => array(\n            'url' => 'https://example.com/#x', // docs\n            'guidelines_path' => 'AGENTS.md',\n        ),"), true, 'array() syntax next to a string holding comment markers');
+});
+
 test('agentsWarning does not fail the run over a composer.json it cannot parse', async () => {
   const bundle = await makeBundle();
   const repo = await repoWithSection(bundle);
