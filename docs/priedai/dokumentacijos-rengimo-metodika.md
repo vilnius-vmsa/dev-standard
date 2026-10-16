@@ -84,6 +84,8 @@ AGENTS.md aprašo, **kaip dirbti** repozitorijoje, o ne kaip sistema veikia. Jam
 
 AGENTS.md nekartoja README ar architektūros aprašo – tik nurodo į juos.
 
+Kur laikomos repozitorijos instrukcijos DI agentams, koks gali būti `CLAUDE.md` ir kaip sukonfigūruoti instrukcijas generuojančius įrankius, nustato [4.8.4](../04-kodo-kurimo-gaires.md#484-di-agentų-instrukcijos).
+
 ## G.7. Pradinės dokumentacijos parengimas
 
 1. **Inventorizacija.** Kas jau yra (README, `docs/`, wiki, komentarai, API specifikacija), kas pasenę, kur tiesos šaltinis.

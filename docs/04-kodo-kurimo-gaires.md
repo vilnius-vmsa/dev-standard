@@ -617,4 +617,17 @@ REKOMENDUOJAMA:
 <!-- CODE-AI-R04 | human-reviewable -->
 *   DI priemones naudoti kaip pagalbinį, o ne pagrindinį kūrimo įrankį — kūrėjas turi suprasti ir galėti paaiškinti kiekvieną kodo eilutę.
 
-> Susiję skyriai: [4.4 Code Review principai](#44-code-review-principai) · [4.6 Saugumas kodo lygmeniu](#46-saugumas-kodo-lygmeniu) · [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [6.4 Secrets management](06-saugumas.md#64-secrets-management) · [12 Tiekėjų ir pavaldžių įstaigų reikalavimai](12-tiekeju-reikalavimai.md)
+### 4.8.4. DI agentų instrukcijos
+
+Skirtingi DI agentai skaito skirtingus instrukcijų failus: Codex skaito tik `AGENTS.md`, o Claude Code `AGENTS.md` praleidžia, jei repozitorijoje yra `CLAUDE.md`. Kad visi agentai gautų tas pačias instrukcijas po vieną kartą, jos laikomos `AGENTS.md` faile.
+
+PRIVALOMA:
+
+<!-- CODE-AI-P10 | ai-reviewable | stacks=all | enforced-by=ai -->
+*   Repozitorijos instrukcijos DI agentams rašomos vienoje vietoje – `AGENTS.md` faile (šakniniame arba to katalogo, kuriam jos taikomos), už įrankių generuojamų blokų ribų. Tai taikoma ir įklijuotai „Vilnius dev standard“ skilčiai.
+<!-- CODE-AI-P11 | ai-reviewable | stacks=all | enforced-by=ai -->
+*   `CLAUDE.md` neprivalomas. Jei repozitorijoje yra `CLAUDE.md` failas (šakniniame kataloge, `.claude/` ar bet kuriame kitame kataloge), jo visas turinys yra `@AGENTS.md`.
+<!-- CODE-AI-P12 | ai-reviewable | stacks=all | enforced-by=ai -->
+*   Įrankiai, generuojantys instrukcijas DI agentams, sukonfigūruojami rašyti jas į `AGENTS.md`, o ne į `CLAUDE.md`, ir ši konfigūracija laikoma repozitorijoje (pvz., Laravel Boost: `config/boost.php` nustatymas `agents.claude_code.guidelines_path` = `AGENTS.md`).
+
+> Susiję skyriai: [4.4 Code Review principai](#44-code-review-principai) · [4.6 Saugumas kodo lygmeniu](#46-saugumas-kodo-lygmeniu) · [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) · [6.4 Secrets management](06-saugumas.md#64-secrets-management) · [12 Tiekėjų ir pavaldžių įstaigų reikalavimai](12-tiekeju-reikalavimai.md) · [G.6 AGENTS.md](priedai/dokumentacijos-rengimo-metodika.md#g6-agentsmd)

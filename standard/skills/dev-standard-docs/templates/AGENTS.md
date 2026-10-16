@@ -45,4 +45,4 @@ Before you report a task as done:
 
 - <gotcha>
 
-<!-- Paste the "Vilnius dev standard" section from the dev standard sync pull request below. -->
+<!-- Paste the "Vilnius dev standard" section from the dev standard sync pull request below. Keep everything in this file outside any block a tool generates (for example Laravel Boost's <laravel-boost-guidelines>). -->
