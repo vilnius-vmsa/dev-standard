@@ -13,6 +13,7 @@
 ## Docker
 
 * [Production multi-stage Dockerfile](docker/Dockerfile.prod.example)
+* [Production multi-stage Nginx/frontend Dockerfile](docker/Dockerfile.nginx.prod.example)
 * [Production Compose su app, worker, Nginx, MySQL ir Redis](docker/docker-compose.production.yml.example)
 
 ## GitHub Actions

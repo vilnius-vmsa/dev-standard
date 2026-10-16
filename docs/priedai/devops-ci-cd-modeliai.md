@@ -38,12 +38,14 @@ Pritaikomi Dockerfile, Compose ir GitHub Actions failai pateikti [DevOps pavyzd�
 
 ## D.2. Dockerfile kontrolė
 
-Produkcinis Dockerfile turi būti multi-stage:
+Produkciniai Dockerfile turi būti multi-stage:
 
 1. `base` etape nustatoma fiksuota OS/runtime versija ir ne-root vartotojas.
 2. `dependencies` etape naudojami Composer/npm ar kito ekosistemos lock failai.
 3. `build` etape kompiliuojami asset'ai ir aplikacija; kešai naudojami tik per BuildKit cache mount.
 4. `runtime` etape kopijuojami tik vykdymui reikalingi failai, nustatomi healthcheck ir exec formos `CMD`.
+
+PHP-FPM ir Nginx/frontend image turi turėti atskirus build ir runtime etapus. Runtime etape negali likti Node, Composer, kompiliatoriai, Git ar package manager cache'ai. Pritaikomi pavyzdžiai: [PHP-FPM Dockerfile](examples/docker/Dockerfile.prod.example) ir [Nginx/frontend Dockerfile](examples/docker/Dockerfile.nginx.prod.example).
 
 Bazinis image turi būti nurodytas kartu su versija ir digest. `latest` ir plaukiojantys package manager reikalavimai produkciniame build'e draudžiami. Composer auth, npm tokenai, sertifikatai ir kiti secrets perduodami per BuildKit secret mount arba runtime secret saugyklą; jų negalima palikti `ARG`, `ENV`, source checkout'e ar image layer'iuose.
 
