@@ -17,6 +17,7 @@ maintenance of Vilnius City Municipality.
 - [Published standard website](https://vilnius-vmsa.github.io/dev-standard/)
 - [Download the latest PDF](https://github.com/vilnius-vmsa/dev-standard/releases/latest/download/dev-standard.pdf)
 - **[→ Quick start](docs/00-greitas-startas.md)** – start here
+- [DevOps CI/CD models](docs/priedai/devops-ci-cd-modeliai.md) – Docker, Compose and branch/tag deployment patterns
 - [Contents](docs/index.md) – the complete standard
 - [Changelog](changelog.md) – version history
 
@@ -142,6 +143,12 @@ skills other names. To document a repository, ask your agent to use the `dev-sta
 with `python3 .agents/skills/dev-standard-docs/check-docs.py`.
 
 ## CI/CD and releases
+
+For containerised applications, use the [DevOps CI/CD models appendix](docs/priedai/devops-ci-cd-modeliai.md) together with
+[Chapter 8](docs/08-devops-ci-cd.md). It documents the repository layout, production Docker/Compose controls and two
+supported release choices: branch-based deployment (`stage` → staging, `main` → production) and tag-based promotion of
+an already tested immutable image. Select one model per application and document its protected branches/tags and rollback
+procedure.
 
 A pull request targeting the `main` branch automatically runs a dependency
 security audit and verifies that the Docusaurus website builds successfully.
