@@ -13,7 +13,7 @@ PRIVALOMA:
 <!-- OPS-ENV-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Visi diegimai į aplinkas turi būti vykdomi tik per CI/CD procesą; rankiniai pakeitimai aplinkose draudžiami, išskyrus aiškiai dokumentuotus incidentų valdymo atvejus.
 <!-- OPS-ENV-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
-*   CI/CD ir GitOps turi užtikrinti, kad aplinkos būtų izoliuotos ir atitiktų 3.[5.3 skyriaus](05-versijavimas.md#53-bibliotekų-ir-paketų-valdymas) reikalavimus.
+*   CI/CD ir GitOps turi užtikrinti, kad aplinkos būtų izoliuotos ir atitiktų 3.[5.3 skyriaus](05-versijavimas.md#53-bibliotekų-ir-paketų-valdymas-angl-dependencies) reikalavimus.
 <!-- OPS-ENV-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Diegimo pipeline negali naudoti tos pačios konfigūracijos ar tų pačių kredencialų skirtingoms aplinkoms, jei tai nėra aiškiai aprašyta ir patvirtinta.
 <!-- OPS-ENV-P04 | process-level -->
