@@ -274,13 +274,13 @@ PRIVALOMA:
 <!-- OPS-REPO-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Aplikacijos repozitorijoje turi būti aiškiai atskirtas programos kodas, `docker/` servisų konfigūracija, šaknyje esantys Compose failai ir `.github/workflows/` aktyvios darbo eigos; šablonai ir pavyzdžiai negali būti maišomi su aktyviomis darbo eigomis.
 <!-- OPS-DOCKER-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
-*   Produkciniai Dockerfile turi naudoti pavadintus multi-stage etapus, versiją ir digest turinčius bazinius image bei lock failus; build metu reikalingi įrankiai negali patekti į galutinį runtime image.
+*   Produkciniai Dockerfile turi naudoti pavadintus multi-stage etapus, versiją ir digest turinčius bazinius image bei, kai aplikacija naudoja package manager, lock failus; build metu reikalingi įrankiai negali patekti į galutinį runtime image.
 <!-- OPS-DOCKER-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Slapti raktai, sertifikatai ir tokenai negali būti kopijuojami į Docker build kontekstą ar image sluoksnius; build kredencialai turi būti perduodami per BuildKit secret mount, o runtime secrets – per saugią aplinkos mechanizmą.
 <!-- OPS-COMPOSE-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Development, production ir CI testų Compose konfigūracijos turi būti atskirtos pagal paskirtį: produkcija naudoja nekintamus image bei runtime secrets ir negali build'inti iš checkout'o.
 <!-- OPS-COMPOSE-P02 | ai-reviewable | stacks=infra,db | enforced-by=ai -->
-*   Compose servisai turi aprašyti healthcheck, priklausomybes, resursų ribas ir saugų vykdymą; bendri servisų numatytieji nustatymai turi būti laikomi anchor'uose, o blue-green variantai gali keisti tik slot'o skirtumus ir turi naudoti bendrą persistent state saugyklą, kai to reikalauja aplikacija.
+*   Compose servisai, kai tai taikoma, turi aprašyti healthcheck, priklausomybes, resursų ribas ir saugų vykdymą; bendri servisų numatytieji nustatymai rekomenduojami anchor'uose, o blue-green variantai gali keisti tik slot'o skirtumus ir turi naudoti bendrą persistent state saugyklą, kai to reikalauja aplikacija.
 
 > Susiję skyriai: [3.5 Konfigūracija, slaptieji raktai ir aplinkos](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [6 Saugumas (Security by Design)](06-saugumas.md) · [8.5 Konteinerių ir Kubernetes diegimo reikalavimai](#85-konteinerių-ir-kubernetes-diegimo-reikalavimai)
 
@@ -333,7 +333,7 @@ Tag push neturi iš naujo tikrinti ar perbuild'inti nepatikrinto kodo. Jei relea
 PRIVALOMA:
 
 <!-- OPS-PIPE-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
-*   Nepriklausomai nuo pasirinkto srauto, deploy gali prasidėti tik po sėkmingo testavimo, image vulnerability scan, SBOM ir provenance generavimo, attestation patikros, smoke testų bei faktinio tikslinės aplinkos health patikrinimo; kiekvienam job turi būti suteiktos tik būtinos GitHub permissions.
+*   Nepriklausomai nuo pasirinkto srauto, deploy gali prasidėti tik po sėkmingo testavimo, image vulnerability scan, SBOM ir provenance generavimo, attestation patikros bei smoke testų; deployment sėkmė patvirtinama tik po faktinio tikslinės aplinkos health patikrinimo; kiekvienam job turi būti suteiktos tik būtinos GitHub permissions.
 
 | Kriterijus | Branch-based | Tag-based |
 |---|---|---|

@@ -1217,8 +1217,8 @@ OPS-COMPOSE-P01:
   text: Development, production and CI test Compose configurations are separated by purpose; production uses immutable images and runtime secrets and cannot build from the checkout.
   source_hash: 72e0314558c2
 OPS-COMPOSE-P02:
-  text: Compose services define healthchecks, dependencies, resource limits and secure execution; shared defaults use anchors, blue-green variants change only slot differences, and application state uses shared persistent storage when required.
-  source_hash: 26900871ae7b
+  text: Where applicable, Compose services define healthchecks, dependencies, resource limits and secure execution; shared defaults are recommended in anchors, blue-green variants change only slot differences, and application state uses shared persistent storage when required.
+  source_hash: a26145ea6797
 OPS-DEVSEC-P01:
   text: CI/CD runs security checks appropriate to the system's risk level.
   source_hash: bcc2673184c1
@@ -1235,8 +1235,8 @@ OPS-DEVSEC-R01:
   text: An SBOM is generated automatically at release and stored with the release artefacts.
   source_hash: d69ce45bf9ff
 OPS-DOCKER-P01:
-  text: Production Dockerfiles use named multi-stage stages, base images with a version and digest, and lock files; tools needed only during the build must not enter the final runtime image.
-  source_hash: f171e26c93e8
+  text: Production Dockerfiles use named multi-stage stages, base images with a version and digest and, where the application uses a package manager, lock files; tools needed only during the build must not enter the final runtime image.
+  source_hash: 217fb1d42970
 OPS-DOCKER-P02:
   text: Secrets, certificates and tokens are not copied into the Docker build context or image layers; build credentials use BuildKit secret mounts and runtime secrets use a secure environment mechanism.
   source_hash: cb72d094c63e
@@ -1322,8 +1322,8 @@ OPS-MON-R01:
   text: Minimum observability readiness (health, log collection and key metrics) is checked before release.
   source_hash: f9de8a2aedae
 OPS-PIPE-P01:
-  text: Regardless of the selected flow, deployment starts only after successful tests, image vulnerability scanning, SBOM and provenance generation, attestation verification, smoke tests and an actual target-environment health check; each job receives only the GitHub permissions it needs.
-  source_hash: f18e30a32be9
+  text: Regardless of the selected flow, deployment starts only after successful tests, image vulnerability scanning, SBOM and provenance generation, attestation verification and smoke tests; deployment success is confirmed only after an actual target-environment health check; each job receives only the GitHub permissions it needs.
+  source_hash: 9b6adcb0828f
 OPS-REPO-P01:
   text: An application repository clearly separates application code, Docker service configuration, root Compose files and active workflows; templates and examples are not mixed with active workflows.
   source_hash: 57644446cec4

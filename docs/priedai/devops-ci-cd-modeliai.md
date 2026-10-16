@@ -15,7 +15,6 @@ application/
 │   └── workflows/
 │       ├── ci.lint.yml
 │       ├── ci.build.yml
-│       ├── ci.test-image.yml
 │       └── cd.deploy.yml
 ├── docker/
 │   ├── <service>/
@@ -68,12 +67,12 @@ Darbo eigų failai gali būti sujungti ar išskaidyti pagal projekto dydį, tač
 | Darbo eiga / job grupė | Trigger'is | Atsakomybė | Išvestis |
 |---|---|---|---|
 | `ci.lint` | PR ir protected branch push | Composer/npm validacija, formatavimas, unit/contract testai, Compose lint ir secret scan | privalomas kokybės vartas |
-| `ci.build` | sėkmingas `ci.lint` po merge | checkout pagal exact SHA, multi-stage build, registry push, image scan, SBOM, provenance ir attestation | immutable candidate digest |
-| `ci.test-image` | po build/attestation | disposable Compose su MySQL/Redis/worker, migracijos ir kritinis smoke scenarijus | patikrintas digest |
+| `ci.build` | sėkmingas `ci.lint` po merge | checkout pagal exact SHA, multi-stage build, registry push, image scan, SBOM, provenance, attestation, image verification ir disposable smoke test | patikrintas immutable candidate digest |
+| pasirenkamas `ci.test-image` | po build/attestation, didesniuose projektuose | Tas pats image-test etapas kaip atskira reusable workflow, kai jo nereikia laikyti pagrindiniame build workflow | patikrintas digest |
 | `cd.deploy` | po promotion ir smoke | runtime secrets, image digest deploy, migracijos politika ir health/readiness patikra | faktinio deploy rezultatas |
 | `ops` (jei taikoma) | atskiras operatoriaus veiksmas | vienkartinės DB ar atkūrimo operacijos su aiškiu target environment | audituojamas operatoriaus rezultatas |
 
-`ci.build` ir `ci.test-image` turi perduoti tarp job'ų konkretų source SHA bei digest, o ne per naujo spręsti branch'o ar perrašomo tag reikšmę. `cd.deploy` negali būti laikomas sėkmingu vien todėl, kad paruošė secrets ar Compose failą: sėkmė reiškia faktinį paleidimą ir health patikrą.
+`ci.build` (arba pasirenkamas `ci.test-image`) turi perduoti tarp job'ų konkretų source SHA bei digest, o ne per naujo spręsti branch'o ar perrašomo tag reikšmę. `cd.deploy` negali būti laikomas sėkmingu vien todėl, kad paruošė secrets ar Compose failą: sėkmė reiškia faktinį paleidimą ir health patikrą.
 
 GitHub Actions trečiųjų šalių action'ai pin'inami į commit SHA, permissions nurodomos workflow arba job lygiu, o `pull_request` iš fork'o negali gauti production secrets ar privileged build tokenų. Concurrency grupės neleidžia dviem leidimams vienu metu perrašyti tos pačios aplinkos.
 
