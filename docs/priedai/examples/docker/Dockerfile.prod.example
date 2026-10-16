@@ -1,0 +1,56 @@
+# syntax=docker/dockerfile:1.7
+#
+# Reference template for a Laravel/PHP-FPM application.
+# Provide reviewed, immutable image references at build time, for example:
+#   --build-arg PHP_RUNTIME_IMAGE=php:8.4-fpm-alpine@sha256:<reviewed-digest>
+#   --build-arg COMPOSER_IMAGE=composer:2.8@sha256:<reviewed-digest>
+#
+# This file intentionally has no floating defaults. A project must choose and
+# review the exact base-image manifests before building.
+
+ARG COMPOSER_IMAGE
+FROM ${COMPOSER_IMAGE} AS vendor
+
+WORKDIR /var/www
+COPY composer.json composer.lock ./
+
+RUN --mount=type=secret,id=composer_auth,required=false \
+    --mount=type=cache,id=composer-cache,target=/tmp/composer-cache \
+    set -eu; \
+    if [ -s /run/secrets/composer_auth ]; then \
+        export COMPOSER_AUTH="$(cat /run/secrets/composer_auth)"; \
+    fi; \
+    COMPOSER_CACHE_DIR=/tmp/composer-cache \
+        composer install \
+            --no-dev \
+            --prefer-dist \
+            --no-interaction \
+            --no-progress \
+            --no-scripts \
+            --optimize-autoloader
+
+ARG PHP_RUNTIME_IMAGE
+FROM ${PHP_RUNTIME_IMAGE} AS runtime
+
+WORKDIR /var/www
+ENV APP_ENV=production \
+    LOG_CHANNEL=stderr \
+    PHP_OPCACHE_VALIDATE_TIMESTAMPS=0
+
+# Copy only application/runtime inputs. Do not copy .env, credentials, VCS
+# metadata, dependency caches, or test tooling into the production image.
+COPY --from=vendor /var/www/vendor ./vendor
+COPY artisan composer.json composer.lock ./
+COPY app bootstrap config database public resources routes storage ./
+
+RUN mkdir -p storage/framework/cache storage/framework/sessions \
+        storage/framework/views storage/logs bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
+
+USER www-data
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD php artisan about --no-ansi >/dev/null || exit 1
+
+EXPOSE 9000
+CMD ["php-fpm", "-F"]

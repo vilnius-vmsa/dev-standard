@@ -1,0 +1,72 @@
+name: Example - CD Deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: Protected deployment environment name.
+        required: true
+        type: string
+      source_sha:
+        description: Exact source revision represented by the images.
+        required: true
+        type: string
+      app_image:
+        description: Immutable application image reference.
+        required: true
+        type: string
+      nginx_image:
+        description: Immutable Nginx image reference.
+        required: true
+        type: string
+    secrets:
+      RUNTIME_ENV:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: [self-hosted, deployment]
+    environment: ${{ inputs.environment }}
+    timeout-minutes: 20
+    env:
+      DEPLOY_ROOT: /srv/<application>
+      COMPOSE_FILE: /srv/<application>/docker-compose.production.yml
+      APP_IMAGE: ${{ inputs.app_image }}
+      NGINX_IMAGE: ${{ inputs.nginx_image }}
+      SOURCE_SHA: ${{ inputs.source_sha }}
+    steps:
+      - name: Validate deployment inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$APP_IMAGE" == *@sha256:* ]]
+          [[ "$NGINX_IMAGE" == *@sha256:* ]]
+
+      - name: Prepare runtime environment
+        shell: bash
+        env:
+          RUNTIME_ENV: ${{ secrets.RUNTIME_ENV }}
+        run: |
+          set -euo pipefail
+          umask 077
+          printf '%s\n' "$RUNTIME_ENV" > "$RUNNER_TEMP/runtime.env"
+
+      - name: Deploy immutable images and wait for readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$DEPLOY_ROOT"
+          export RUNTIME_ENV_FILE="$RUNNER_TEMP/runtime.env"
+          export APP_IMAGE NGINX_IMAGE
+          docker compose --env-file "$RUNTIME_ENV_FILE" -f "$COMPOSE_FILE" pull app worker nginx
+          docker compose --env-file "$RUNTIME_ENV_FILE" -f "$COMPOSE_FILE" up -d --wait
+          docker compose --env-file "$RUNTIME_ENV_FILE" -f "$COMPOSE_FILE" run --rm app php artisan migrate --force
+
+      - name: Verify public health endpoint
+        shell: bash
+        run: curl --fail --silent --show-error --retry 10 --retry-delay 3 https://<public-host>/health

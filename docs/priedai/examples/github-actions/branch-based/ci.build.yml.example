@@ -1,0 +1,177 @@
+name: Example - CI Build (branch-based)
+
+on:
+  workflow_run:
+    workflows: ["CI: Lint and Validate"]
+    types: [completed]
+    branches: [stage, main]
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: build-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  build-test-promote:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      environment: ${{ steps.meta.outputs.environment }}
+      source_sha: ${{ steps.meta.outputs.source_sha }}
+      app_image: ${{ steps.image.outputs.app_image }}
+      nginx_image: ${{ steps.image.outputs.nginx_image }}
+    steps:
+      - name: Checkout exact linted revision
+        uses: actions/checkout@<reviewed-commit-sha>
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 1
+
+      - name: Resolve deployment metadata
+        id: meta
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+          SOURCE_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+          case "$SOURCE_BRANCH" in
+            stage) ENVIRONMENT=staging ;;
+            main) ENVIRONMENT=production ;;
+            *) echo "Unsupported protected branch: $SOURCE_BRANCH" >&2; exit 1 ;;
+          esac
+          printf 'source_sha=%s\n' "$SOURCE_SHA" >> "$GITHUB_OUTPUT"
+          printf 'environment=%s\n' "$ENVIRONMENT" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to the container registry
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REGISTRY: ghcr.io
+        run: echo "$GH_TOKEN" | docker login "$REGISTRY" -u "${{ github.actor }}" --password-stdin
+
+      - name: Build and push immutable candidate images
+        id: image
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
+          ENVIRONMENT: ${{ steps.meta.outputs.environment }}
+          APP_REPOSITORY: ghcr.io/<owner>/<application>-image-php
+          NGINX_REPOSITORY: ghcr.io/<owner>/<application>-image-nginx
+        run: |
+          set -euo pipefail
+          CANDIDATE_TAG="candidate-${SOURCE_SHA}-${GITHUB_RUN_ID}"
+          docker buildx build --push --file docker/php-fpm/Dockerfile.prod \
+            --tag "$APP_REPOSITORY:$CANDIDATE_TAG" --metadata-file app-metadata.json .
+          docker buildx build --push --file docker/nginx/Dockerfile.prod \
+            --tag "$NGINX_REPOSITORY:$CANDIDATE_TAG" --metadata-file nginx-metadata.json .
+          APP_DIGEST="$(jq -r '."containerimage.digest"' app-metadata.json)"
+          NGINX_DIGEST="$(jq -r '."containerimage.digest"' nginx-metadata.json)"
+          [[ "$APP_DIGEST" == sha256:* && "$NGINX_DIGEST" == sha256:* ]]
+          echo "app_repository=$APP_REPOSITORY" >> "$GITHUB_OUTPUT"
+          echo "app_digest=$APP_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "nginx_repository=$NGINX_REPOSITORY" >> "$GITHUB_OUTPUT"
+          echo "nginx_digest=$NGINX_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "app_image=$APP_REPOSITORY@$APP_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "nginx_image=$NGINX_REPOSITORY@$NGINX_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "candidate_tag=$CANDIDATE_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Scan published application image
+        uses: aquasecurity/trivy-action@<reviewed-commit-sha>
+        with:
+          image-ref: ${{ steps.image.outputs.app_image }}
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          format: table
+
+      - name: Scan published Nginx image
+        uses: aquasecurity/trivy-action@<reviewed-commit-sha>
+        with:
+          image-ref: ${{ steps.image.outputs.nginx_image }}
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          format: table
+
+      - name: Generate application SBOM
+        uses: anchore/sbom-action@<reviewed-commit-sha>
+        with:
+          image: ${{ steps.image.outputs.app_image }}
+          format: spdx-json
+          output-file: sbom-app.spdx.json
+
+      - name: Generate Nginx SBOM
+        uses: anchore/sbom-action@<reviewed-commit-sha>
+        with:
+          image: ${{ steps.image.outputs.nginx_image }}
+          format: spdx-json
+          output-file: sbom-nginx.spdx.json
+
+      - name: Attest application build provenance
+        uses: actions/attest-build-provenance@<reviewed-commit-sha>
+        with:
+          subject-name: ${{ steps.image.outputs.app_repository }}
+          subject-digest: ${{ steps.image.outputs.app_digest }}
+          push-to-registry: true
+
+      - name: Attest Nginx build provenance
+        uses: actions/attest-build-provenance@<reviewed-commit-sha>
+        with:
+          subject-name: ${{ steps.image.outputs.nginx_repository }}
+          subject-digest: ${{ steps.image.outputs.nginx_digest }}
+          push-to-registry: true
+
+      - name: Smoke-test the immutable images
+        shell: bash
+        env:
+          APP_IMAGE: ${{ steps.image.outputs.app_image }}
+        run: docker run --rm "$APP_IMAGE" php artisan about --no-ansi
+
+      - name: Promote the smoke-tested application image
+        shell: bash
+        env:
+          APP_IMAGE: ${{ steps.image.outputs.app_image }}
+          NGINX_IMAGE: ${{ steps.image.outputs.nginx_image }}
+          ENVIRONMENT: ${{ steps.meta.outputs.environment }}
+        run: |
+          set -euo pipefail
+          docker buildx imagetools create --tag "${APP_IMAGE%@*}:$ENVIRONMENT" "$APP_IMAGE"
+          docker buildx imagetools create --tag "${NGINX_IMAGE%@*}:$ENVIRONMENT" "$NGINX_IMAGE"
+
+      - name: Publish tested image metadata
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
+          APP_DIGEST: ${{ steps.image.outputs.app_digest }}
+          NGINX_DIGEST: ${{ steps.image.outputs.nginx_digest }}
+        run: |
+          set -euo pipefail
+          jq -n \
+            --arg source_sha "$SOURCE_SHA" \
+            --arg app_digest "$APP_DIGEST" \
+            --arg nginx_digest "$NGINX_DIGEST" \
+            '{source_sha: $source_sha, app_digest: $app_digest, nginx_digest: $nginx_digest}' \
+            > metadata.json
+
+      - name: Upload tested image metadata
+        uses: actions/upload-artifact@<reviewed-commit-sha>
+        with:
+          name: image-metadata
+          path: metadata.json
+          if-no-files-found: error
+
+  deploy:
+    needs: build-test-promote
+    uses: ./.github/workflows/cd.deploy.yml
+    with:
+      environment: ${{ needs.build-test-promote.outputs.environment }}
+      source_sha: ${{ needs.build-test-promote.outputs.source_sha }}
+      app_image: ${{ needs.build-test-promote.outputs.app_image }}
+      nginx_image: ${{ needs.build-test-promote.outputs.nginx_image }}
+    secrets: inherit

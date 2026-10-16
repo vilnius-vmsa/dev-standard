@@ -27,11 +27,14 @@ application/
 ├── docker-compose.yml
 ├── docker-compose.production.yml
 ├── docker-compose.ci-test-image.override.yml
+├── docs/priedai/examples/       # reference files; not active workflows
 ├── .dockerignore
 └── application source, lock files and tests
 ```
 
 Aktyvios darbo eigos laikomos `.github/workflows/`, o pavyzdžiai ir reusable workflow šablonai – atskiroje dokumentuotoje vietoje. Produkcinė Compose konfigūracija turi būti vykdoma iš konkretaus image ref, o ne iš lokalaus checkout'o.
+
+Pritaikomi Dockerfile, Compose ir GitHub Actions failai pateikti [DevOps pavyzdžių kataloge](examples/README.md). Jie laikomi dokumentacijos dalimi, todėl jų kopijavimas į `.github/workflows/` turi būti sąmoningas veiksmas, atlikus projekto, registry, secrets ir deployment adapterio pritaikymą.
 
 ## D.2. Dockerfile kontrolė
 
@@ -72,13 +75,13 @@ Darbo eigų failai gali būti sujungti ar išskaidyti pagal projekto dydį, tač
 | `cd.deploy` | po promotion ir smoke | runtime secrets, image digest deploy, migracijos politika ir health/readiness patikra | faktinio deploy rezultatas |
 | `ops` (jei taikoma) | atskiras operatoriaus veiksmas | vienkartinės DB ar atkūrimo operacijos su aiškiu target environment | audituojamas operatoriaus rezultatas |
 
-`ci.build` (arba pasirenkamas `ci.test-image`) turi perduoti tarp job'ų konkretų source SHA bei digest, o ne per naujo spręsti branch'o ar perrašomo tag reikšmę. `cd.deploy` negali būti laikomas sėkmingu vien todėl, kad paruošė secrets ar Compose failą: sėkmė reiškia faktinį paleidimą ir health patikrą.
+`ci.build` (arba pasirenkamas `ci.test-image`) turi perduoti tarp job'ų konkretų source SHA bei digest, o ne per naujo spręsti branch'o ar perrašomo tag reikšmę. `cd.deploy` negali būti laikomas sėkmingu vien todėl, kad paruošė secrets ar Compose failą: sėkmė reiškia faktinį paleidimą ir health patikrą. Minimalūs pavyzdžiai pateikti [bendram lint vartui](examples/github-actions/ci.lint.yml.example), [branch-based build](examples/github-actions/branch-based/ci.build.yml.example), [reusable deploy](examples/github-actions/cd.deploy.yml.example) ir [tag-based release](examples/github-actions/tag-based/ci.release.yml.example).
 
 GitHub Actions trečiųjų šalių action'ai pin'inami į commit SHA, permissions nurodomos workflow arba job lygiu, o `pull_request` iš fork'o negali gauti production secrets ar privileged build tokenų. Concurrency grupės neleidžia dviem leidimams vienu metu perrašyti tos pačios aplinkos.
 
 ## D.5. Branch-based srauto pavyzdys
 
-Šis modelis tinka, kai `stage` yra nuolatinė staging aplinka, `main` – produkcijos šaltinis, o komanda tą pačią dieną leidžia daug pakeitimų.
+Šis modelis tinka, kai `stage` yra nuolatinė staging aplinka, `main` – produkcijos šaltinis, o komanda tą pačią dieną leidžia daug pakeitimų. Pritaikomas workflow pavyzdys: [branch-based/ci.build.yml.example](examples/github-actions/branch-based/ci.build.yml.example).
 
 ```text
 feature/*
@@ -105,7 +108,7 @@ Svarbios sąlygos:
 
 ## D.6. Tag-based srauto pavyzdys
 
-Šis modelis tinka, kai production leidimai turi būti aiškiai versijuoti ir patvirtinti.
+Šis modelis tinka, kai production leidimai turi būti aiškiai versijuoti ir patvirtinti. Pritaikomas workflow pavyzdys: [tag-based/ci.release.yml.example](examples/github-actions/tag-based/ci.release.yml.example).
 
 ```text
 PR/main ── lint/validate/test ── candidate build ── scan/SBOM/provenance

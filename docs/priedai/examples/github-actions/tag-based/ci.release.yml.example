@@ -1,0 +1,101 @@
+name: Example - CI Release (tag-based)
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  verify-promote-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      source_sha: ${{ steps.metadata.outputs.source_sha }}
+      app_image: ${{ steps.metadata.outputs.app_image }}
+      nginx_image: ${{ steps.metadata.outputs.nginx_image }}
+    steps:
+      - name: Checkout the exact tag commit
+        uses: actions/checkout@<reviewed-commit-sha>
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Verify this is a protected main commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags --depth=1
+          TAG_SHA="$(git rev-list -n 1 "$GITHUB_REF_NAME")"
+          git merge-base --is-ancestor "$TAG_SHA" origin/main
+
+      - name: Resolve smoke-tested candidate metadata
+        id: metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_SHA: ${{ github.sha }}
+          APP_REPOSITORY: ghcr.io/<owner>/<application>-image-php
+          NGINX_REPOSITORY: ghcr.io/<owner>/<application>-image-nginx
+        shell: bash
+        run: |
+          set -euo pipefail
+          # CI Build must publish this metadata only after scan, attestation and
+          # smoke-test succeed. Never rebuild here and never resolve latest.
+          BUILD_RUN_ID="$(gh run list --workflow ci.build.yml --branch main --commit "$TAG_SHA" \
+            --status success --limit 20 --json databaseId --jq '.[0].databaseId')"
+          test -n "$BUILD_RUN_ID"
+          rm -rf "$RUNNER_TEMP/image-metadata"
+          mkdir -p "$RUNNER_TEMP/image-metadata"
+          gh run download "$BUILD_RUN_ID" --name image-metadata --dir "$RUNNER_TEMP/image-metadata"
+          SOURCE_SHA="$(jq -r .source_sha "$RUNNER_TEMP/image-metadata/metadata.json")"
+          APP_DIGEST="$(jq -r .app_digest "$RUNNER_TEMP/image-metadata/metadata.json")"
+          NGINX_DIGEST="$(jq -r .nginx_digest "$RUNNER_TEMP/image-metadata/metadata.json")"
+          [[ "$SOURCE_SHA" == "$TAG_SHA" ]]
+          [[ "$APP_DIGEST" == sha256:* && "$NGINX_DIGEST" == sha256:* ]]
+          printf 'source_sha=%s\n' "$SOURCE_SHA" >> "$GITHUB_OUTPUT"
+          printf 'app_image=%s@%s\n' "$APP_REPOSITORY" "$APP_DIGEST" >> "$GITHUB_OUTPUT"
+          printf 'nginx_image=%s@%s\n' "$NGINX_REPOSITORY" "$NGINX_DIGEST" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to the container registry
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: echo "$GH_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Promote the tested digests to the release tag
+        env:
+          APP_IMAGE: ${{ steps.metadata.outputs.app_image }}
+          NGINX_IMAGE: ${{ steps.metadata.outputs.nginx_image }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          docker buildx imagetools create --tag "${APP_IMAGE%@*}:$TAG" "$APP_IMAGE"
+          docker buildx imagetools create --tag "${NGINX_IMAGE%@*}:$TAG" "$NGINX_IMAGE"
+
+      - name: Create or publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          SOURCE_SHA: ${{ steps.metadata.outputs.source_sha }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --draft=false --latest
+          else
+            gh release create "$TAG" --target "$SOURCE_SHA" --generate-notes --latest
+          fi
+
+  deploy:
+    needs: verify-promote-release
+    uses: ./.github/workflows/cd.deploy.yml
+    with:
+      environment: production
+      source_sha: ${{ needs.verify-promote-release.outputs.source_sha }}
+      app_image: ${{ needs.verify-promote-release.outputs.app_image }}
+      nginx_image: ${{ needs.verify-promote-release.outputs.nginx_image }}
+    secrets: inherit
