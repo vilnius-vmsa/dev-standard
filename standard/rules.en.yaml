@@ -1222,6 +1222,12 @@ OPS-CI-R01:
 OPS-CI-R02:
   text: Critical projects clearly separate fast PR checks from full pre-release checks.
   source_hash: 1c3da58fe87e
+OPS-COMPOSE-P01:
+  text: Development, production and CI test Compose configurations are separated by purpose; production uses immutable images and runtime secrets and cannot build from the checkout.
+  source_hash: 72e0314558c2
+OPS-COMPOSE-P02:
+  text: Where applicable, Compose services define healthchecks, dependencies, resource limits and secure execution; shared defaults are recommended in anchors, blue-green variants change only slot differences, and application state uses shared persistent storage when required.
+  source_hash: a26145ea6797
 OPS-DEVSEC-P01:
   text: CI/CD runs security checks appropriate to the system's risk level.
   source_hash: bcc2673184c1
@@ -1237,12 +1243,18 @@ OPS-DEVSEC-P04:
 OPS-DEVSEC-R01:
   text: An SBOM is generated automatically at release and stored with the release artefacts.
   source_hash: d69ce45bf9ff
+OPS-DOCKER-P01:
+  text: Production Dockerfiles use named multi-stage stages, base images with a version and digest and, where the application uses a package manager, lock files; tools needed only during the build must not enter the final runtime image.
+  source_hash: 217fb1d42970
+OPS-DOCKER-P02:
+  text: Secrets, certificates and tokens are not copied into the Docker build context or image layers; build credentials use BuildKit secret mounts and runtime secrets use a secure environment mechanism.
+  source_hash: cb72d094c63e
 OPS-ENV-P01:
   text: All deployments to environments go only through CI/CD; manual changes in environments are forbidden except for clearly documented incident handling.
   source_hash: 3d940a48cd81
 OPS-ENV-P02:
   text: CI/CD and GitOps keep environments isolated and compliant with section 3.5.3.
-  source_hash: eff91a64759f
+  source_hash: 63d11d48f6a6
 OPS-ENV-P03:
   text: The deployment pipeline does not use the same configuration or credentials for different environments unless this is explicitly described and approved.
   source_hash: e0822c487a81
@@ -1252,6 +1264,12 @@ OPS-ENV-P05:
 OPS-ENV-R02:
   text: The project's deployment documentation describes how environments, branches and deployment flows relate.
   source_hash: afef1865f877
+OPS-FLOW-P01:
+  text: When a branch-based model is selected, every protected branch has an unambiguous environment mapping and the deployed artifact is built from the workflow head SHA and passes lint, test, security, SBOM/provenance, attestation and smoke gates.
+  source_hash: f12cd8aa277f
+OPS-FLOW-P02:
+  text: Automatic synchronization is one-way only, from a successfully production-deployed main commit to stage; stage is never automatically merged into main, and conflicts stop synchronization for human resolution.
+  source_hash: bf2a9273649c
 OPS-FIN-P01:
   text: Resources are labelled so costs can be seen per system, project or environment.
   source_hash: df3b4756b98d
@@ -1312,6 +1330,12 @@ OPS-MON-P04:
 OPS-MON-R01:
   text: Minimum observability readiness (health, log collection and key metrics) is checked before release.
   source_hash: f9de8a2aedae
+OPS-PIPE-P01:
+  text: Regardless of the selected flow, deployment starts only after successful tests, image vulnerability scanning, SBOM and provenance generation, attestation verification and smoke tests; deployment success is confirmed only after an actual target-environment health check; each job receives only the GitHub permissions it needs.
+  source_hash: 9b6adcb0828f
+OPS-REPO-P01:
+  text: An application repository clearly separates application code, Docker service configuration, root Compose files and active workflows; templates and examples are not mixed with active workflows.
+  source_hash: 57644446cec4
 OPS-REL-P01:
   text: Every production release has a clear release description.
   source_hash: 5a9cf686b827
@@ -1330,6 +1354,15 @@ OPS-REL-R01:
 OPS-REL-R02:
   text: Release reviews cover technical, operational and business changes in one place.
   source_hash: 87ae31a1b852
+OPS-TAG-P01:
+  text: A production tag is a protected semantic-version tag that exists as refs/tags/name and points to a pre-tested commit; a branch named v1.2.3 is not a release tag.
+  source_hash: e5e7540e5048
+OPS-TAG-P02:
+  text: In a tag-based release, the image is built once from the exact commit, checked by vulnerability scanning, SBOM, provenance, attestation and smoke tests, and the same digest is promoted without a rebuild.
+  source_hash: 1d26adb729b6
+OPS-TAG-P03:
+  text: A release records the commit SHA, image digests, migration information and rollback information; rollback uses an immutable digest or version tag, not an overwritten latest tag.
+  source_hash: 237227c7efc0
 OPS-VER-P02:
   text: Container images and other artefacts are tagged so it is clear which code version is deployed.
   source_hash: 5afec404997e

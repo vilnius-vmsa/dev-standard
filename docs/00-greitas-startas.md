@@ -62,7 +62,7 @@ Prieš projektavimą / naują funkcionalumą:
 | Kuriu naują API endpoint | [3.3 Backend ir API principai](03-architektura.md#33-backend-ir-api-principai), [6.2 Autentifikacija ir autorizacija](06-saugumas.md#62-autentifikacija-ir-autorizacija) |
 | Rašau PR / MR | [4.3.5 PR reikalavimai](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai), [4.4 CR principai](04-kodo-kurimo-gaires.md#44-code-review-principai), [4.5](04-kodo-kurimo-gaires.md#45-testai) |
 | Konfigūruoju CI/CD pipeline | [8.2 CI minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai), [8.6 DevSecOps CI/CD kontrolė](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė) |
-| Pridedu naują priklausomybę | [5.3 Bibliotekų ir paketų valdymas](05-versijavimas.md#53-bibliotekų-ir-paketų-valdymas), [5.4 Leidžiamos ir draudžiamos priklausomybės](05-versijavimas.md#54-leidžiamos-ir-draudžiamos-priklausomybės) |
+| Pridedu naują priklausomybę | [5.3 Bibliotekų ir paketų valdymas](05-versijavimas.md#53-bibliotekų-ir-paketų-valdymas-angl-dependencies), [5.4 Leidžiamos ir draudžiamos priklausomybės](05-versijavimas.md#54-leidžiamos-ir-draudžiamos-priklausomybės) |
 | Projektuoju integraciją | [3.4 Duomenys ir integracijos](03-architektura.md#34-duomenys-ir-integracijos), [6.3 Duomenų apsauga (GDPR kontekstas)](06-saugumas.md#63-duomenų-apsauga-gdpr-kontekstas) |
 | Tvarkau incidentą | [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas), [9.4 Klaidos ir error handling](09-stebesena-logai.md#94-klaidos-ir-error-handling) |
 | Priimu tiekėjo darbą | [12.7 Darbų priėmimas](12-tiekeju-reikalavimai.md#127-darbų-priėmimas), [12.3 Privalomi perdavimo artefaktai](12-tiekeju-reikalavimai.md#123-privalomi-perdavimo-artefaktai) |
@@ -108,7 +108,7 @@ Ką patikrinti prieš pradedant naują projektą arba perimant esamą sistemą:
 | Taisyklė | Nuoroda |
 |---|---|
 | Backend: struktūruotas klaidos atsakymas (`type`, `title`, `status`, `detail`) — RFC 7807 | [3.3.8](03-architektura.md#338-standartizuotos-klaidos) |
-| Frontend: Global Error Boundary + fallback UI | [3.2.7](03-architektura.md#327-klaidų-apdorojimas-ir-ux-atsparumas) |
+| Frontend: Global Error Boundary + fallback UI | [3.2.7](03-architektura.md#327-api-komunikacija-ir-klaidų-valdymas) |
 | Loguoti kontekstą, ne tik stacktrace; jokių asmens duomenų | [9.1](09-stebesena-logai.md#91-logging-žurnalų-standartai) |
 | Klaidų klasifikacija: `retriable`, `user_error`, `system_error`, `external_dependency` | [9.4](09-stebesena-logai.md#94-klaidos-ir-error-handling) |
 | Saugumas: klaidų pranešimai neturi atskleisti vidinės sistemos informacijos | [6.1](06-saugumas.md#61-bendrieji-saugumo-principai) |
@@ -135,4 +135,4 @@ Ką patikrinti prieš pradedant naują projektą arba perimant esamą sistemą:
 | Puslapiavimas: maksimalus page size serverio pusėje | [3.3.11](03-architektura.md#3311-puslapiavimas) |
 | Autentifikacija: Bearer token arba session cookie | [6.2](06-saugumas.md#62-autentifikacija-ir-autorizacija) |
 | Rate limiting viešiems endpointams | [3.3.4](03-architektura.md#334-apsauga-ir-prieiga) |
-| Klaidos: RFC 7807 `application/problem+json` | [3.3.8](03-architektura.md#338-klaidų-apdorojimas-api-lygmeniu) |
+| Klaidos: RFC 7807 `application/problem+json` | [3.3.8](03-architektura.md#338-standartizuotos-klaidos) |

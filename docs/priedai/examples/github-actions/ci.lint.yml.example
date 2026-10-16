@@ -1,0 +1,51 @@
+name: Example - CI Lint and Validate
+
+on:
+  pull_request:
+    branches: [stage, main]
+  push:
+    branches: [stage, main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint, test and validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # Replace the placeholder with the reviewed commit SHA for this action.
+      - name: Checkout exact revision
+        uses: actions/checkout@<reviewed-commit-sha>
+
+      - name: Validate Composer dependencies
+        if: ${{ hashFiles('composer.json') != '' }}
+        run: composer validate --strict --no-interaction
+
+      - name: Audit Composer dependencies
+        if: ${{ hashFiles('composer.lock') != '' }}
+        run: composer audit --locked --no-interaction
+
+      - name: Run application tests
+        run: composer test --no-interaction
+
+      - name: Install frontend dependencies
+        if: ${{ hashFiles('package-lock.json') != '' }}
+        run: npm ci --ignore-scripts
+
+      - name: Audit frontend dependencies
+        if: ${{ hashFiles('package-lock.json') != '' }}
+        run: npm audit --audit-level=high
+
+      - name: Build frontend assets
+        if: ${{ hashFiles('package-lock.json') != '' }}
+        run: npm run build
+
+      - name: Validate production Compose
+        if: ${{ hashFiles('docker-compose.production.yml') != '' }}
+        run: docker compose -f docker-compose.production.yml config --quiet
+
+      - name: Scan repository for secrets
+        # Pin gitleaks to a reviewed action commit in the consuming repository.
+        uses: gitleaks/gitleaks-action@<reviewed-commit-sha>

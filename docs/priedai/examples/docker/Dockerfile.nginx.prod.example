@@ -1,0 +1,21 @@
+# syntax=docker/dockerfile:1.7
+# Inactive example. Copy to docker/nginx/Dockerfile.prod and replace all
+# placeholders. Build from the exact PHP image digest used by the release.
+
+ARG PHP_IMAGE_REF
+FROM ${PHP_IMAGE_REF} AS application
+
+FROM nginx:1.27-alpine@sha256:REPLACE_WITH_NGINX_DIGEST AS runtime
+
+# The PHP image owns the application build and public assets. The Nginx image
+# contains only the public web root and server configuration.
+COPY --from=application /var/www/public /usr/share/nginx/html
+COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY docker/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
+
+RUN mkdir -p /var/cache/nginx /var/run \
+    && chown -R nginx:nginx /var/cache/nginx /var/run /usr/share/nginx/html
+
+USER nginx
+EXPOSE 8080
+CMD ["nginx", "-g", "daemon off;"]

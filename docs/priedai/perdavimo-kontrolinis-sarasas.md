@@ -14,7 +14,7 @@
 | 1.3 | CI/CD konfigūracijos ir build scenarijai perduoti | [12.3.1](../12-tiekeju-reikalavimai.md#1231-programinį-kodą) | ☐ |
 | 1.4 | Testų kodas ir testavimo ataskaitos perduoti | [12.3.1](../12-tiekeju-reikalavimai.md#1231-programinį-kodą) | ☐ |
 | 1.5 | Nėra hardcoded secrets; build procesas veikia | [12.3.1](../12-tiekeju-reikalavimai.md#1231-programinį-kodą) | ☐ |
-| 1.6 | Lock failai repozitorijoje, nėra `latest` priklausomybių | [5.3](../05-versijavimas.md#53-bibliotekų-ir-paketų-valdymas) | ☐ |
+| 1.6 | Lock failai repozitorijoje, nėra `latest` priklausomybių | [5.3](../05-versijavimas.md#53-bibliotekų-ir-paketų-valdymas-angl-dependencies) | ☐ |
 
 ## C.2. Documentation
 
