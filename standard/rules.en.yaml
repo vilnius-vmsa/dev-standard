@@ -1254,7 +1254,7 @@ OPS-ENV-P01:
   source_hash: 3d940a48cd81
 OPS-ENV-P02:
   text: CI/CD and GitOps keep environments isolated and compliant with section 3.5.3.
-  source_hash: eff91a64759f
+  source_hash: 63d11d48f6a6
 OPS-ENV-P03:
   text: The deployment pipeline does not use the same configuration or credentials for different environments unless this is explicitly described and approved.
   source_hash: e0822c487a81
