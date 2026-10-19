@@ -1,5 +1,8 @@
 # Inactive example. Apply only to published-image smoke tests. It must never
 # be used with production data or production secret paths.
+# CI must provision these files in an isolated temporary directory. The
+# definitions below replace the production secret sources when this override
+# is merged; never point CI_SECRETS_DIR at the production SECRETS_DIR.
 
 services:
   mysql:
@@ -24,13 +27,17 @@ services:
       APP_DEBUG: "false"
       DB_HOST: mysql
       REDIS_HOST: redis
-    volumes: !reset []
+    volumes: !override
+      - ci_application_storage:/var/www/storage
+      - ci_application_bootstrap_cache:/var/www/bootstrap/cache
 
   worker:
     image: ${PHP_IMAGE_REF:?PHP_IMAGE_REF is required}
     build: !reset null
     env_file: !reset []
-    volumes: !reset []
+    volumes: !override
+      - ci_application_storage:/var/www/storage
+      - ci_application_bootstrap_cache:/var/www/bootstrap/cache
 
   nginx:
     image: ${NGINX_IMAGE_REF:?NGINX_IMAGE_REF is required}
@@ -41,3 +48,15 @@ services:
 volumes:
   ci_mysql_data:
   ci_redis_data:
+  ci_application_storage:
+  ci_application_bootstrap_cache:
+
+secrets:
+  application_env:
+    file: ${CI_SECRETS_DIR:?CI_SECRETS_DIR is required}/application.env
+  mysql_password:
+    file: ${CI_SECRETS_DIR:?CI_SECRETS_DIR is required}/mysql_password
+  mysql_root_password:
+    file: ${CI_SECRETS_DIR:?CI_SECRETS_DIR is required}/mysql_root_password
+  redis_password:
+    file: ${CI_SECRETS_DIR:?CI_SECRETS_DIR is required}/redis_password

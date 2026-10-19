@@ -15,9 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      # Replace the placeholder with the reviewed commit SHA for this action.
       - name: Checkout exact revision
-        uses: actions/checkout@<reviewed-commit-sha>
+        uses: actions/checkout@v7
 
       - name: Validate Composer dependencies
         if: ${{ hashFiles('composer.json') != '' }}
@@ -47,5 +46,4 @@ jobs:
         run: docker compose -f docker-compose.production.yml config --quiet
 
       - name: Scan repository for secrets
-        # Pin gitleaks to a reviewed action commit in the consuming repository.
-        uses: gitleaks/gitleaks-action@<reviewed-commit-sha>
+        uses: gitleaks/gitleaks-action@v2

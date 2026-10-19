@@ -22,7 +22,7 @@ jobs:
       nginx_image: ${{ steps.metadata.outputs.nginx_image }}
     steps:
       - name: Checkout the exact tag commit
-        uses: actions/checkout@<reviewed-commit-sha>
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0

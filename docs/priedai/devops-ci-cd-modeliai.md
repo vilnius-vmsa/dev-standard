@@ -15,7 +15,9 @@ application/
 │   └── workflows/
 │       ├── ci.lint.yml
 │       ├── ci.build.yml
-│       └── cd.deploy.yml
+│       ├── cd.deploy.yml
+│       ├── ops.deploy.yml
+│       └── ops.start-database.yml
 ├── docker/
 │   ├── <service>/
 │   │   ├── Dockerfile.dev
@@ -59,27 +61,42 @@ Naudokite atskirus Compose vaidmenis:
 |---|---|---:|---|
 | Development | Kasdienis lokalus darbas | Taip | bind mount'ai, dokumentuoti portai, vietiniai secrets |
 | Production | Leidimas serveryje | Ne | immutable image, runtime secrets, persistent data, healthcheck |
+| Production blue-green (pasirenkamas) | Slotų keitimas be pilno vieno slot'o sustabdymo | Ne | du PHP/worker/Nginx slotai, bendras balanceris, bendras state, slot healthcheck |
 | CI image test | Vienkartinis image patikrinimas | Ne | disposable MySQL/Redis, izoliuotas tinklas, automatinis cleanup |
 
-Bendri servisų nustatymai aprašomi YAML anchor'uose. Blue-green servisai paveldi bendrą konfigūraciją ir keičia tik slot'o image, pavadinimą bei priklausomybes; viešą portą valdo vienas balancer. Stateful duomenys (duomenų bazė, uploads ir reikalingi runtime failai) turi turėti aiškią persistent saugyklą.
+Bendri servisų nustatymai aprašomi YAML anchor'uose. Numatytoji produkcija gali
+naudoti vieną aplikacijos slotą. Jei pasirenkamas blue-green variantas, slotai
+paveldi bendrą konfigūraciją ir keičia tik slot'o image, pavadinimą bei
+priklausomybes; viešą portą valdo vienas balancer. Stateful duomenys (duomenų
+bazė, uploads ir reikalingi runtime failai) turi turėti aiškią persistent
+saugyklą.
 
 Servisai vienas kitą pasiekia Compose service DNS vardu, o ne `127.0.0.1` ar `localhost`. `depends_on` nepakeičia healthcheck: prieš migration, queue worker ar aplikacijos startą turi būti patikrinta faktinė priklausomybės parengtis. Logai rašomi į stdout/stderr ir surenkami centralizuotai; secrets nemontuojami į logus ar debug output.
 
 ## D.4. GitHub Actions atsakomybės
+
+Branch-based projektuose `CI: Lint` vykdo PR ir protected branch push vartus,
+o po sėkmingo push vartų rezultato kviečia bendrą `CI: Build` workflow. `CD:
+Deploy` lieka reusable deployment workflow. `Ops: Deploy` yra atskiras
+operatoriaus kelias jau paskelbto PHP-FPM ir Nginx digest redeploy'ui; jis
+neatlieka rebuild ir negali apeiti lint, scan, attestation ar smoke vartų.
 
 Darbo eigų failai gali būti sujungti ar išskaidyti pagal projekto dydį, tačiau vartai turi išlikti aiškūs:
 
 | Darbo eiga / job grupė | Trigger'is | Atsakomybė | Išvestis |
 |---|---|---|---|
 | `ci.lint` | PR ir protected branch push | Composer/npm validacija, formatavimas, unit/contract testai, Compose lint ir secret scan | privalomas kokybės vartas |
-| `ci.build` | sėkmingas `ci.lint` po merge | checkout pagal exact SHA, multi-stage build, registry push, image scan, SBOM, provenance, attestation, image verification ir disposable smoke test | patikrintas immutable candidate digest |
+| `ci.build` | sėkmingas `ci.lint` po merge | checkout pagal exact SHA, multi-stage build, registry push, image scan, SBOM, provenance, attestation, image verification, disposable smoke test ir promotion | patikrintas immutable digest perduotas į `cd.deploy` |
 | pasirenkamas `ci.test-image` | po build/attestation, didesniuose projektuose | Tas pats image-test etapas kaip atskira reusable workflow, kai jo nereikia laikyti pagrindiniame build workflow | patikrintas digest |
-| `cd.deploy` | po promotion ir smoke | runtime secrets, image digest deploy, migracijos politika ir health/readiness patikra | faktinio deploy rezultatas |
-| `ops` (jei taikoma) | atskiras operatoriaus veiksmas | vienkartinės DB ar atkūrimo operacijos su aiškiu target environment | audituojamas operatoriaus rezultatas |
+| `cd.deploy` | po promotion ir smoke | numatytasis single-slot runtime secrets, image digest deploy, migracijos politika ir health/readiness patikra | faktinio deploy rezultatas |
+| pasirenkamas `cd.deploy-blue-green` | po promotion ir smoke | neaktyvaus slot'o paleidimas, health patikra ir balancerio perjungimas | faktinio slot switch ir deploy rezultatas |
+| `ops.start-database` (jei taikoma) | atskiras operatoriaus veiksmas | vienkartinis DB paruošimas su aiškiu target environment | audituojamas operatoriaus rezultatas |
+| `ops.deploy` (jei taikoma) | atskiras operatoriaus veiksmas | jau patikrintų PHP-FPM/Nginx digest'ų redeploy be rebuild | audituojamas deploy ir health rezultatas |
 
 `ci.build` (arba pasirenkamas `ci.test-image`) turi perduoti tarp job'ų konkretų source SHA bei digest, o ne per naujo spręsti branch'o ar perrašomo tag reikšmę. `cd.deploy` negali būti laikomas sėkmingu vien todėl, kad paruošė secrets ar Compose failą: sėkmė reiškia faktinį paleidimą ir health patikrą. Minimalūs pavyzdžiai pateikti [bendram lint vartui](examples/github-actions/ci.lint.yml.example), [branch-based build](examples/github-actions/branch-based/ci.build.yml.example), [reusable deploy](examples/github-actions/cd.deploy.yml.example) ir [tag-based release](examples/github-actions/tag-based/ci.release.yml.example).
 
-GitHub Actions trečiųjų šalių action'ai pin'inami į commit SHA, permissions nurodomos workflow arba job lygiu, o `pull_request` iš fork'o negali gauti production secrets ar privileged build tokenų. Concurrency grupės neleidžia dviem leidimams vienu metu perrašyti tos pačios aplinkos.
+Permissions nurodomos workflow arba job lygiu, `pull_request` iš fork'o negali gauti production secrets ar privileged build tokenų. Concurrency grupės neleidžia dviem leidimams vienu metu perrašyti tos pačios aplinkos.
+
 
 ## D.5. Branch-based srauto pavyzdys
 
@@ -89,24 +106,29 @@ GitHub Actions trečiųjų šalių action'ai pin'inami į commit SHA, permission
 feature/*
    │ PR
    ▼
-stage ── CI lint/validate/test ── build/scan/SBOM/attest/smoke ── deploy staging
+stage ── CI: Lint ── CI: Build (build/scan/SBOM/attest/verify/smoke) ── CD: Deploy staging
    │
    │ patvirtintas PR
    ▼
-main  ── CI lint/validate/test ── build/scan/SBOM/attest/smoke ── deploy production
+main  ── CI: Lint ── CI: Build (build/scan/SBOM/attest/verify/smoke) ── CD: Deploy production
                                                                   │
                                                                   ▼
                                                         optional main → stage sync PR
 ```
 
+`CD: Deploy` naudoja single-slot Compose pagal nutylėjimą. Jei projektui
+reikalingas slotų perjungimas, tas pats image digest handoff gali būti perduotas
+pasirenkamam `cd.deploy-blue-green` workflow ir blue-green Compose variantui.
+
 Svarbios sąlygos:
 
 - workflow naudoja įvykio `head_sha`, o ne vėliau iš naujo išsprendžiamą branch'o HEAD;
 - staging ar production deploy vyksta tik po visų saugumo ir smoke vartų;
-- `main` → `stage` sinchronizacija kuriama tik po faktinio production health patikrinimo;
+- `main` → `stage` sinchronizacija kuriama tik po užbaigto reusable build/deploy job ir faktinio production health patikrinimo;
 - `stage` → `main` automatinė sinchronizacija draudžiama, nes staging gali turėti nebaigtų funkcijų;
 - konfliktas sinchronizacijos PR sustabdo automatizavimą ir paliekamas žmogui išspręsti;
-- kiekvienas aplinkos deploy turi būti rollback'inamas pagal konkretų image digest.
+- kiekvienas aplinkos deploy turi būti rollback'inamas pagal konkretų image digest;
+- rankinis redeploy atliekamas per `Ops: Deploy`, perduodant jau patikrintus PHP-FPM ir Nginx digest'us.
 
 ## D.6. Tag-based srauto pavyzdys
 

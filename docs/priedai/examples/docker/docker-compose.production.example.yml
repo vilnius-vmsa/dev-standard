@@ -7,7 +7,7 @@ name: ${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME is required}
 x-runtime-defaults: &runtime-defaults
   restart: unless-stopped
   read_only: true
-  security_opt: [no-new-privileges:true]
+  security_opt: ["no-new-privileges:true"]
   cap_drop: [ALL]
   tmpfs:
     - /tmp:rw,noexec,nosuid,nodev,size=32m,mode=1777
@@ -34,9 +34,17 @@ x-php-defaults: &php-defaults
       condition: service_healthy
 
 services:
+  # Resource limits are safe starting points for a small production host;
+  # tune them to the workload, but keep an explicit CPU and memory limit on
+  # every service, including stateful services.
   mysql:
     image: mysql:8.4@sha256:REPLACE_WITH_CURRENT_DIGEST
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "2.00"
+          memory: 2G
     environment:
       MYSQL_DATABASE: ${DB_DATABASE:?DB_DATABASE is required}
       MYSQL_USER: ${DB_USERNAME:?DB_USERNAME is required}
@@ -55,6 +63,11 @@ services:
   redis:
     image: redis:7.4-alpine@sha256:REPLACE_WITH_CURRENT_DIGEST
     <<: *runtime-defaults
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
     command: ["sh", "-ec", "exec redis-server --requirepass \"$$(cat /run/secrets/redis_password)\""]
     secrets: [redis_password]
     volumes:
@@ -67,6 +80,14 @@ services:
 
   php:
     <<: *php-defaults
+    volumes:
+      - application_storage:/var/www/storage
+      - application_bootstrap_cache:/var/www/bootstrap/cache
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
     expose: [9000]
     healthcheck:
       test: ["CMD", "php-fpm", "-t"]
@@ -76,10 +97,23 @@ services:
 
   worker:
     <<: *php-defaults
+    volumes:
+      - application_storage:/var/www/storage
+      - application_bootstrap_cache:/var/www/bootstrap/cache
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
     command: ["php", "artisan", "queue:work", "redis", "--sleep=1", "--tries=3"]
 
   nginx:
     <<: *runtime-defaults
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
     image: ${NGINX_IMAGE_REF:?NGINX_IMAGE_REF must be an immutable digest reference}
     depends_on:
       php:
@@ -94,6 +128,11 @@ services:
 
   alloy:
     <<: *runtime-defaults
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
     image: ${ALLOY_IMAGE_REF:?ALLOY_IMAGE_REF must be an immutable digest reference}
     profiles: [observability]
     command: ["run", "/etc/alloy/config.alloy", "--storage.path=/var/lib/alloy/data"]
@@ -107,6 +146,8 @@ networks:
     internal: true
 
 volumes:
+  application_storage:
+  application_bootstrap_cache:
   mysql_data:
   redis_data:
   alloy_data:

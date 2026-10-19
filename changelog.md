@@ -13,9 +13,12 @@ Formatas paremtas [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), vers
 - G priedas „Dokumentacijos rengimo metodika“: kaip rengti, tikrinti ir palaikyti sistemų dokumentaciją, kad ja galėtų naudotis DI agentai, vidinės ir išorinės komandos (10 skyrius).
 - DI agentų pakete – `dev-standard-docs` įgūdis dokumentacijai kurti, atnaujinti ir tikrinti, su šablonais ir nuorodų tikrintuvu `check-docs.py`; sinchronizavimas diegia visus paketo įgūdžius ir įspėja apie pasenusią `AGENTS.md` skiltį.
 - Išplėstas 8 skyrius ir pridėtas DevOps CI/CD modelių priedas: rekomenduojama aplikacijos, Docker ir Compose struktūra, production image sauga, branch-based (`stage` → staging, `main` → production) ir tag-based (promotion be rebuild) leidimo srautai, bendri image, attestation, smoke test ir rollback vartai.
+- Patikslintas branch-based srautas: `CI: Lint` → reusable `CI: Build` → `CD: Deploy`, sinchronizacija po užbaigto production pipeline, o rankinis digest redeploy atliekamas per atskirą `Ops: Deploy` workflow.
+- Pridėti pasirenkami blue-green production Compose ir deployment pavyzdžiai; single-slot išlieka numatytuoju variantu.
 
 ### Pakeista
 
+- Iš DevOps CI/CD reikalavimų pašalintas privalomas GitHub Actions action'ų commit SHA fiksavimas; kol kas projektai gali naudoti savo patvirtintą versijų valdymo tvarką.
 - Sinchronizavimo darbo eigą paleidžiant rankiniu būdu galima nurodyti `version` (`latest` arba konkretų leidimą), kad saugykla atnaujintų standartą iš karto, nelaukiant savaitinio paleidimo.
 - D ir F priedų šablonai (ADR, runbook) pateikiami angliškai ir įtraukiami į `dev-standard-docs` įgūdį; F priedo šablono atvaizdavimas pataisytas.
 

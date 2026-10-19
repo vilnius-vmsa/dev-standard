@@ -280,7 +280,7 @@ PRIVALOMA:
 <!-- OPS-COMPOSE-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Development, production ir CI testų Compose konfigūracijos turi būti atskirtos pagal paskirtį: produkcija naudoja nekintamus image bei runtime secrets ir negali build'inti iš checkout'o.
 <!-- OPS-COMPOSE-P02 | ai-reviewable | stacks=infra,db | enforced-by=ai -->
-*   Compose servisai, kai tai taikoma, turi aprašyti healthcheck, priklausomybes, resursų ribas ir saugų vykdymą; bendri servisų numatytieji nustatymai rekomenduojami anchor'uose, o blue-green variantai gali keisti tik slot'o skirtumus ir turi naudoti bendrą persistent state saugyklą, kai to reikalauja aplikacija.
+*   Compose servisai, kai tai taikoma, turi aprašyti healthcheck, priklausomybes, resursų ribas ir saugų vykdymą; bendri servisų numatytieji nustatymai rekomenduojami anchor'uose. Blue-green yra pasirenkamas variantas: jis gali keisti tik slot'o skirtumus ir turi naudoti bendrą persistent state saugyklą, kai to reikalauja aplikacija.
 
 > Susiję skyriai: [3.5 Konfigūracija, slaptieji raktai ir aplinkos](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [6 Saugumas (Security by Design)](06-saugumas.md) · [8.5 Konteinerių ir Kubernetes diegimo reikalavimai](#85-konteinerių-ir-kubernetes-diegimo-reikalavimai)
 
@@ -294,17 +294,34 @@ PRIVALOMA:
 *   Jei pasirenkamas branch-based modelis, kiekvienas protected branch turi turėti vienareikšmį aplinkos ryšį (pvz., `stage` → staging, `main` → production), o diegiamas artefaktas turi būti pastatytas iš tikslaus workflow `head_sha` ir praeiti lint, test, security, SBOM/provenance, attestation bei smoke vartus.
 <!-- OPS-FLOW-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Automatinė sinchronizacija gali vykti tik viena kryptimi – iš sėkmingai į produkciją įdiegto `main` commit į `stage`; `stage` negali būti automatiškai merdžinamas į `main`, o konfliktas turi sustabdyti sinchronizaciją ir pareikalauti žmogaus sprendimo.
+<!-- OPS-FLOW-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   `CI: Lint` turi vykdyti PR ir protected branch push vartus; tik po sėkmingo vartų rezultato ir build-reikšmingų pakeitimų nustatymo gali būti kviečiamas bendras `CI: Build` workflow.
+<!-- OPS-FLOW-P04 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Bendras `CI: Build` pipeline turi sekti nuoseklią seką: build → vulnerability scan → SBOM/provenance → attestation → verification → image smoke test → promotion → `CD: Deploy`; kiekvienas etapas turi perduoti tą patį commit SHA ir immutable image digest.
+<!-- OPS-FLOW-P05 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Rankiniam jau patikrinto image redeploy turi būti atskiras `Ops: Deploy` workflow, kuris priima tik digest pagrįstas image nuorodas, nekeičia kodo ir nepakeičia lint, build ar saugos vartų.
 
 Tipinė seka:
 
 ```text
-feature/* → PR stage → CI lint/validate/test
-merge stage → build → scan → SBOM/provenance → attest → smoke → staging deploy
-merge main  → build → scan → SBOM/provenance → attest → smoke → production deploy
-successful production deploy → optional main-to-stage sync PR
+feature/* → PR → CI: Lint
+merge stage → CI: Lint → CI: Build (build/scan/SBOM/attest/verify/smoke/promote) → CD: Deploy staging
+merge main  → CI: Lint → CI: Build (build/scan/SBOM/attest/verify/smoke/promote) → CD: Deploy production
+successful completed production pipeline → optional main-to-stage sync PR
+manual redeploy → Ops: Deploy (existing PHP/Nginx digests only)
 ```
 
 `login` repozitorijos pavyzdyje `stage` leidžia laikyti dar nepatvirtintas funkcijas, o `main` yra produkcijos šaltinis. Sinchronizacijos PR turi būti kuriamas tik po realaus produkcijos health patikrinimo, ne vien po sėkmingo build job.
+
+Šiame modelyje `CI: Build` yra reusable workflow, kurį po `CI: Lint` vartų
+kviečia protected branch pipeline. Sinchronizacija į `stage` paleidžiama tik
+po to, kai visas reusable build/deploy job baigėsi sėkmingai, todėl ji negali
+remtis dar vykdomu nested deployment job. `Ops: Deploy` skirtas atkūrimui ar
+pakartotiniam jau paskelbto digest diegimui; jis neatlieka naujo build.
+
+`CD: Deploy` gali naudoti numatytą single-slot Compose arba pasirenkamą
+blue-green variantą. Blue-green keičia tik rollout topologiją: CI image build,
+testai, digest handoff ir deployment vartai išlieka tie patys.
 
 ## 8.14. Tag-based leidimo modelis {#814-tag-based-leidimo-modelis}
 

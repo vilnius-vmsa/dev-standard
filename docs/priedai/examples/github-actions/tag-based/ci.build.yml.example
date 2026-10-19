@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout exact linted main revision
-        uses: actions/checkout@<reviewed-commit-sha>
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 1
@@ -42,22 +42,63 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: echo "$GH_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-      - name: Build and push immutable candidate images
+      - name: Create Composer GitHub App token
+        id: github-app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.COMPOSER_APP_ID }}
+          private-key: ${{ secrets.COMPOSER_APP_PRIVATE_KEY }}
+
+      - name: Build and push PHP-FPM candidate image
+        id: php
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./docker/php-fpm/Dockerfile.prod
+          push: true
+          build-args: |
+            RELEASE_NUMBER=${{ steps.meta.outputs.source_sha }}
+          secrets: |
+            composer_auth={"github-oauth":{"github.com":"${{ steps.github-app-token.outputs.token }}"}}
+          tags: ghcr.io/<owner>/<application>-image-php:candidate-${{ steps.meta.outputs.source_sha }}-${{ github.run_id }}
+          labels: |
+            org.opencontainers.image.revision=${{ steps.meta.outputs.source_sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          provenance: mode=max
+          sbom: true
+          cache-from: type=registry,ref=ghcr.io/<owner>/<application>-image-php:buildcache
+          cache-to: type=registry,ref=ghcr.io/<owner>/<application>-image-php:buildcache,mode=max
+
+      - name: Build and push Nginx candidate image
+        id: nginx
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./docker/nginx/Dockerfile.prod
+          push: true
+          build-args: |
+            PHP_IMAGE_REF=ghcr.io/<owner>/<application>-image-php@${{ steps.php.outputs.digest }}
+          tags: ghcr.io/<owner>/<application>-image-nginx:candidate-${{ steps.meta.outputs.source_sha }}-${{ github.run_id }}
+          labels: |
+            org.opencontainers.image.revision=${{ steps.meta.outputs.source_sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          provenance: mode=max
+          sbom: true
+          cache-from: type=registry,ref=ghcr.io/<owner>/<application>-image-nginx:buildcache
+          cache-to: type=registry,ref=ghcr.io/<owner>/<application>-image-nginx:buildcache,mode=max
+
+      - name: Resolve published image digests
         id: image
         shell: bash
         env:
           SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
           APP_REPOSITORY: ghcr.io/<owner>/<application>-image-php
           NGINX_REPOSITORY: ghcr.io/<owner>/<application>-image-nginx
+          APP_DIGEST: ${{ steps.php.outputs.digest }}
+          NGINX_DIGEST: ${{ steps.nginx.outputs.digest }}
         run: |
           set -euo pipefail
           CANDIDATE_TAG="candidate-${SOURCE_SHA}-${GITHUB_RUN_ID}"
-          docker buildx build --push --file docker/php-fpm/Dockerfile.prod \
-            --tag "$APP_REPOSITORY:$CANDIDATE_TAG" --metadata-file app-metadata.json .
-          docker buildx build --push --file docker/nginx/Dockerfile.prod \
-            --tag "$NGINX_REPOSITORY:$CANDIDATE_TAG" --metadata-file nginx-metadata.json .
-          APP_DIGEST="$(jq -r '."containerimage.digest"' app-metadata.json)"
-          NGINX_DIGEST="$(jq -r '."containerimage.digest"' nginx-metadata.json)"
           [[ "$APP_DIGEST" == sha256:* && "$NGINX_DIGEST" == sha256:* ]]
           echo "app_repository=$APP_REPOSITORY" >> "$GITHUB_OUTPUT"
           echo "app_digest=$APP_DIGEST" >> "$GITHUB_OUTPUT"
@@ -67,7 +108,7 @@ jobs:
           echo "nginx_image=$NGINX_REPOSITORY@$NGINX_DIGEST" >> "$GITHUB_OUTPUT"
 
       - name: Scan candidate application image
-        uses: aquasecurity/trivy-action@<reviewed-commit-sha>
+        uses: aquasecurity/trivy-action@0.36.0
         with:
           image-ref: ${{ steps.image.outputs.app_image }}
           ignore-unfixed: true
@@ -76,7 +117,7 @@ jobs:
           format: table
 
       - name: Scan candidate Nginx image
-        uses: aquasecurity/trivy-action@<reviewed-commit-sha>
+        uses: aquasecurity/trivy-action@0.36.0
         with:
           image-ref: ${{ steps.image.outputs.nginx_image }}
           ignore-unfixed: true
@@ -85,21 +126,21 @@ jobs:
           format: table
 
       - name: Generate candidate SBOMs
-        uses: anchore/sbom-action@<reviewed-commit-sha>
+        uses: anchore/sbom-action@v0.20.0
         with:
           image: ${{ steps.image.outputs.app_image }}
           format: spdx-json
           output-file: sbom-app.spdx.json
 
       - name: Generate candidate Nginx SBOM
-        uses: anchore/sbom-action@<reviewed-commit-sha>
+        uses: anchore/sbom-action@v0.20.0
         with:
           image: ${{ steps.image.outputs.nginx_image }}
           format: spdx-json
           output-file: sbom-nginx.spdx.json
 
       - name: Attest candidate application image
-        uses: actions/attest@<reviewed-commit-sha>
+        uses: actions/attest@v4
         with:
           subject-name: ${{ steps.image.outputs.app_repository }}
           subject-digest: ${{ steps.image.outputs.app_digest }}
@@ -107,7 +148,7 @@ jobs:
           create-storage-record: false
 
       - name: Attest candidate Nginx image
-        uses: actions/attest@<reviewed-commit-sha>
+        uses: actions/attest@v4
         with:
           subject-name: ${{ steps.image.outputs.nginx_repository }}
           subject-digest: ${{ steps.image.outputs.nginx_digest }}
@@ -135,14 +176,14 @@ jobs:
             > metadata.json
 
       - name: Upload tested image metadata
-        uses: actions/upload-artifact@<reviewed-commit-sha>
+        uses: actions/upload-artifact@v4
         with:
           name: image-metadata
           path: metadata.json
           if-no-files-found: error
 
       - name: Upload SBOMs
-        uses: actions/upload-artifact@<reviewed-commit-sha>
+        uses: actions/upload-artifact@v4
         with:
           name: image-sboms
           path: sbom-*.spdx.json
