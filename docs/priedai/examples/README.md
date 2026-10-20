@@ -24,6 +24,8 @@
 * [Branch-based build ir deploy](github-actions/branch-based/ci.build.yml.example)
 * [Branch-based reusable deploy](github-actions/cd.deploy.yml.example)
 * [Optional blue-green reusable deploy](github-actions/cd.deploy-blue-green.yml.example)
+* [Operator-only immutable digest redeploy](github-actions/ops.deploy.yml.example)
+* [Operator-only allowlisted service restart](github-actions/ops.restart.yml.example)
 * [Tag-based candidate build, scan ir attestation](github-actions/tag-based/ci.build.yml.example)
 * [Tag-based tested-image promotion ir release](github-actions/tag-based/ci.release.yml.example)
 
@@ -34,6 +36,10 @@ Branch-based modelyje `CI: Lint` po protected branch push kviečia bendrą
 pakartoti jau paskelbto image diegimą, naudokite atskirą `Ops: Deploy` workflow
 su PHP-FPM ir Nginx `@sha256:...` nuorodomis; jo negalima naudoti naujam build
 arba saugos vartų apeigai.
+Jei reikia atnaujinti host-managed TLS ar atlikti kitą leidžiamą runtime
+serviso atkūrimą, naudokite atskirą `Ops: Restart` workflow su aiškiu serviso
+allowlist'u; jis naudoja hoste esantį image, vykdo `--pull never` ir tikrina
+atkurtos paslaugos būseną.
 `ops.start-database` lieka atskira vienkartine infrastruktūros operacija ir
 nepriklauso aplikacijos build/deploy vartams.
 

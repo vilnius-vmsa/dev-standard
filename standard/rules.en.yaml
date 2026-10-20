@@ -1288,6 +1288,12 @@ OPS-FLOW-P04:
 OPS-FLOW-P05:
   text: "Manual redeployment of an already verified image uses a separate `Ops: Deploy` workflow that accepts only digest-based image references, does not change code, and does not replace the lint, build or security gates."
   source_hash: f509362819ce
+OPS-FLOW-P06:
+  text: "Manual runtime service recreation uses a separate `Ops: Restart` workflow with an explicit service allowlist; it uses an image already present on the host, runs `docker compose up -d --pull never --force-recreate --no-deps --wait`, verifies the recreated service, forbids build, pull, promotion or image-reference changes, and adds an HTTPS health check when a balancer is recreated after TLS changes."
+  source_hash: 99050af5246f
+OPS-FLOW-P07:
+  text: "Secret preparation and rotation use a project-owned `scripts/deploy/prepare-secrets.sh` procedure that validates the application environment and TLS pair, preserves the active slot, installs files atomically with runtime permissions and never prints secret values; `Ops: Restart` may call it only when all rotation inputs are provided."
+  source_hash: 3c6eaa32b5d5
 OPS-GITOPS-P01:
   text: The GitOps repository structure clearly separates application templates, environment parameters and, where applicable, cluster declarations.
   source_hash: 94daa58108fc

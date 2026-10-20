@@ -300,6 +300,10 @@ PRIVALOMA:
 *   Bendras `CI: Build` pipeline turi sekti nuoseklią seką: build → vulnerability scan → SBOM/provenance → attestation → verification → image smoke test → promotion → `CD: Deploy`; kiekvienas etapas turi perduoti tą patį commit SHA ir immutable image digest.
 <!-- OPS-FLOW-P05 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Rankiniam jau patikrinto image redeploy turi būti atskiras `Ops: Deploy` workflow, kuris priima tik digest pagrįstas image nuorodas, nekeičia kodo ir nepakeičia lint, build ar saugos vartų.
+<!-- OPS-FLOW-P06 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Rankinis runtime serviso atkūrimas turi vykti per atskirą `Ops: Restart` workflow su aiškiu serviso allowlist'u; jis turi naudoti hoste jau esantį image, vykdyti `docker compose up -d --pull never --force-recreate --no-deps --wait`, patikrinti atkurtą servisą, neleisti build, pull, promotion ar image ref pakeitimo, o balancerio atkūrimą po TLS pakeitimo papildyti HTTPS health patikra.
+<!-- OPS-FLOW-P07 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Secret paruošimui ir rotacijai turi būti projekto valdoma `scripts/deploy/prepare-secrets.sh` procedūra, kuri validuoja aplikacijos aplinką ir TLS porą, išsaugo aktyvų slot'ą, įdiegia failus atomiškai su runtime leidimais ir neprintina secret reikšmių; `Ops: Restart` gali ją kviesti tik tada, kai visi rotacijos įėjimai pateikti.
 
 Tipinė seka:
 
@@ -309,6 +313,7 @@ merge stage → CI: Lint → CI: Build (build/scan/SBOM/attest/verify/smoke/prom
 merge main  → CI: Lint → CI: Build (build/scan/SBOM/attest/verify/smoke/promote) → CD: Deploy production
 successful completed production pipeline → optional main-to-stage sync PR
 manual redeploy → Ops: Deploy (existing PHP/Nginx digests only)
+secret rotation or runtime maintenance → Ops: Restart (allowlisted service only)
 ```
 
 `login` repozitorijos pavyzdyje `stage` leidžia laikyti dar nepatvirtintas funkcijas, o `main` yra produkcijos šaltinis. Sinchronizacijos PR turi būti kuriamas tik po realaus produkcijos health patikrinimo, ne vien po sėkmingo build job.
@@ -318,6 +323,8 @@ kviečia protected branch pipeline. Sinchronizacija į `stage` paleidžiama tik
 po to, kai visas reusable build/deploy job baigėsi sėkmingai, todėl ji negali
 remtis dar vykdomu nested deployment job. `Ops: Deploy` skirtas atkūrimui ar
 pakartotiniam jau paskelbto digest diegimui; jis neatlieka naujo build.
+`Ops: Restart` skirtas tik leistinam hoste esančio serviso atkūrimui, ypač po
+TLS secret rotacijos; jis negali pakeisti image ref ar apeiti deployment vartų.
 
 `CD: Deploy` gali naudoti numatytą single-slot Compose arba pasirenkamą
 blue-green variantą. Blue-green keičia tik rollout topologiją: CI image build,

@@ -17,6 +17,7 @@ application/
 │       ├── ci.build.yml
 │       ├── cd.deploy.yml
 │       ├── ops.deploy.yml
+│       ├── ops.restart.yml
 │       └── ops.start-database.yml
 ├── docker/
 │   ├── <service>/
@@ -80,6 +81,9 @@ o po sėkmingo push vartų rezultato kviečia bendrą `CI: Build` workflow. `CD:
 Deploy` lieka reusable deployment workflow. `Ops: Deploy` yra atskiras
 operatoriaus kelias jau paskelbto PHP-FPM ir Nginx digest redeploy'ui; jis
 neatlieka rebuild ir negali apeiti lint, scan, attestation ar smoke vartų.
+`Ops: Restart` yra atskiras operatoriaus kelias leistinam runtime serviso
+atkūrimui, ypač balancerio atkūrimui po host-managed TLS pakeitimo; jis negali
+pull'inti, keisti image ref ar priimti laisvo serviso/profile įvesties.
 
 Darbo eigų failai gali būti sujungti ar išskaidyti pagal projekto dydį, tačiau vartai turi išlikti aiškūs:
 
@@ -92,8 +96,9 @@ Darbo eigų failai gali būti sujungti ar išskaidyti pagal projekto dydį, tač
 | pasirenkamas `cd.deploy-blue-green` | po promotion ir smoke | neaktyvaus slot'o paleidimas, health patikra ir balancerio perjungimas | faktinio slot switch ir deploy rezultatas |
 | `ops.start-database` (jei taikoma) | atskiras operatoriaus veiksmas | vienkartinis DB paruošimas su aiškiu target environment | audituojamas operatoriaus rezultatas |
 | `ops.deploy` (jei taikoma) | atskiras operatoriaus veiksmas | jau patikrintų PHP-FPM/Nginx digest'ų redeploy be rebuild | audituojamas deploy ir health rezultatas |
+| `ops.restart` (jei taikoma) | atskiras operatoriaus veiksmas | explicit allowlist serviso atkūrimas iš hoste esančio image, ypač po TLS secret rotacijos | audituojamas serviso atkūrimo ir health rezultatas |
 
-`ci.build` (arba pasirenkamas `ci.test-image`) turi perduoti tarp job'ų konkretų source SHA bei digest, o ne per naujo spręsti branch'o ar perrašomo tag reikšmę. `cd.deploy` negali būti laikomas sėkmingu vien todėl, kad paruošė secrets ar Compose failą: sėkmė reiškia faktinį paleidimą ir health patikrą. Minimalūs pavyzdžiai pateikti [bendram lint vartui](examples/github-actions/ci.lint.yml.example), [branch-based build](examples/github-actions/branch-based/ci.build.yml.example), [reusable deploy](examples/github-actions/cd.deploy.yml.example) ir [tag-based release](examples/github-actions/tag-based/ci.release.yml.example).
+`ci.build` (arba pasirenkamas `ci.test-image`) turi perduoti tarp job'ų konkretų source SHA bei digest, o ne per naujo spręsti branch'o ar perrašomo tag reikšmę. `cd.deploy` negali būti laikomas sėkmingu vien todėl, kad paruošė secrets ar Compose failą: sėkmė reiškia faktinį paleidimą ir health patikrą. Minimalūs pavyzdžiai pateikti [bendram lint vartui](examples/github-actions/ci.lint.yml.example), [branch-based build](examples/github-actions/branch-based/ci.build.yml.example), [reusable deploy](examples/github-actions/cd.deploy.yml.example), [Ops: Deploy](examples/github-actions/ops.deploy.yml.example), [Ops: Restart](examples/github-actions/ops.restart.yml.example) ir [tag-based release](examples/github-actions/tag-based/ci.release.yml.example).
 
 Permissions nurodomos workflow arba job lygiu, `pull_request` iš fork'o negali gauti production secrets ar privileged build tokenų. Concurrency grupės neleidžia dviem leidimams vienu metu perrašyti tos pačios aplinkos.
 
@@ -128,7 +133,9 @@ Svarbios sąlygos:
 - `stage` → `main` automatinė sinchronizacija draudžiama, nes staging gali turėti nebaigtų funkcijų;
 - konfliktas sinchronizacijos PR sustabdo automatizavimą ir paliekamas žmogui išspręsti;
 - kiekvienas aplinkos deploy turi būti rollback'inamas pagal konkretų image digest;
-- rankinis redeploy atliekamas per `Ops: Deploy`, perduodant jau patikrintus PHP-FPM ir Nginx digest'us.
+- rankinis redeploy atliekamas per `Ops: Deploy`, perduodant jau patikrintus PHP-FPM ir Nginx digest'us;
+- host-managed TLS pakeitimas užbaigiamas per `Ops: Restart`, kuris atkuria tik leistiną servisą, nenaudoja `pull` ir tikrina balancerio HTTPS health;
+- secret paruošimas ar rotacija vykdoma per projekto `scripts/deploy/prepare-secrets.sh`, kuris neprintina secret reikšmių ir išsaugo aktyvų slot'ą.
 
 ## D.6. Tag-based srauto pavyzdys
 
