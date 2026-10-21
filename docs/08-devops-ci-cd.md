@@ -13,7 +13,7 @@ PRIVALOMA:
 <!-- OPS-ENV-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Visi diegimai į aplinkas turi būti vykdomi tik per CI/CD procesą; rankiniai pakeitimai aplinkose draudžiami, išskyrus aiškiai dokumentuotus incidentų valdymo atvejus.
 <!-- OPS-ENV-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
-*   CI/CD ir GitOps turi užtikrinti, kad aplinkos būtų izoliuotos ir atitiktų 3.[5.3 skyriaus](05-versijavimas.md#53-bibliotekų-ir-paketų-valdymas) reikalavimus.
+*   CI/CD ir GitOps turi užtikrinti, kad aplinkos būtų izoliuotos ir atitiktų 3.[5.3 skyriaus](05-versijavimas.md#53-bibliotekų-ir-paketų-valdymas-angl-dependencies) reikalavimus.
 <!-- OPS-ENV-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Diegimo pipeline negali naudoti tos pačios konfigūracijos ar tų pačių kredencialų skirtingoms aplinkoms, jei tai nėra aiškiai aprašyta ir patvirtinta.
 <!-- OPS-ENV-P04 | process-level -->
@@ -264,3 +264,111 @@ REKOMENDUOJAMA:
 *   GitOps struktūrą rekomenduojama dokumentuoti taip, kad ją suprastų ne tik pradinė komanda, bet ir nauji perėmėjai.
 
 > Susiję skyriai: [4.3 Versijų valdymas ir repozitorijos](04-kodo-kurimo-gaires.md#43-versijų-valdymas-ir-repozitorijos) · [8.8 Infrastruktūra kaip kodas (IaC)](#88-infrastruktūra-kaip-kodas-iac) · [9.8 Eksploatacijos dokumentacija](09-stebesena-logai.md#98-eksploatacijos-dokumentacija)
+
+## 8.12. Aplikacijos repozitorijos, Docker ir Compose struktūra {#812-aplikacijos-repozitorijos-docker-ir-compose-struktūra}
+
+Šie reikalavimai taikomi servisams, kurie yra pakuojami į konteinerius ir leidžiami per CI/CD. Praktinis katalogų, Dockerfile ir Compose pavyzdys pateiktas [DevOps CI/CD modelių priede](priedai/devops-ci-cd-modeliai.md).
+
+PRIVALOMA:
+
+<!-- OPS-REPO-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Aplikacijos repozitorijoje turi būti aiškiai atskirtas programos kodas, `docker/` servisų konfigūracija, šaknyje esantys Compose failai ir `.github/workflows/` aktyvios darbo eigos; šablonai ir pavyzdžiai negali būti maišomi su aktyviomis darbo eigomis.
+<!-- OPS-DOCKER-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Produkciniai Dockerfile turi naudoti pavadintus multi-stage etapus, versiją ir digest turinčius bazinius image bei, kai aplikacija naudoja package manager, lock failus; build metu reikalingi įrankiai negali patekti į galutinį runtime image.
+<!-- OPS-DOCKER-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Slapti raktai, sertifikatai ir tokenai negali būti kopijuojami į Docker build kontekstą ar image sluoksnius; build kredencialai turi būti perduodami per BuildKit secret mount, o runtime secrets – per saugią aplinkos mechanizmą.
+<!-- OPS-DOCKER-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Kiekvienas deployuojamas servisas turi turėti vieną kanoninį registry image pavadinimą, nekintantį tarp staging ir production; aplinka, release versija ir build identifikatorius turi būti perteikiami tag'ais, OCI label'iais ir digest'ais, o ne kuriant aplinkai skirtingus repository pavadinimus. Deploy turi naudoti digest, tag'ai yra paieškos ir promotion nuorodos, o `org.opencontainers.image.revision`, `org.opencontainers.image.source` ir `org.opencontainers.image.version` – atsekamumo metadata. Blue-green slotai turi naudoti tą patį image repository ir konkretų digest'ą.
+<!-- OPS-COMPOSE-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Development, production ir CI testų Compose konfigūracijos turi būti atskirtos pagal paskirtį: produkcija naudoja nekintamus image bei runtime secrets ir negali build'inti iš checkout'o.
+<!-- OPS-COMPOSE-P02 | ai-reviewable | stacks=infra,db | enforced-by=ai -->
+*   Compose servisai, kai tai taikoma, turi aprašyti healthcheck, priklausomybes, resursų ribas ir saugų vykdymą; bendri servisų numatytieji nustatymai rekomenduojami anchor'uose. Blue-green yra pasirenkamas variantas: jis gali keisti tik slot'o skirtumus ir turi naudoti bendrą persistent state saugyklą, kai to reikalauja aplikacija.
+
+> Susiję skyriai: [3.5 Konfigūracija, slaptieji raktai ir aplinkos](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [6 Saugumas (Security by Design)](06-saugumas.md) · [8.5 Konteinerių ir Kubernetes diegimo reikalavimai](#85-konteinerių-ir-kubernetes-diegimo-reikalavimai)
+
+## 8.13. Branch-based diegimo modelis {#813-branch-based-diegimo-modelis}
+
+Branch-based modelis tinka komandai, kuri dažnai leidžia patikrintus pakeitimus į dvi nuolatines aplinkas. Šiame modelyje branch'as parenka tikslinę aplinką, tačiau pats branch'o pavadinimas nepakeičia commit ir image atsekamumo.
+
+PRIVALOMA:
+
+<!-- OPS-FLOW-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Jei pasirenkamas branch-based modelis, kiekvienas protected branch turi turėti vienareikšmį aplinkos ryšį (pvz., `stage` → staging, `main` → production), o diegiamas artefaktas turi būti pastatytas iš tikslaus workflow `head_sha` ir praeiti lint, test, security, SBOM/provenance, attestation bei smoke vartus.
+<!-- OPS-FLOW-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Automatinė sinchronizacija gali vykti tik viena kryptimi – iš sėkmingai į produkciją įdiegto `main` commit į `stage`; `stage` negali būti automatiškai merdžinamas į `main`, o konfliktas turi sustabdyti sinchronizaciją ir pareikalauti žmogaus sprendimo.
+<!-- OPS-FLOW-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   `CI: Lint` turi vykdyti PR ir protected branch push vartus; tik po sėkmingo vartų rezultato ir build-reikšmingų pakeitimų nustatymo gali būti kviečiamas bendras `CI: Build` workflow.
+<!-- OPS-FLOW-P04 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Bendras `CI: Build` pipeline turi sekti nuoseklią seką: build → vulnerability scan → SBOM/provenance → attestation → verification → image smoke test → promotion → `CD: Deploy`; kiekvienas etapas turi perduoti tą patį commit SHA ir immutable image digest.
+<!-- OPS-FLOW-P05 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Rankiniam jau patikrinto image redeploy turi būti atskiras `Ops: Deploy` workflow, kuris priima tik digest pagrįstas image nuorodas, patikrina build bei tikslią release attestation pagal source SHA ir subject digest, nekeičia kodo ir nepakeičia lint, build ar saugos vartų.
+<!-- OPS-FLOW-P06 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Rankinis runtime serviso atkūrimas turi vykti per atskirą `Ops: Restart` workflow su aiškiu serviso allowlist'u; jis turi naudoti hoste jau esantį image, vykdyti `docker compose up -d --pull never --force-recreate --no-deps --wait`, patikrinti atkurtą servisą, neleisti build, pull, promotion ar image ref pakeitimo, o balancerio atkūrimą po TLS pakeitimo papildyti HTTPS health patikra.
+<!-- OPS-FLOW-P07 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Secret paruošimui ir rotacijai turi būti projekto valdoma `scripts/prepare-secrets.sh` procedūra, kuri validuoja aplikacijos aplinką ir TLS porą, išsaugo aktyvų slot'ą, įdiegia failus atomiškai su runtime leidimais ir neprintina secret reikšmių; `Ops: Restart` gali ją kviesti tik tada, kai visi rotacijos įėjimai pateikti.
+
+Tipinė seka:
+
+```text
+feature/* → PR → CI: Lint
+merge stage → CI: Lint → CI: Build (build/scan/SBOM/attest/verify/smoke/promote) → CD: Deploy staging
+merge main  → CI: Lint → CI: Build (build/scan/SBOM/attest/verify/smoke/promote) → CD: Deploy production
+successful completed production pipeline → optional main-to-stage sync PR
+manual redeploy → Ops: Deploy (existing PHP/Nginx digests only)
+secret rotation or runtime maintenance → Ops: Restart (allowlisted service only)
+```
+
+`login` repozitorijos pavyzdyje `stage` leidžia laikyti dar nepatvirtintas funkcijas, o `main` yra produkcijos šaltinis. Sinchronizacijos PR turi būti kuriamas tik po realaus produkcijos health patikrinimo, ne vien po sėkmingo build job.
+
+Šiame modelyje `CI: Build` yra reusable workflow, kurį po `CI: Lint` vartų
+kviečia protected branch pipeline. Sinchronizacija į `stage` paleidžiama tik
+po to, kai visas reusable build/deploy job baigėsi sėkmingai, todėl ji negali
+remtis dar vykdomu nested deployment job. `Ops: Deploy` skirtas atkūrimui ar
+pakartotiniam jau paskelbto digest diegimui; jis neatlieka naujo build.
+`Ops: Restart` skirtas tik leistinam hoste esančio serviso atkūrimui, ypač po
+TLS secret rotacijos; jis negali pakeisti image ref ar apeiti deployment vartų.
+
+`CD: Deploy` gali naudoti numatytą single-slot Compose arba pasirenkamą
+blue-green variantą. Blue-green keičia tik rollout topologiją: CI image build,
+testai, digest handoff ir deployment vartai išlieka tie patys.
+
+## 8.14. Tag-based leidimo modelis {#814-tag-based-leidimo-modelis}
+
+Tag-based modelis tinka, kai produkcija turi būti leidžiama tik aiškiai patvirtintomis, versijuotomis versijomis. Tag yra leidimo įrašas, o ne priežastis perbuild'inti jau patikrintą image.
+
+PRIVALOMA:
+
+<!-- OPS-TAG-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Produkcinis tag turi būti apsaugotas semantinės versijos tag, kuris realiai egzistuoja kaip `refs/tags/<name>` ir nurodo į iš anksto patikrintą commit; branch'as, pavadintas kaip `v1.2.3`, negali būti laikomas release tag.
+<!-- OPS-TAG-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Tag-based leidime image turi būti pastatytas vieną kartą iš tikslaus commit, patikrintas pažeidžiamumų skenavimu, SBOM, provenance, attestation ir smoke testais, o į produkciją turi būti promotion'intas tas pats digest be rebuild.
+<!-- OPS-TAG-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Release turi registruoti commit SHA, image digest'us ir migracijų bei rollback informaciją; rollback turi remtis nekintamu digest arba versijos tag, o ne perrašomu `latest`.
+
+Tipinė seka:
+
+```text
+PR/main → lint/validate/test → candidate build → scan/SBOM/provenance → attest → smoke
+protected vX.Y.Z tag → verify tag commit == tested SHA → promote the same digest → production deploy
+```
+
+Tag push neturi iš naujo tikrinti ar perbuild'inti nepatikrinto kodo. Jei release ir staging image yra skirtingi, promotion vartai turi saugoti ryšį su konkretaus sėkmingo smoke testo run'u, ne tik su SHA pagrindu pavadintu tag'u.
+
+## 8.15. Bendri pipeline vartai ir modelio pasirinkimas {#815-bendri-pipeline-vartai-ir-modelio-pasirinkimas}
+
+PRIVALOMA:
+
+<!-- OPS-PIPE-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Nepriklausomai nuo pasirinkto srauto, deploy gali prasidėti tik po sėkmingo testavimo, image vulnerability scan, SBOM ir provenance generavimo, attestation patikros bei smoke testų; deployment sėkmė patvirtinama tik po faktinio tikslinės aplinkos health patikrinimo; kiekvienam job turi būti suteiktos tik būtinos GitHub permissions.
+
+| Kriterijus | Branch-based | Tag-based |
+|---|---|---|
+| Pagrindinis tikslas | Greitas, dažnas diegimas pagal aplinkos branch'ą | Formalus, versijuotas produkcijos leidimas |
+| Produkcijos vartai | `main` merge ir sėkminga produkcijos patikra | Apsaugotas `vX.Y.Z` tag, nurodantis į patikrintą SHA |
+| Privalumas | Mažiau rankinių veiksmų, tinka kasdieniam darbui | Aiški istorija, patogus auditas ir rollback |
+| Rizika | `main` turi būti nuolat paruoštas produkcijai | Reikia release disciplinos ir tag apsaugos |
+| Tinkamas pasirinkimas | Komandai, kuri tą pačią dieną leidžia daug suderinamų pakeitimų | Komandai, kuriai reikia atskiro approval ir leidimo lango |
+
+Modelis turi būti pasirinktas ir aprašytas projekto diegimo dokumentacijoje. Abiem atvejais privalomi nekintami artefaktai, atsekamumas iki commit, rollback planas ir deploy po faktinio health patikrinimo.
+
+> Praktinė kontrolė prieš PR: [DevOps CI/CD modelių priedas](priedai/devops-ci-cd-modeliai.md) · [8.2 CI minimalūs reikalavimai](#82-ci-continuous-integration-minimalūs-reikalavimai) · [8.3 CD](#83-cd-continuous-delivery-deployment) · [8.4 Versijavimas ir žymėjimas](#84-versijavimas-ir-žymėjimas-release-artefaktams)

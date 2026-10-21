@@ -1,0 +1,62 @@
+name: Example - Ops Deploy
+
+# Inactive example. Copy to .github/workflows/ops.deploy.yml only after the
+# reusable cd.deploy workflow and the consuming repository's deployment
+# contract have been adapted. This path never builds or promotes images.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target GitHub Environment.
+        required: true
+        type: choice
+        options: [staging, production]
+      app_image:
+        description: Full PHP-FPM image reference including sha256 digest.
+        required: true
+        type: string
+      nginx_image:
+        description: Full Nginx image reference including sha256 digest.
+        required: true
+        type: string
+      source_sha:
+        description: Exact source commit recorded in both image labels.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: read
+  attestations: read
+
+jobs:
+  validate:
+    name: Validate manual digest redeploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+      APP_IMAGE: ${{ inputs.app_image }}
+      NGINX_IMAGE: ${{ inputs.nginx_image }}
+      SOURCE_SHA: ${{ inputs.source_sha }}
+    steps:
+      - name: Validate immutable inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$APP_IMAGE" =~ ^ghcr\.io/[^@]+@sha256:[a-f0-9]{64}$ ]]
+          [[ "$NGINX_IMAGE" =~ ^ghcr\.io/[^@]+@sha256:[a-f0-9]{64}$ ]]
+
+  deploy:
+    name: Redeploy selected ${{ inputs.environment }} images
+    needs: validate
+    uses: ./.github/workflows/cd.deploy.yml
+    with:
+      environment: ${{ inputs.environment }}
+      source_sha: ${{ inputs.source_sha }}
+      app_image: ${{ inputs.app_image }}
+      nginx_image: ${{ inputs.nginx_image }}
+      release_workflow: ${{ github.repository }}/.github/workflows/ci.build.yml
+    secrets: inherit

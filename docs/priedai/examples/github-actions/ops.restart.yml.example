@@ -1,0 +1,154 @@
+name: Example - Ops Restart
+
+# Inactive example. Copy to .github/workflows/ops.restart.yml only after the
+# consuming repository has the matching blue-green Compose file and
+# `scripts/prepare-secrets.sh` contract. Recreate is intentional: it reopens host-managed
+# secrets such as changed TLS files without pulling or changing image refs.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: GitHub Environment and deployment runner.
+        required: true
+        type: choice
+        options: [staging, production]
+      service:
+        description: Service to recreate from the existing local image.
+        required: true
+        type: choice
+        options: [balancer, nginx-blue, nginx-green]
+
+permissions: {}
+
+concurrency:
+  group: ops-restart-${{ inputs.environment }}-${{ inputs.service }}
+  cancel-in-progress: false
+
+jobs:
+  restart:
+    name: Recreate ${{ inputs.service }} in ${{ inputs.environment }}
+    runs-on: [self-hosted, Linux, "${{ inputs.environment }}"]
+    environment: ${{ inputs.environment }}
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      TARGET_SERVICE: ${{ inputs.service }}
+      DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+      SECRETS_DIR: ${{ vars.SECRETS_DIR || format('/home/ubuntu/secrets/REPLACE_APPLICATION-{0}', inputs.environment) }}
+      COMPOSE_PROJECT_NAME: REPLACE_APPLICATION-${{ inputs.environment }}
+    steps:
+      - name: Checkout deployment configuration
+        uses: actions/checkout@<reviewed-commit-sha>
+        with:
+          ref: main
+          persist-credentials: false
+          sparse-checkout: |
+            docker-compose.production.blue-green.yml
+            scripts/prepare-secrets.sh
+
+      - name: Check available disk space
+        shell: bash
+        run: |
+          set -euo pipefail
+          available_kb="$(df -Pk / | awk 'NR == 2 { print $4 }')"
+          test "$available_kb" -ge 1048576
+
+      - name: Prepare host-managed runtime secrets when configured
+        shell: bash
+        env:
+          PRODUCTION_ENV: ${{ secrets.PRODUCTION_ENV }}
+          TLS_CERTIFICATE_B64: ${{ secrets.TLS_CERTIFICATE_B64 }}
+          TLS_PRIVATE_KEY_B64: ${{ secrets.TLS_PRIVATE_KEY_B64 }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PRODUCTION_ENV" && -z "$TLS_CERTIFICATE_B64" && -z "$TLS_PRIVATE_KEY_B64" ]]; then
+            echo "Secret provisioning inputs are not configured; using existing files in SECRETS_DIR."
+          elif [[ -n "$PRODUCTION_ENV" && -n "$TLS_CERTIFICATE_B64" && -n "$TLS_PRIVATE_KEY_B64" ]]; then
+            ./scripts/prepare-secrets.sh \
+              --environment "$DEPLOY_ENVIRONMENT" \
+              --secrets-dir "$SECRETS_DIR"
+          else
+            echo "PRODUCTION_ENV, TLS_CERTIFICATE_B64, and TLS_PRIVATE_KEY_B64 must be configured together." >&2
+            exit 1
+          fi
+
+      - name: Validate restart target and runtime files
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$DEPLOY_ENVIRONMENT:$TARGET_SERVICE" in
+            staging:balancer|staging:nginx-blue|staging:nginx-green|production:balancer|production:nginx-blue|production:nginx-green) ;;
+            *) echo "Unsupported restart target: $DEPLOY_ENVIRONMENT/$TARGET_SERVICE" >&2; exit 1 ;;
+          esac
+          test -r "$SECRETS_DIR/compose.env"
+          test -r "$SECRETS_DIR/application.env"
+          test -s "$SECRETS_DIR/tls_certificate"
+          test -s "$SECRETS_DIR/tls_private_key"
+          test -s "$SECRETS_DIR/upstream.conf"
+          docker compose --env-file "$SECRETS_DIR/compose.env" \
+            -f docker-compose.production.blue-green.yml \
+            --profile blue --profile green --profile balancer config -q
+
+      - name: Recreate selected service without pulling
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$TARGET_SERVICE" in
+            balancer) profile=balancer ;;
+            nginx-blue) profile=blue ;;
+            nginx-green) profile=green ;;
+            *) echo "Unsupported restart target: $TARGET_SERVICE" >&2; exit 1 ;;
+          esac
+          docker compose \
+            --env-file "$SECRETS_DIR/compose.env" \
+            -f docker-compose.production.blue-green.yml \
+            --profile "$profile" \
+            up -d --pull never --force-recreate --no-deps \
+            --wait --wait-timeout 120 "$TARGET_SERVICE"
+
+      - name: Verify recreated service
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$TARGET_SERVICE" in
+            balancer) profile=balancer ;;
+            nginx-blue) profile=blue ;;
+            nginx-green) profile=green ;;
+            *) echo "Unsupported restart target: $TARGET_SERVICE" >&2; exit 1 ;;
+          esac
+          compose=(docker compose --env-file "$SECRETS_DIR/compose.env" -f docker-compose.production.blue-green.yml --profile "$profile")
+          "${compose[@]}" ps "$TARGET_SERVICE"
+          if [ "$TARGET_SERVICE" = balancer ]; then
+            "${compose[@]}" exec -T balancer nginx -t
+            curl --fail --silent --show-error --insecure https://127.0.0.1/health
+          else
+            "${compose[@]}" exec -T "$TARGET_SERVICE" \
+              wget -q -O /dev/null http://127.0.0.1:8080/health
+          fi
+
+      - name: Show service logs on failure
+        if: failure()
+        shell: bash
+        run: |
+          case "$TARGET_SERVICE" in
+            balancer) profile=balancer ;;
+            nginx-blue) profile=blue ;;
+            nginx-green) profile=green ;;
+            *) exit 0 ;;
+          esac
+          docker compose --env-file "$SECRETS_DIR/compose.env" \
+            -f docker-compose.production.blue-green.yml --profile "$profile" \
+            logs --no-color --tail=100 "$TARGET_SERVICE" || true
+
+      - name: Report restart
+        run: |
+          {
+            echo "## Service recreated"
+            echo
+            echo "- Environment: \`$DEPLOY_ENVIRONMENT\`"
+            echo "- Service: \`$TARGET_SERVICE\`"
+            echo "- Image pull: \`never\`"
+            echo "- TLS check: \`$([ \"$TARGET_SERVICE\" = balancer ] && echo performed || echo not-applicable)\`"
+          } >> "$GITHUB_STEP_SUMMARY"

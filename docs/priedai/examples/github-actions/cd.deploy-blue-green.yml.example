@@ -1,0 +1,114 @@
+name: Example - CD Blue-Green Deploy
+
+# Optional deployment workflow. The normal cd.deploy.yml.example remains the
+# default single-slot path. This workflow reuses the same immutable images and
+# switches only the balancer after the inactive slot is healthy.
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      source_sha:
+        required: true
+        type: string
+      app_image:
+        description: Immutable application image digest used by both slots.
+        required: true
+        type: string
+      nginx_image:
+        description: Immutable Nginx image digest used by both slots.
+        required: true
+        type: string
+    secrets:
+      RUNTIME_ENV:
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blue-green-deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Blue-green deploy to ${{ inputs.environment }}
+    runs-on: [self-hosted, deployment]
+    environment: ${{ inputs.environment }}
+    timeout-minutes: 30
+    env:
+      DEPLOY_ROOT: /srv/<application>
+      COMPOSE_FILE: /srv/<application>/docker-compose.production.blue-green.yml
+      SECRETS_DIR: /srv/<application>/secrets
+      BALANCER_CONFIG_DIR: /srv/<application>/balancer
+      ACTIVE_SLOT_FILE: /srv/<application>/balancer/active-slot
+      PHP_IMAGE_BLUE: ${{ inputs.app_image }}
+      PHP_IMAGE_GREEN: ${{ inputs.app_image }}
+      NGINX_IMAGE_BLUE: ${{ inputs.nginx_image }}
+      NGINX_IMAGE_GREEN: ${{ inputs.nginx_image }}
+      BALANCER_IMAGE_REF: ghcr.io/<owner>/<application>-balancer@sha256:<balancer-digest>
+      SOURCE_SHA: ${{ inputs.source_sha }}
+
+    steps:
+      - name: Validate handoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$PHP_IMAGE_BLUE" == *@sha256:* ]]
+          [[ "$NGINX_IMAGE_BLUE" == *@sha256:* ]]
+
+      - name: Checkout deployment configuration
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+
+      - name: Roll out inactive slot and switch balancer
+        shell: bash
+        env:
+          RUNTIME_ENV: ${{ secrets.RUNTIME_ENV }}
+        run: |
+          set -euo pipefail
+          umask 077
+          printf '%s\n' "$RUNTIME_ENV" > "$RUNNER_TEMP/runtime.env"
+          cd "$DEPLOY_ROOT"
+          current_slot="$(cat "$ACTIVE_SLOT_FILE" 2>/dev/null || echo blue)"
+          case "$current_slot" in
+            blue) next_slot=green ;;
+            green) next_slot=blue ;;
+            *) echo "Unknown active slot: $current_slot" >&2; exit 1 ;;
+          esac
+
+          docker compose --env-file "$RUNNER_TEMP/runtime.env" -f "$COMPOSE_FILE" pull \
+            "php-$next_slot" "worker-$next_slot" "nginx-$next_slot"
+          docker compose --env-file "$RUNNER_TEMP/runtime.env" -f "$COMPOSE_FILE" up -d --wait \
+            "php-$next_slot" "worker-$next_slot"
+          docker compose --env-file "$RUNNER_TEMP/runtime.env" -f "$COMPOSE_FILE" run --rm --no-deps \
+            "php-$next_slot" php artisan migrate --force --no-interaction
+          docker compose --env-file "$RUNNER_TEMP/runtime.env" -f "$COMPOSE_FILE" up -d --wait "nginx-$next_slot"
+          docker compose --env-file "$RUNNER_TEMP/runtime.env" -f "$COMPOSE_FILE" exec -T "nginx-$next_slot" \
+            wget -q -O /dev/null http://127.0.0.1:8080/health
+
+          cat > "$BALANCER_CONFIG_DIR/active.conf" <<EOF
+          upstream application {
+              server nginx-$next_slot:8080;
+          }
+          server {
+              listen 8080;
+              location / {
+                  proxy_pass http://application;
+                  proxy_set_header Host \$host;
+                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto \$scheme;
+              }
+          }
+          EOF
+          docker compose --env-file "$RUNNER_TEMP/runtime.env" -f "$COMPOSE_FILE" up -d --no-deps --force-recreate balancer
+          docker compose --env-file "$RUNNER_TEMP/runtime.env" -f "$COMPOSE_FILE" exec -T balancer \
+            wget -q -O /dev/null http://127.0.0.1:8080/health
+          printf '%s\n' "$next_slot" > "$ACTIVE_SLOT_FILE"
+
+          # Keep the previous slot available for a short rollback window. A
+          # separate housekeeping procedure may stop it after observation.

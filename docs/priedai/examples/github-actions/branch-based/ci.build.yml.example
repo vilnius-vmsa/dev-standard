@@ -1,0 +1,244 @@
+name: Example - CI Build (branch-based)
+
+on:
+  workflow_run:
+    workflows: ["CI: Lint and Validate"]
+    types: [completed]
+    branches: [stage, main]
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: build-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  build-test-promote:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      environment: ${{ steps.meta.outputs.environment }}
+      source_sha: ${{ steps.meta.outputs.source_sha }}
+      app_image: ${{ steps.image.outputs.app_image }}
+      nginx_image: ${{ steps.image.outputs.nginx_image }}
+    steps:
+      - name: Checkout exact linted revision
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 1
+
+      - name: Resolve deployment metadata
+        id: meta
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+          SOURCE_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+          case "$SOURCE_BRANCH" in
+            stage) ENVIRONMENT=staging ;;
+            main) ENVIRONMENT=production ;;
+            *) echo "Unsupported protected branch: $SOURCE_BRANCH" >&2; exit 1 ;;
+          esac
+          printf 'source_sha=%s\n' "$SOURCE_SHA" >> "$GITHUB_OUTPUT"
+          printf 'environment=%s\n' "$ENVIRONMENT" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to the container registry
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REGISTRY: ghcr.io
+        run: echo "$GH_TOKEN" | docker login "$REGISTRY" -u "${{ github.actor }}" --password-stdin
+
+      - name: Create Composer GitHub App token
+        id: github-app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.COMPOSER_APP_ID }}
+          private-key: ${{ secrets.COMPOSER_APP_PRIVATE_KEY }}
+
+      - name: Build and push PHP-FPM candidate image
+        id: php
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./docker/php-fpm/Dockerfile.prod
+          push: true
+          build-args: |
+            RELEASE_NUMBER=${{ steps.meta.outputs.source_sha }}
+          secrets: |
+            composer_auth={"github-oauth":{"github.com":"${{ steps.github-app-token.outputs.token }}"}}
+          tags: ghcr.io/<owner>/<application>-image-php:candidate-${{ steps.meta.outputs.source_sha }}-${{ github.run_id }}
+          labels: |
+            org.opencontainers.image.revision=${{ steps.meta.outputs.source_sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=candidate-${{ steps.meta.outputs.source_sha }}-${{ github.run_id }}
+          provenance: mode=max
+          sbom: true
+          cache-from: type=registry,ref=ghcr.io/<owner>/<application>-image-php:buildcache
+          cache-to: type=registry,ref=ghcr.io/<owner>/<application>-image-php:buildcache,mode=max
+
+      - name: Build and push Nginx candidate image
+        id: nginx
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./docker/nginx/Dockerfile.prod
+          push: true
+          build-args: |
+            PHP_IMAGE_REF=ghcr.io/<owner>/<application>-image-php@${{ steps.php.outputs.digest }}
+          tags: ghcr.io/<owner>/<application>-image-nginx:candidate-${{ steps.meta.outputs.source_sha }}-${{ github.run_id }}
+          labels: |
+            org.opencontainers.image.revision=${{ steps.meta.outputs.source_sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=candidate-${{ steps.meta.outputs.source_sha }}-${{ github.run_id }}
+          provenance: mode=max
+          sbom: true
+          cache-from: type=registry,ref=ghcr.io/<owner>/<application>-image-nginx:buildcache
+          cache-to: type=registry,ref=ghcr.io/<owner>/<application>-image-nginx:buildcache,mode=max
+
+      - name: Resolve published image digests
+        id: image
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
+          APP_REPOSITORY: ghcr.io/<owner>/<application>-image-php
+          NGINX_REPOSITORY: ghcr.io/<owner>/<application>-image-nginx
+          APP_DIGEST: ${{ steps.php.outputs.digest }}
+          NGINX_DIGEST: ${{ steps.nginx.outputs.digest }}
+        run: |
+          set -euo pipefail
+          CANDIDATE_TAG="candidate-${SOURCE_SHA}-${GITHUB_RUN_ID}"
+          [[ "$APP_DIGEST" == sha256:* && "$NGINX_DIGEST" == sha256:* ]]
+          echo "app_repository=$APP_REPOSITORY" >> "$GITHUB_OUTPUT"
+          echo "app_digest=$APP_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "nginx_repository=$NGINX_REPOSITORY" >> "$GITHUB_OUTPUT"
+          echo "nginx_digest=$NGINX_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "app_image=$APP_REPOSITORY@$APP_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "nginx_image=$NGINX_REPOSITORY@$NGINX_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "candidate_tag=$CANDIDATE_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Scan published application image
+        uses: aquasecurity/trivy-action@0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.app_image }}
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          format: table
+
+      - name: Scan published Nginx image
+        uses: aquasecurity/trivy-action@0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.nginx_image }}
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          format: table
+
+      - name: Generate application SBOM
+        uses: anchore/sbom-action@v0.20.0
+        with:
+          image: ${{ steps.image.outputs.app_image }}
+          format: spdx-json
+          output-file: sbom-app.spdx.json
+
+      - name: Generate Nginx SBOM
+        uses: anchore/sbom-action@v0.20.0
+        with:
+          image: ${{ steps.image.outputs.nginx_image }}
+          format: spdx-json
+          output-file: sbom-nginx.spdx.json
+
+      - name: Attest application build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ steps.image.outputs.app_repository }}
+          subject-digest: ${{ steps.image.outputs.app_digest }}
+          push-to-registry: true
+
+      - name: Attest Nginx build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ steps.image.outputs.nginx_repository }}
+          subject-digest: ${{ steps.image.outputs.nginx_digest }}
+          push-to-registry: true
+
+      - name: Smoke-test the immutable images
+        shell: bash
+        env:
+          APP_IMAGE: ${{ steps.image.outputs.app_image }}
+        run: docker run --rm "$APP_IMAGE" php artisan about --no-ansi
+
+      - name: Promote the smoke-tested application image
+        shell: bash
+        env:
+          APP_IMAGE: ${{ steps.image.outputs.app_image }}
+          NGINX_IMAGE: ${{ steps.image.outputs.nginx_image }}
+          ENVIRONMENT: ${{ steps.meta.outputs.environment }}
+        run: |
+          set -euo pipefail
+          docker buildx imagetools create --tag "${APP_IMAGE%@*}:$ENVIRONMENT" "$APP_IMAGE"
+          docker buildx imagetools create --tag "${NGINX_IMAGE%@*}:$ENVIRONMENT" "$NGINX_IMAGE"
+
+      - name: Attest promoted application release
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ steps.image.outputs.app_repository }}
+          subject-digest: ${{ steps.image.outputs.app_digest }}
+          predicate-type: https://in-toto.io/attestation/release/v0.1
+          predicate: '{"purl":"pkg:github/${{ github.repository }}@${{ steps.meta.outputs.source_sha }}"}'
+          push-to-registry: true
+          create-storage-record: false
+
+      - name: Attest promoted Nginx release
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ steps.image.outputs.nginx_repository }}
+          subject-digest: ${{ steps.image.outputs.nginx_digest }}
+          predicate-type: https://in-toto.io/attestation/release/v0.1
+          predicate: '{"purl":"pkg:github/${{ github.repository }}@${{ steps.meta.outputs.source_sha }}"}'
+          push-to-registry: true
+          create-storage-record: false
+
+      - name: Publish tested image metadata
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
+          APP_DIGEST: ${{ steps.image.outputs.app_digest }}
+          NGINX_DIGEST: ${{ steps.image.outputs.nginx_digest }}
+        run: |
+          set -euo pipefail
+          jq -n \
+            --arg source_sha "$SOURCE_SHA" \
+            --arg app_digest "$APP_DIGEST" \
+            --arg nginx_digest "$NGINX_DIGEST" \
+            '{source_sha: $source_sha, app_digest: $app_digest, nginx_digest: $nginx_digest}' \
+            > metadata.json
+
+      - name: Upload tested image metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-metadata
+          path: metadata.json
+          if-no-files-found: error
+
+  deploy:
+    needs: build-test-promote
+    permissions:
+      contents: read
+      packages: read
+      attestations: read
+    uses: ./.github/workflows/cd.deploy.yml
+    with:
+      environment: ${{ needs.build-test-promote.outputs.environment }}
+      source_sha: ${{ needs.build-test-promote.outputs.source_sha }}
+      app_image: ${{ needs.build-test-promote.outputs.app_image }}
+      nginx_image: ${{ needs.build-test-promote.outputs.nginx_image }}
+      release_workflow: ${{ github.repository }}/.github/workflows/ci.build.yml
+    secrets: inherit
