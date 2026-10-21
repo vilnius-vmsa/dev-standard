@@ -19,6 +19,10 @@ on:
         description: Immutable Nginx image reference.
         required: true
         type: string
+      release_workflow:
+        description: Workflow that created the exact release attestation.
+        required: true
+        type: string
     secrets:
       RUNTIME_ENV:
         required: true
@@ -32,12 +36,17 @@ jobs:
     runs-on: [self-hosted, deployment]
     environment: ${{ inputs.environment }}
     timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: read
+      attestations: read
     env:
       DEPLOY_ROOT: /srv/<application>
       COMPOSE_FILE: /srv/<application>/docker-compose.production.yml
       APP_IMAGE: ${{ inputs.app_image }}
       NGINX_IMAGE: ${{ inputs.nginx_image }}
       SOURCE_SHA: ${{ inputs.source_sha }}
+      RELEASE_WORKFLOW: ${{ inputs.release_workflow }}
     steps:
       - name: Validate deployment inputs
         shell: bash
@@ -46,6 +55,43 @@ jobs:
           [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
           [[ "$APP_IMAGE" == *@sha256:* ]]
           [[ "$NGINX_IMAGE" == *@sha256:* ]]
+
+      - name: Verify build and release attestations
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          command -v gh
+          command -v jq
+          verify_image() {
+            local image="$1" name digest attestations
+            name="${image%@*}"
+            digest="${image##*@}"
+            gh attestation verify "oci://${image}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/ci.build.yml"
+            attestations="$(gh attestation verify "oci://${image}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "$RELEASE_WORKFLOW" \
+              --predicate-type https://in-toto.io/attestation/release/v0.1 \
+              --format json)"
+            jq -e \
+              --arg predicate_type "https://in-toto.io/attestation/release/v0.1" \
+              --arg expected_purl "pkg:github/${GITHUB_REPOSITORY}@${SOURCE_SHA}" \
+              --arg subject_name "$name" \
+              --arg subject_digest "$digest" \
+              'any(.[]?;
+                .verificationResult.statement.predicateType == $predicate_type
+                and .verificationResult.statement.predicate.purl == $expected_purl
+                and any(.verificationResult.statement.subject[]?;
+                  .name == $subject_name
+                  and .digest.sha256 == ($subject_digest | sub("^sha256:"; ""))
+                )
+              )' <<<"$attestations" >/dev/null
+          }
+          verify_image "$APP_IMAGE"
+          verify_image "$NGINX_IMAGE"
 
       - name: Prepare runtime environment
         shell: bash

@@ -1249,6 +1249,9 @@ OPS-DOCKER-P01:
 OPS-DOCKER-P02:
   text: Secrets, certificates and tokens are not copied into the Docker build context or image layers; build credentials use BuildKit secret mounts and runtime secrets use a secure environment mechanism.
   source_hash: cb72d094c63e
+OPS-DOCKER-P03:
+  text: "Each deployable service has one canonical registry image name that does not change between staging and production; environment, release version and build identifier are represented by tags, OCI labels and digests, not environment-specific repository names. Deployments use the digest, tags are navigation and promotion references, and `org.opencontainers.image.revision`, `org.opencontainers.image.source` and `org.opencontainers.image.version` provide traceability metadata. Blue-green slots use the same image repository and exact digest."
+  source_hash: c48480cfe488
 OPS-ENV-P01:
   text: All deployments to environments go only through CI/CD; manual changes in environments are forbidden except for clearly documented incident handling.
   source_hash: 3d940a48cd81
@@ -1286,14 +1289,14 @@ OPS-FLOW-P04:
   text: "The shared `CI: Build` pipeline follows this sequence: build → vulnerability scan → SBOM/provenance → attestation → verification → image smoke test → promotion → `CD: Deploy`; every stage passes along the same commit SHA and immutable image digest."
   source_hash: 71f6ee3ec34c
 OPS-FLOW-P05:
-  text: "Manual redeployment of an already verified image uses a separate `Ops: Deploy` workflow that accepts only digest-based image references, does not change code, and does not replace the lint, build or security gates."
-  source_hash: f509362819ce
+  text: "Manual redeployment of an already verified image uses a separate `Ops: Deploy` workflow that accepts only digest-based image references, verifies the matching build and exact release attestations for the source SHA and subject digest, does not change code, and does not replace the lint, build or security gates."
+  source_hash: a16db39495d3
 OPS-FLOW-P06:
   text: "Manual runtime service recreation uses a separate `Ops: Restart` workflow with an explicit service allowlist; it uses an image already present on the host, runs `docker compose up -d --pull never --force-recreate --no-deps --wait`, verifies the recreated service, forbids build, pull, promotion or image-reference changes, and adds an HTTPS health check when a balancer is recreated after TLS changes."
   source_hash: 99050af5246f
 OPS-FLOW-P07:
-  text: "Secret preparation and rotation use a project-owned `scripts/deploy/prepare-secrets.sh` procedure that validates the application environment and TLS pair, preserves the active slot, installs files atomically with runtime permissions and never prints secret values; `Ops: Restart` may call it only when all rotation inputs are provided."
-  source_hash: 3c6eaa32b5d5
+  text: "Secret preparation and rotation use a project-owned `scripts/prepare-secrets.sh` procedure that validates the application environment and TLS pair, preserves the active slot, installs files atomically with runtime permissions and never prints secret values; `Ops: Restart` may call it only when all rotation inputs are provided."
+  source_hash: d4d04a321fb1
 OPS-GITOPS-P01:
   text: The GitOps repository structure clearly separates application templates, environment parameters and, where applicable, cluster declarations.
   source_hash: 94daa58108fc

@@ -54,6 +54,20 @@ Bazinis image turi būti nurodytas kartu su versija ir digest. `latest` ir plauk
 
 Galutiniame image neturi būti kompiliatorių, Git, package manager cache'ų ar testų įrankių, nebent jie yra aiškiai reikalingi runtime. Failų kopijavimas turi naudoti tinkamą owner'į, o procesai turi veikti ne-root teisėmis.
 
+### Image pavadinimas, tag'ai, label'iai ir digest'ai
+
+Kiekvienas deployuojamas servisas turi vieną kanoninį registry image
+pavadinimą, pavyzdžiui, `ghcr.io/<org>/<app>-php` arba
+`ghcr.io/<org>/<app>-nginx`. Tas pats pavadinimas naudojamas staging ir
+production; aplinka neturi būti įrašoma į repository pavadinimą, pvz.
+`<app>-php-production`. Aplinką, release versiją ir build identifikatorių
+aprašo tag'ai bei OCI label'iai, o faktinis deploy visada remiasi konkrečiu
+`@sha256:...` digest'u. Bent `org.opencontainers.image.revision`,
+`org.opencontainers.image.source` ir `org.opencontainers.image.version` turi
+leisti susieti image su source commit ir release. Blue-green slotai naudoja tą
+patį image pavadinimą ir digest'ą; skiriasi tik Compose slotas ir jo runtime
+topologija.
+
 ## D.3. Compose kontrolė
 
 Naudokite atskirus Compose vaidmenis:
@@ -135,7 +149,7 @@ Svarbios sąlygos:
 - kiekvienas aplinkos deploy turi būti rollback'inamas pagal konkretų image digest;
 - rankinis redeploy atliekamas per `Ops: Deploy`, perduodant jau patikrintus PHP-FPM ir Nginx digest'us;
 - host-managed TLS pakeitimas užbaigiamas per `Ops: Restart`, kuris atkuria tik leistiną servisą, nenaudoja `pull` ir tikrina balancerio HTTPS health;
-- secret paruošimas ar rotacija vykdoma per projekto `scripts/deploy/prepare-secrets.sh`, kuris neprintina secret reikšmių ir išsaugo aktyvų slot'ą.
+- secret paruošimas ar rotacija vykdoma per projekto `scripts/prepare-secrets.sh`, kuris neprintina secret reikšmių ir išsaugo aktyvų slot'ą.
 
 ## D.6. Tag-based srauto pavyzdys
 

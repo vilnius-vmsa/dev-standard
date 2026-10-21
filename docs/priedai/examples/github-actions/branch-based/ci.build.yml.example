@@ -77,6 +77,7 @@ jobs:
           labels: |
             org.opencontainers.image.revision=${{ steps.meta.outputs.source_sha }}
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=candidate-${{ steps.meta.outputs.source_sha }}-${{ github.run_id }}
           provenance: mode=max
           sbom: true
           cache-from: type=registry,ref=ghcr.io/<owner>/<application>-image-php:buildcache
@@ -95,6 +96,7 @@ jobs:
           labels: |
             org.opencontainers.image.revision=${{ steps.meta.outputs.source_sha }}
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=candidate-${{ steps.meta.outputs.source_sha }}-${{ github.run_id }}
           provenance: mode=max
           sbom: true
           cache-from: type=registry,ref=ghcr.io/<owner>/<application>-image-nginx:buildcache
@@ -184,6 +186,26 @@ jobs:
           docker buildx imagetools create --tag "${APP_IMAGE%@*}:$ENVIRONMENT" "$APP_IMAGE"
           docker buildx imagetools create --tag "${NGINX_IMAGE%@*}:$ENVIRONMENT" "$NGINX_IMAGE"
 
+      - name: Attest promoted application release
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ steps.image.outputs.app_repository }}
+          subject-digest: ${{ steps.image.outputs.app_digest }}
+          predicate-type: https://in-toto.io/attestation/release/v0.1
+          predicate: '{"purl":"pkg:github/${{ github.repository }}@${{ steps.meta.outputs.source_sha }}"}'
+          push-to-registry: true
+          create-storage-record: false
+
+      - name: Attest promoted Nginx release
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ steps.image.outputs.nginx_repository }}
+          subject-digest: ${{ steps.image.outputs.nginx_digest }}
+          predicate-type: https://in-toto.io/attestation/release/v0.1
+          predicate: '{"purl":"pkg:github/${{ github.repository }}@${{ steps.meta.outputs.source_sha }}"}'
+          push-to-registry: true
+          create-storage-record: false
+
       - name: Publish tested image metadata
         shell: bash
         env:
@@ -208,10 +230,15 @@ jobs:
 
   deploy:
     needs: build-test-promote
+    permissions:
+      contents: read
+      packages: read
+      attestations: read
     uses: ./.github/workflows/cd.deploy.yml
     with:
       environment: ${{ needs.build-test-promote.outputs.environment }}
       source_sha: ${{ needs.build-test-promote.outputs.source_sha }}
       app_image: ${{ needs.build-test-promote.outputs.app_image }}
       nginx_image: ${{ needs.build-test-promote.outputs.nginx_image }}
+      release_workflow: ${{ github.repository }}/.github/workflows/ci.build.yml
     secrets: inherit

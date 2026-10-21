@@ -277,6 +277,8 @@ PRIVALOMA:
 *   Produkciniai Dockerfile turi naudoti pavadintus multi-stage etapus, versiją ir digest turinčius bazinius image bei, kai aplikacija naudoja package manager, lock failus; build metu reikalingi įrankiai negali patekti į galutinį runtime image.
 <!-- OPS-DOCKER-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Slapti raktai, sertifikatai ir tokenai negali būti kopijuojami į Docker build kontekstą ar image sluoksnius; build kredencialai turi būti perduodami per BuildKit secret mount, o runtime secrets – per saugią aplinkos mechanizmą.
+<!-- OPS-DOCKER-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Kiekvienas deployuojamas servisas turi turėti vieną kanoninį registry image pavadinimą, nekintantį tarp staging ir production; aplinka, release versija ir build identifikatorius turi būti perteikiami tag'ais, OCI label'iais ir digest'ais, o ne kuriant aplinkai skirtingus repository pavadinimus. Deploy turi naudoti digest, tag'ai yra paieškos ir promotion nuorodos, o `org.opencontainers.image.revision`, `org.opencontainers.image.source` ir `org.opencontainers.image.version` – atsekamumo metadata. Blue-green slotai turi naudoti tą patį image repository ir konkretų digest'ą.
 <!-- OPS-COMPOSE-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Development, production ir CI testų Compose konfigūracijos turi būti atskirtos pagal paskirtį: produkcija naudoja nekintamus image bei runtime secrets ir negali build'inti iš checkout'o.
 <!-- OPS-COMPOSE-P02 | ai-reviewable | stacks=infra,db | enforced-by=ai -->
@@ -299,11 +301,11 @@ PRIVALOMA:
 <!-- OPS-FLOW-P04 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Bendras `CI: Build` pipeline turi sekti nuoseklią seką: build → vulnerability scan → SBOM/provenance → attestation → verification → image smoke test → promotion → `CD: Deploy`; kiekvienas etapas turi perduoti tą patį commit SHA ir immutable image digest.
 <!-- OPS-FLOW-P05 | ai-reviewable | stacks=infra | enforced-by=ai -->
-*   Rankiniam jau patikrinto image redeploy turi būti atskiras `Ops: Deploy` workflow, kuris priima tik digest pagrįstas image nuorodas, nekeičia kodo ir nepakeičia lint, build ar saugos vartų.
+*   Rankiniam jau patikrinto image redeploy turi būti atskiras `Ops: Deploy` workflow, kuris priima tik digest pagrįstas image nuorodas, patikrina build bei tikslią release attestation pagal source SHA ir subject digest, nekeičia kodo ir nepakeičia lint, build ar saugos vartų.
 <!-- OPS-FLOW-P06 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Rankinis runtime serviso atkūrimas turi vykti per atskirą `Ops: Restart` workflow su aiškiu serviso allowlist'u; jis turi naudoti hoste jau esantį image, vykdyti `docker compose up -d --pull never --force-recreate --no-deps --wait`, patikrinti atkurtą servisą, neleisti build, pull, promotion ar image ref pakeitimo, o balancerio atkūrimą po TLS pakeitimo papildyti HTTPS health patikra.
 <!-- OPS-FLOW-P07 | ai-reviewable | stacks=infra | enforced-by=ai -->
-*   Secret paruošimui ir rotacijai turi būti projekto valdoma `scripts/deploy/prepare-secrets.sh` procedūra, kuri validuoja aplikacijos aplinką ir TLS porą, išsaugo aktyvų slot'ą, įdiegia failus atomiškai su runtime leidimais ir neprintina secret reikšmių; `Ops: Restart` gali ją kviesti tik tada, kai visi rotacijos įėjimai pateikti.
+*   Secret paruošimui ir rotacijai turi būti projekto valdoma `scripts/prepare-secrets.sh` procedūra, kuri validuoja aplikacijos aplinką ir TLS porą, išsaugo aktyvų slot'ą, įdiegia failus atomiškai su runtime leidimais ir neprintina secret reikšmių; `Ops: Restart` gali ją kviesti tik tada, kai visi rotacijos įėjimai pateikti.
 
 Tipinė seka:
 

@@ -58,4 +58,5 @@ jobs:
       source_sha: ${{ inputs.source_sha }}
       app_image: ${{ inputs.app_image }}
       nginx_image: ${{ inputs.nginx_image }}
+      release_workflow: ${{ github.repository }}/.github/workflows/ci.build.yml
     secrets: inherit

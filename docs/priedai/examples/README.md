@@ -29,6 +29,11 @@
 * [Tag-based candidate build, scan ir attestation](github-actions/tag-based/ci.build.yml.example)
 * [Tag-based tested-image promotion ir release](github-actions/tag-based/ci.release.yml.example)
 
+Image naming taisyklė: vienas deployuojamas servisas turi vieną kanoninį
+registry image pavadinimą. Staging ir production atskiriami tag'ais ir OCI
+label'iais, o deploy naudojamas konkretus digest; aplinkai skirtų repository
+pavadinimų, tokių kaip `app-php-production`, kurti nereikia.
+
 Branch-based modelis naudoja `stage → staging` ir `main → production`. Tag-based modelis pirmiausia sukuria ir patikrina candidate image, o apsaugotas `vX.Y.Z` tag paaukština tą patį nekintamą digest į leidimą ir produkciją.
 
 Branch-based modelyje `CI: Lint` po protected branch push kviečia bendrą
@@ -40,6 +45,9 @@ Jei reikia atnaujinti host-managed TLS ar atlikti kitą leidžiamą runtime
 serviso atkūrimą, naudokite atskirą `Ops: Restart` workflow su aiškiu serviso
 allowlist'u; jis naudoja hoste esantį image, vykdo `--pull never` ir tikrina
 atkurtos paslaugos būseną.
+Secret paruošimo ir rotacijos skriptas turi būti projekto
+`scripts/prepare-secrets.sh`: jis validuoja aplikacijos aplinką ir TLS porą,
+išsaugo aktyvų slot'ą, failus įdiegia atomiškai ir neprintina secret reikšmių.
 `ops.start-database` lieka atskira vienkartine infrastruktūros operacija ir
 nepriklauso aplikacijos build/deploy vartams.
 

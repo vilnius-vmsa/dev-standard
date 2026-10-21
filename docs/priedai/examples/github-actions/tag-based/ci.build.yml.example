@@ -64,6 +64,7 @@ jobs:
           labels: |
             org.opencontainers.image.revision=${{ steps.meta.outputs.source_sha }}
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=candidate-${{ steps.meta.outputs.source_sha }}-${{ github.run_id }}
           provenance: mode=max
           sbom: true
           cache-from: type=registry,ref=ghcr.io/<owner>/<application>-image-php:buildcache
@@ -82,6 +83,7 @@ jobs:
           labels: |
             org.opencontainers.image.revision=${{ steps.meta.outputs.source_sha }}
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=candidate-${{ steps.meta.outputs.source_sha }}-${{ github.run_id }}
           provenance: mode=max
           sbom: true
           cache-from: type=registry,ref=ghcr.io/<owner>/<application>-image-nginx:buildcache
