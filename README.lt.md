@@ -9,7 +9,7 @@ diegimo ir priežiūros standartas.
 [![Testai](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/ci.lint-validate.yml/badge.svg)](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/ci.lint-validate.yml)
 [![Diegimas](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/cd.deploy.yml/badge.svg)](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/cd.deploy.yml)
 [![CodeQL](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/codeql.yml/badge.svg)](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/codeql.yml)
-[![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Node.js 20 | 22+](https://img.shields.io/badge/Node.js-20%20%7C%2022%2B-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![Licencija: CC BY 4.0](https://img.shields.io/badge/licencija-CC_BY_4.0-2b5797?logo=creativecommons&logoColor=white)](LICENSE)
 
 ## Navigacija
@@ -35,7 +35,7 @@ Detaliau: [2 skyrius – Standarto paskirtis ir taikymo sritis](docs/02-paskirti
 
 ## Vietinis paleidimas
 
-Reikalinga Node.js 20 arba naujesnė versija.
+Reikalinga Node.js 20 arba 22 ir naujesnė versija.
 
 ```bash
 npm ci
