@@ -1226,8 +1226,8 @@ OPS-COMPOSE-P01:
   text: Development, production and CI test Compose configurations are separated by purpose; production uses immutable images and runtime secrets and cannot build from the checkout.
   source_hash: 72e0314558c2
 OPS-COMPOSE-P02:
-  text: "Where applicable, Compose services define healthchecks, dependencies, resource limits and secure execution; shared service defaults are recommended in anchors. Blue-green is optional: it may change only slot differences and must use shared persistent-state storage when required by the application."
-  source_hash: 4029ba20f76d
+  text: "Where applicable, Compose services define healthchecks, dependencies, resource limits and secure execution; shared service defaults are recommended in anchors. Blue-green is optional: it may change only slot differences, must preserve the single-slot hardening and resource limits across every slot, balancer and stateful service, and must use shared persistent-state storage when required by the application."
+  source_hash: f92caf0c5bae
 OPS-DEVSEC-P01:
   text: CI/CD runs security checks appropriate to the system's risk level.
   source_hash: bcc2673184c1

@@ -13,9 +13,9 @@
 
 * [Production multi-stage PHP-FPM Dockerfile](docker/Dockerfile.prod.example)
 * [Production multi-stage Nginx Dockerfile](docker/Dockerfile.nginx.prod.example)
-* [Development Compose](docker/docker-compose.example.yml)
-* [Production Compose su PHP-FPM, worker, Nginx, MySQL, Redis ir Alloy](docker/docker-compose.production.example.yml)
-* [Optional blue-green production Compose](docker/docker-compose.production.blue-green.example.yml)
+* [Development Compose](docker/docker-compose.example.yml) — lokalus darbas, HTTP per `127.0.0.1:8080`.
+* [Production Compose su PHP-FPM, worker, Nginx, MySQL, Redis ir Alloy](docker/docker-compose.production.example.yml) — serveriui, HTTPS per hosto `:443`.
+* [Optional blue-green production Compose](docker/docker-compose.production.blue-green.example.yml) — serveriui, balancerio HTTPS per hosto `:443`.
 * [Published-image CI smoke Compose override](docker/docker-compose.ci-smoke.override.example.yml)
 
 ## GitHub Actions
@@ -52,7 +52,10 @@ image.
 Jei reikia atnaujinti host-managed TLS ar atlikti kitą leidžiamą runtime
 serviso atkūrimą, naudokite `Ops: Deploy` workflow restart operaciją su aiškiu
 serviso allowlist'u; ji naudoja hoste esantį image, vykdo `--pull never` ir
-tikrina atkurtos paslaugos būseną.
+tikrina atkurtos paslaugos būseną. Restart prieš Compose validaciją nuskaito
+visų blue-green servisų esamus digest image reference'us iš hosto konteinerių
+label'ių ir perduoda juos Compose nekeičiant; todėl restart nereikalauja
+perrašomo tag'o ar naujo image pasirinkimo.
 Secret paruošimo ir rotacijos skriptas turi būti projekto
 `scripts/prepare-secrets.sh`: jis validuoja aplikacijos aplinką ir TLS porą,
 išsaugo aktyvų slot'ą, failus įdiegia atomiškai ir neprintina secret reikšmių.
@@ -64,7 +67,19 @@ secret scan bei artifact housekeeping yra atskiri pagalbiniai workflow. Jie
 negali tapti production deploy vartų pakaitalu; `ops.start-database` taip pat
 tik paleidžia ir patikrina leistiną duomenų bazės servisą.
 
+Development Compose yra skirtas tik lokaliam darbui: jis publikuoja HTTP per
+`127.0.0.1:8080` ir neturi būti naudojamas staging ar production hoste.
+Production Compose failai yra atskiri serverio pavyzdžiai: jie terminina TLS
+balanceryje arba production Nginx procese, publikuoja hosto `443` į konteinerio
+TLS portą ir reikalauja `tls_certificate` bei `tls_private_key` secrets.
+Blue-green deploy sugeneruoja balancerio TLS konfigūraciją ir tikrina
+`https://127.0.0.1:8443/health` konteineryje bei viešą HTTPS endpointą per hosto
+`:443`. Jis, kaip ir single-slot `cd.deploy`, privalo patikrinti build
+attestation bei konkretaus `release_workflow` release attestation abiem
+diegiamiems image digest'ams prieš rollout.
+
 Single-slot production Compose ir `cd.deploy.yml.example` yra numatytasis
 variantas. Blue-green pavyzdžiai pasirenkami tik tada, kai reikia dviejų
 keičiamų aplikacijos, worker ir Nginx slotų bei balancerio perjungimo; jie
-nekeičia bendrų lint, build, scan, attestation, smoke ir image digest vartų.
+nekeičia saugumo hardening, CPU/memory limitų, bendrų lint, build, scan,
+attestation, smoke ir image digest vartų.

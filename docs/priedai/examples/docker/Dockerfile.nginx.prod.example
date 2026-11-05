@@ -13,9 +13,16 @@ COPY --from=application /var/www/public /usr/share/nginx/html
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
 
+# The production default.conf must listen on 8443 with TLS and reference
+# /run/secrets/tls_certificate and /run/secrets/tls_private_key. The local
+# development Nginx configuration is a separate HTTP-on-8080 configuration.
+
 RUN mkdir -p /var/cache/nginx /var/run \
     && chown -R nginx:nginx /var/cache/nginx /var/run /usr/share/nginx/html
 
 USER nginx
-EXPOSE 8080
+# Production Nginx serves HTTPS internally on 8443. The production Compose
+# maps host port 443 to this container port. The development image/Compose
+# remains HTTP on 8080.
+EXPOSE 8443
 CMD ["nginx", "-g", "daemon off;"]

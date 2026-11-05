@@ -282,7 +282,7 @@ PRIVALOMA:
 <!-- OPS-COMPOSE-P01 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Development, production ir CI testų Compose konfigūracijos turi būti atskirtos pagal paskirtį: produkcija naudoja nekintamus image bei runtime secrets ir negali build'inti iš checkout'o.
 <!-- OPS-COMPOSE-P02 | ai-reviewable | stacks=infra,db | enforced-by=ai -->
-*   Compose servisai, kai tai taikoma, turi aprašyti healthcheck, priklausomybes, resursų ribas ir saugų vykdymą; bendri servisų numatytieji nustatymai rekomenduojami anchor'uose. Blue-green yra pasirenkamas variantas: jis gali keisti tik slot'o skirtumus ir turi naudoti bendrą persistent state saugyklą, kai to reikalauja aplikacija.
+*   Compose servisai, kai tai taikoma, turi aprašyti healthcheck, priklausomybes, resursų ribas ir saugų vykdymą; bendri servisų numatytieji nustatymai rekomenduojami anchor'uose. Blue-green yra pasirenkamas variantas: jis gali keisti tik slot'o skirtumus, turi išlaikyti single-slot hardening ir resource limitus visuose slotuose, balanceryje bei stateful servisuose ir turi naudoti bendrą persistent state saugyklą, kai to reikalauja aplikacija.
 
 > Susiję skyriai: [3.5 Konfigūracija, slaptieji raktai ir aplinkos](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [6 Saugumas (Security by Design)](06-saugumas.md) · [8.5 Konteinerių ir Kubernetes diegimo reikalavimai](#85-konteinerių-ir-kubernetes-diegimo-reikalavimai)
 

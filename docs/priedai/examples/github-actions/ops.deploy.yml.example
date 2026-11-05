@@ -14,12 +14,15 @@ on:
         type: choice
         options: [redeploy, restart]
       environment:
-        description: Target GitHub Environment.
+        description: GitHub Environment to deploy.
         required: true
+        default: staging
         type: choice
-        options: [staging, production]
+        options:
+          - staging
+          - production
       image_tag:
-        description: Optional immutable sha-<40> tag; empty uses the promoted environment tag.
+        description: Optional immutable source tag (sha-<40 hex>); leave empty to use the environment's promoted image.
         required: false
         default: ""
         type: string
@@ -179,6 +182,37 @@ jobs:
             exit 1
           fi
 
+      - name: Resolve current host image references without changing them
+        shell: bash
+        run: |
+          set -euo pipefail
+          image_for_service() {
+            local service container image
+            for service in "$@"; do
+              container="$(docker ps -aq \
+                --filter "label=com.docker.compose.project=$COMPOSE_PROJECT_NAME" \
+                --filter "label=com.docker.compose.service=$service" | head -n 1)"
+              if [ -n "$container" ]; then
+                image="$(docker inspect --format '{{.Config.Image}}' "$container")"
+                [[ "$image" == *@sha256:* ]] || {
+                  echo "The existing $service container does not use an immutable image reference: $image" >&2
+                  exit 1
+                }
+                printf '%s' "$image"
+                return 0
+              fi
+            done
+            echo "No existing container found for Compose service(s): $*" >&2
+            exit 1
+          }
+          {
+            printf 'PHP_IMAGE_BLUE=%s\n' "$(image_for_service php-blue worker-blue)"
+            printf 'PHP_IMAGE_GREEN=%s\n' "$(image_for_service php-green worker-green)"
+            printf 'NGINX_IMAGE_BLUE=%s\n' "$(image_for_service nginx-blue)"
+            printf 'NGINX_IMAGE_GREEN=%s\n' "$(image_for_service nginx-green)"
+            printf 'BALANCER_IMAGE_REF=%s\n' "$(image_for_service balancer)"
+          } >> "$GITHUB_ENV"
+
       - name: Validate restart target and runtime files
         shell: bash
         run: |
@@ -227,7 +261,7 @@ jobs:
           "${compose[@]}" ps "$TARGET_SERVICE"
           if [ "$TARGET_SERVICE" = balancer ]; then
             "${compose[@]}" exec -T balancer nginx -t
-            curl --fail --silent --show-error --insecure https://127.0.0.1/health
+            curl --fail --silent --show-error --insecure https://127.0.0.1:443/health
           else
             "${compose[@]}" exec -T "$TARGET_SERVICE" wget -q -O /dev/null http://127.0.0.1:8080/health
           fi

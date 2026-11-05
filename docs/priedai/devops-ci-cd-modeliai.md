@@ -89,6 +89,19 @@ priklausomybes; viešą portą valdo vienas balancer. Stateful duomenys (duomen�
 bazė, uploads ir reikalingi runtime failai) turi turėti aiškią persistent
 saugyklą.
 
+Development Compose yra skirtas tik lokaliam darbui ir gali publikuoti HTTP per
+`127.0.0.1:8080`. Staging ir production turi naudoti atskirą serverio Compose
+failą, kuriame edge balanceris arba production Nginx terminina TLS ir publikuoja
+HTTPS per hosto `443` (balancerio konteinerio TLS listeneris pavyzdyje yra
+`8443`). Šie failai negali būti sukeisti: lokalus HTTP pavyzdys nėra serverio
+deployment konfigūracija.
+
+Blue-green deploy strategija negali susilpninti single-slot saugumo ar resursų
+kontrolės: abu slotai, balanceris ir stateful servisai turi paveldėti tuos
+pačius `read_only`, `no-new-privileges`, `cap_drop`, healthcheck ir explicit
+CPU/memory limitus. Keičiasi tik slotų topologija, image ref ir balancerio
+maršrutizavimas.
+
 Produkcijai rekomenduojama naudoti Compose Deploy Specification
 `deploy.resources.limits` ir `reservations`, įskaitant aplikaciją, worker'ius,
 balancerį ir stateful servisus. Jei konkretus Compose/runtime diegimas taiko
@@ -129,6 +142,7 @@ Darbo eigų failai gali būti sujungti ar išskaidyti pagal projekto dydį, tač
 | `ops.housekeeping` | schedule arba manual | workflow artifact/log retention pagal nustatytą laiką | kontroliuojamas CI saugojimas |
 
 `ci.build` (arba pasirenkamas `ci.test-image`) turi perduoti tarp job'ų konkretų source SHA bei digest, o ne per naujo spręsti branch'o ar perrašomo tag reikšmę. `cd.deploy` negali būti laikomas sėkmingu vien todėl, kad paruošė secrets ar Compose failą: sėkmė reiškia faktinį paleidimą ir health patikrą. Minimalūs pavyzdžiai pateikti [CI Pipeline vartui](examples/github-actions/ci.pipeline.yml.example), [docs check](examples/github-actions/docs-check.yml.example), [dev-standard sync](examples/github-actions/dev-standard-sync.yml.example), [branch-based build](examples/github-actions/branch-based/ci.build.yml.example), [reusable deploy](examples/github-actions/cd.deploy.yml.example), [Ops: Deploy](examples/github-actions/ops.deploy.yml.example), [scheduled scan](examples/github-actions/ops.scheduled-scan.yml.example), [housekeeping](examples/github-actions/ops.housekeeping.yml.example), [start database](examples/github-actions/ops.start-database.yml.example) ir [tag-based release](examples/github-actions/tag-based/ci.release.yml.example).
+Pasirenkamas `cd.deploy-blue-green` turi naudoti tą patį `source_sha`, image digest'ų, build attestation ir `release_workflow` release attestation vartą kaip single-slot `cd.deploy`; skiriasi tik slotų rollout ir balancerio perjungimas.
 
 Permissions nurodomos workflow arba job lygiu, `pull_request` iš fork'o negali gauti production secrets ar privileged build tokenų. Concurrency grupės neleidžia dviem leidimams vienu metu perrašyti tos pačios aplinkos.
 

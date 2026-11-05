@@ -38,8 +38,8 @@ services:
   # tune them to the workload, but keep an explicit CPU and memory limit on
   # every service, including stateful services.
   mysql:
+    <<: *runtime-defaults
     image: mysql:8.4@sha256:REPLACE_WITH_CURRENT_DIGEST
-    restart: unless-stopped
     deploy:
       resources:
         limits:
@@ -119,9 +119,17 @@ services:
       php:
         condition: service_healthy
     ports:
-      - "127.0.0.1:8080:8080"
+      # Server-only edge: TLS terminates in the production Nginx image on
+      # 8443; the host exposes the public HTTPS port 443. Local development
+      # uses docker-compose.example.yml and HTTP on 127.0.0.1:8080.
+      - "443:8443"
+    secrets:
+      - source: tls_certificate
+        target: tls_certificate
+      - source: tls_private_key
+        target: tls_private_key
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"]
+      test: ["CMD-SHELL", "wget -q -T 3 --no-check-certificate -O /dev/null https://127.0.0.1:8443/health"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -161,3 +169,7 @@ secrets:
     file: ${SECRETS_DIR:?SECRETS_DIR is required}/mysql_root_password
   redis_password:
     file: ${SECRETS_DIR:?SECRETS_DIR is required}/redis_password
+  tls_certificate:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/tls_certificate
+  tls_private_key:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/tls_private_key
