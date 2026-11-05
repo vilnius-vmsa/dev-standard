@@ -9,7 +9,7 @@ maintenance of Vilnius City Municipality.
 [![Tests](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/ci.lint-validate.yml/badge.svg)](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/ci.lint-validate.yml)
 [![Deployment](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/cd.deploy.yml/badge.svg)](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/cd.deploy.yml)
 [![CodeQL](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/codeql.yml/badge.svg)](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/codeql.yml)
-[![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Node.js 20 | 22+](https://img.shields.io/badge/Node.js-20%20%7C%2022%2B-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![License: CC BY 4.0](https://img.shields.io/badge/license-CC_BY_4.0-2b5797?logo=creativecommons&logoColor=white)](LICENSE)
 
 ## Navigation
@@ -35,7 +35,7 @@ For details, see [Chapter 2 – Purpose and scope of the standard](docs/02-paski
 
 ## Running locally
 
-Node.js 20 or later is required.
+Node.js 20, or 22 and later, is required.
 
 ```bash
 npm ci
