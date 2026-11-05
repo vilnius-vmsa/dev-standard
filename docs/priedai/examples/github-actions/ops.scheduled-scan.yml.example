@@ -1,0 +1,115 @@
+name: Example - Ops scheduled scan
+
+on:
+  schedule:
+    # Weekly scan catches newly published vulnerabilities in existing images.
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: ops-scheduled-scan
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: read
+
+env:
+  PHP_REPOSITORY: ghcr.io/<owner>/<application>-image-php
+  NGINX_REPOSITORY: ghcr.io/<owner>/<application>-image-nginx
+
+jobs:
+  resolve-images:
+    name: Resolve promoted service images
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      images: ${{ steps.images.outputs.images }}
+    steps:
+      - name: Log in to the container registry
+        uses: docker/login-action@<reviewed-commit-sha>
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve environment tags to immutable digests
+        id: images
+        shell: bash
+        run: |
+          set -euo pipefail
+          entries=()
+          for environment in staging production; do
+            for repository in "$PHP_REPOSITORY" "$NGINX_REPOSITORY"; do
+              output="$(docker buildx imagetools inspect "${repository}:${environment}" 2>&1)" || {
+                echo "::warning::${repository}:${environment} was not found; skipping."
+                continue
+              }
+              digest="$(awk '$1 == "Digest:" { print $2; exit }' <<<"$output")"
+              [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+              entries+=("$(jq -cn --arg name "${repository##*/} (${environment})" \
+                --arg ref "${repository}@${digest}" '{name: $name, ref: $ref}')")
+            done
+          done
+          ((${#entries[@]} > 0)) || { echo "No promoted images were found." >&2; exit 1; }
+          images="$(printf '%s\n' "${entries[@]}" | jq -cs 'unique_by(.ref)')"
+          echo "images=$images" >> "$GITHUB_OUTPUT"
+
+  scan-images:
+    name: Scan ${{ matrix.image.name }}
+    needs: resolve-images
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.resolve-images.outputs.images) }}
+    steps:
+      - name: Scan the immutable image
+        uses: aquasecurity/trivy-action@<reviewed-commit-sha>
+        with:
+          image-ref: ${{ matrix.image.ref }}
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          format: table
+
+  audit-composer:
+    name: Audit locked Composer dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@<reviewed-commit-sha>
+      - uses: shivammathur/setup-php@<reviewed-commit-sha>
+        if: ${{ hashFiles('composer.lock') != '' }}
+        with:
+          php-version: '8.4'
+          tools: composer:2
+      - run: composer audit --locked --no-interaction
+        if: ${{ hashFiles('composer.lock') != '' }}
+
+  audit-npm:
+    name: Audit production npm dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@<reviewed-commit-sha>
+      - uses: actions/setup-node@<reviewed-commit-sha>
+        if: ${{ hashFiles('package-lock.json') != '' }}
+        with:
+          node-version: '22'
+      - run: npm audit --package-lock-only --omit=dev --audit-level=high
+        if: ${{ hashFiles('package-lock.json') != '' }}
+
+  scan-secrets:
+    name: Scan repository history for secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@<reviewed-commit-sha>
+        with:
+          fetch-depth: 0
+      - name: Run the pinned secret scanner
+        uses: gitleaks/gitleaks-action@<reviewed-commit-sha>
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

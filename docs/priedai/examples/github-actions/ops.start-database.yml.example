@@ -1,0 +1,65 @@
+name: Example - Ops start database
+
+# This is a one-time or incident-recovery operation. It must not deploy or
+# rebuild application services.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: GitHub Environment and self-hosted runner label.
+        required: true
+        type: choice
+        options: [staging, production]
+      database_service:
+        description: Explicit database service key from production Compose.
+        required: true
+        type: choice
+        options: [mysql, postgres]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ops-start-database-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  start-database:
+    name: Start database on ${{ inputs.environment }}
+    runs-on: [self-hosted, Linux, "${{ inputs.environment }}"]
+    environment: ${{ inputs.environment }}
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      DATABASE_SERVICE: ${{ inputs.database_service }}
+      SECRETS_DIR: ${{ vars.SECRETS_DIR || format('/home/ubuntu/secrets/{0}', inputs.environment) }}
+      COMPOSE_FILE: /srv/<application>/docker-compose.production.yml
+    steps:
+      - name: Checkout deployment configuration
+        uses: actions/checkout@<reviewed-commit-sha>
+        with:
+          ref: main
+          persist-credentials: false
+          sparse-checkout: docker-compose.production.yml
+
+      - name: Validate the selected database service
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$DATABASE_SERVICE" in
+            mysql|postgres) ;;
+            *) echo "Unsupported database service: $DATABASE_SERVICE" >&2; exit 1 ;;
+          esac
+          test -r "$SECRETS_DIR/compose.env"
+          docker compose --env-file "$SECRETS_DIR/compose.env" \
+            -f "$COMPOSE_FILE" config -q
+
+      - name: Start database and wait for health
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker compose --env-file "$SECRETS_DIR/compose.env" \
+            -f "$COMPOSE_FILE" up -d --wait --no-recreate "$DATABASE_SERVICE"
+          docker compose --env-file "$SECRETS_DIR/compose.env" \
+            -f "$COMPOSE_FILE" ps "$DATABASE_SERVICE"

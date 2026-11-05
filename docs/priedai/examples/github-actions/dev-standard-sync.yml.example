@@ -1,0 +1,35 @@
+name: Example - Dev standard sync
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      stacks:
+        description: "First setup only, for example laravel,frontend"
+        required: false
+        type: string
+      version:
+        description: "latest or an exact release such as v1.3.1"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: dev-standard-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync dev standard guidance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Apply the selected dev-standard release
+        uses: vilnius-vmsa/dev-standard/.github/actions/sync@<reviewed-commit-sha>
+        with:
+          stacks: ${{ inputs.stacks }}
+          version: ${{ inputs.version }}

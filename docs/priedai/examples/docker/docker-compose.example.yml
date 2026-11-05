@@ -1,0 +1,101 @@
+# Inactive example. Copy to the application root as docker-compose.yml and
+# replace every placeholder. Never use this file as production configuration.
+
+name: ${COMPOSE_PROJECT_NAME:-application-dev}
+
+x-app-defaults: &app-defaults
+  build:
+    context: .
+    dockerfile: docker/php-fpm/Dockerfile.dev
+  working_dir: /var/www
+  env_file:
+    - .env
+  environment:
+    REDIS_HOST: redis
+    DB_HOST: mysql
+  depends_on:
+    mysql:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  networks: [internal]
+
+services:
+  mysql:
+    image: mysql:8.4@sha256:REPLACE_WITH_CURRENT_DIGEST
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-application}
+      MYSQL_USER: ${DB_USERNAME:-application}
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+    secrets: [mysql_password, mysql_root_password]
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p\"$$(cat /run/secrets/mysql_root_password)\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7.4-alpine@sha256:REPLACE_WITH_CURRENT_DIGEST
+    command: ["sh", "-ec", "exec redis-server --requirepass \"$$(cat /run/secrets/redis_password)\""]
+    secrets: [redis_password]
+    volumes:
+      - redis_data:/data
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$(cat /run/secrets/redis_password)\" ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  php:
+    <<: *app-defaults
+    volumes:
+      - .:/var/www
+      - ./docker/php-fpm/composer:/home/app/.composer
+    expose: [9000]
+
+  worker:
+    <<: *app-defaults
+    command: ["php", "artisan", "queue:work", "redis", "--sleep=1", "--tries=3"]
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile.dev
+    depends_on:
+      php:
+        condition: service_started
+    ports:
+      - "127.0.0.1:${HTTP_PORT:-8080}:8080"
+    networks: [internal]
+
+  alloy:
+    image: ${ALLOY_IMAGE_REF:-grafana/alloy:REPLACE_WITH_DIGEST}
+    profiles: [observability]
+    command: ["run", "/etc/alloy/config.alloy", "--storage.path=/var/lib/alloy/data"]
+    volumes:
+      - ${ALLOY_CONFIG_DIR:-docker/alloy}/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloy_data:/var/lib/alloy/data
+    networks: [internal]
+
+networks:
+  internal:
+    name: ${COMPOSE_PROJECT_NAME:-application-dev}-internal
+
+volumes:
+  mysql_data:
+  redis_data:
+  alloy_data:
+
+secrets:
+  mysql_password:
+    file: ${SECRETS_DIR:-docker/secrets}/mysql_password
+  mysql_root_password:
+    file: ${SECRETS_DIR:-docker/secrets}/mysql_root_password
+  redis_password:
+    file: ${SECRETS_DIR:-docker/secrets}/redis_password
