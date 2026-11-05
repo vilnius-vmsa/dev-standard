@@ -6,19 +6,23 @@ FROM composer:2@sha256:REPLACE_WITH_COMPOSER_DIGEST AS composer_bin
 FROM node:22-alpine@sha256:REPLACE_WITH_NODE_DIGEST AS node_base
 FROM php:8.4-fpm-alpine@sha256:REPLACE_WITH_PHP_DIGEST AS php_fpm_base
 
+ARG REDIS_PECL_VERSION=REPLACE_WITH_REDIS_PECL_VERSION
+
 ENV HOME=/home/app \
     TZ=UTC
 WORKDIR /var/www
 
-# Keep runtime packages in the base. Compiler and header packages are removed
-# after extensions are built, so they do not reach the final image.
+# Keep runtime packages in the base. In the consuming production Dockerfile,
+# pin every apk package to an exact version or use a pinned Alpine repository
+# snapshot; compiler and header packages are removed after extensions are
+# built, so they do not reach the final image.
 RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     apk add --no-cache ca-certificates tzdata \
     && apk add --virtual .php-build-deps \
         $PHPIZE_DEPS icu-dev libzip-dev \
     && docker-php-ext-install -j"$(nproc)" \
         intl opcache pdo_mysql zip bcmath \
-    && pecl install redis \
+    && pecl install redis-${REDIS_PECL_VERSION} \
     && docker-php-ext-enable redis \
     && php_runtime_deps="$(scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions \
         | tr ',' '\n' \

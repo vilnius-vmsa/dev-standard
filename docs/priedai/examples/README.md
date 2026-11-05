@@ -20,12 +20,16 @@
 
 ## GitHub Actions
 
-* [Bendras lint ir validation vartas](github-actions/ci.lint.yml.example)
+* [CI Pipeline lint ir validation vartas](github-actions/ci.pipeline.yml.example)
+* [Dokumentacijos patikra](github-actions/docs-check.yml.example)
+* [Dev standard sinchronizacija](github-actions/dev-standard-sync.yml.example)
 * [Branch-based build ir deploy](github-actions/branch-based/ci.build.yml.example)
 * [Branch-based reusable deploy](github-actions/cd.deploy.yml.example)
 * [Optional blue-green reusable deploy](github-actions/cd.deploy-blue-green.yml.example)
-* [Operator-only immutable digest redeploy](github-actions/ops.deploy.yml.example)
-* [Operator-only allowlisted service restart](github-actions/ops.restart.yml.example)
+* [Operator-only promoted-tag redeploy or allowlisted service restart](github-actions/ops.deploy.yml.example)
+* [Scheduled image, dependency ir secret scan](github-actions/ops.scheduled-scan.yml.example)
+* [Operator-only database start](github-actions/ops.start-database.yml.example)
+* [Scheduled artifact housekeeping](github-actions/ops.housekeeping.yml.example)
 * [Tag-based candidate build, scan ir attestation](github-actions/tag-based/ci.build.yml.example)
 * [Tag-based tested-image promotion ir release](github-actions/tag-based/ci.release.yml.example)
 
@@ -36,20 +40,29 @@ pavadinimų, tokių kaip `app-php-production`, kurti nereikia.
 
 Branch-based modelis naudoja `stage → staging` ir `main → production`. Tag-based modelis pirmiausia sukuria ir patikrina candidate image, o apsaugotas `vX.Y.Z` tag paaukština tą patį nekintamą digest į leidimą ir produkciją.
 
-Branch-based modelyje `CI: Lint` po protected branch push kviečia bendrą
+Branch-based modelyje `CI: Pipeline` po protected branch push kviečia bendrą
 `CI: Build`, o `CD: Deploy` lieka reusable deployment workflow. Jei reikia
-pakartoti jau paskelbto image diegimą, naudokite atskirą `Ops: Deploy` workflow
-su PHP-FPM ir Nginx `@sha256:...` nuorodomis; jo negalima naudoti naujam build
-arba saugos vartų apeigai.
+pakartoti jau paskelbto image diegimą, `Ops: Deploy` pagal environment tag'ą
+arba pasirenkamą `sha-<40>` tag'ą išsprendžia PHP-FPM ir Nginx digest'us,
+patikrina revision bei attestation ir tik tada kviečia `CD: Deploy`; jo
+negalima naudoti naujam build arba saugos vartų apeigai.
+`CI: Pipeline` prieš build'ą patikrina push range: vien dokumentacijos ar kitų
+ne-build failų pakeitimai sustabdo srautą po validation vartų ir nekuria naujų
+image.
 Jei reikia atnaujinti host-managed TLS ar atlikti kitą leidžiamą runtime
-serviso atkūrimą, naudokite atskirą `Ops: Restart` workflow su aiškiu serviso
-allowlist'u; jis naudoja hoste esantį image, vykdo `--pull never` ir tikrina
-atkurtos paslaugos būseną.
+serviso atkūrimą, naudokite `Ops: Deploy` workflow restart operaciją su aiškiu
+serviso allowlist'u; ji naudoja hoste esantį image, vykdo `--pull never` ir
+tikrina atkurtos paslaugos būseną.
 Secret paruošimo ir rotacijos skriptas turi būti projekto
 `scripts/prepare-secrets.sh`: jis validuoja aplikacijos aplinką ir TLS porą,
 išsaugo aktyvų slot'ą, failus įdiegia atomiškai ir neprintina secret reikšmių.
 `ops.start-database` lieka atskira vienkartine infrastruktūros operacija ir
 nepriklauso aplikacijos build/deploy vartams.
+
+Dokumentacijos patikra, standardo sinchronizacija, scheduled vulnerability ir
+secret scan bei artifact housekeeping yra atskiri pagalbiniai workflow. Jie
+negali tapti production deploy vartų pakaitalu; `ops.start-database` taip pat
+tik paleidžia ir patikrina leistiną duomenų bazės servisą.
 
 Single-slot production Compose ir `cd.deploy.yml.example` yra numatytasis
 variantas. Blue-green pavyzdžiai pasirenkami tik tada, kai reikia dviejų

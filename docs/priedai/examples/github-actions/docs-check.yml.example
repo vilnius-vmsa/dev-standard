@@ -1,0 +1,33 @@
+name: Example - Docs check
+
+# Copy to .github/workflows/docs-check.yml after confirming the repository's
+# documentation checker and paths.
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - '**/*.md'
+      - '.agents/skills/dev-standard-docs/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs:
+    name: Check documentation links and paths
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@<reviewed-commit-sha>
+
+      - name: Run the repository documentation checker
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .agents/skills/dev-standard-docs/check-docs.py
+          python3 .agents/skills/dev-standard-docs/check-docs.py

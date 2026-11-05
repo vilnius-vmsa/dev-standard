@@ -297,35 +297,35 @@ PRIVALOMA:
 <!-- OPS-FLOW-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Automatinė sinchronizacija gali vykti tik viena kryptimi – iš sėkmingai į produkciją įdiegto `main` commit į `stage`; `stage` negali būti automatiškai merdžinamas į `main`, o konfliktas turi sustabdyti sinchronizaciją ir pareikalauti žmogaus sprendimo.
 <!-- OPS-FLOW-P03 | ai-reviewable | stacks=infra | enforced-by=ai -->
-*   `CI: Lint` turi vykdyti PR ir protected branch push vartus; tik po sėkmingo vartų rezultato ir build-reikšmingų pakeitimų nustatymo gali būti kviečiamas bendras `CI: Build` workflow.
+*   `CI: Pipeline` turi vykdyti PR ir protected branch push vartus; tik po sėkmingo vartų rezultato ir build-reikšmingų pakeitimų nustatymo gali būti kviečiamas bendras `CI: Build` workflow.
 <!-- OPS-FLOW-P04 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Bendras `CI: Build` pipeline turi sekti nuoseklią seką: build → vulnerability scan → SBOM/provenance → attestation → verification → image smoke test → promotion → `CD: Deploy`; kiekvienas etapas turi perduoti tą patį commit SHA ir immutable image digest.
 <!-- OPS-FLOW-P05 | ai-reviewable | stacks=infra | enforced-by=ai -->
-*   Rankiniam jau patikrinto image redeploy turi būti atskiras `Ops: Deploy` workflow, kuris priima tik digest pagrįstas image nuorodas, patikrina build bei tikslią release attestation pagal source SHA ir subject digest, nekeičia kodo ir nepakeičia lint, build ar saugos vartų.
+*   Rankiniam jau patikrinto image redeploy turi būti atskiras `Ops: Deploy` workflow, kuris pagal environment tag'ą arba pasirenkamą `sha-<40>` tag'ą išsprendžia kanoninių image repository digest'us, patikrina jų source revision bei build/release attestation, nekeičia kodo ir nepakeičia lint, build ar saugos vartų.
 <!-- OPS-FLOW-P06 | ai-reviewable | stacks=infra | enforced-by=ai -->
-*   Rankinis runtime serviso atkūrimas turi vykti per atskirą `Ops: Restart` workflow su aiškiu serviso allowlist'u; jis turi naudoti hoste jau esantį image, vykdyti `docker compose up -d --pull never --force-recreate --no-deps --wait`, patikrinti atkurtą servisą, neleisti build, pull, promotion ar image ref pakeitimo, o balancerio atkūrimą po TLS pakeitimo papildyti HTTPS health patikra.
+*   Rankinis runtime serviso atkūrimas turi vykti per `Ops: Deploy` workflow aiškią restart operaciją su serviso allowlist'u; ji turi naudoti hoste jau esantį image, vykdyti `docker compose up -d --pull never --force-recreate --no-deps --wait`, patikrinti atkurtą servisą, neleisti build, pull, promotion ar image ref pakeitimo, o balancerio atkūrimą po TLS pakeitimo papildyti HTTPS health patikra.
 <!-- OPS-FLOW-P07 | ai-reviewable | stacks=infra | enforced-by=ai -->
-*   Secret paruošimui ir rotacijai turi būti projekto valdoma `scripts/prepare-secrets.sh` procedūra, kuri validuoja aplikacijos aplinką ir TLS porą, išsaugo aktyvų slot'ą, įdiegia failus atomiškai su runtime leidimais ir neprintina secret reikšmių; `Ops: Restart` gali ją kviesti tik tada, kai visi rotacijos įėjimai pateikti.
+*   Secret paruošimui ir rotacijai turi būti projekto valdoma `scripts/prepare-secrets.sh` procedūra, kuri validuoja aplikacijos aplinką ir TLS porą, išsaugo aktyvų slot'ą, įdiegia failus atomiškai su runtime leidimais ir neprintina secret reikšmių; `Ops: Deploy` restart operacija gali ją kviesti tik tada, kai visi rotacijos įėjimai pateikti.
 
 Tipinė seka:
 
 ```text
-feature/* → PR → CI: Lint
-merge stage → CI: Lint → CI: Build (build/scan/SBOM/attest/verify/smoke/promote) → CD: Deploy staging
-merge main  → CI: Lint → CI: Build (build/scan/SBOM/attest/verify/smoke/promote) → CD: Deploy production
+feature/* → PR → CI: Pipeline
+merge stage → CI: Pipeline → CI: Build (build/scan/SBOM/attest/verify/smoke/promote) → CD: Deploy staging
+merge main  → CI: Pipeline → CI: Build (build/scan/SBOM/attest/verify/smoke/promote) → CD: Deploy production
 successful completed production pipeline → optional main-to-stage sync PR
-manual redeploy → Ops: Deploy (existing PHP/Nginx digests only)
-secret rotation or runtime maintenance → Ops: Restart (allowlisted service only)
+manual redeploy → Ops: Deploy (resolve promoted tag → PHP/Nginx digests)
+secret rotation or runtime maintenance → Ops: Deploy (restart operation, allowlisted service only)
 ```
 
 `login` repozitorijos pavyzdyje `stage` leidžia laikyti dar nepatvirtintas funkcijas, o `main` yra produkcijos šaltinis. Sinchronizacijos PR turi būti kuriamas tik po realaus produkcijos health patikrinimo, ne vien po sėkmingo build job.
 
-Šiame modelyje `CI: Build` yra reusable workflow, kurį po `CI: Lint` vartų
+Šiame modelyje `CI: Build` yra reusable workflow, kurį po `CI: Pipeline` vartų
 kviečia protected branch pipeline. Sinchronizacija į `stage` paleidžiama tik
 po to, kai visas reusable build/deploy job baigėsi sėkmingai, todėl ji negali
 remtis dar vykdomu nested deployment job. `Ops: Deploy` skirtas atkūrimui ar
 pakartotiniam jau paskelbto digest diegimui; jis neatlieka naujo build.
-`Ops: Restart` skirtas tik leistinam hoste esančio serviso atkūrimui, ypač po
+`Ops: Deploy` restart operacija skirta tik leistinam hoste esančio serviso atkūrimui, ypač po
 TLS secret rotacijos; jis negali pakeisti image ref ar apeiti deployment vartų.
 
 `CD: Deploy` gali naudoti numatytą single-slot Compose arba pasirenkamą

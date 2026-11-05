@@ -13,11 +13,14 @@ application/
 │   ├── dependabot.yml
 │   ├── pull_request_template.md
 │   └── workflows/
-│       ├── ci.lint.yml
+│       ├── ci.pipeline.yml
+│       ├── docs-check.yml
+│       ├── dev-standard-sync.yml
 │       ├── ci.build.yml
 │       ├── cd.deploy.yml
 │       ├── ops.deploy.yml
-│       ├── ops.restart.yml
+│       ├── ops.housekeeping.yml
+│       ├── ops.scheduled-scan.yml
 │       └── ops.start-database.yml
 ├── docker/
 │   ├── <service>/
@@ -86,33 +89,46 @@ priklausomybes; viešą portą valdo vienas balancer. Stateful duomenys (duomen�
 bazė, uploads ir reikalingi runtime failai) turi turėti aiškią persistent
 saugyklą.
 
+Produkcijai rekomenduojama naudoti Compose Deploy Specification
+`deploy.resources.limits` ir `reservations`, įskaitant aplikaciją, worker'ius,
+balancerį ir stateful servisus. Jei konkretus Compose/runtime diegimas taiko
+tik service-level `cpus`, `mem_limit` ir `mem_reservation`, ši forma taip pat
+galima, tačiau viename projekte pasirinkimas turi būti nuoseklus ir neturi
+likti nė vienas neribotas produkcinis servisas.
+
 Servisai vienas kitą pasiekia Compose service DNS vardu, o ne `127.0.0.1` ar `localhost`. `depends_on` nepakeičia healthcheck: prieš migration, queue worker ar aplikacijos startą turi būti patikrinta faktinė priklausomybės parengtis. Logai rašomi į stdout/stderr ir surenkami centralizuotai; secrets nemontuojami į logus ar debug output.
 
 ## D.4. GitHub Actions atsakomybės
 
-Branch-based projektuose `CI: Lint` vykdo PR ir protected branch push vartus,
+Branch-based projektuose `CI: Pipeline` vykdo PR ir protected branch push vartus,
 o po sėkmingo push vartų rezultato kviečia bendrą `CI: Build` workflow. `CD:
 Deploy` lieka reusable deployment workflow. `Ops: Deploy` yra atskiras
-operatoriaus kelias jau paskelbto PHP-FPM ir Nginx digest redeploy'ui; jis
-neatlieka rebuild ir negali apeiti lint, scan, attestation ar smoke vartų.
-`Ops: Restart` yra atskiras operatoriaus kelias leistinam runtime serviso
-atkūrimui, ypač balancerio atkūrimui po host-managed TLS pakeitimo; jis negali
-pull'inti, keisti image ref ar priimti laisvo serviso/profile įvesties.
+operatoriaus kelias jau paskelbto PHP-FPM ir Nginx digest redeploy'ui: pagal
+environment arba pasirenkamą `sha-<40>` tag'ą išsprendžia digest'us, patikrina
+revision bei attestation, tada kviečia `CD: Deploy`; jis neatlieka rebuild ir
+negali apeiti lint, scan, attestation ar smoke vartų.
+`Ops: Deploy` turi du aiškiai atskirtus operatoriaus veiksmus: jau patikrinto
+digest redeploy ir leistino runtime serviso atkūrimą, ypač balancerio atkūrimą
+po host-managed TLS pakeitimo. Restart operacija negali pull'inti, keisti image
+ref ar priimti laisvo serviso/profile įvesties.
 
 Darbo eigų failai gali būti sujungti ar išskaidyti pagal projekto dydį, tačiau vartai turi išlikti aiškūs:
 
 | Darbo eiga / job grupė | Trigger'is | Atsakomybė | Išvestis |
 |---|---|---|---|
-| `ci.lint` | PR ir protected branch push | Composer/npm validacija, formatavimas, unit/contract testai, Compose lint ir secret scan | privalomas kokybės vartas |
-| `ci.build` | sėkmingas `ci.lint` po merge | checkout pagal exact SHA, multi-stage build, registry push, image scan, SBOM, provenance, attestation, image verification, disposable smoke test ir promotion | patikrintas immutable digest perduotas į `cd.deploy` |
+| `ci.pipeline` | PR ir protected branch push | Composer/npm validacija, formatavimas, unit/contract testai, Compose lint ir secret scan | privalomas kokybės vartas |
+| `docs-check` | dokumentacijos pakeitimai | nuorodų, anchor'ų ir dokumentacijos kelių patikra | dokumentacijos kokybės vartas |
+| `dev-standard-sync` | schedule arba manual | pasirinkto dev-standard release pritaikymas ir PR paruošimas | atnaujinimo PR arba sinchronizacijos rezultatas |
+| `ci.build` | sėkmingas `ci.pipeline` po merge, kai nustatyti build-reikšmingi pakeitimai | checkout pagal exact SHA, multi-stage build, registry push, image scan, SBOM, provenance, attestation, image verification, disposable smoke test ir promotion | patikrintas immutable digest perduotas į `cd.deploy` |
 | pasirenkamas `ci.test-image` | po build/attestation, didesniuose projektuose | Tas pats image-test etapas kaip atskira reusable workflow, kai jo nereikia laikyti pagrindiniame build workflow | patikrintas digest |
 | `cd.deploy` | po promotion ir smoke | numatytasis single-slot runtime secrets, image digest deploy, migracijos politika ir health/readiness patikra | faktinio deploy rezultatas |
 | pasirenkamas `cd.deploy-blue-green` | po promotion ir smoke | neaktyvaus slot'o paleidimas, health patikra ir balancerio perjungimas | faktinio slot switch ir deploy rezultatas |
 | `ops.start-database` (jei taikoma) | atskiras operatoriaus veiksmas | vienkartinis DB paruošimas su aiškiu target environment | audituojamas operatoriaus rezultatas |
-| `ops.deploy` (jei taikoma) | atskiras operatoriaus veiksmas | jau patikrintų PHP-FPM/Nginx digest'ų redeploy be rebuild | audituojamas deploy ir health rezultatas |
-| `ops.restart` (jei taikoma) | atskiras operatoriaus veiksmas | explicit allowlist serviso atkūrimas iš hoste esančio image, ypač po TLS secret rotacijos | audituojamas serviso atkūrimo ir health rezultatas |
+| `ops.deploy` (jei taikoma) | atskiras operatoriaus veiksmas | jau patikrintų PHP-FPM/Nginx digest'ų redeploy arba explicit allowlist serviso atkūrimas iš hoste esančio image, ypač po TLS secret rotacijos | audituojamas deploy/restart ir health rezultatas |
+| `ops.scheduled-scan` | weekly schedule arba manual | promoted image, lockfile dependency ir secret istorijos scan | audituojami scan rezultatai |
+| `ops.housekeeping` | schedule arba manual | workflow artifact/log retention pagal nustatytą laiką | kontroliuojamas CI saugojimas |
 
-`ci.build` (arba pasirenkamas `ci.test-image`) turi perduoti tarp job'ų konkretų source SHA bei digest, o ne per naujo spręsti branch'o ar perrašomo tag reikšmę. `cd.deploy` negali būti laikomas sėkmingu vien todėl, kad paruošė secrets ar Compose failą: sėkmė reiškia faktinį paleidimą ir health patikrą. Minimalūs pavyzdžiai pateikti [bendram lint vartui](examples/github-actions/ci.lint.yml.example), [branch-based build](examples/github-actions/branch-based/ci.build.yml.example), [reusable deploy](examples/github-actions/cd.deploy.yml.example), [Ops: Deploy](examples/github-actions/ops.deploy.yml.example), [Ops: Restart](examples/github-actions/ops.restart.yml.example) ir [tag-based release](examples/github-actions/tag-based/ci.release.yml.example).
+`ci.build` (arba pasirenkamas `ci.test-image`) turi perduoti tarp job'ų konkretų source SHA bei digest, o ne per naujo spręsti branch'o ar perrašomo tag reikšmę. `cd.deploy` negali būti laikomas sėkmingu vien todėl, kad paruošė secrets ar Compose failą: sėkmė reiškia faktinį paleidimą ir health patikrą. Minimalūs pavyzdžiai pateikti [CI Pipeline vartui](examples/github-actions/ci.pipeline.yml.example), [docs check](examples/github-actions/docs-check.yml.example), [dev-standard sync](examples/github-actions/dev-standard-sync.yml.example), [branch-based build](examples/github-actions/branch-based/ci.build.yml.example), [reusable deploy](examples/github-actions/cd.deploy.yml.example), [Ops: Deploy](examples/github-actions/ops.deploy.yml.example), [scheduled scan](examples/github-actions/ops.scheduled-scan.yml.example), [housekeeping](examples/github-actions/ops.housekeeping.yml.example), [start database](examples/github-actions/ops.start-database.yml.example) ir [tag-based release](examples/github-actions/tag-based/ci.release.yml.example).
 
 Permissions nurodomos workflow arba job lygiu, `pull_request` iš fork'o negali gauti production secrets ar privileged build tokenų. Concurrency grupės neleidžia dviem leidimams vienu metu perrašyti tos pačios aplinkos.
 
@@ -125,11 +141,11 @@ Permissions nurodomos workflow arba job lygiu, `pull_request` iš fork'o negali 
 feature/*
    │ PR
    ▼
-stage ── CI: Lint ── CI: Build (build/scan/SBOM/attest/verify/smoke) ── CD: Deploy staging
+stage ── CI: Pipeline ── CI: Build (build/scan/SBOM/attest/verify/smoke) ── CD: Deploy staging
    │
    │ patvirtintas PR
    ▼
-main  ── CI: Lint ── CI: Build (build/scan/SBOM/attest/verify/smoke) ── CD: Deploy production
+main  ── CI: Pipeline ── CI: Build (build/scan/SBOM/attest/verify/smoke) ── CD: Deploy production
                                                                   │
                                                                   ▼
                                                         optional main → stage sync PR
@@ -147,8 +163,8 @@ Svarbios sąlygos:
 - `stage` → `main` automatinė sinchronizacija draudžiama, nes staging gali turėti nebaigtų funkcijų;
 - konfliktas sinchronizacijos PR sustabdo automatizavimą ir paliekamas žmogui išspręsti;
 - kiekvienas aplinkos deploy turi būti rollback'inamas pagal konkretų image digest;
-- rankinis redeploy atliekamas per `Ops: Deploy`, perduodant jau patikrintus PHP-FPM ir Nginx digest'us;
-- host-managed TLS pakeitimas užbaigiamas per `Ops: Restart`, kuris atkuria tik leistiną servisą, nenaudoja `pull` ir tikrina balancerio HTTPS health;
+- rankinis redeploy atliekamas per `Ops: Deploy`, kuris išsprendžia promoted environment arba `sha-<40>` tag'ą į jau patikrintus PHP-FPM ir Nginx digest'us;
+- host-managed TLS pakeitimas užbaigiamas per `Ops: Deploy` restart operaciją, kuri atkuria tik leistiną servisą, nenaudoja `pull` ir tikrina balancerio HTTPS health;
 - secret paruošimas ar rotacija vykdoma per projekto `scripts/prepare-secrets.sh`, kuris neprintina secret reikšmių ir išsaugo aktyvų slot'ą.
 
 ## D.6. Tag-based srauto pavyzdys

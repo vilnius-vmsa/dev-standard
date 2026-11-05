@@ -2,7 +2,7 @@ name: Example - CI Build (tag candidate)
 
 on:
   workflow_run:
-    workflows: ["CI: Lint and Validate"]
+    workflows: ["CI: Pipeline"]
     types: [completed]
     branches: [main]
 

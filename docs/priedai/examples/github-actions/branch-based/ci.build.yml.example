@@ -1,10 +1,16 @@
 name: Example - CI Build (branch-based)
 
 on:
-  workflow_run:
-    workflows: ["CI: Lint and Validate"]
-    types: [completed]
-    branches: [stage, main]
+  workflow_call:
+    inputs:
+      source_branch:
+        description: Protected source branch that passed CI Pipeline.
+        required: true
+        type: string
+      source_sha:
+        description: Exact commit that passed CI Pipeline.
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -13,12 +19,11 @@ permissions:
   attestations: write
 
 concurrency:
-  group: build-${{ github.event.workflow_run.head_branch }}
+  group: build-${{ inputs.source_branch }}
   cancel-in-progress: false
 
 jobs:
   build-test-promote:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:
@@ -30,15 +35,15 @@ jobs:
       - name: Checkout exact linted revision
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ inputs.source_sha }}
           fetch-depth: 1
 
       - name: Resolve deployment metadata
         id: meta
         shell: bash
         env:
-          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
-          SOURCE_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
           set -euo pipefail
           case "$SOURCE_BRANCH" in
@@ -181,10 +186,13 @@ jobs:
           APP_IMAGE: ${{ steps.image.outputs.app_image }}
           NGINX_IMAGE: ${{ steps.image.outputs.nginx_image }}
           ENVIRONMENT: ${{ steps.meta.outputs.environment }}
+          SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
         run: |
           set -euo pipefail
           docker buildx imagetools create --tag "${APP_IMAGE%@*}:$ENVIRONMENT" "$APP_IMAGE"
           docker buildx imagetools create --tag "${NGINX_IMAGE%@*}:$ENVIRONMENT" "$NGINX_IMAGE"
+          docker buildx imagetools create --tag "${APP_IMAGE%@*}:sha-$SOURCE_SHA" "$APP_IMAGE"
+          docker buildx imagetools create --tag "${NGINX_IMAGE%@*}:sha-$SOURCE_SHA" "$NGINX_IMAGE"
 
       - name: Attest promoted application release
         uses: actions/attest@v4

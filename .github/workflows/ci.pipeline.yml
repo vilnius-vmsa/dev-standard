@@ -1,4 +1,4 @@
-name: "CI: Lint & Validate"
+name: "CI: Pipeline"
 
 run-name: "Lint & Validate ${{ github.event.pull_request.number }}"
 
