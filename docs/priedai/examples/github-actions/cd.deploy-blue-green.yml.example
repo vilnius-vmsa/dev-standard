@@ -56,6 +56,9 @@ jobs:
       PHP_IMAGE_GREEN: ${{ inputs.app_image }}
       NGINX_IMAGE_BLUE: ${{ inputs.nginx_image }}
       NGINX_IMAGE_GREEN: ${{ inputs.nginx_image }}
+      # This infrastructure edge image is maintained outside this repository.
+      # It is reviewed and pinned by digest, but is not covered by this
+      # application's build/release attestation contract.
       BALANCER_IMAGE_REF: ghcr.io/<owner>/<application>-balancer@sha256:<balancer-digest>
       SOURCE_SHA: ${{ inputs.source_sha }}
       RELEASE_WORKFLOW: ${{ inputs.release_workflow }}
@@ -68,6 +71,7 @@ jobs:
           [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
           [[ "$PHP_IMAGE_BLUE" == *@sha256:* ]]
           [[ "$NGINX_IMAGE_BLUE" == *@sha256:* ]]
+          [[ "$BALANCER_IMAGE_REF" =~ ^[^@[:space:]]+@sha256:[0-9a-f]{64}$ ]]
 
       - name: Verify build and release attestations
         shell: bash

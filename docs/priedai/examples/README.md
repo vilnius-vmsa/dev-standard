@@ -76,7 +76,10 @@ Blue-green deploy sugeneruoja balancerio TLS konfigūraciją ir tikrina
 `https://127.0.0.1:8443/health` konteineryje bei viešą HTTPS endpointą per hosto
 `:443`. Jis, kaip ir single-slot `cd.deploy`, privalo patikrinti build
 attestation bei konkretaus `release_workflow` release attestation abiem
-diegiamiems image digest'ams prieš rollout.
+šio repozitorijos sukurtiems image digest'ams prieš rollout. Išorinis
+infrastruktūros balancerio image nėra šio build'o artefaktas: jis turi būti
+atskirai peržiūrėtas ir nurodytas pilnu `repository@sha256:<digest>` reference'u;
+jam netaikomas aplikacijos source-SHA ar release-attestation predicate.
 
 Single-slot production Compose ir `cd.deploy.yml.example` yra numatytasis
 variantas. Blue-green pavyzdžiai pasirenkami tik tada, kai reikia dviejų

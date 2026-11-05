@@ -142,7 +142,13 @@ Darbo eigų failai gali būti sujungti ar išskaidyti pagal projekto dydį, tač
 | `ops.housekeeping` | schedule arba manual | workflow artifact/log retention pagal nustatytą laiką | kontroliuojamas CI saugojimas |
 
 `ci.build` (arba pasirenkamas `ci.test-image`) turi perduoti tarp job'ų konkretų source SHA bei digest, o ne per naujo spręsti branch'o ar perrašomo tag reikšmę. `cd.deploy` negali būti laikomas sėkmingu vien todėl, kad paruošė secrets ar Compose failą: sėkmė reiškia faktinį paleidimą ir health patikrą. Minimalūs pavyzdžiai pateikti [CI Pipeline vartui](examples/github-actions/ci.pipeline.yml.example), [docs check](examples/github-actions/docs-check.yml.example), [dev-standard sync](examples/github-actions/dev-standard-sync.yml.example), [branch-based build](examples/github-actions/branch-based/ci.build.yml.example), [reusable deploy](examples/github-actions/cd.deploy.yml.example), [Ops: Deploy](examples/github-actions/ops.deploy.yml.example), [scheduled scan](examples/github-actions/ops.scheduled-scan.yml.example), [housekeeping](examples/github-actions/ops.housekeeping.yml.example), [start database](examples/github-actions/ops.start-database.yml.example) ir [tag-based release](examples/github-actions/tag-based/ci.release.yml.example).
-Pasirenkamas `cd.deploy-blue-green` turi naudoti tą patį `source_sha`, image digest'ų, build attestation ir `release_workflow` release attestation vartą kaip single-slot `cd.deploy`; skiriasi tik slotų rollout ir balancerio perjungimas.
+Pasirenkamas `cd.deploy-blue-green` turi naudoti tą patį `source_sha`, image
+digest'ų, build attestation ir `release_workflow` release attestation vartą
+kaip single-slot `cd.deploy` visiems šio repozitorijos sukurtiems image'ams;
+skiriasi tik slotų rollout ir balancerio perjungimas. Išorinių infrastruktūros
+image, pvz. atskiro balancerio, nereikia attestuoti šio aplikacijos build'u:
+tokie image privalo būti atskirai peržiūrėti ir pilnai pin'inti
+`repository@sha256:<digest>` reference'u.
 
 Permissions nurodomos workflow arba job lygiu, `pull_request` iš fork'o negali gauti production secrets ar privileged build tokenų. Concurrency grupės neleidžia dviem leidimams vienu metu perrašyti tos pačios aplinkos.
 
