@@ -1,7 +1,7 @@
 # E priedas. PR / MR šablonas (Pull Request Template)
 
 > **Paskirtis:** standartizuotas PR / MR aprašymo formatas pagal [4.3.5](../04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai).
-> **Naudojimas:** kopijuoti failą `pull_request_template.md` į projekto `.github/` (GitHub) arba `.gitlab/merge_request_templates/` (GitLab) katalogą.
+> **Naudojimas:** GitHub repozitorijose šabloną įdiegia standarto sinchronizavimas, jei repozitorija PR šablono dar neturi. Vėliau sinchronizavimas šablono nekeičia. GitLab projektuose failą `pull_request_template.md` kopijuokite į `.gitlab/merge_request_templates/` katalogą.
 
 ---
 

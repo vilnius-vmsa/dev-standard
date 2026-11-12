@@ -13,6 +13,9 @@ const CLAUDE_SKILLS_DIR = '.claude/skills';
 const GENERATED_SKILL = /^dev-standard(-[a-z0-9]+)*$/;
 const LOCAL_INSTRUCTIONS = 'dev-standard-local.instructions.md';
 const GENERATED_INSTRUCTIONS = /^dev-standard-.+\.instructions\.md$/;
+const PR_TEMPLATE = 'pull_request_template.md';
+// GitHub reads a PR template from these folders, as one file or a PULL_REQUEST_TEMPLATE folder, in any letter case.
+const PR_TEMPLATE_DIRS = ['.github', '.', 'docs'];
 
 export function parseStacks(input) {
   const names = (input ?? '').split(',').map((s) => s.trim().toLowerCase()).filter((s) => s && s !== 'all');
@@ -133,9 +136,36 @@ export async function applyBundle({ repoDir, bundleDir, version, stacks }) {
     await symlink(path.relative(path.dirname(link), skillDir), link);
   }
 
+  const prTemplate = await installPrTemplate(repoDir, bundleDir);
+
   await mkdir(path.join(repoDir, path.dirname(CONFIG_FILE)), { recursive: true });
   await writeFile(path.join(repoDir, CONFIG_FILE), `${JSON.stringify({ version, stacks }, null, 2)}\n`);
-  return { stacks: resolved, skills: [...wantedSkills] };
+  return { stacks: resolved, skills: [...wantedSkills], prTemplate };
+}
+
+async function hasPrTemplate(repoDir) {
+  for (const dir of PR_TEMPLATE_DIRS) {
+    let names;
+    try {
+      names = await readdir(path.join(repoDir, dir));
+    } catch (error) {
+      if (error.code === 'ENOENT' || error.code === 'ENOTDIR') continue;
+      throw error;
+    }
+    if (names.some((name) => [PR_TEMPLATE, 'pull_request_template'].includes(name.toLowerCase()))) return true;
+  }
+  return false;
+}
+
+// The template belongs to the team once it exists: sync only creates it, never updates it.
+// Returns the path it created, or null. Bundles before the template shipped have none.
+async function installPrTemplate(repoDir, bundleDir) {
+  const source = await readIfExists(path.join(bundleDir, PR_TEMPLATE));
+  if (source === null || await hasPrTemplate(repoDir)) return null;
+  const target = path.posix.join('.github', PR_TEMPLATE);
+  await mkdir(path.join(repoDir, '.github'), { recursive: true });
+  await writeFile(path.join(repoDir, target), source);
+  return target;
 }
 
 // A pasted AGENTS.md section carries this marker; bundles up to v1.2.7 have none (revision 0).
@@ -246,9 +276,10 @@ async function main() {
       await setOutputs({ skip: 'true' });
     }
   } else if (command === 'apply') {
-    const { stacks, skills } = await applyBundle({ repoDir, bundleDir: values.bundle, version: values.version, stacks: parseStacks(values.stacks) });
+    const { stacks, skills, prTemplate } = await applyBundle({ repoDir, bundleDir: values.bundle, version: values.version, stacks: parseStacks(values.stacks) });
     await writeFile(values.warning, (await agentsWarning(repoDir, values.bundle)) ?? '');
     console.log(`Installed ${values.version} for stacks: ${stacks.join(', ')}; skills: ${skills.join(', ')}`);
+    if (prTemplate) console.log(`Created ${prTemplate}; later syncs leave it to the team.`);
   } else {
     throw new Error(`unknown command "${command}"; use plan or apply`);
   }
