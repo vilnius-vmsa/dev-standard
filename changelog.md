@@ -17,6 +17,7 @@ Formatas paremtas [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), vers
 ### Pakeista
 
 - Sinchronizavimas sukuria `.github/pull_request_template.md` iš leidimo, jei repozitorija PR šablono neturi. Esamo šablono sinchronizavimas nekeičia. Šablono nuorodos į standartą veda į svetainę, kad veiktų ir kitose repozitorijose.
+- PR šablone (E priedas) – instrukcija DI agentams: skiltis „Aprašymas / Description“ rašoma su diagrama arba `diff` eskizu, kitos skiltys pildomos kaip anksčiau. Žmonėms šablonas nesikeičia.
 - Sinchronizavimo darbo eigą paleidžiant rankiniu būdu galima nurodyti `version` (`latest` arba konkretų leidimą), kad saugykla atnaujintų standartą iš karto, nelaukiant savaitinio paleidimo.
 - D ir F priedų šablonai (ADR, runbook) pateikiami angliškai ir įtraukiami į `dev-standard-docs` įgūdį; F priedo šablono atvaizdavimas pataisytas.
 - DI peržiūros metodas (`review-method.md`) atlieka du etapus: pirmiausia ieško defektų, tada tikrina pakeitimą pagal kiekvieną taikomą PRIVALOMA reikalavimą. Reikalavimo ID nurodomas tik tada, kai radinys pažeidžia to reikalavimo tekstą, o santraukoje nurodoma, kiek PRIVALOMA reikalavimų patikrinta.

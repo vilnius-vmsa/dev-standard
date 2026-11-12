@@ -11,6 +11,8 @@
 
 Projektas gali naudoti šį šabloną tiesiogiai arba jį pritaikyti savo poreikiams, išlaikant žemiau aprašytą minimalią struktūrą.
 
+Skiltyje „Aprašymas / Description“ esantis HTML komentaras skirtas DI agentams. Agentas šią skiltį rašo su diagrama arba `diff` eskizu, o kitas skiltis pildo kaip žmogus. GitHub komentaro neatvaizduoja, todėl žmogui šablonas nesikeičia.
+
 ---
 
 ## Minimalūs PR / MR laukai (pagal 4.3.5)
