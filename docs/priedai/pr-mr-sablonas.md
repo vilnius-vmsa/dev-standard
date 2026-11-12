@@ -11,7 +11,7 @@
 
 Projektas gali naudoti šį šabloną tiesiogiai arba jį pritaikyti savo poreikiams, išlaikant žemiau aprašytą minimalią struktūrą.
 
-Šablono viršuje esantis HTML komentaras skirtas DI agentams. Agentas PR aprašą rašo trumpesne forma: santrauka su diagrama arba `diff` eskizu, įrodymai „prieš ir po“, sujungimo rizika ir visi žemiau nurodyti privalomi laukai. GitHub šio komentaro neatvaizduoja, todėl žmogus pildo šabloną kaip anksčiau.
+Skiltyje „Aprašymas / Description“ esantis HTML komentaras skirtas DI agentams. Agentas šią skiltį rašo su diagrama arba `diff` eskizu, o kitas skiltis pildo kaip žmogus. GitHub komentaro neatvaizduoja, todėl žmogui šablonas nesikeičia.
 
 ---
 
