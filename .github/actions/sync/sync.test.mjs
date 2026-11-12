@@ -78,7 +78,7 @@ const RULES = [{
 }];
 
 // Writes a real bundle (same generator as releases) to a temporary directory.
-async function makeBundle(version = 'v1.3.0') {
+async function makeBundle(version = 'v1.3.0', { prTemplate } = {}) {
   const dir = await tempDir();
   const files = buildBundle({
     rules: RULES, english: { 'CODE-SEC-P01': { text: 'EN', source_hash: 'h' } }, stacks: STACKS,
@@ -89,6 +89,7 @@ async function makeBundle(version = 'v1.3.0') {
       ['SKILL.md', '---\nname: dev-standard-docs\ndescription: Docs.\n---\n'],
       ['templates/glossary.md', '# Glossary\n'],
     ])]]),
+    prTemplate,
   });
   for (const [rel, content] of files) {
     await mkdir(path.dirname(path.join(dir, rel)), { recursive: true });
@@ -415,4 +416,41 @@ test('bundleSkills rejects skill names sync could not remove later or that leave
   assert.deepEqual(bundleSkills({ skills: ['dev-standard', 'dev-standard-docs'] }).map((s) => s.source), ['skills/dev-standard', 'skills/dev-standard-docs']);
   assert.throws(() => bundleSkills({ skills: ['team-tools'] }), /skill name "team-tools" must start with dev-standard/);
   assert.throws(() => bundleSkills({ skills: ['dev-standard-../../x'] }), /skill name "dev-standard-\.\.\/\.\.\/x"/);
+});
+
+const PR_TEMPLATE = '## Aprašymas / Description\r\n';
+
+test('applyBundle creates .github/pull_request_template.md when the repository has none', async () => {
+  const repo = await tempDir();
+  const result = await applyBundle({ repoDir: repo, bundleDir: await makeBundle('v1.3.0', { prTemplate: PR_TEMPLATE }), version: 'v1.3.0', stacks: [] });
+  assert.equal(result.prTemplate, '.github/pull_request_template.md');
+  assert.equal(await readFile(path.join(repo, '.github/pull_request_template.md'), 'utf8'), PR_TEMPLATE);
+});
+
+test('applyBundle leaves an existing PR template alone wherever GitHub reads it from', async () => {
+  for (const existing of ['.github/pull_request_template.md', '.github/PULL_REQUEST_TEMPLATE.md', 'pull_request_template.md',
+    'docs/pull_request_template.md', '.github/PULL_REQUEST_TEMPLATE/feature.md']) {
+    const repo = await tempDir();
+    await mkdir(path.dirname(path.join(repo, existing)), { recursive: true });
+    await writeFile(path.join(repo, existing), 'team template');
+    const result = await applyBundle({ repoDir: repo, bundleDir: await makeBundle('v1.3.0', { prTemplate: PR_TEMPLATE }), version: 'v1.3.0', stacks: [] });
+    assert.equal(result.prTemplate, null, existing);
+    assert.equal(await readFile(path.join(repo, existing), 'utf8'), 'team template', existing);
+    // Listing, not reading: a case-insensitive filesystem would open PULL_REQUEST_TEMPLATE.md for the lower-case name.
+    const github = (await readdir(path.join(repo, '.github'))).filter((name) => name !== 'instructions');
+    assert.deepEqual(github, existing.startsWith('.github/') ? [existing.split('/')[1]] : [], existing);
+  }
+});
+
+test('applyBundle does not recreate a PR template the team edited, and skips bundles without one', async () => {
+  const repo = await tempDir();
+  const bundle = await makeBundle('v1.3.0', { prTemplate: PR_TEMPLATE });
+  await applyBundle({ repoDir: repo, bundleDir: bundle, version: 'v1.3.0', stacks: [] });
+  await writeFile(path.join(repo, '.github/pull_request_template.md'), 'edited');
+  await applyBundle({ repoDir: repo, bundleDir: bundle, version: 'v1.3.0', stacks: [] });
+  assert.equal(await readFile(path.join(repo, '.github/pull_request_template.md'), 'utf8'), 'edited');
+
+  const bare = await tempDir();
+  const result = await applyBundle({ repoDir: bare, bundleDir: await makeBundle(), version: 'v1.3.0', stacks: [] });
+  assert.equal(result.prTemplate, null);
 });

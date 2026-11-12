@@ -133,3 +133,11 @@ test('a bundle without skills lists none', () => {
   assert.deepEqual(JSON.parse(files.get('manifest.json')).skills, []);
   assert.ok(![...files.keys()].some((key) => key.startsWith('skills/')));
 });
+
+test('ships the PR template unchanged when given one', () => {
+  const template = '## Aprašymas / Description\r\n<!-- AI agents: ... -->\r\n';
+  const files = buildBundle({ rules: RULES, english: EN, stacks: STACKS, version: 'v1.5.0', siteUrl: SITE, reviewMethod: METHOD, prTemplate: template });
+  assert.equal(files.get('pull_request_template.md'), template);
+  assert.ok(JSON.parse(files.get('manifest.json')).files.includes('pull_request_template.md'));
+  assert.equal(build().has('pull_request_template.md'), false);
+});

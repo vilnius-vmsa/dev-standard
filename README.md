@@ -70,7 +70,7 @@ and the `dev-standard` skill ships it as a file next to `SKILL.md`, so Copilot p
 reviews use the same format. `rules:validate` fails if it cites a rule ID or section number that does not exist.
 
 Each release attaches `dev-standard-agent-bundle.zip` (Copilot instruction files, the `dev-standard` and
-`dev-standard-docs` skills, `AGENTS.md` snippet, `rules.json`). The English rule list is at `/rules` on the site.
+`dev-standard-docs` skills, `AGENTS.md` snippet, PR template, `rules.json`). The English rule list is at `/rules` on the site.
 
 Skills live in `standard/skills/<name>/` (`dev-standard`, `dev-standard-docs`) and go into the bundle unchanged;
 `rules:validate` checks their frontmatter, relative links, rule IDs, section numbers and links into the
@@ -139,7 +139,8 @@ Pull requests opened by sync do not start your CI on their own; close and reopen
 
 Sync installs each skill of the bundle in `.agents/skills/<name>` with a `.claude/skills/<name>` link, and removes
 skills a release dropped. Names starting with `dev-standard` in those two folders belong to sync; give your own
-skills other names. To document a repository, ask your agent to use the `dev-standard-docs` skill; check the docs
+skills other names. When the repository has no PR template, sync adds `.github/pull_request_template.md` from the
+release. After that the template belongs to the team, and sync leaves it alone. To document a repository, ask your agent to use the `dev-standard-docs` skill; check the docs
 with `python3 .agents/skills/dev-standard-docs/check-docs.py`.
 
 ## CI/CD and releases

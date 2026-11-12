@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildBundle } from './lib/bundle.mjs';
 import { acceptEntries, applyDrafts, checkEnglish, parseEnglish, stringifyEnglish } from './lib/english.mjs';
-import { loadPages, loadSectionNumbers } from './lib/references.mjs';
+import { loadPages, loadSectionNumbers, siteLinkErrors } from './lib/references.mjs';
 import { loadRules } from './lib/rules.mjs';
 import { buildSiteData } from './lib/site-data.mjs';
 import { loadSkillFiles, mergeSkillFiles } from './lib/skill-files.mjs';
@@ -20,6 +20,8 @@ const EN_FILE = path.join(ROOT, 'standard/rules.en.yaml');
 // Also the dev-standard skill's review-method.md; its references are checked with the skill.
 const REVIEW_METHOD_FILE = path.join(ROOT, 'standard/skills/dev-standard/review-method.md');
 const SKILLS_DIR = path.join(ROOT, 'standard/skills');
+// Ships in the bundle; sync copies it into repositories that have no PR template.
+const PR_TEMPLATE_FILE = path.join(ROOT, '.github/pull_request_template.md');
 const SITE_DATA_FILE = path.join(ROOT, 'src/data/rules.generated.json');
 // Keep in sync with url + baseUrl in docusaurus.config.js.
 const SITE_URL = (process.env.DEV_STANDARD_SITE_URL ?? 'https://vilnius-vmsa.github.io/dev-standard').replace(/\/+$/, '');
@@ -60,7 +62,15 @@ async function loadHandwrittenSkills(rules) {
     siteUrl: SITE_URL,
   };
   const errors = [...skills].flatMap(([name, files]) => checkSkill(name, files, known).map((e) => `standard/skills/${e}`));
-  return { skills, errors: [...mergeErrors, ...errors] };
+  const prTemplate = await readFile(PR_TEMPLATE_FILE, 'utf8');
+  errors.push(...prTemplateErrors(prTemplate, known).map((e) => `.github/pull_request_template.md: ${e}`));
+  return { skills, prTemplate, errors: [...mergeErrors, ...errors] };
+}
+
+// Consuming repositories get the template as is, so links into the standard must be absolute site URLs.
+function prTemplateErrors(text, { siteUrl, pages }) {
+  const relative = [...text.matchAll(/\]\(([^)\s]+)\)/g)].map((m) => m[1]).filter((target) => !/^[a-z][a-z0-9+.-]*:/i.test(target));
+  return [...relative.map((target) => `relative link ${target} breaks in other repositories; link to ${siteUrl} instead`), ...siteLinkErrors(text, siteUrl, pages)];
 }
 
 async function saveEnglish(entries) {
@@ -103,11 +113,11 @@ const commands = {
     const english = (await loadEnglish()) ?? {};
     // --allow-drafts is for local previews only; releases must use reviewed English.
     errors.push(...checkEnglish(rules, english, { strict: !flag('allow-drafts') }));
-    const { skills, errors: skillErrors } = await loadHandwrittenSkills(rules);
+    const { skills, prTemplate, errors: skillErrors } = await loadHandwrittenSkills(rules);
     errors.push(...skillErrors);
     if (errors.length) fail(errors);
 
-    const files = buildBundle({ rules, english, stacks, version, siteUrl: SITE_URL, reviewMethod: await readFile(REVIEW_METHOD_FILE, 'utf8'), skills });
+    const files = buildBundle({ rules, english, stacks, version, siteUrl: SITE_URL, reviewMethod: await readFile(REVIEW_METHOD_FILE, 'utf8'), skills, prTemplate });
     for (const [relPath, content] of files) {
       const target = path.resolve(ROOT, out, relPath);
       await mkdir(path.dirname(target), { recursive: true });
