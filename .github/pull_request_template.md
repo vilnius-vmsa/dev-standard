@@ -1,3 +1,30 @@
+<!--
+AI agents: write the PR body in the shape below and leave out the bilingual sections that follow this comment. People filling in the template by hand can skip this comment.
+Summary uses the `show-me` method of explaining a change with visuals. If the `pr` skill is installed, follow it for the visuals and keep the Verify, impact and task lines below, which the standard requires (CODE-VCS-P21 to P23, DOC-UPD-P04).
+Keep prose to a sentence or two beside each visual, in the domain words from the repository's `GLOSSARY.md` when it has one.
+
+## Summary
+
+One sentence on why the change is needed. Then the smallest visual that makes the change clear, usually one or two:
+- a `diff` of a call tree, component tree, file tree or pseudocode, when the surrounding shape already exists
+- a Mermaid sequence diagram or flowchart, for data or control flow between parts
+- a whole code block, when most of it is new
+Keep only the calls, files, states and boundaries a reviewer needs to judge the change.
+
+## Evidence
+
+**Before:** and **After:** with a screenshot for a visual change, otherwise the test or command output that fails before and passes after.
+**Verify:** the commands or clicks a reviewer runs to see it work.
+
+## Merge Danger
+
+**Door:** two-way when a revert undoes the change. One-way when it doesn't, as with data migrations, deleted data and published API contracts.
+**Blast radius:** one word, then what breaks if the change is wrong.
+**Breaking changes, migrations, config and env, dependencies, infrastructure, docs:** one line each, "none" or what changes.
+
+Closes #<issue> (or the task tracker ID)
+-->
+
 ## Aprašymas / Description
 
 <!-- Trumpai aprašykite, kas keičiama ir kodėl. -->
