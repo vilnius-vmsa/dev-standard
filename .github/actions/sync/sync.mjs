@@ -68,7 +68,7 @@ export function resolveStacks(stacks, manifest) {
   const unknown = stacks.filter((s) => !manifest.stacks.includes(s));
   if (unknown.length) {
     const valid = manifest.stacks.filter((s) => s !== 'all');
-    throw new Error(`unknown stack(s): ${unknown.join(', ')}. Valid stacks: ${valid.join(', ')}`);
+    throw new Error(`unknown stack(s): ${unknown.join(', ')}. Valid stacks in release ${manifest.version}: ${valid.join(', ')}. A stack added in a newer release needs that release: run the sync with version "latest".`);
   }
   const resolved = new Set(['all']);
   const add = (stack) => {
@@ -77,7 +77,57 @@ export function resolveStacks(stacks, manifest) {
     for (const implied of manifest.implies?.[stack] ?? []) add(implied);
   };
   stacks.forEach(add);
+  for (const included of legacyStacks(stacks, manifest)) add(included);
   return [...resolved];
+}
+
+// Transitional: a stack that was split into profiles (infra) still brings all of them while the repository
+// lists none of them itself. Returns the profiles added that way.
+export function legacyStacks(stacks, manifest) {
+  const added = [];
+  for (const stack of stacks) {
+    const profiles = manifest.legacyIncludes?.[stack] ?? [];
+    if (profiles.length && !profiles.some((profile) => stacks.includes(profile))) added.push(...profiles);
+  }
+  return added;
+}
+
+const RELEASE_MODELS = ['flow-branch', 'flow-tag'];
+const DEPLOYMENT_METHODS = ['compose', 'compose-blue-green', 'k8s'];
+const profileNote = (text) => `> [!WARNING]\n> ${text}\n`;
+const NOTHING_DEPLOYED = 'If the repository deploys nothing (for example a library),';
+
+// Markdown for the pull request body; empty when the DevOps profiles in the config need no attention.
+// Does not depend on legacyIncludes: once the transition is over, a repository that still lists only
+// `infra` must be told why its profile files are being removed.
+export function stackWarnings(stacks, manifest) {
+  // Releases before the DevOps profiles know none of these stacks.
+  if (!RELEASE_MODELS.every((model) => manifest.stacks.includes(model))) return '';
+  const resolved = resolveStacks(stacks, manifest);
+  if (!resolved.includes('infra')) return '';
+
+  const legacy = legacyStacks(stacks, manifest);
+  if (legacy.length) {
+    return profileNote(`\`${CONFIG_FILE}\` lists \`infra\` but no DevOps profile, so this release still installs all of them: ${legacy.map((s) => `\`${s}\``).join(', ')}. Replace \`infra\` with the profiles this repository uses (one release model: \`flow-branch\` or \`flow-tag\`; one deployment: \`compose\`, \`compose-blue-green\` or \`k8s\`). A later release installs only the common rules for \`infra\`. ${NOTHING_DEPLOYED} keep \`infra\` as it is: the later release then gives it the common rules only.`);
+  }
+  const lines = [];
+  const models = RELEASE_MODELS.filter((model) => stacks.includes(model));
+  const methods = DEPLOYMENT_METHODS.filter((method) => stacks.includes(method));
+  if (models.length === 0 && methods.length === 0) {
+    // One note, not two: a repository that deploys nothing legitimately has neither.
+    return profileNote(`\`${CONFIG_FILE}\` lists no release model and no deployment method, so the branch-based, tag-based, Compose and Kubernetes rules are not installed. Add one release model (\`flow-branch\` or \`flow-tag\`) and one deployment method (\`compose\`, \`compose-blue-green\` or \`k8s\`). ${NOTHING_DEPLOYED} say so in its README and ignore this note (OPS-PIPE-P07).`);
+  }
+  if (models.length === 2) {
+    lines.push(profileNote(`\`${CONFIG_FILE}\` lists both \`flow-branch\` and \`flow-tag\`. A repository follows one release model; remove the other.`));
+  } else if (models.length === 0) {
+    lines.push(profileNote(`\`${CONFIG_FILE}\` lists a deployment method but no release model, so the branch-based or tag-based rules are not installed. Add \`flow-branch\` or \`flow-tag\`.`));
+  }
+  if (methods.length === 0) {
+    lines.push(profileNote(`\`${CONFIG_FILE}\` lists no deployment method, so the Compose or Kubernetes rules are not installed. Add \`compose\`, \`compose-blue-green\` or \`k8s\`. If the repository uses a technology the standard does not describe, state that in its deployment documentation (and list \`docker\` when it builds container images); then ignore this note (OPS-PIPE-P07).`));
+  } else if (methods.includes('k8s') && methods.length > 1) {
+    lines.push(profileNote(`\`${CONFIG_FILE}\` lists both a Compose profile and \`k8s\`. A repository normally has one deployment method; keep both only if it really deploys both ways.`));
+  }
+  return lines.join('\n');
 }
 
 // Bundles up to v1.2.7 hold one skill in skill/ and list no skills in the manifest.
@@ -135,7 +185,7 @@ export async function applyBundle({ repoDir, bundleDir, version, stacks }) {
 
   await mkdir(path.join(repoDir, path.dirname(CONFIG_FILE)), { recursive: true });
   await writeFile(path.join(repoDir, CONFIG_FILE), `${JSON.stringify({ version, stacks }, null, 2)}\n`);
-  return { stacks: resolved, skills: [...wantedSkills] };
+  return { stacks: resolved, skills: [...wantedSkills], warning: stackWarnings(stacks, manifest) };
 }
 
 // A pasted AGENTS.md section carries this marker; bundles up to v1.2.7 have none (revision 0).
@@ -246,8 +296,8 @@ async function main() {
       await setOutputs({ skip: 'true' });
     }
   } else if (command === 'apply') {
-    const { stacks, skills } = await applyBundle({ repoDir, bundleDir: values.bundle, version: values.version, stacks: parseStacks(values.stacks) });
-    await writeFile(values.warning, (await agentsWarning(repoDir, values.bundle)) ?? '');
+    const { stacks, skills, warning } = await applyBundle({ repoDir, bundleDir: values.bundle, version: values.version, stacks: parseStacks(values.stacks) });
+    await writeFile(values.warning, [(await agentsWarning(repoDir, values.bundle)) ?? '', warning].filter(Boolean).join('\n'));
     console.log(`Installed ${values.version} for stacks: ${stacks.join(', ')}; skills: ${skills.join(', ')}`);
   } else {
     throw new Error(`unknown command "${command}"; use plan or apply`);

@@ -1,0 +1,193 @@
+name: Example - CI Validate
+
+# Reusable quality gate shared by the branch-based and the tag-based
+# CI: Pipeline. It runs for pull requests and for protected-branch pushes and
+# never receives deployment secrets. The calling job succeeds only when every
+# job below succeeds, so the call itself is the gate.
+#
+# Replace the commands with the project's own tools, but keep one step for
+# each check required by OPS-CI-P03 and OPS-DEVSEC-P02: build, formatting and
+# linting, static analysis, tests, dependency audit and secret detection.
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend - format, analyse, audit, test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up PHP and Composer
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          # The PHP version and extensions the application supports. Do not
+          # rely on the ubuntu-latest defaults.
+          php-version: "8.4"
+          tools: composer:2
+
+      - name: Validate Composer metadata
+        run: composer validate --strict --no-check-publish
+
+      # If the application uses private packages, create a short-lived token
+      # here (for example actions/create-github-app-token, as in CI: Build)
+      # and pass it to this step as COMPOSER_AUTH. It is a build credential,
+      # not a deployment secret.
+      - name: Install locked Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress --no-scripts
+
+      - name: Check formatting
+        run: vendor/bin/pint --test
+
+      - name: Run static analysis
+        # For example Larastan/PHPStan with the level agreed for the project.
+        run: vendor/bin/phpstan analyse --no-progress
+
+      - name: Audit Composer dependencies
+        run: composer audit --locked --no-interaction
+
+      - name: Run the test suite
+        env:
+          APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          CACHE_STORE: array
+          QUEUE_CONNECTION: sync
+          SESSION_DRIVER: array
+        run: composer test --no-interaction
+
+  frontend:
+    name: Frontend - lint, audit, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Lint frontend sources
+        # For example ESLint; `npm run lint` must fail on findings.
+        run: npm run lint
+
+      - name: Audit the production dependency tree
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Build production assets
+        run: npm run build
+
+  docker:
+    name: Docker - Compose files and secrets helper
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Validate Compose definitions
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Structure only: images, runtime secrets and SECRETS_DIR do not
+          # exist here. Interpolated values are validated by CD: Deploy and by
+          # the smoke gate, which run the real helper.
+          for file in docker-compose.yml docker-compose.production.yml \
+            docker-compose.observability.yml; do
+            [ -f "$file" ] || continue
+            docker compose -f "$file" config --no-interpolate --quiet
+          done
+
+      - name: Check the deployed-mode and secret allowlist guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The secrets helper must refuse debug mode, a non-deployed APP_ENV
+          # and secret-looking keys outside its allowlist before it writes any
+          # runtime file.
+          digest=sha256:0000000000000000000000000000000000000000000000000000000000000000
+          base=$'DB_DATABASE=ci\nDB_USERNAME=ci\nDB_PASSWORD=ci\nDB_ROOT_PASSWORD=ci\nREDIS_PASSWORD=ci\nAPP_KEY=ci'
+          expect_refusal() {
+            local deploy_environment="$1" runtime_env="$2" expected="$3" output
+            if output="$(RUNTIME_ENV="$base"$'\n'"$runtime_env" DEPLOY_ENVIRONMENT="$deploy_environment" \
+              SECRETS_DIR="$RUNNER_TEMP/guard-secrets" COMPOSE_PROJECT_NAME=ci-guard \
+              TLS_CERTIFICATE_B64=Y2k= TLS_PRIVATE_KEY_B64=Y2k= \
+              PHP_IMAGE_REF="ci.invalid/php@$digest" NGINX_IMAGE_REF="ci.invalid/nginx@$digest" \
+              bash docker/scripts/prepare-runtime-secrets.sh 2>&1)"; then
+              echo "The helper accepted: $runtime_env" >&2
+              exit 1
+            fi
+            grep -qF "$expected" <<<"$output" || {
+              echo "Unexpected refusal for '$runtime_env': $output" >&2
+              exit 1
+            }
+          }
+          expect_refusal production $'APP_ENV=production\nAPP_DEBUG=true' 'APP_DEBUG must be disabled'
+          expect_refusal production $'APP_ENV=local\nAPP_DEBUG=false' 'is not valid for production'
+          expect_refusal production $'APP_ENV=production\nAPP_DEBUG=false\nAPP_DEBUG=true' 'APP_DEBUG must be disabled'
+          expect_refusal production $'APP_ENV=production\nPOSTMARK_TOKEN=x' 'not allowlisted: POSTMARK_TOKEN'
+          expect_refusal production $'APP_ENV=production\nexport MAIL_PASSWORD=x' 'not plain upper-case KEY=value'
+          expect_refusal production $'APP_ENV=production\nDATABASE_URL=mysql://app:pw@db/app' 'not allowlisted: DATABASE_URL'
+          test ! -e "$RUNNER_TEMP/guard-secrets"
+
+  secrets:
+    name: Scan new commits for secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # A pinned gitleaks binary verified by checksum. gitleaks-action needs a
+      # licence in organisation repositories; the CLI does not. Take the
+      # checksum from the release's checksums file when updating the version.
+      GITLEAKS_VERSION: 8.30.1
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - name: Checkout repository with history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # The commit range below needs history; a shallow checkout would
+          # scan only the last commit.
+          fetch-depth: 0
+
+      - name: Install pinned gitleaks
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/gitleaks.tar.gz"
+          curl -fsSLo "$archive" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  ${archive}" | sha256sum -c -
+          tar -xzf "$archive" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" version
+
+      - name: Scan the commits this event adds
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = pull_request ]; then
+            range="${PR_BASE}..${HEAD_SHA}"
+          elif [ -n "$PUSH_BEFORE" ] && ! [[ "$PUSH_BEFORE" =~ ^0+$ ]] \
+            && git cat-file -e "${PUSH_BEFORE}^{commit}" 2>/dev/null; then
+            range="${PUSH_BEFORE}..${HEAD_SHA}"
+          else
+            # New branch or rewritten history: scan everything reachable.
+            range="$HEAD_SHA"
+          fi
+          echo "Scanning $range"
+          "$RUNNER_TEMP/gitleaks" git --redact --no-banner --log-opts="$range" .

@@ -1,0 +1,171 @@
+# syntax=docker/dockerfile:1.7
+# Inactive example. Copy to docker/php-fpm/Dockerfile.prod, pin every digest
+# and package version, and adapt the extensions and the copied directories.
+#
+# Stages:
+#   php_base           runtime packages, PHP extensions, the unprivileged
+#                      user, production php.ini, FPM pool and the entrypoint;
+#   assets_build       frontend build in a Node image; Node never reaches PHP;
+#   vendor_build       Composer install with the private-package credential;
+#   application_build  application sources plus vendor and built assets;
+#   final              only the directories the application runs from.
+
+FROM composer:2@sha256:REPLACE_WITH_COMPOSER_DIGEST AS composer_bin
+FROM node:22-alpine@sha256:REPLACE_WITH_NODE_DIGEST AS node_build
+FROM php:8.4-fpm-alpine@sha256:REPLACE_WITH_PHP_DIGEST AS php_base
+
+ARG REDIS_PECL_VERSION=REPLACE_WITH_REDIS_PECL_VERSION
+
+ENV TZ=UTC \
+    HOME=/home/app
+
+# In the consuming Dockerfile pin every apk package to an exact version
+# (name=version). The build packages form one virtual group that is removed
+# in the same layer, so compilers and headers never reach the final image.
+# fcgi provides cgi-fcgi for the PHP-FPM liveness healthcheck.
+RUN apk add --no-cache \
+        ca-certificates \
+        fcgi \
+        icu-libs \
+        libzip \
+        tzdata \
+    && apk add --no-cache --virtual .php-build-deps \
+        $PHPIZE_DEPS \
+        icu-dev \
+        libzip-dev \
+    && docker-php-ext-install -j"$(nproc)" \
+        bcmath \
+        intl \
+        opcache \
+        pcntl \
+        pdo_mysql \
+        zip \
+    && pecl install "redis-${REDIS_PECL_VERSION}" \
+    && docker-php-ext-enable redis \
+    && apk del .php-build-deps \
+    && addgroup -g 1001 -S app \
+    && adduser -u 1001 -D -S -G app -h /home/app app \
+    && install -d -o app -g app -m 0750 /var/www /home/app
+
+# Production PHP settings (errors are logged, never displayed) and the FPM
+# pool with the liveness ping path. Examples: php-fpm/php.prod.ini.example and
+# php-fpm/www.prod.conf.example. The official image ships no php.ini, so
+# without this file PHP runs on its built-in development defaults.
+COPY docker/php-fpm/conf.d/php.prod.ini /usr/local/etc/php/conf.d/zz-app.ini
+COPY docker/php-fpm/pool.d/www.prod.conf /usr/local/etc/php-fpm.d/zz-app.conf
+
+# The entrypoint exports the mounted secret files for the PHP process
+# (example: php-fpm/entrypoint.sh.example). Every command, including
+# `php artisan migrate` run by the deployment, goes through it.
+COPY docker/php-fpm/entrypoint.sh /usr/local/bin/app-entrypoint
+RUN chmod 0555 /usr/local/bin/app-entrypoint
+
+WORKDIR /var/www
+
+FROM node_build AS assets_build
+
+WORKDIR /var/www
+
+# Lock files first, so the dependency layer survives source changes.
+COPY package.json package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    npm ci --no-audit --no-fund
+
+# Only what the asset build reads.
+COPY vite.config.js ./
+COPY resources ./resources
+COPY public ./public
+RUN npm run build \
+    && rm -rf node_modules
+
+FROM php_base AS vendor_build
+
+COPY --from=composer_bin /usr/bin/composer /usr/local/bin/composer
+COPY composer.json composer.lock ./
+
+# The private-package credential is a BuildKit secret: it exists only for
+# this command and is not stored in any layer.
+RUN --mount=type=secret,id=composer_auth,required=true \
+    --mount=type=cache,target=/tmp/composer-cache,sharing=locked \
+    COMPOSER_CACHE_DIR=/tmp/composer-cache \
+    COMPOSER_AUTH="$(cat /run/secrets/composer_auth)" \
+    composer install --no-dev --prefer-dist --optimize-autoloader \
+        --no-interaction --no-progress --no-scripts
+
+FROM php_base AS application_build
+
+# An explicit list instead of `COPY . ./`: tests, tooling configuration, the
+# docker directory and anything new in the repository root stay out of the
+# image unless they are added here on purpose. Keep the build-relevant path
+# detection of CI: Pipeline consistent with this list if it uses an allowlist.
+COPY --from=vendor_build /var/www/vendor ./vendor
+COPY app ./app
+COPY bootstrap ./bootstrap
+COPY config ./config
+COPY database ./database
+COPY lang ./lang
+COPY public ./public
+COPY resources ./resources
+COPY routes ./routes
+COPY artisan composer.json composer.lock ./
+COPY --from=assets_build /var/www/public/ ./public/
+
+# The package manifest is generated here, at build time, with throwaway
+# values. bootstrap/cache is therefore part of the image and is not mounted
+# as a volume at runtime.
+RUN install -d -o app -g app -m 0770 \
+        bootstrap/cache \
+        storage/framework/cache/data \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/logs \
+    && install -d -o app -g app -m 0755 storage/app/public \
+    && rm -f bootstrap/cache/*.php \
+    && APP_ENV=production \
+       APP_DEBUG=false \
+       APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= \
+       CACHE_STORE=array \
+       SESSION_DRIVER=array \
+       QUEUE_CONNECTION=sync \
+       php artisan package:discover --ansi
+
+# Minimal runtime: no Composer, Node, Git, compiler or private token.
+FROM php_base AS final
+
+WORKDIR /var/www
+
+# The readiness route returns this value as "release" so that the smoke and
+# deployment gates can prove which source revision actually answers.
+ARG RELEASE_NUMBER
+ENV RELEASE_NUMBER=${RELEASE_NUMBER}
+
+COPY --chown=app:app --from=application_build /var/www/app ./app
+COPY --chown=app:app --from=application_build /var/www/bootstrap ./bootstrap
+COPY --chown=app:app --from=application_build /var/www/config ./config
+COPY --chown=app:app --from=application_build /var/www/database ./database
+COPY --chown=app:app --from=application_build /var/www/lang ./lang
+COPY --chown=app:app --from=application_build /var/www/public ./public
+COPY --chown=app:app --from=application_build /var/www/resources ./resources
+COPY --chown=app:app --from=application_build /var/www/routes ./routes
+COPY --chown=app:app --from=application_build /var/www/vendor ./vendor
+COPY --chown=app:app --from=application_build /var/www/artisan ./artisan
+COPY --chown=app:app --from=application_build /var/www/composer.json ./composer.json
+
+# Writable paths. At runtime the root filesystem is read-only: Compose mounts
+# these as tmpfs and storage/app/public as the only persistent volume.
+RUN install -d -o app -g app -m 0770 \
+        bootstrap/cache \
+        storage/framework/cache/data \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/logs \
+    && install -d -o app -g app -m 0755 storage/app/public
+
+RUN ln -s ../storage/app/public public/storage
+
+# No HEALTHCHECK instruction: liveness is defined per service in the Compose
+# file, and readiness is the /health/ready gate (DevOps appendix H.3).
+EXPOSE 9000
+USER app
+ENTRYPOINT ["/usr/local/bin/app-entrypoint"]
+CMD ["php-fpm"]

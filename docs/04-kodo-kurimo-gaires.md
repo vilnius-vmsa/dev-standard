@@ -297,7 +297,7 @@ REKOMENDUOJAMA:
 <!-- CODE-VCS-R06a | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Pasenusias neaktyvias šakas periodiškai archyvuoti arba šalinti.
 
-> Susiję skyriai: [8.3 CD (Continuous Delivery/Deployment)](08-devops-ci-cd.md#83-cd-continuous-delivery-deployment) · [8.9 Leidimų (release) valdymas](08-devops-ci-cd.md#89-leidimų-release-valdymas)
+> Susiję skyriai: [8.3 CD (Continuous Delivery/Deployment)](08-devops-ci-cd.md#83-cd-continuous-delivery-deployment) · [8.8 Leidimų (release) valdymas](08-devops-ci-cd.md#88-leidimų-release-valdymas)
 
 ### 4.3.3. Šakų (Branch) apsauga
 
@@ -498,7 +498,7 @@ REKOMENDUOJAMA:
 
 Šiame poskyryje apibrėžiami saugaus programavimo reikalavimai, taikomi tiesiogiai programinio kodo kūrimui ir keitimui.
 
-Bendrieji saugumo, autentifikacijos, autorizacijos, slaptųjų raktų, priklausomybių ir saugumo tikrinimo reikalavimai apibrėžti [#3.3](03-architektura.md#33-backend-ir-api-principai), 3.5, 5, 6 ir 8.6 skyriuose.
+Bendrieji saugumo, autentifikacijos, autorizacijos, slaptųjų raktų, priklausomybių ir saugumo tikrinimo reikalavimai apibrėžti [#3.3](03-architektura.md#33-backend-ir-api-principai), 3.5, 5, 6 ir 8.5 skyriuose.
 
 PRIVALOMA:
 
@@ -526,7 +526,7 @@ REKOMENDUOJAMA:
 <!-- CODE-SEC-R04 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kodo peržiūros metu papildomai vertinti, ar pakeitimas nepadidina atakos paviršiaus ir neįveda naujų jautrių duomenų nutekėjimo rizikų.
 
-> Susiję skyriai: [3.3.6 Input validacija ir užklausų apsauga](03-architektura.md#336-input-validacija-ir-užklausų-apsauga) · [3.3.8 Standartizuotos klaidos](03-architektura.md#338-standartizuotos-klaidos) · [3.5.2 Slaptieji raktai](03-architektura.md#352-slaptieji-raktai) · [5 Versijavimas ir priklausomybių valdymas](05-versijavimas.md) · [6 Saugumas (Security by Design)](06-saugumas.md) · [8.6 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė)
+> Susiję skyriai: [3.3.6 Input validacija ir užklausų apsauga](03-architektura.md#336-input-validacija-ir-užklausų-apsauga) · [3.3.8 Standartizuotos klaidos](03-architektura.md#338-standartizuotos-klaidos) · [3.5.2 Slaptieji raktai](03-architektura.md#352-slaptieji-raktai) · [5 Versijavimas ir priklausomybių valdymas](05-versijavimas.md) · [6 Saugumas (Security by Design)](06-saugumas.md) · [8.5 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#85-devsecops-ci-cd-kontrolė)
 
 ## 4.7. Refaktoringas ir techninė skola
 

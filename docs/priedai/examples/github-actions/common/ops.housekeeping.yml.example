@@ -1,0 +1,64 @@
+name: Example - Ops housekeeping
+
+# Retention for what CI produces. Workflow runs are always cleaned. Container
+# images are pruned only when asked for:
+#   - manually: tick `prune_images` when starting the workflow; it reports
+#     only (dry run) unless `prune_dry_run` is unticked;
+#   - on schedule: set the repository variable HOUSEKEEPING_PRUNE_IMAGES to
+#     `true`; it stays a dry run until HOUSEKEEPING_PRUNE_DRY_RUN is `false`.
+# Start with dry runs and read the run summary before enabling deletion.
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      days:
+        description: Retention period for workflow runs and logs.
+        required: false
+        default: "90"
+        type: string
+      prune_images:
+        description: Also prune old container image versions.
+        required: false
+        default: false
+        type: boolean
+      prune_dry_run:
+        description: Only report which image versions would be deleted.
+        required: false
+        default: true
+        type: boolean
+
+concurrency:
+  group: ops-housekeeping
+  cancel-in-progress: false
+
+permissions:
+  actions: write
+  # Needed only for image pruning; the repository must also have admin access
+  # to the listed packages.
+  packages: write
+
+jobs:
+  housekeeping:
+    name: Retain only required CI artifacts and images
+    # The organisation's own reusable workflow: referenced by @main, so every
+    # project follows the shared version. Third-party actions stay pinned to a
+    # commit SHA.
+    uses: vilnius-vmsa/shared-workflows/.github/workflows/housekeeping.yml@main
+    with:
+      days: ${{ inputs.days || '90' }}
+      prune_images: ${{ inputs.prune_images == true || (github.event_name == 'schedule' && vars.HOUSEKEEPING_PRUNE_IMAGES == 'true') }}
+      prune_dry_run: ${{ (github.event_name == 'workflow_dispatch' && inputs.prune_dry_run != false) || (github.event_name == 'schedule' && vars.HOUSEKEEPING_PRUNE_DRY_RUN != 'false') }}
+      # The canonical image packages of this application, without the
+      # registry and owner.
+      image_packages: <app>-php <app>-nginx
+      # Retention rules (the shared workflow's defaults are shown):
+      # - versions that carry only candidate-* tags are deleted after 14 days;
+      # - versions that carry only sha-<40> tags: the newest 20 are kept, and
+      #   any younger than 90 days;
+      # - versions tagged staging, production, latest, buildcache or vX.Y.Z
+      #   and untagged versions are never deleted.
+      candidate_days: 14
+      source_keep: 20
+      source_days: 90

@@ -1,0 +1,35 @@
+; Inactive example. Copy to docker/php-fpm/pool.d/www.prod.conf; the production
+; Dockerfile installs it as /usr/local/etc/php-fpm.d/zz-app.conf.
+
+[global]
+; On the stop signal let workers finish running requests for up to
+; max_execution_time before they are killed. Keep stop_grace_period of the
+; PHP services in Compose slightly above this value.
+process_control_timeout = 120s
+
+[www]
+user = app
+group = app
+listen = 9000
+pm = dynamic
+; Size the pool to the container memory limit: max_children x the typical
+; memory of one worker (measure it; it is far below memory_limit) must fit
+; into the limit set for the PHP service in Compose.
+pm.max_children = 8
+pm.start_servers = 2
+pm.min_spare_servers = 1
+pm.max_spare_servers = 4
+pm.max_requests = 500
+; Liveness: the Compose healthcheck calls this path over FastCGI (cgi-fcgi).
+; It proves that FPM accepts requests, nothing about the application.
+ping.path = /fpm-ping
+ping.response = pong
+pm.status_path = /fpm-status
+; The entrypoint exports the mounted secrets as environment variables.
+clear_env = no
+catch_workers_output = yes
+php_admin_flag[log_errors] = on
+php_admin_value[error_log] = /dev/stderr
+; Nginx already logs every request; a second access log would repeat the raw
+; request URI, including tokens carried in the path.
+access.log = /dev/null

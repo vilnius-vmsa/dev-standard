@@ -1,0 +1,24 @@
+---
+applyTo: "**"
+---
+
+<!-- Inactive example. Copy to .github/instructions/dev-standard-local.instructions.md
+     and replace the paths and the reason with the project's own. Sync never
+     touches this file. Local rules may only make the standard stricter; the
+     exception below is allowed because OPS-REPO-P02 itself provides for it. -->
+
+# Project rules
+
+## Exception: OPS-REPO-P02 (file layout)
+
+Docker and deployment files are not kept in the repository root but in these
+directories:
+
+- `legacy/app/docker/**`
+- `legacy/app/docker-compose*.yml`
+- `legacy/tools/deploy/**`
+
+Reason: inherited repository structure; the move to the standard layout is
+planned separately.
+
+All chapter 8 rules (OPS-*) apply to these paths.

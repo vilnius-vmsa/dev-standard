@@ -1,0 +1,95 @@
+# Inactive example. Copy to docker/nginx/conf.d/default.conf. It is baked
+# into the production Nginx image and is the same in every role: single-slot,
+# blue slot and green slot. Anything role-specific is a separate file that
+# Compose mounts:
+#   upstream.conf   which PHP-FPM service this Nginx talks to;
+#   edge-tls.conf   the public TLS listener, only where TLS terminates.
+
+# Application listener. In single-slot it is reached through the local TLS
+# listener (edge-tls.conf); in blue-green through the balancer. It is never
+# published on the host.
+server {
+    listen 8080;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.php;
+    charset utf-8;
+
+    client_max_body_size 16M;
+
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~* \.(?:css|js|gif|ico|jpe?g|png|svg|webp|woff2?|ttf|eot)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+        try_files $uri =404;
+    }
+
+    location ~ ^/index\.php(/|$) {
+        include fastcgi_params;
+        # `php-upstream` is defined in upstream.conf, never here.
+        fastcgi_pass php-upstream;
+        # The path inside the PHP-FPM container, not this container's root.
+        fastcgi_param SCRIPT_FILENAME /var/www/public$fastcgi_script_name;
+        fastcgi_param HTTP_AUTHORIZATION $http_authorization;
+        fastcgi_param HTTP_X_FORWARDED_PROTO $http_x_forwarded_proto;
+        fastcgi_param HTTP_X_FORWARDED_PORT $http_x_forwarded_port;
+    }
+
+    location ~ \.php$ { return 404; }
+    location ~ /\. { deny all; }
+
+    # Liveness: Nginx itself answers, no upstream involved.
+    location = /health {
+        access_log off;
+        default_type text/plain;
+        return 200 'ok';
+    }
+
+    # Readiness reports dependency state and the release. Keep it off the
+    # application listener; gates call it through the monitoring listener.
+    location = /health/ready { return 404; }
+}
+
+# Private monitoring listener: container loopback and the Docker networks
+# only. Never publish it as ingress.
+server {
+    listen 18080;
+    server_name _;
+    access_log off;
+
+    # Readiness: Nginx -> PHP-FPM -> application -> database and Redis.
+    location = /health/ready {
+        include fastcgi_params;
+        fastcgi_pass php-upstream;
+        fastcgi_param SCRIPT_FILENAME /var/www/public/index.php;
+        fastcgi_param SCRIPT_NAME /index.php;
+        fastcgi_param REQUEST_URI /health/ready;
+        fastcgi_param QUERY_STRING "";
+        allow 127.0.0.1;
+        # Docker assigns networks from all private ranges, not only 172.16/12.
+        allow 10.0.0.0/8;
+        allow 172.16.0.0/12;
+        allow 192.168.0.0/16;
+        deny all;
+    }
+
+    location = /stub_status {
+        stub_status;
+        allow 127.0.0.1;
+        # Docker assigns networks from all private ranges, not only 172.16/12.
+        allow 10.0.0.0/8;
+        allow 172.16.0.0/12;
+        allow 192.168.0.0/16;
+        deny all;
+    }
+
+    location / { return 404; }
+}

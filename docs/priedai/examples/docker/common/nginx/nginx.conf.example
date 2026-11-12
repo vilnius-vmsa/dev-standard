@@ -1,0 +1,38 @@
+# Inactive example. Copy to docker/nginx/nginx.conf; the production Nginx
+# Dockerfile installs it as /etc/nginx/nginx.conf.
+#
+# The container runs as the unprivileged nginx user with a read-only root
+# filesystem, so every writable path points at a tmpfs mounted by Compose
+# (/run, /var/cache/nginx, /tmp). There is no `user` directive: the process
+# already runs unprivileged.
+
+worker_processes auto;
+pid /run/nginx.pid;
+
+# Logs go to stdout/stderr and are collected centrally.
+error_log /dev/stderr warn;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    access_log /dev/stdout;
+
+    sendfile on;
+    tcp_nopush on;
+    keepalive_timeout 65;
+    server_tokens off;
+
+    client_body_temp_path /var/cache/nginx/client_temp;
+    proxy_temp_path       /var/cache/nginx/proxy_temp;
+    fastcgi_temp_path     /var/cache/nginx/fastcgi_temp;
+    uwsgi_temp_path       /var/cache/nginx/uwsgi_temp;
+    scgi_temp_path        /var/cache/nginx/scgi_temp;
+
+    # default.conf, upstream.conf and, where Compose mounts it, edge-tls.conf.
+    include /etc/nginx/conf.d/*.conf;
+}

@@ -1,0 +1,285 @@
+# Inactive example. Copy to the application root as
+# docker-compose.production.yml and replace every placeholder. Production
+# never builds from the checkout.
+
+name: ${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME is required}
+
+# Applied to every container: servers and databases keep time in UTC
+# (ARCH-API-P13), the same zone as date.timezone in php.prod.ini, so that
+# application timestamps, database time functions and logs agree. Local time
+# is a presentation concern (the application and Grafana convert it).
+x-container-environment: &container-environment
+  TZ: UTC
+
+# Local log rotation: json-file keeps logs readable through the Docker API,
+# which Alloy uses; without limits they fill the host disk.
+x-logging: &application-logging
+  driver: json-file
+  options:
+    max-size: "50m"
+    max-file: "5"
+
+# Labels for central log collection. Alloy (docker-compose.observability.yml)
+# collects only containers with app.logging.enabled=true and turns the other
+# labels into Loki labels, so every service must carry its anchor.
+x-log-labels:
+  mysql: &mysql-log-labels
+    app.logging.enabled: "true"
+    app.logging.component: "mysql"
+    app.logging.service_name: "<application>-mysql"
+    app.logging.type: "database"
+  redis: &redis-log-labels
+    app.logging.enabled: "true"
+    app.logging.component: "redis"
+    app.logging.service_name: "<application>-redis"
+    app.logging.type: "cache"
+  php: &php-log-labels
+    app.logging.enabled: "true"
+    app.logging.component: "php"
+    app.logging.service_name: "<application>-php"
+    app.logging.type: "application"
+  worker: &worker-log-labels
+    app.logging.enabled: "true"
+    app.logging.component: "worker"
+    app.logging.service_name: "<application>-worker"
+    app.logging.type: "application"
+  nginx: &nginx-log-labels
+    app.logging.enabled: "true"
+    app.logging.component: "nginx"
+    app.logging.service_name: "<application>-nginx"
+    app.logging.type: "http"
+
+x-runtime-defaults: &runtime-defaults
+  restart: unless-stopped
+  read_only: true
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,nodev,size=32m,mode=1777
+  networks: [internal]
+  environment: *container-environment
+  logging: *application-logging
+
+x-php-defaults: &php-defaults
+  <<: *runtime-defaults
+  networks: [internal, egress]
+  image: ${PHP_IMAGE_REF:?PHP_IMAGE_REF must be an immutable digest reference}
+  # PHP-FPM lets running requests finish for up to process_control_timeout
+  # (120s in the pool example); the container must not be killed before that.
+  stop_grace_period: 130s
+  # Non-secret settings only: the secrets helper removes every secret key
+  # from this file. Compose reads it on the host.
+  env_file:
+    - ${SECRETS_DIR:?SECRETS_DIR is required}/application.env
+  environment:
+    <<: *container-environment
+    DB_HOST: mysql
+    REDIS_HOST: redis
+  # Secrets are mounted as files and exported by the image entrypoint for the
+  # PHP process only. The application gets its own database password; the
+  # database root password is mounted into `mysql` alone.
+  secrets: [app_key, mysql_password, redis_password]
+  # Writable state. The root filesystem is read-only; framework caches,
+  # compiled views and logs are tmpfs, so every container starts from the
+  # files built into its own image and nothing from a previous release (or,
+  # with blue-green, from the other slot) is carried over. bootstrap/cache is
+  # not mounted at all: it holds the package manifest generated at image
+  # build. Only user data is persistent. uid/gid 1001 is the image's app user.
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,nodev,size=160m,uid=1001,gid=1001,mode=1777
+    - /var/www/storage/framework/views:rw,noexec,nosuid,nodev,size=32m,uid=1001,gid=1001,mode=0770
+    - /var/www/storage/framework/cache:rw,noexec,nosuid,nodev,size=16m,uid=1001,gid=1001,mode=0770
+    - /var/www/storage/framework/sessions:rw,noexec,nosuid,nodev,size=16m,uid=1001,gid=1001,mode=0770
+    - /var/www/storage/logs:rw,noexec,nosuid,nodev,size=16m,uid=1001,gid=1001,mode=0770
+    - /home/app:rw,noexec,nosuid,nodev,size=8m,uid=1001,gid=1001,mode=0750
+  volumes:
+    - application_uploads:/var/www/storage/app/public
+  depends_on:
+    mysql:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  # Resource limits are safe starting points for a small production host;
+  # tune them to the workload, but keep an explicit CPU and memory limit on
+  # every service, including stateful services.
+  mysql:
+    <<: *runtime-defaults
+    labels: *mysql-log-labels
+    image: mysql:8.4@sha256:REPLACE_WITH_CURRENT_DIGEST
+    # Run as the image's mysql account from the start. The official
+    # entrypoint then needs no root-to-mysql handoff, so no capability has to
+    # be added back on top of cap_drop: [ALL].
+    user: "999:999"
+    # Time for a clean InnoDB shutdown.
+    stop_grace_period: 60s
+    tmpfs:
+      - /var/run/mysqld:rw,noexec,nosuid,nodev,size=8m,uid=999,gid=999,mode=0755
+      - /tmp:rw,noexec,nosuid,nodev,size=128m,uid=999,gid=999,mode=1777
+    deploy:
+      resources:
+        limits:
+          cpus: "2.00"
+          memory: 2G
+    environment:
+      <<: *container-environment
+      MYSQL_DATABASE: ${DB_DATABASE:?DB_DATABASE is required}
+      MYSQL_USER: ${DB_USERNAME:?DB_USERNAME is required}
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+    secrets: [mysql_password, mysql_root_password]
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$(cat /run/secrets/mysql_root_password) mysqladmin ping -h 127.0.0.1 -u root --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7.4-alpine@sha256:REPLACE_WITH_CURRENT_DIGEST
+    <<: *runtime-defaults
+    labels: *redis-log-labels
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+    # Run as the image's redis account (uid 999, gid 1000 in the Alpine
+    # image) from the start: chown and su-exec would need capabilities that
+    # cap_drop: [ALL] removes. The shell only reads the secret and replaces
+    # itself with the Redis process.
+    user: "999:1000"
+    # Time to write the append-only file on shutdown.
+    stop_grace_period: 60s
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m,uid=999,gid=1000,mode=1777
+    command: ["sh", "-ec", "exec redis-server --appendonly yes --requirepass \"$$(cat /run/secrets/redis_password)\""]
+    secrets: [redis_password]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=$$(cat /run/secrets/redis_password) redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  php:
+    <<: *php-defaults
+    labels: *php-log-labels
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+    expose: [9000]
+    healthcheck:
+      # PHP-FPM liveness over FastCGI (ping.path from the PHP image). This
+      # is not application readiness: the deploy gate requests /health/ready.
+      test: ["CMD-SHELL", "SCRIPT_NAME=/fpm-ping SCRIPT_FILENAME=/fpm-ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000 | grep -q pong"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  worker:
+    <<: *php-defaults
+    labels: *worker-log-labels
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+    # --timeout bounds one job; --max-time recycles the worker so it never
+    # runs stale code or leaks memory for long.
+    command: ["php", "artisan", "queue:work", "redis", "--sleep=1", "--tries=3", "--timeout=90", "--max-time=3600", "--no-interaction"]
+    # On stop the worker finishes its current job. The grace period must be
+    # longer than --timeout, otherwise a deployment kills a running job.
+    stop_grace_period: 100s
+    # Liveness of the worker loop, not of the process: the application touches
+    # this file on every queue loop (see the DevOps appendix H.3). Without the
+    # heartbeat `up --wait` would only mean "the process started".
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@filemtime('/tmp/queue-worker.heartbeat') >= time() - 120 ? 0 : 1);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  nginx:
+    <<: *runtime-defaults
+    labels: *nginx-log-labels
+    networks: [edge, internal]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+    image: ${NGINX_IMAGE_REF:?NGINX_IMAGE_REF must be an immutable digest reference}
+    # Let in-flight requests finish; aligned with the PHP services.
+    stop_grace_period: 130s
+    # A service-level tmpfs list replaces the one inherited through the YAML
+    # merge key, so /tmp has to be repeated here.
+    tmpfs:
+      - /run:rw,noexec,nosuid,nodev,size=4m,uid=101,gid=101,mode=0755
+      - /var/cache/nginx:rw,noexec,nosuid,nodev,size=64m,uid=101,gid=101,mode=0750
+      - /tmp:rw,noexec,nosuid,nodev,size=32m,uid=101,gid=101,mode=1777
+    depends_on:
+      php:
+        condition: service_healthy
+    volumes:
+      # Single-slot terminates TLS in this service, so it mounts the TLS
+      # listener. The image itself stays role-neutral.
+      - ./docker/nginx/conf.d/edge-tls.conf:/etc/nginx/conf.d/edge-tls.conf:ro
+      # Read-only view of user uploads for the public storage link.
+      - application_uploads:/usr/share/nginx/html/storage:ro
+    ports:
+      # Server-only edge: TLS terminates in the production Nginx image on
+      # 8443; the host exposes the public HTTPS port 443. The same production
+      # image may also contain its internal 8080 listener for blue-green use,
+      # but this single-slot service does not publish that listener. Local
+      # development uses ../common/docker-compose.example.yml and HTTP on host port 8080.
+      - "443:8443"
+    secrets:
+      - source: tls_certificate
+        target: tls_certificate
+      - source: tls_private_key
+        target: tls_private_key
+    healthcheck:
+      # Nginx liveness only. Readiness (/health/ready through PHP-FPM) is
+      # verified by the deployment workflow after the rollout.
+      test: ["CMD-SHELL", "wget -q -T 3 --no-check-certificate -O /dev/null https://127.0.0.1:8443/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Log and metrics export (Alloy) is a separate Compose project:
+  # docker-compose.observability.yml.
+
+networks:
+  edge:
+    driver: bridge
+  internal:
+    internal: true
+  egress:
+    driver: bridge
+
+volumes:
+  application_uploads:
+  mysql_data:
+  redis_data:
+
+secrets:
+  app_key:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/app_key
+  mysql_password:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/mysql_password
+  mysql_root_password:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/mysql_root_password
+  redis_password:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/redis_password
+  tls_certificate:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/tls_certificate
+  tls_private_key:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/tls_private_key

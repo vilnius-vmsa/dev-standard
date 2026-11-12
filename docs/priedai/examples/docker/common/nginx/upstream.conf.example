@@ -1,0 +1,10 @@
+# Inactive example. Copy to docker/nginx/conf.d/upstream.conf. It is baked
+# into the production Nginx image as the default and points at the single-slot
+# PHP-FPM service. Blue-green Compose replaces it per slot by mounting
+# upstream.blue.conf or upstream.green.conf over the same path, so one
+# immutable Nginx image digest serves every slot.
+
+upstream php-upstream {
+    server php:9000;
+    keepalive 16;
+}

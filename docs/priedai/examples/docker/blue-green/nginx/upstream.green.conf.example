@@ -1,0 +1,7 @@
+# Inactive example. Copy to docker/nginx/conf.d/upstream.green.conf. Blue-green
+# Compose mounts it into nginx-green as /etc/nginx/conf.d/upstream.conf.
+
+upstream php-upstream {
+    server php-green:9000;
+    keepalive 16;
+}

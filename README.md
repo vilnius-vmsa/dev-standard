@@ -125,7 +125,11 @@ The GitHub organization's Copilot custom instructions are set once by hand and o
    ```
 
 3. Open **Actions → Dev standard sync → Run workflow** and enter your stacks (`php`, `laravel`, `symfony`,
-   `frontend`, `mobile`, `infra`, `db`; `all` is always included). Merge the pull request it opens.
+   `frontend`, `mobile`, `db`, and the DevOps profiles: one release model, `flow-branch` or `flow-tag`, and one
+   deployment method, `compose`, `compose-blue-green` or `k8s`; `all` and the common `infra` rules are included
+   automatically). A stack that a newer release introduced (the DevOps profiles) can be listed only
+   after moving to that release: run the workflow with `version` set to `latest`. A repository that has CI but deploys nothing lists `infra` alone; sync then notes the missing
+   profiles, which such a repository can ignore. Merge the pull request it opens.
 4. Paste the section from the pull request's warning into your `AGENTS.md`, outside any block a tool generates (sync
    never edits it). Laravel Boost repositories also pin Claude Code's guidelines to `AGENTS.md` (CODE-AI-P12); the sync
    pull request shows how. When a release changes that section, the sync pull request warns again and shows the new version.

@@ -1,0 +1,155 @@
+name: Example - Ops Deploy
+
+# Branch-based example: image_tag accepts only sha-<40>. For tag-based release
+# redeploy use ../tag-based/ops.deploy.yml.example instead.
+#
+# Inactive example. Copy to .github/workflows/ops.deploy.yml only after the
+# reusable cd.deploy workflow and the consuming repository's contracts have
+# been adapted. This workflow only redeploys already verified images.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: GitHub Environment to deploy.
+        required: true
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
+      image_tag:
+        description: Optional immutable source tag (sha-<40 hex>); leave empty to use the environment's promoted image.
+        required: false
+        default: ""
+        type: string
+permissions:
+  contents: read
+  packages: read
+  attestations: read
+
+# Not the deploy group: the called cd.deploy job takes `cd-deploy-<env>`
+# itself, and a caller holding the same group is cancelled as a deadlock.
+concurrency:
+  group: ops-deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  resolve-image:
+    name: Resolve promoted deployment image
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+      REQUESTED_TAG: ${{ inputs.image_tag }}
+      APP_REPOSITORY: ghcr.io/<org>/<app>-php
+      NGINX_REPOSITORY: ghcr.io/<org>/<app>-nginx
+    outputs:
+      source_sha: ${{ steps.image.outputs.source_sha }}
+      app_image: ${{ steps.image.outputs.app_image }}
+      nginx_image: ${{ steps.image.outputs.nginx_image }}
+      release_workflow: ${{ steps.image.outputs.release_workflow }}
+    steps:
+      - name: Log in to the container registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve promoted tag to immutable images
+        id: image
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          case "$ENVIRONMENT" in
+            staging|production) default_tag="$ENVIRONMENT" ;;
+            *) echo "Unsupported environment: $ENVIRONMENT" >&2; exit 1 ;;
+          esac
+          if [ -n "$REQUESTED_TAG" ]; then
+            [[ "$REQUESTED_TAG" =~ ^sha-[0-9a-f]{40}$ ]] || {
+              echo "image_tag must be sha-<40 hex> when provided." >&2
+              exit 1
+            }
+            tag="$REQUESTED_TAG"
+          else
+            tag="$default_tag"
+          fi
+          resolve_digest() {
+            local repository="$1" output digest
+            output="$(docker buildx imagetools inspect "${repository}:${tag}" 2>&1)" || {
+              echo "$output" >&2
+              return 1
+            }
+            digest="$(awk '$1 == "Digest:" { print $2; exit }' <<<"$output")"
+            [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+            printf '%s' "$digest"
+          }
+          app_digest="$(resolve_digest "$APP_REPOSITORY")"
+          nginx_digest="$(resolve_digest "$NGINX_REPOSITORY")"
+          app_image="${APP_REPOSITORY}@${app_digest}"
+          nginx_image="${NGINX_REPOSITORY}@${nginx_digest}"
+          docker pull "$app_image" >/dev/null
+          docker pull "$nginx_image" >/dev/null
+          app_revision="$(docker image inspect "$app_image" --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')"
+          nginx_revision="$(docker image inspect "$nginx_image" --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')"
+          [[ "$app_revision" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$nginx_revision" == "$app_revision" ]]
+          if [[ "$tag" =~ ^sha-([0-9a-f]{40})$ ]]; then
+            [[ "${BASH_REMATCH[1]}" == "$app_revision" ]]
+          fi
+          for image in "$app_image" "$nginx_image"; do
+            attestation_args=(
+              --repo "$GITHUB_REPOSITORY"
+              --signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/ci.build.yml"
+            )
+            if [[ "$ENVIRONMENT" == production ]]; then
+              attestation_args+=(--source-ref refs/heads/main)
+            fi
+            gh attestation verify "oci://${image}" "${attestation_args[@]}"
+          done
+          {
+            echo "source_sha=$app_revision"
+            echo "app_image=$app_image"
+            echo "nginx_image=$nginx_image"
+            echo "release_workflow=${GITHUB_REPOSITORY}/.github/workflows/ci.build.yml"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Checkout protected production source history
+        if: ${{ inputs.environment == 'production' }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify production source is reachable from main
+        if: ${{ inputs.environment == 'production' }}
+        env:
+          SOURCE_SHA: ${{ steps.image.outputs.source_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git cat-file -e "${SOURCE_SHA}^{commit}"
+          git merge-base --is-ancestor "$SOURCE_SHA" origin/main || {
+            echo "Production image source ${SOURCE_SHA} is not reachable from origin/main." >&2
+            exit 1
+          }
+
+  redeploy:
+    name: Redeploy resolved ${{ inputs.environment }} images
+    needs: resolve-image
+    # Blue-green projects (cd.deploy.yml copied from the blue-green example)
+    # add a boolean `force_recreate_balancer` workflow_dispatch input here
+    # and pass it on (`force_recreate_balancer: ${{ inputs.force_recreate_balancer }}`)
+    # for the cases where an in-place balancer reload is not enough.
+    uses: ./.github/workflows/cd.deploy.yml
+    with:
+      environment: ${{ inputs.environment }}
+      source_sha: ${{ needs.resolve-image.outputs.source_sha }}
+      app_image: ${{ needs.resolve-image.outputs.app_image }}
+      nginx_image: ${{ needs.resolve-image.outputs.nginx_image }}
+      release_workflow: ${{ needs.resolve-image.outputs.release_workflow }}
+    secrets: inherit

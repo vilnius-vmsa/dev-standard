@@ -1,0 +1,247 @@
+name: Example - CD Deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: Protected deployment environment name.
+        required: true
+        type: string
+      source_sha:
+        description: Exact source revision represented by the images.
+        required: true
+        type: string
+      app_image:
+        description: Immutable application image reference.
+        required: true
+        type: string
+      nginx_image:
+        description: Immutable Nginx image reference.
+        required: true
+        type: string
+      release_workflow:
+        description: Workflow that created the exact release attestation.
+        required: true
+        type: string
+      release_attestation_required:
+        description: Require a release attestation before rollout; candidate staging deploys may disable this while retaining build-attestation verification.
+        required: false
+        default: true
+        type: boolean
+    # No `secrets:` block on purpose. The secrets below are Environment
+    # secrets: they are resolved inside the job that declares `environment:`,
+    # not by the caller, so declaring them here as required would make the
+    # call fail validation. Callers pass `secrets: inherit`.
+    #   RUNTIME_ENV, TLS_CERTIFICATE_B64, TLS_PRIVATE_KEY_B64 (required)
+    #   ALLOY_ENV, LOKI_PASSWORD (optional, enable log export)
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    # Deploy jobs run only on the self-hosted runner of the target
+    # environment, selected by its environment label. Build, test and scan
+    # jobs stay on GitHub-hosted runners and never use this label.
+    runs-on: "${{ inputs.environment }}"
+    concurrency:
+      group: cd-deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    environment: ${{ inputs.environment }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: read
+      attestations: read
+    env:
+      DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+      COMPOSE_FILE: docker-compose.production.yml
+      COMPOSE_PROJECT_NAME: <application>-${{ inputs.environment }}
+      SECRETS_DIR: /srv/<application>/secrets
+      # These names are the production Compose contract. The secrets helper
+      # writes them to SECRETS_DIR/compose.env before Compose is evaluated.
+      PHP_IMAGE_REF: ${{ inputs.app_image }}
+      NGINX_IMAGE_REF: ${{ inputs.nginx_image }}
+      SOURCE_SHA: ${{ inputs.source_sha }}
+      RELEASE_WORKFLOW: ${{ inputs.release_workflow }}
+      RELEASE_ATTESTATION_REQUIRED: ${{ inputs.release_attestation_required }}
+    steps:
+      - name: Validate deployment inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$PHP_IMAGE_REF" == *@sha256:* ]]
+          [[ "$NGINX_IMAGE_REF" == *@sha256:* ]]
+          if [[ "$RELEASE_ATTESTATION_REQUIRED" != 'true' && "$DEPLOY_ENVIRONMENT" != 'staging' ]]; then
+            echo 'Release attestation cannot be disabled outside the staging candidate deploy.' >&2
+            exit 1
+          fi
+
+      # The images are private: the runner must authenticate before the
+      # image and attestation checks and before Compose pulls.
+      - name: Log in to the container registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify build and release attestations
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          command -v gh
+          command -v jq
+          verify_image() {
+            local image="$1" name digest attestations revision
+            name="${image%@*}"
+            digest="${image##*@}"
+            docker pull "$image" >/dev/null
+            revision="$(docker image inspect "$image" --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')"
+            [[ "$revision" == "$SOURCE_SHA" ]] || {
+              echo "$image was built from ${revision:-an unknown revision}; expected $SOURCE_SHA." >&2
+              exit 1
+            }
+            gh attestation verify "oci://${image}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/ci.build.yml"
+            if [[ "$RELEASE_ATTESTATION_REQUIRED" == 'true' ]]; then
+              attestations="$(gh attestation verify "oci://${image}" \
+                --repo "$GITHUB_REPOSITORY" \
+                --signer-workflow "$RELEASE_WORKFLOW" \
+                --predicate-type https://in-toto.io/attestation/release/v0.1 \
+                --format json)"
+              jq -e \
+                --arg predicate_type "https://in-toto.io/attestation/release/v0.1" \
+                --arg expected_purl "pkg:github/${GITHUB_REPOSITORY}@${SOURCE_SHA}" \
+                --arg subject_name "$name" \
+                --arg subject_digest "$digest" \
+                'any(.[]?;
+                  .verificationResult.statement.predicateType == $predicate_type
+                  and .verificationResult.statement.predicate.purl == $expected_purl
+                  and any(.verificationResult.statement.subject[]?;
+                    .name == $subject_name
+                    and .digest.sha256 == ($subject_digest | sub("^sha256:"; ""))
+                  )
+                )' <<<"$attestations" >/dev/null
+            fi
+          }
+          verify_image "$PHP_IMAGE_REF"
+          verify_image "$NGINX_IMAGE_REF"
+
+      - name: Checkout exact deployment source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+          # The consuming project copies the production Compose example to
+          # this path and keeps the helper in the same source revision.
+          # File paths, not directories: cone mode would reject them on a
+          # reused workspace.
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            docker-compose.production.yml
+            docker-compose.observability.yml
+            docker/alloy/config.alloy
+            docker/nginx/conf.d/edge-tls.conf
+            docker/scripts/prepare-runtime-secrets.sh
+
+      - name: Prepare runtime secrets and Compose environment
+        shell: bash
+        env:
+          RUNTIME_ENV: ${{ secrets.RUNTIME_ENV }}
+          DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+          TLS_CERTIFICATE_B64: ${{ secrets.TLS_CERTIFICATE_B64 }}
+          TLS_PRIVATE_KEY_B64: ${{ secrets.TLS_PRIVATE_KEY_B64 }}
+          ALLOY_ENV: ${{ secrets.ALLOY_ENV }}
+          LOKI_PASSWORD: ${{ secrets.LOKI_PASSWORD }}
+          PHP_IMAGE_REF: ${{ inputs.app_image }}
+          NGINX_IMAGE_REF: ${{ inputs.nginx_image }}
+        run: bash docker/scripts/prepare-runtime-secrets.sh
+
+      - name: Validate generated Compose runtime contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          compose_env="$SECRETS_DIR/compose.env"
+          test -r "$compose_env"
+          for variable in \
+            COMPOSE_PROJECT_NAME SECRETS_DIR DB_DATABASE DB_USERNAME \
+            PHP_IMAGE_REF NGINX_IMAGE_REF; do
+            grep -Eq "^${variable}=.+$" "$compose_env" || {
+              echo "${variable} is missing from generated ${compose_env}." >&2
+              exit 1
+            }
+          done
+          docker compose --env-file "$compose_env" -f "$COMPOSE_FILE" config -q
+
+      - name: Deploy immutable images and wait for readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker compose --env-file "$SECRETS_DIR/compose.env" -f "$COMPOSE_FILE" pull php worker nginx
+          # Start the stateful services first and wait for their health, so
+          # the migration below also works on the very first deployment. On
+          # later deployments this leaves the running database untouched.
+          docker compose --env-file "$SECRETS_DIR/compose.env" -f "$COMPOSE_FILE" up -d --wait mysql redis
+          docker compose --env-file "$SECRETS_DIR/compose.env" -f "$COMPOSE_FILE" stop worker
+          docker compose --env-file "$SECRETS_DIR/compose.env" -f "$COMPOSE_FILE" run --rm --no-deps \
+            php php artisan migrate --force --no-interaction
+          docker compose --env-file "$SECRETS_DIR/compose.env" -f "$COMPOSE_FILE" up -d --wait
+
+      - name: Verify readiness and deployed release
+        shell: bash
+        run: |
+          set -euo pipefail
+          # /health is Nginx liveness and proves nothing about the
+          # application. /health/ready is served only on the private 18080
+          # listener: it goes through PHP-FPM, checks the database and Redis
+          # and reports the release it serves. The rollout succeeds only when
+          # that release is the deployed source revision.
+          for attempt in $(seq 1 20); do
+            if response="$(docker compose --env-file "$SECRETS_DIR/compose.env" -f "$COMPOSE_FILE" \
+                exec -T nginx wget -q -T 10 -O - http://127.0.0.1:18080/health/ready)" \
+              && jq -e --arg release "$SOURCE_SHA" \
+                '.status == "ok" and .release == $release' <<<"$response" >/dev/null; then
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "Readiness did not report status ok for release $SOURCE_SHA." >&2
+          exit 1
+
+      - name: Verify the public HTTPS edge
+        shell: bash
+        env:
+          # Environment-scoped variable, for example https://app.example.lt.
+          PUBLIC_URL: ${{ vars.PUBLIC_URL }}
+        run: |
+          set -euo pipefail
+          : "${PUBLIC_URL:?PUBLIC_URL must be set on the GitHub Environment}"
+          # Liveness through the public name proves DNS, TLS and port
+          # publication; application readiness was verified above.
+          curl --fail --silent --show-error --max-time 10 \
+            --retry 10 --retry-delay 3 "$PUBLIC_URL/health" >/dev/null
+
+      - name: Start log and metrics export
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # A separate Compose project, identical for single-slot and
+          # blue-green. It runs after every deployment, also a failed one, so
+          # the logs of a failed rollout are shipped too.
+          if [ -s "$SECRETS_DIR/alloy.env" ] && [ -s "$SECRETS_DIR/loki_password" ] \
+            && [ -f docker-compose.observability.yml ]; then
+            # --force-recreate: a changed config.alloy or credential is a
+            # bind-mounted file, which Compose would not notice by itself.
+            docker compose --env-file "$SECRETS_DIR/compose.env" \
+              -p "${COMPOSE_PROJECT_NAME}-observability" \
+              -f docker-compose.observability.yml up -d --wait --force-recreate alloy
+          else
+            echo "::warning::Log export is not configured (ALLOY_ENV, LOKI_PASSWORD); OPS-MON-P02 is not met for this environment."
+          fi

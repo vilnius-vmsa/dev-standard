@@ -7,7 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { buildBundle } from '../../../scripts/standard/lib/bundle.mjs';
-import { agentsWarning, applyBundle, bundleSkills, CONFIG_FILE, parseStacks, planRun, readConfig, resolveStacks } from './sync.mjs';
+import { agentsWarning, applyBundle, bundleSkills, CONFIG_FILE, legacyStacks, parseStacks, planRun, readConfig, resolveStacks, stackWarnings } from './sync.mjs';
 
 const tempDir = () => mkdtemp(path.join(os.tmpdir(), 'dev-standard-sync-'));
 const SYNC = fileURLToPath(new URL('./sync.mjs', import.meta.url));
@@ -78,10 +78,10 @@ const RULES = [{
 }];
 
 // Writes a real bundle (same generator as releases) to a temporary directory.
-async function makeBundle(version = 'v1.3.0') {
+async function makeBundle(version = 'v1.3.0', stacks = STACKS) {
   const dir = await tempDir();
   const files = buildBundle({
-    rules: RULES, english: { 'CODE-SEC-P01': { text: 'EN', source_hash: 'h' } }, stacks: STACKS,
+    rules: RULES, english: { 'CODE-SEC-P01': { text: 'EN', source_hash: 'h' } }, stacks,
     version, siteUrl: 'https://example.test', reviewMethod: '## How to review\n',
     skills: new Map([['dev-standard', new Map([
       ['SKILL.md', '---\nname: dev-standard\ndescription: Rules.\n---\n'],
@@ -115,7 +115,106 @@ test('resolveStacks adds all and implied stacks, and rejects unknown ones', () =
   const manifest = { stacks: ['all', 'php', 'laravel', 'frontend'], implies: { laravel: ['php'] } };
   assert.deepEqual(resolveStacks(['laravel', 'frontend'], manifest), ['all', 'laravel', 'php', 'frontend']);
   assert.deepEqual(resolveStacks([], manifest), ['all']);
-  assert.throws(() => resolveStacks(['laravl'], manifest), /unknown stack\(s\): laravl\. Valid stacks: php, laravel, frontend/);
+  assert.throws(() => resolveStacks(['laravl'], manifest), /unknown stack\(s\): laravl\. Valid stacks in release .*: php, laravel, frontend\. .*version "latest"/);
+});
+
+const DEVOPS_MANIFEST = {
+  stacks: ['all', 'infra', 'docker', 'compose', 'compose-blue-green', 'flow-branch', 'flow-tag', 'k8s'],
+  implies: { docker: ['infra'], compose: ['docker'], 'compose-blue-green': ['compose'], 'flow-branch': ['infra'], 'flow-tag': ['infra'], k8s: ['docker'] },
+  legacyIncludes: { infra: ['docker', 'compose', 'compose-blue-green', 'flow-branch', 'flow-tag', 'k8s'] },
+};
+
+test('resolveStacks follows a three-level implies chain', () => {
+  assert.deepEqual(
+    resolveStacks(['flow-branch', 'compose-blue-green'], DEVOPS_MANIFEST),
+    ['all', 'flow-branch', 'infra', 'compose-blue-green', 'compose', 'docker'],
+  );
+});
+
+test('a repository that lists only infra still gets every DevOps profile, with a warning', () => {
+  assert.deepEqual(legacyStacks(['infra'], DEVOPS_MANIFEST), DEVOPS_MANIFEST.legacyIncludes.infra);
+  assert.deepEqual(resolveStacks(['infra'], DEVOPS_MANIFEST).sort(), [...DEVOPS_MANIFEST.stacks].sort());
+  assert.match(stackWarnings(['infra'], DEVOPS_MANIFEST), /lists `infra` but no DevOps profile/);
+});
+
+test('choosing a profile turns the transitional behaviour off', () => {
+  assert.deepEqual(legacyStacks(['infra', 'flow-tag'], DEVOPS_MANIFEST), []);
+  assert.deepEqual(resolveStacks(['infra', 'flow-tag'], DEVOPS_MANIFEST), ['all', 'infra', 'flow-tag']);
+  assert.equal(stackWarnings(['flow-tag', 'compose'], DEVOPS_MANIFEST), '');
+  assert.equal(stackWarnings(['laravel'], { stacks: ['all', 'laravel'] }), '');
+});
+
+test('a half-chosen profile is reported instead of silently losing rules', () => {
+  assert.match(stackWarnings(['infra', 'docker'], DEVOPS_MANIFEST), /no release model and no deployment method/);
+  assert.match(stackWarnings(['flow-branch'], DEVOPS_MANIFEST), /no deployment method/);
+  assert.doesNotMatch(stackWarnings(['flow-branch'], DEVOPS_MANIFEST), /no release model/);
+  assert.match(stackWarnings(['compose-blue-green'], DEVOPS_MANIFEST), /no release model/);
+  assert.match(stackWarnings(['flow-tag', 'compose', 'k8s'], DEVOPS_MANIFEST), /both a Compose profile and `k8s`/);
+});
+
+test('after the transition a repository that lists only infra is still warned', () => {
+  const { legacyIncludes, ...later } = DEVOPS_MANIFEST;
+  const warning = stackWarnings(['infra'], later);
+  assert.match(warning, /no release model and no deployment method/);
+  // One note with a way out for a repository that deploys nothing.
+  assert.equal(warning.match(/\[!WARNING\]/g).length, 1);
+  assert.match(warning, /deploys nothing .* ignore this note/);
+});
+
+test('the transitional note tells a repository that deploys nothing what to do', () => {
+  assert.match(stackWarnings(['infra'], DEVOPS_MANIFEST), /deploys nothing .* keep `infra` as it is/);
+});
+
+test('a bundle from before the DevOps profiles gives no profile warning', () => {
+  assert.equal(stackWarnings(['infra'], { stacks: ['all', 'infra'], implies: {} }), '');
+});
+
+test('repositories without infrastructure stacks get no profile warning', () => {
+  assert.equal(stackWarnings(['laravel'], { ...DEVOPS_MANIFEST, stacks: [...DEVOPS_MANIFEST.stacks, 'laravel'] }), '');
+  assert.equal(stackWarnings([], DEVOPS_MANIFEST), '');
+});
+
+test('both release models at once give a warning', () => {
+  assert.match(stackWarnings(['flow-branch', 'flow-tag'], DEVOPS_MANIFEST), /both `flow-branch` and `flow-tag`/);
+});
+
+// The same generator as releases, with a stack that was split into profiles.
+const PROFILE_STACKS = new Map([
+  ['all', { description: 'All', applyTo: '**' }],
+  ['infra', { description: 'Common', applyTo: '**/*.tf', legacyIncludes: ['docker', 'flow-branch', 'flow-tag'] }],
+  ['docker', { description: 'Images', applyTo: '**/Dockerfile*', implies: ['infra'] }],
+  ['flow-branch', { description: 'Branch model', applyTo: '.github/workflows/**', implies: ['infra'] }],
+  ['flow-tag', { description: 'Tag model', applyTo: '.github/workflows/**', implies: ['infra'] }],
+]);
+
+test('applyBundle keeps a repository that lists only infra on every profile, and warns', async () => {
+  const repo = await tempDir();
+  const bundle = await makeBundle('v1.5.0', PROFILE_STACKS);
+
+  const result = await applyBundle({ repoDir: repo, bundleDir: bundle, version: 'v1.5.0', stacks: ['infra'] });
+
+  assert.deepEqual(await instructions(repo), [
+    'dev-standard-all.instructions.md', 'dev-standard-docker.instructions.md', 'dev-standard-flow-branch.instructions.md',
+    'dev-standard-flow-tag.instructions.md', 'dev-standard-infra.instructions.md',
+  ]);
+  // The config keeps what the repository chose, not the expanded list.
+  assert.deepEqual(JSON.parse(await readFile(path.join(repo, CONFIG_FILE), 'utf8')).stacks, ['infra']);
+  assert.match(result.warning, /lists `infra` but no DevOps profile/);
+});
+
+test('applyBundle removes the profiles a repository did not choose once it chooses one', async () => {
+  const repo = await tempDir();
+  const bundle = await makeBundle('v1.5.0', PROFILE_STACKS);
+  await applyBundle({ repoDir: repo, bundleDir: bundle, version: 'v1.5.0', stacks: ['infra'] });
+
+  const result = await applyBundle({ repoDir: repo, bundleDir: bundle, version: 'v1.5.0', stacks: ['flow-branch', 'docker'] });
+
+  assert.deepEqual(await instructions(repo), [
+    'dev-standard-all.instructions.md', 'dev-standard-docker.instructions.md',
+    'dev-standard-flow-branch.instructions.md', 'dev-standard-infra.instructions.md',
+  ]);
+  assert.match(result.warning, /no deployment method/);
+  assert.doesNotMatch(result.warning, /no release model/);
 });
 
 test('applyBundle installs instructions, skill, symlink and config on first setup', async () => {

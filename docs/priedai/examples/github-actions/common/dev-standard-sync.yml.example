@@ -29,7 +29,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Apply the selected dev-standard release
-        uses: vilnius-vmsa/dev-standard/.github/actions/sync@<reviewed-commit-sha>
+        uses: vilnius-vmsa/dev-standard/.github/actions/sync@main
         with:
           stacks: ${{ inputs.stacks }}
           version: ${{ inputs.version }}

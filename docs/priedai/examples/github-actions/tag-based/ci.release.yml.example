@@ -5,10 +5,7 @@ on:
     tags: ['v*.*.*']
 
 permissions:
-  contents: write
-  packages: write
-  id-token: write
-  attestations: write
+  contents: read
 
 concurrency:
   group: release-${{ github.ref_name }}
@@ -18,6 +15,11 @@ jobs:
   verify-promote-release:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      attestations: write
     outputs:
       source_sha: ${{ steps.metadata.outputs.source_sha }}
       app_repository: ${{ steps.metadata.outputs.app_repository }}
@@ -28,7 +30,7 @@ jobs:
       nginx_image: ${{ steps.metadata.outputs.nginx_image }}
     steps:
       - name: Checkout the exact tag commit
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
@@ -37,32 +39,58 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin main --no-tags --depth=1
-          TAG_SHA="$(git rev-list -n 1 "$GITHUB_REF_NAME")"
-          git merge-base --is-ancestor "$TAG_SHA" origin/main
+          # The `v*.*.*` trigger is a glob and also matches v1.2.3-rc1 or
+          # vfoo.bar.baz. Only a plain semantic version is a release.
+          [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo "$GITHUB_REF_NAME is not a release tag in the form vX.Y.Z." >&2
+            exit 1
+          }
+          # Full history is required: a shallow fetch (--depth) truncates
+          # origin/main, and the ancestry check would then pass only when the
+          # tag points at the tip of main.
+          git fetch origin main --no-tags
+          git show-ref --verify --quiet "refs/tags/$GITHUB_REF_NAME"
+          TAG_SHA="$(git rev-list -n 1 "refs/tags/$GITHUB_REF_NAME")"
+          git merge-base --is-ancestor "$TAG_SHA" origin/main || {
+            echo "Tag $GITHUB_REF_NAME does not point to a commit reachable from origin/main." >&2
+            exit 1
+          }
 
-      - name: Resolve smoke-tested candidate metadata
-        id: metadata
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+
+      - name: Log in to the container registry
         env:
           GH_TOKEN: ${{ github.token }}
+        run: echo "$GH_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Resolve smoke-tested source tags from the registry
+        id: metadata
+        env:
           TAG_SHA: ${{ github.sha }}
-          APP_REPOSITORY: ghcr.io/<owner>/<application>-image-php
-          NGINX_REPOSITORY: ghcr.io/<owner>/<application>-image-nginx
+          APP_REPOSITORY: ghcr.io/<org>/<app>-php
+          NGINX_REPOSITORY: ghcr.io/<org>/<app>-nginx
         shell: bash
         run: |
           set -euo pipefail
-          # CI Build must publish this metadata only after scan, attestation and
-          # smoke-test succeed. Never rebuild here and never resolve latest.
-          BUILD_RUN_ID="$(gh run list --workflow ci.build.yml --branch main --commit "$TAG_SHA" \
-            --status success --limit 20 --json databaseId --jq '.[0].databaseId')"
-          test -n "$BUILD_RUN_ID"
-          rm -rf "$RUNNER_TEMP/image-metadata"
-          mkdir -p "$RUNNER_TEMP/image-metadata"
-          gh run download "$BUILD_RUN_ID" --name image-metadata --dir "$RUNNER_TEMP/image-metadata"
-          SOURCE_SHA="$(jq -r .source_sha "$RUNNER_TEMP/image-metadata/metadata.json")"
-          APP_DIGEST="$(jq -r .app_digest "$RUNNER_TEMP/image-metadata/metadata.json")"
-          NGINX_DIGEST="$(jq -r .nginx_digest "$RUNNER_TEMP/image-metadata/metadata.json")"
-          [[ "$SOURCE_SHA" == "$TAG_SHA" ]]
+          resolve_digest() {
+            local repository="$1" output digest
+            if ! output="$(docker buildx imagetools inspect "${repository}:sha-${TAG_SHA}" 2>&1)"; then
+              echo "Could not resolve ${repository}:sha-${TAG_SHA} from the registry." >&2
+              echo "$output" >&2
+              return 1
+            fi
+            digest="$(awk '/^Digest:/ { print $2; exit }' <<<"$output")"
+            [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || {
+              echo "Could not resolve ${repository}:sha-${TAG_SHA} to an immutable digest." >&2
+              echo "$output" >&2
+              return 1
+            }
+            printf '%s' "$digest"
+          }
+          SOURCE_SHA="$TAG_SHA"
+          APP_DIGEST="$(resolve_digest "$APP_REPOSITORY")"
+          NGINX_DIGEST="$(resolve_digest "$NGINX_REPOSITORY")"
           [[ "$APP_DIGEST" == sha256:* && "$NGINX_DIGEST" == sha256:* ]]
           printf 'source_sha=%s\n' "$SOURCE_SHA" >> "$GITHUB_OUTPUT"
           printf 'app_repository=%s\n' "$APP_REPOSITORY" >> "$GITHUB_OUTPUT"
@@ -72,10 +100,38 @@ jobs:
           printf 'nginx_digest=%s\n' "$NGINX_DIGEST" >> "$GITHUB_OUTPUT"
           printf 'nginx_image=%s@%s\n' "$NGINX_REPOSITORY" "$NGINX_DIGEST" >> "$GITHUB_OUTPUT"
 
-      - name: Log in to the container registry
+      # The sha-<source SHA> tag above only locates the digests. The gate is
+      # this signed attestation: it exists only if ci.build.yml deployed these
+      # exact digests to staging and the staging readiness check passed.
+      - name: Verify the staging-verified attestation
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-        run: echo "$GH_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          SOURCE_SHA: ${{ steps.metadata.outputs.source_sha }}
+          APP_IMAGE: ${{ steps.metadata.outputs.app_image }}
+          NGINX_IMAGE: ${{ steps.metadata.outputs.nginx_image }}
+          PREDICATE_TYPE: https://<org-domain>/attestation/staging-verified/v1
+        run: |
+          set -euo pipefail
+          for image in "$APP_IMAGE" "$NGINX_IMAGE"; do
+            attestations="$(gh attestation verify "oci://${image}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/ci.build.yml" \
+              --predicate-type "$PREDICATE_TYPE" \
+              --format json)" || {
+              echo "$image has no staging-verified attestation; it was not deployed and verified on staging." >&2
+              exit 1
+            }
+            jq -e \
+              --arg expected_purl "pkg:github/${GITHUB_REPOSITORY}@${SOURCE_SHA}" \
+              'any(.[]?;
+                .verificationResult.statement.predicate.purl == $expected_purl
+                and .verificationResult.statement.predicate.environment == "staging"
+              )' <<<"$attestations" >/dev/null || {
+              echo "The staging-verified attestation of $image is not for commit $SOURCE_SHA." >&2
+              exit 1
+            }
+          done
 
       - name: Promote the tested digests to the release tag
         env:
@@ -84,11 +140,47 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          docker buildx imagetools create --tag "${APP_IMAGE%@*}:$TAG" "$APP_IMAGE"
-          docker buildx imagetools create --tag "${NGINX_IMAGE%@*}:$TAG" "$NGINX_IMAGE"
+          # An immutable tag is created once. If it already exists it must
+          # point at the same digest; it is never moved. A rebuild of the same
+          # commit produces a different digest and therefore stops here: the
+          # image already published for that commit is redeployed through
+          # Ops: Deploy instead.
+          ensure_immutable_tag() {
+            local repository="$1" digest="$2" tag="$3" output actual
+            [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || {
+              echo "Invalid digest for ${repository}:${tag}: ${digest}" >&2
+              return 1
+            }
+            if output="$(docker buildx imagetools inspect "${repository}:${tag}" 2>&1)"; then
+              actual="$(awk '/^Digest:/ { print $2; exit }' <<<"$output")"
+              [[ "$actual" = "$digest" ]] || {
+                echo "Immutable ${repository}:${tag} already points to ${actual}, not ${digest}." >&2
+                return 1
+              }
+              return 0
+            fi
+            # Only a missing tag may be created; any other registry error stops.
+            grep -Eqi 'not found|manifest unknown|no such manifest' <<<"$output" || {
+              echo "$output" >&2
+              return 1
+            }
+            docker buildx imagetools create --tag "${repository}:${tag}" "${repository}@${digest}"
+            for attempt in $(seq 1 15); do
+              if output="$(docker buildx imagetools inspect "${repository}:${tag}" 2>&1)"; then
+                actual="$(awk '/^Digest:/ { print $2; exit }' <<<"$output")"
+                [[ "$actual" = "$digest" ]] && return 0
+              fi
+              sleep 2
+            done
+            echo "${repository}:${tag} does not preserve ${digest}." >&2
+            echo "$output" >&2
+            return 1
+          }
+          ensure_immutable_tag "${APP_IMAGE%@*}" "${APP_IMAGE##*@}" "$TAG"
+          ensure_immutable_tag "${NGINX_IMAGE%@*}" "${NGINX_IMAGE##*@}" "$TAG"
 
       - name: Attest promoted application release
-        uses: actions/attest@v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-name: ${{ steps.metadata.outputs.app_repository }}
           subject-digest: ${{ steps.metadata.outputs.app_digest }}
@@ -98,7 +190,7 @@ jobs:
           create-storage-record: false
 
       - name: Attest promoted Nginx release
-        uses: actions/attest@v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-name: ${{ steps.metadata.outputs.nginx_repository }}
           subject-digest: ${{ steps.metadata.outputs.nginx_digest }}
@@ -107,21 +199,79 @@ jobs:
           push-to-registry: true
           create-storage-record: false
 
+      # The release is the deployment record required by the standard: the
+      # version, the commit, the exact image digests, the migrations it
+      # contains and how to return to the previous version.
       - name: Create or publish the GitHub release
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
           SOURCE_SHA: ${{ steps.metadata.outputs.source_sha }}
+          APP_IMAGE: ${{ steps.metadata.outputs.app_image }}
+          NGINX_IMAGE: ${{ steps.metadata.outputs.nginx_image }}
+          # Where the application keeps its migrations.
+          MIGRATIONS_PATH: database/migrations
         run: |
           set -euo pipefail
+          previous_tag="$(git describe --tags --abbrev=0 --match 'v[0-9]*.[0-9]*.[0-9]*' "${SOURCE_SHA}^" 2>/dev/null || true)"
+          record="$RUNNER_TEMP/release-record.md"
+          {
+            echo "## Deployment record"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Version | \`$TAG\` |"
+            echo "| Commit | \`$SOURCE_SHA\` |"
+            echo "| Application image | \`$APP_IMAGE\` |"
+            echo "| Nginx image | \`$NGINX_IMAGE\` |"
+            echo "| Previous version | \`${previous_tag:-none}\` |"
+            echo
+            echo "### Migrations"
+            echo
+            if [ -n "$previous_tag" ]; then
+              migrations="$(git diff --name-only --diff-filter=A "$previous_tag" "$SOURCE_SHA" -- "$MIGRATIONS_PATH")"
+            else
+              migrations="$(git ls-tree -r --name-only "$SOURCE_SHA" -- "$MIGRATIONS_PATH")"
+            fi
+            if [ -n "$migrations" ]; then
+              echo "This release adds database migrations. They run automatically during deployment and are not reverted by a rollback, so they must stay compatible with the previous version:"
+              echo
+              while IFS= read -r migration; do
+                printf '%s\n' "- \`$migration\`"
+              done <<< "$migrations"
+            else
+              echo "No new database migrations."
+            fi
+            echo
+            echo "### Rollback"
+            echo
+            if [ -n "$previous_tag" ]; then
+              echo "Run **Ops: Deploy** with \`image_tag\` = \`$previous_tag\`. It redeploys the previous release by digest and does not change the database schema."
+            else
+              echo "This is the first release; there is no previous version to return to."
+            fi
+          } > "$record"
+
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release edit "$TAG" --draft=false --latest
+            # A release prepared by hand keeps its text; the record is appended.
+            gh release view "$TAG" --json body --jq .body > "$RUNNER_TEMP/release-body.md"
+            # A re-run must not append a second record: keep only the text
+            # above an existing one.
+            sed -i '/^## Deployment record$/,$d' "$RUNNER_TEMP/release-body.md"
+            { cat "$RUNNER_TEMP/release-body.md"; echo; cat "$record"; } > "$RUNNER_TEMP/release-notes.md"
+            gh release edit "$TAG" --draft=false --latest --notes-file "$RUNNER_TEMP/release-notes.md"
           else
-            gh release create "$TAG" --target "$SOURCE_SHA" --generate-notes --latest
+            gh release create "$TAG" --target "$SOURCE_SHA" --latest \
+              --notes-file "$record" --generate-notes
           fi
 
   deploy:
     needs: verify-promote-release
+    permissions:
+      contents: read
+      packages: read
+      attestations: read
     uses: ./.github/workflows/cd.deploy.yml
     with:
       environment: production
@@ -129,4 +279,5 @@ jobs:
       app_image: ${{ needs.verify-promote-release.outputs.app_image }}
       nginx_image: ${{ needs.verify-promote-release.outputs.nginx_image }}
       release_workflow: ${{ github.repository }}/.github/workflows/ci.release.yml
+      release_attestation_required: true
     secrets: inherit

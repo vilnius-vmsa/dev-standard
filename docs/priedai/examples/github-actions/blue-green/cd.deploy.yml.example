@@ -1,0 +1,446 @@
+name: Example - CD Blue-Green Deploy
+
+# Blue-green variant of the deployment workflow. Copy it to
+# .github/workflows/cd.deploy.yml INSTEAD of ../single-slot/cd.deploy.yml.example:
+# a project has one cd.deploy.yml, so ci.build and ci.release call it
+# unchanged; ops.deploy only adds the optional force_recreate_balancer
+# input (see its comment). It reuses the same immutable images and
+# switches only the balancer after the inactive slot is ready. The active
+# slot is read from the balancer configuration; a failed or cancelled run
+# restores the previous slot, and the previous slot is removed only after the
+# new one serves traffic.
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: Protected deployment environment name.
+        required: true
+        type: string
+      source_sha:
+        required: true
+        type: string
+      app_image:
+        description: Immutable application image digest used by both slots.
+        required: true
+        type: string
+      nginx_image:
+        description: Immutable Nginx image digest used by both slots.
+        required: true
+        type: string
+      release_workflow:
+        description: Workflow that created the exact release attestation.
+        required: true
+        type: string
+      release_attestation_required:
+        description: Require a release attestation before rollout; candidate staging deploys may disable this while retaining build-attestation verification.
+        required: false
+        default: true
+        type: boolean
+      force_recreate_balancer:
+        description: Recreate the balancer when an in-place Nginx reload is insufficient.
+        required: false
+        default: false
+        type: boolean
+    # No `secrets:` block on purpose. The secrets below are Environment
+    # secrets: they are resolved inside the job that declares `environment:`,
+    # not by the caller, so declaring them here as required would make the
+    # call fail validation. Callers pass `secrets: inherit`.
+    #   RUNTIME_ENV, TLS_CERTIFICATE_B64, TLS_PRIVATE_KEY_B64 (required)
+    #   ALLOY_ENV, LOKI_PASSWORD (optional, enable log export)
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Blue-green deploy to ${{ inputs.environment }}
+    # Deploy jobs run only on the self-hosted runner of the target
+    # environment, selected by its environment label. Build, test and scan
+    # jobs stay on GitHub-hosted runners and never use this label.
+    runs-on: "${{ inputs.environment }}"
+    # Job level, exactly as in the single-slot variant: one group per environment
+    # serialises every path that changes the host. Callers must not use the
+    # same group name themselves (GitHub cancels that as a deadlock).
+    concurrency:
+      group: cd-deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    environment: ${{ inputs.environment }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: read
+      attestations: read
+    env:
+      COMPOSE_FILE: docker-compose.production.yml
+      SECRETS_DIR: /srv/<application>/secrets
+      COMPOSE_PROJECT_NAME: <application>-${{ inputs.environment }}
+      BALANCER_CONFIG_DIR: /srv/<application>/balancer
+      PHP_IMAGE_BLUE: ${{ inputs.app_image }}
+      PHP_IMAGE_GREEN: ${{ inputs.app_image }}
+      NGINX_IMAGE_BLUE: ${{ inputs.nginx_image }}
+      NGINX_IMAGE_GREEN: ${{ inputs.nginx_image }}
+      # This infrastructure edge image is maintained outside this repository.
+      # It is reviewed and pinned by digest, but is not covered by this
+      # application's build/release attestation contract.
+      BALANCER_IMAGE_REF: ghcr.io/<owner>/<application>-balancer@sha256:<balancer-digest>
+      SOURCE_SHA: ${{ inputs.source_sha }}
+      RELEASE_WORKFLOW: ${{ inputs.release_workflow }}
+      RELEASE_ATTESTATION_REQUIRED: ${{ inputs.release_attestation_required }}
+      DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+      FORCE_RECREATE_BALANCER: ${{ inputs.force_recreate_balancer }}
+
+    steps:
+      - name: Validate handoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$PHP_IMAGE_BLUE" == *@sha256:* ]]
+          [[ "$NGINX_IMAGE_BLUE" == *@sha256:* ]]
+          [[ "$BALANCER_IMAGE_REF" =~ ^[^@[:space:]]+@sha256:[0-9a-f]{64}$ ]]
+          if [[ "$RELEASE_ATTESTATION_REQUIRED" != 'true' && "$DEPLOY_ENVIRONMENT" != 'staging' ]]; then
+            echo 'Release attestation cannot be disabled outside the staging candidate deploy.' >&2
+            exit 1
+          fi
+
+      # The images are private: the runner must authenticate before the
+      # image and attestation checks and before Compose pulls.
+      - name: Log in to the container registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify build and release attestations
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          command -v gh
+          command -v jq
+          verify_image() {
+            local image="$1" name digest attestations revision
+            name="${image%@*}"
+            digest="${image##*@}"
+            docker pull "$image" >/dev/null
+            revision="$(docker image inspect "$image" --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')"
+            [[ "$revision" == "$SOURCE_SHA" ]] || {
+              echo "$image was built from ${revision:-an unknown revision}; expected $SOURCE_SHA." >&2
+              exit 1
+            }
+            gh attestation verify "oci://${image}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/ci.build.yml"
+            if [[ "$RELEASE_ATTESTATION_REQUIRED" == 'true' ]]; then
+              attestations="$(gh attestation verify "oci://${image}" \
+                --repo "$GITHUB_REPOSITORY" \
+                --signer-workflow "$RELEASE_WORKFLOW" \
+                --predicate-type https://in-toto.io/attestation/release/v0.1 \
+                --format json)"
+              jq -e \
+                --arg predicate_type "https://in-toto.io/attestation/release/v0.1" \
+                --arg expected_purl "pkg:github/${GITHUB_REPOSITORY}@${SOURCE_SHA}" \
+                --arg subject_name "$name" \
+                --arg subject_digest "$digest" \
+                'any(.[]?;
+                  .verificationResult.statement.predicateType == $predicate_type
+                  and .verificationResult.statement.predicate.purl == $expected_purl
+                  and any(.verificationResult.statement.subject[]?;
+                    .name == $subject_name
+                    and .digest.sha256 == ($subject_digest | sub("^sha256:"; ""))
+                  )
+                )' <<<"$attestations" >/dev/null
+            fi
+          }
+          verify_image "$PHP_IMAGE_BLUE"
+          verify_image "$NGINX_IMAGE_BLUE"
+
+      - name: Checkout exact deployment source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+          # The consuming project copies the blue-green Compose example to
+          # this path and keeps the helper in the same source revision.
+          # File paths, not directories: cone mode would reject them on a
+          # reused workspace.
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            docker-compose.production.yml
+            docker-compose.observability.yml
+            docker/alloy/config.alloy
+            docker/nginx/conf.d/upstream.blue.conf
+            docker/nginx/conf.d/upstream.green.conf
+            docker/scripts/prepare-runtime-secrets.sh
+
+      - name: Prepare runtime Docker secrets
+        shell: bash
+        env:
+          RUNTIME_ENV: ${{ secrets.RUNTIME_ENV }}
+          DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+          TLS_CERTIFICATE_B64: ${{ secrets.TLS_CERTIFICATE_B64 }}
+          TLS_PRIVATE_KEY_B64: ${{ secrets.TLS_PRIVATE_KEY_B64 }}
+          ALLOY_ENV: ${{ secrets.ALLOY_ENV }}
+          LOKI_PASSWORD: ${{ secrets.LOKI_PASSWORD }}
+        run: bash docker/scripts/prepare-runtime-secrets.sh
+
+      - name: Validate generated Compose runtime contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Fail before anything is pulled or started when the helper output
+          # or the Compose file is incomplete.
+          compose_env="$SECRETS_DIR/compose.env"
+          test -r "$compose_env"
+          for variable in \
+            COMPOSE_PROJECT_NAME SECRETS_DIR DB_DATABASE DB_USERNAME \
+            PHP_IMAGE_BLUE PHP_IMAGE_GREEN NGINX_IMAGE_BLUE NGINX_IMAGE_GREEN \
+            BALANCER_IMAGE_REF BALANCER_CONFIG_DIR; do
+            grep -Eq "^${variable}=.+$" "$compose_env" || {
+              echo "${variable} is missing from generated ${compose_env}." >&2
+              exit 1
+            }
+          done
+          docker compose --env-file "$compose_env" -f "$COMPOSE_FILE" config -q
+
+      - name: Determine the active and the next slot
+        id: slot
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The host directory of the balancer configuration (first deployment).
+          install -d -m 0755 "$BALANCER_CONFIG_DIR"
+          # The balancer configuration is the single source of truth for the
+          # active slot. There is no separate "active slot" marker that could
+          # disagree with where traffic really goes after a partial failure.
+          current=""
+          if [ -s "$BALANCER_CONFIG_DIR/active.conf" ]; then
+            current="$(awk '$1 == "server" { host = $2; sub(/:.*/, "", host); print host; exit }' \
+              "$BALANCER_CONFIG_DIR/active.conf")"
+          fi
+          case "$current" in
+            nginx-blue) next=green; old=blue ;;
+            nginx-green) next=blue; old=green ;;
+            "") next=blue; old=none ;;
+            *) echo "The balancer points to an unknown upstream: $current" >&2; exit 1 ;;
+          esac
+          {
+            echo "next=$next"
+            echo "old=$old"
+          } >> "$GITHUB_OUTPUT"
+          echo "Active slot: $old; deploying slot: $next"
+
+      - name: Start the next slot, migrate and check readiness
+        id: rollout
+        shell: bash
+        env:
+          NEXT_SLOT: ${{ steps.slot.outputs.next }}
+          OLD_SLOT: ${{ steps.slot.outputs.old }}
+        run: |
+          set -euo pipefail
+          compose() {
+            docker compose --env-file "$SECRETS_DIR/compose.env" -f "$COMPOSE_FILE" "$@"
+          }
+          compose pull "php-$NEXT_SLOT" "worker-$NEXT_SLOT" "nginx-$NEXT_SLOT"
+          compose up -d --wait "php-$NEXT_SLOT"
+          if [ "$OLD_SLOT" != none ]; then
+            compose stop "worker-$OLD_SLOT"
+            echo "old_worker_stopped=true" >> "$GITHUB_OUTPUT"
+          fi
+          compose run --rm --no-deps "php-$NEXT_SLOT" php artisan migrate --force --no-interaction
+          compose up -d --wait "nginx-$NEXT_SLOT"
+
+          # Gate the switch on the new slot's readiness, before any traffic.
+          # Readiness is served only on the private 18080 listener: it goes
+          # through PHP-FPM, checks the database and Redis and reports the
+          # release it serves. /health is only Nginx liveness and must not
+          # gate a slot switch.
+          for attempt in $(seq 1 20); do
+            if response="$(compose exec -T "nginx-$NEXT_SLOT" \
+                wget -q -T 10 -O - http://127.0.0.1:18080/health/ready)" \
+              && jq -e --arg release "$SOURCE_SHA" \
+                '.status == "ok" and .release == $release' <<<"$response" >/dev/null; then
+              echo "Slot $NEXT_SLOT is ready and serves $SOURCE_SHA."
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "Slot $NEXT_SLOT is not ready; traffic stays on the old slot." >&2
+          exit 1
+
+      - name: Switch the balancer to the next slot
+        id: switch
+        shell: bash
+        env:
+          NEXT_SLOT: ${{ steps.slot.outputs.next }}
+        run: |
+          set -euo pipefail
+          compose() {
+            docker compose --env-file "$SECRETS_DIR/compose.env" -f "$COMPOSE_FILE" "$@"
+          }
+          active="$BALANCER_CONFIG_DIR/active.conf"
+          # Keep the working configuration so the rollback step can restore
+          # it. The file is a single-file bind mount: always rewrite it in
+          # place (cat/cp), never replace it with mv.
+          if [ -s "$active" ]; then
+            cp "$active" "$active.previous"
+          else
+            : > "$active.previous"
+          fi
+          echo "config_changed=true" >> "$GITHUB_OUTPUT"
+          cat > "$active" <<EOF
+          upstream application {
+              server nginx-$NEXT_SLOT:8080;
+          }
+          upstream application_monitor {
+              server nginx-$NEXT_SLOT:18080;
+          }
+          server {
+              listen 8443 ssl;
+              server_name _;
+              ssl_certificate /run/secrets/tls_certificate;
+              ssl_certificate_key /run/secrets/tls_private_key;
+              ssl_protocols TLSv1.2 TLSv1.3;
+              add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+              # Keep in line with the application Nginx and PHP upload limits.
+              client_max_body_size 16M;
+              location / {
+                  proxy_pass http://application;
+                  proxy_set_header Host \$host;
+                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto \$scheme;
+                  proxy_set_header X-Forwarded-Port 443;
+              }
+          }
+          server {
+              listen 18080;
+              server_name _;
+              location = /health {
+                  proxy_pass http://application;
+                  proxy_set_header Host \$host;
+                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+              }
+              # Readiness of the slot that currently receives traffic.
+              location = /health/ready {
+                  proxy_pass http://application_monitor;
+                  proxy_set_header Host \$host;
+              }
+              location / { return 404; }
+          }
+          EOF
+          if [ "${FORCE_RECREATE_BALANCER:-false}" = true ]; then
+            compose up -d --no-deps --force-recreate --wait balancer
+          else
+            compose up -d --no-deps --wait balancer
+            compose exec -T balancer nginx -t
+            compose exec -T balancer nginx -s reload
+          fi
+
+          # After the switch the balancer must serve the new release.
+          for attempt in $(seq 1 20); do
+            if response="$(compose exec -T balancer \
+                wget -q -T 10 -O - http://127.0.0.1:18080/health/ready)" \
+              && jq -e --arg release "$SOURCE_SHA" \
+                '.status == "ok" and .release == $release' <<<"$response" >/dev/null; then
+              echo "Traffic is served by slot $NEXT_SLOT at $SOURCE_SHA."
+              echo "switched=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "The balancer does not serve release $SOURCE_SHA after the switch." >&2
+          exit 1
+
+      - name: Start the new worker
+        shell: bash
+        env:
+          NEXT_SLOT: ${{ steps.slot.outputs.next }}
+        run: |
+          set -euo pipefail
+          docker compose --env-file "$SECRETS_DIR/compose.env" -f "$COMPOSE_FILE" \
+            up -d --wait "worker-$NEXT_SLOT"
+
+      - name: Verify the public HTTPS edge
+        shell: bash
+        env:
+          # Environment-scoped variable, for example https://app.example.lt.
+          PUBLIC_URL: ${{ vars.PUBLIC_URL }}
+        run: |
+          set -euo pipefail
+          : "${PUBLIC_URL:?PUBLIC_URL must be set on the GitHub Environment}"
+          # Liveness through the public name proves DNS, TLS and port
+          # publication; application readiness was verified above.
+          curl --fail --silent --show-error --max-time 10 \
+            --retry 10 --retry-delay 3 "$PUBLIC_URL/health" >/dev/null
+
+      # Any failure or cancellation after the slot was chosen puts traffic and
+      # the queue worker back on the previous slot and removes the new one, so
+      # the balancer configuration again matches what is running.
+      - name: Roll back a failed or cancelled deployment
+        if: ${{ (failure() || cancelled()) && steps.slot.outcome == 'success' }}
+        shell: bash
+        env:
+          NEXT_SLOT: ${{ steps.slot.outputs.next }}
+          OLD_SLOT: ${{ steps.slot.outputs.old }}
+          OLD_WORKER_STOPPED: ${{ steps.rollout.outputs.old_worker_stopped }}
+          CONFIG_CHANGED: ${{ steps.switch.outputs.config_changed }}
+        run: |
+          set +e
+          compose() {
+            docker compose --env-file "$SECRETS_DIR/compose.env" -f "$COMPOSE_FILE" "$@"
+          }
+          active="$BALANCER_CONFIG_DIR/active.conf"
+          echo "Deployment failed; restoring slot $OLD_SLOT."
+          # Restore the balancer only if this run changed its configuration;
+          # a failure before the switch never touched it.
+          if [ "$CONFIG_CHANGED" = true ]; then
+            cat "$active.previous" > "$active"
+            if [ "$OLD_SLOT" != none ]; then
+              compose exec -T balancer nginx -t && compose exec -T balancer nginx -s reload
+            else
+              # First deployment: there is no previous slot to return to.
+              compose stop balancer
+            fi
+          fi
+          compose stop "php-$NEXT_SLOT" "worker-$NEXT_SLOT" "nginx-$NEXT_SLOT"
+          compose rm -f "php-$NEXT_SLOT" "worker-$NEXT_SLOT" "nginx-$NEXT_SLOT"
+          if [ "$OLD_WORKER_STOPPED" = true ]; then
+            compose start "worker-$OLD_SLOT" || compose up -d --no-deps "worker-$OLD_SLOT"
+          fi
+
+      # The previous slot is removed only after the new one serves traffic and
+      # its worker runs. A later return to the previous version is a normal
+      # redeploy of that version through Ops: Deploy, not a slot switch.
+      - name: Stop the previous slot
+        if: ${{ success() && steps.switch.outputs.switched == 'true' && steps.slot.outputs.old != 'none' }}
+        shell: bash
+        env:
+          OLD_SLOT: ${{ steps.slot.outputs.old }}
+        run: |
+          set -euo pipefail
+          compose() {
+            docker compose --env-file "$SECRETS_DIR/compose.env" -f "$COMPOSE_FILE" "$@"
+          }
+          compose stop "php-$OLD_SLOT" "worker-$OLD_SLOT" "nginx-$OLD_SLOT"
+          compose rm -f "php-$OLD_SLOT" "worker-$OLD_SLOT" "nginx-$OLD_SLOT"
+
+      - name: Start log and metrics export
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # A separate Compose project, identical for single-slot and
+          # blue-green. It runs after every deployment, also a failed one, so
+          # the logs of a failed rollout are shipped too.
+          if [ -s "$SECRETS_DIR/alloy.env" ] && [ -s "$SECRETS_DIR/loki_password" ] \
+            && [ -f docker-compose.observability.yml ]; then
+            # --force-recreate: a changed config.alloy or credential is a
+            # bind-mounted file, which Compose would not notice by itself.
+            docker compose --env-file "$SECRETS_DIR/compose.env" \
+              -p "${COMPOSE_PROJECT_NAME}-observability" \
+              -f docker-compose.observability.yml up -d --wait --force-recreate alloy
+          else
+            echo "::warning::Log export is not configured (ALLOY_ENV, LOKI_PASSWORD); OPS-MON-P02 is not met for this environment."
+          fi
