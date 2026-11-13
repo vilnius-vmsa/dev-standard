@@ -515,7 +515,7 @@ Nginx versijos.
 Blue-green balanceris pagal nutylėjimą nekeičiamas: po `nginx -t` aktyvi
 konfigūracija pritaikoma per `nginx -s reload`, kad nebūtų nutraukiami aktyvūs
 ryšiai. Blue-green projekto `Ops: Deploy` turi `force_recreate_balancer` input'ą
-ir perduoda jį į `cd.deploy` (pavyzdžiuose tai parodyta komentaru);
+ir perduoda jį į `cd.deploy` (`Ops: Deploy` pavyzdžiuose jo nėra: blue-green projektas prideda boolean `workflow_dispatch` input'ą ir perduoda `force_recreate_balancer: ${{ inputs.force_recreate_balancer }}`);
 jis nustatomas į `true`, kai reload nepakanka, pavyzdžiui, pasikeitus
 balancerio image'ui, mount'ams ar kitai paleidimo konfigūracijai, taip pat
 atnaujinus TLS sertifikatą: secret failai yra bind mount'ai, todėl veikiantis
@@ -703,6 +703,19 @@ komandos yra rekomenduojama šio priedo realizacija; scriptas yra tik patogus
 secrets sukūrimo būdas, todėl projektas gali naudoti secret managerį, platformos
 native mechanizmą ar kitą operatoriaus įrankį, taip pat sujungti ar pervadinti
 pavyzdžius, jei išlaiko tuos pačius saugos ir atsekamumo rezultatus.
+
+### Neakivaizdūs pavyzdžių sprendimai
+
+Pavyzdžių failuose komentarų nėra, todėl čia surašyta, kodėl kai kurios eilutės yra būtent tokios ir kodėl jų nereikia „supaprastinti“:
+
+- **`docker buildx imagetools create --prefer-index=false`** (`ci.build`, `ci.release`): tag'o perkėlimas turi būti tiksli kopija. Pagal nutylėjimą Buildx vienos platformos manifestą įvelka į naują image index su kitu digest'u, ir digest'o patikra nepraeitų. Build'ai su SBOM ir provenance jau stumia index'ą, kuris kopijuojamas nepakeistas.
+- **`fastcgi_read_timeout` ir `proxy_read_timeout` 130 s** (Nginx, TLS kraštas, balanceris): ilgiau nei PHP `max_execution_time` (120 s). Su numatytomis 60 s Nginx grąžintų `504`, kol PHP dar leidžiama dirbti.
+- **`fastcgi_keep_conn on`**: be jo upstream'o `keepalive` neveikia.
+- **MySQL `healthcheck` vykdo `SELECT 1`**, ne `mysqladmin ping`: `ping` pavyksta ir tada, kai slaptažodis atmestas.
+- **Redis slaptažodis įrašomas į konfigūracijos failą `tmpfs` kataloge**, o ne perduodamas komandinėje eilutėje, kad nebūtų matomas procesų sąraše ir `docker inspect`.
+- **Nginx įkėlimų volume montuojamas su `nocopy`**: kitaip tuščias volume perimtų Nginx image katalogo savininką ir PHP nebegalėtų į jį rašyti.
+- **Alloy konfigūracijoje nėra `stage.docker`**: jis skirtas `json-file` log driver formatui, kurio Docker API šaltinis neteikia, ir perrašytų aplikacijos JSON eilutę su `log` ir `stream` raktais.
+- **`git fetch` nėra po checkout su `persist-credentials: false`** (tag-based `ops.deploy`): privačioje repozitorijoje jis nepavyktų; `fetch-depth: 0` jau parsiunčia visas šakas ir tag'us.
 
 ## H.5. Branch-based srauto pavyzdys
 

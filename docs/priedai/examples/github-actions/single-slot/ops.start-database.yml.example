@@ -1,19 +1,7 @@
+# Inactive example. Copy to .github/workflows/ops.start-database.yml.
+
 name: Example - Ops start database
 
-# Single-slot variant; copy it to .github/workflows/ops.start-database.yml.
-# A blue-green project copies ../blue-green/ops.start-database.yml.example
-# instead: the database is the same, but the secrets helper and the checked
-# out file set must match the topology CD: Deploy uses.
-#
-# Operator-only: prepares the runtime secrets and starts MySQL. It is
-# self-sufficient, so it works on a host where nothing has been deployed yet
-# and after an incident. It never deploys, rebuilds or migrates application
-# services.
-#
-# A normal first deployment does not need this workflow: CD: Deploy starts
-# MySQL and Redis itself before the migration. Use this one to bring the
-# database up ahead of the first deployment (for example to restore a dump)
-# or to recover it without touching the application.
 on:
   workflow_dispatch:
     inputs:
@@ -32,15 +20,12 @@ permissions:
   packages: read
 
 concurrency:
-  # The same group as CD: Deploy: this workflow rewrites the runtime secrets
-  # directory and must not run next to a deployment.
   group: cd-deploy-${{ inputs.environment }}
   cancel-in-progress: false
 
 jobs:
   start-database:
     name: Start MySQL on ${{ inputs.environment }}
-    # Runs only on the self-hosted runner of the target environment.
     runs-on: "${{ inputs.environment }}"
     environment: ${{ inputs.environment }}
     timeout-minutes: 15
@@ -48,7 +33,6 @@ jobs:
       contents: read
       packages: read
     env:
-      # Keep these aligned with CD: Deploy.
       COMPOSE_FILE: docker-compose.production.yml
       SECRETS_DIR: /srv/<application>/secrets
       IMAGE_TAG: ${{ inputs.image_tag }}
@@ -60,9 +44,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # Check out the revision the images were built from, not the branch
-          # the workflow was dispatched on: running containers bind-mount the
-          # configuration files of this workspace.
           if [[ "$IMAGE_TAG" =~ ^sha-([0-9a-f]{40})$ ]]; then
             echo "ref=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
           elif [[ "$IMAGE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -77,9 +58,6 @@ jobs:
         with:
           ref: ${{ steps.source.outputs.ref }}
           persist-credentials: false
-          # The same file set as CD: Deploy. Running containers bind-mount
-          # these files from this workspace, so a smaller checkout would
-          # remove files they need after their next restart.
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             docker-compose.production.yml
@@ -99,8 +77,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # The Compose file and the secrets helper require pinned image
-          # references even though only MySQL is started here.
           [[ "$IMAGE_TAG" =~ ^(sha-[0-9a-f]{40}|v[0-9]+\.[0-9]+\.[0-9]+)$ ]] || {
             echo "Use an immutable sha-<40 hex> or vX.Y.Z image tag; floating tags are not allowed." >&2
             exit 1
@@ -114,7 +90,6 @@ jobs:
             }
             printf '%s@%s' "$repository" "$digest"
           }
-          # Assign first: a failure inside $(...) of an echo would be ignored.
           php_image_ref="$(resolve_digest "$APP_REPOSITORY")"
           nginx_image_ref="$(resolve_digest "$NGINX_REPOSITORY")"
           {
@@ -129,8 +104,6 @@ jobs:
           DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
           TLS_CERTIFICATE_B64: ${{ secrets.TLS_CERTIFICATE_B64 }}
           TLS_PRIVATE_KEY_B64: ${{ secrets.TLS_PRIVATE_KEY_B64 }}
-          # The helper rebuilds the whole directory: pass the log-export
-          # inputs too, or a running environment would lose them.
           ALLOY_ENV: ${{ secrets.ALLOY_ENV }}
           LOKI_PASSWORD: ${{ secrets.LOKI_PASSWORD }}
         run: bash docker/scripts/prepare-runtime-secrets.sh

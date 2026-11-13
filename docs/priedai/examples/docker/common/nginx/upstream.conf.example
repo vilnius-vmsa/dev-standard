@@ -1,14 +1,5 @@
-# Inactive example. Copy to docker/nginx/conf.d/upstream.conf. It is baked
-# into the production Nginx image as the default and points at the single-slot
-# PHP-FPM service. Blue-green Compose replaces it per slot by mounting
-# upstream.blue.conf or upstream.green.conf over the same path, so one
-# immutable Nginx image digest serves every slot.
+# Inactive example. Copy to docker/nginx/conf.d/upstream.conf.
 
-# Nginx resolves an upstream name once, at start or reload, and keeps that
-# address. If the PHP-FPM container comes back with another address, every
-# request fails until Nginx is reloaded. `resolve` (Nginx 1.27.3+) re-resolves
-# the name through Docker's DNS; it needs `zone`. `valid` overrides Docker's
-# 600 s TTL.
 upstream php-upstream {
     zone php-upstream 64k;
     resolver 127.0.0.11 valid=5s ipv6=off;

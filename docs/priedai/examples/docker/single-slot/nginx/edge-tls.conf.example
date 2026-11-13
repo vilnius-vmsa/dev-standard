@@ -1,10 +1,4 @@
-# Inactive example. Copy to docker/nginx/conf.d/edge-tls.conf. It is NOT baked
-# into the image: single-slot Compose mounts it into the `nginx` service, the
-# only place where that topology terminates TLS. Blue-green slots do not mount
-# it (they have no TLS secrets); there the balancer terminates TLS.
-#
-# The TLS listener only terminates TLS and hands the request to the local
-# application listener, so the application configuration exists once.
+# Inactive example. Copy to docker/nginx/conf.d/edge-tls.conf.
 
 server {
     listen 8443 ssl;
@@ -22,7 +16,6 @@ server {
         proxy_pass http://127.0.0.1:8080;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
-        # Not shorter than fastcgi_read_timeout of the application listener.
         proxy_read_timeout 130s;
         proxy_send_timeout 130s;
         proxy_set_header Host $host;

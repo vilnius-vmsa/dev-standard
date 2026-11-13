@@ -1,14 +1,7 @@
+# Inactive example. Copy to .github/workflows/cd.deploy.yml.
+
 name: Example - CD Blue-Green Deploy
 
-# Blue-green variant of the deployment workflow. Copy it to
-# .github/workflows/cd.deploy.yml INSTEAD of ../single-slot/cd.deploy.yml.example:
-# a project has one cd.deploy.yml, so ci.build and ci.release call it
-# unchanged; ops.deploy only adds the optional force_recreate_balancer
-# input (see its comment). It reuses the same immutable images and
-# switches only the balancer after the inactive slot is ready. The active
-# slot is read from the balancer configuration; a failed or cancelled run
-# restores the previous slot, and the previous slot is removed only after the
-# new one serves traffic.
 on:
   workflow_call:
     inputs:
@@ -41,12 +34,6 @@ on:
         required: false
         default: false
         type: boolean
-    # No `secrets:` block on purpose. The secrets below are Environment
-    # secrets: they are resolved inside the job that declares `environment:`,
-    # not by the caller, so declaring them here as required would make the
-    # call fail validation. Callers pass `secrets: inherit`.
-    #   RUNTIME_ENV, TLS_CERTIFICATE_B64, TLS_PRIVATE_KEY_B64 (required)
-    #   ALLOY_ENV, LOKI_PASSWORD (optional, enable log export)
 
 permissions:
   contents: read
@@ -54,13 +41,7 @@ permissions:
 jobs:
   deploy:
     name: Blue-green deploy to ${{ inputs.environment }}
-    # Deploy jobs run only on the self-hosted runner of the target
-    # environment, selected by its environment label. Build, test and scan
-    # jobs stay on GitHub-hosted runners and never use this label.
     runs-on: "${{ inputs.environment }}"
-    # Job level, exactly as in the single-slot variant: one group per environment
-    # serialises every path that changes the host. Callers must not use the
-    # same group name themselves (GitHub cancels that as a deadlock).
     concurrency:
       group: cd-deploy-${{ inputs.environment }}
       cancel-in-progress: false
@@ -78,12 +59,6 @@ jobs:
       PHP_IMAGE_GREEN: ${{ inputs.app_image }}
       NGINX_IMAGE_BLUE: ${{ inputs.nginx_image }}
       NGINX_IMAGE_GREEN: ${{ inputs.nginx_image }}
-      # The balancer is the current official Nginx image (1.27.3 or newer),
-      # pinned by digest and kept up to date like any other base image. It is
-      # not the project's Nginx image: that one carries the application's
-      # default.conf and the PHP-FPM upstream. Its whole configuration is the
-      # active.conf this workflow writes. It is not covered by this
-      # application's build/release attestation contract.
       BALANCER_IMAGE_REF: docker.io/library/nginx@sha256:<balancer-digest>
       SOURCE_SHA: ${{ inputs.source_sha }}
       RELEASE_WORKFLOW: ${{ inputs.release_workflow }}
@@ -105,8 +80,6 @@ jobs:
             exit 1
           fi
 
-      # The images are private: the runner must authenticate before the
-      # image and attestation checks and before Compose pulls.
       - name: Log in to the container registry
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
         with:
@@ -164,10 +137,6 @@ jobs:
         with:
           ref: ${{ inputs.source_sha }}
           persist-credentials: false
-          # The consuming project copies the blue-green Compose example to
-          # this path and keeps the helper in the same source revision.
-          # File paths, not directories: cone mode would reject them on a
-          # reused workspace.
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             docker-compose.production.yml
@@ -192,8 +161,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # Fail before anything is pulled or started when the helper output
-          # or the Compose file is incomplete.
           compose_env="$SECRETS_DIR/compose.env"
           test -r "$compose_env"
           for variable in \
@@ -212,11 +179,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # The host directory of the balancer configuration (first deployment).
           install -d -m 0755 "$BALANCER_CONFIG_DIR"
-          # The balancer configuration is the single source of truth for the
-          # active slot. There is no separate "active slot" marker that could
-          # disagree with where traffic really goes after a partial failure.
           current=""
           if [ -s "$BALANCER_CONFIG_DIR/active.conf" ]; then
             current="$(awk '$1 == "server" { host = $2; sub(/:.*/, "", host); print host; exit }' \
@@ -254,11 +217,6 @@ jobs:
           compose run --rm --no-deps "php-$NEXT_SLOT" php artisan migrate --force --no-interaction
           compose up -d --wait "nginx-$NEXT_SLOT"
 
-          # Gate the switch on the new slot's readiness, before any traffic.
-          # Readiness is served only on the private 18080 listener: it goes
-          # through PHP-FPM, checks the database and Redis and reports the
-          # release it serves. /health is only Nginx liveness and must not
-          # gate a slot switch.
           for attempt in $(seq 1 20); do
             if response="$(compose exec -T "nginx-$NEXT_SLOT" \
                 wget -q -T 10 -O - http://127.0.0.1:18080/health/ready)" \
@@ -283,9 +241,6 @@ jobs:
             docker compose --env-file "$SECRETS_DIR/compose.env" -f "$COMPOSE_FILE" "$@"
           }
           active="$BALANCER_CONFIG_DIR/active.conf"
-          # Keep the working configuration so the rollback step can restore
-          # it. The file is a single-file bind mount: always rewrite it in
-          # place (cat/cp), never replace it with mv.
           if [ -s "$active" ]; then
             cp "$active" "$active.previous"
           else
@@ -293,11 +248,7 @@ jobs:
           fi
           echo "config_changed=true" >> "$GITHUB_OUTPUT"
           cat > "$active" <<EOF
-          # The official image shows its version by default; the public edge
-          # must not.
           server_tokens off;
-          # Names are re-resolved at run time (Nginx 1.27.3+), so a slot
-          # that comes back with another address is found without a reload.
           upstream application {
               zone application 64k;
               resolver 127.0.0.11 valid=5s ipv6=off;
@@ -315,11 +266,9 @@ jobs:
               ssl_certificate_key /run/secrets/tls_private_key;
               ssl_protocols TLSv1.2 TLSv1.3;
               add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-              # Keep in line with the application Nginx and PHP upload limits.
               client_max_body_size 16M;
               location / {
                   proxy_pass http://application;
-                  # Not shorter than fastcgi_read_timeout of the slot Nginx.
                   proxy_read_timeout 130s;
                   proxy_send_timeout 130s;
                   proxy_set_header Host \$host;
@@ -336,7 +285,6 @@ jobs:
                   proxy_set_header Host \$host;
                   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
               }
-              # Readiness of the slot that currently receives traffic.
               location = /health/ready {
                   proxy_pass http://application_monitor;
                   proxy_set_header Host \$host;
@@ -352,7 +300,6 @@ jobs:
             compose exec -T balancer nginx -s reload
           fi
 
-          # After the switch the balancer must serve the new release.
           for attempt in $(seq 1 20); do
             if response="$(compose exec -T balancer \
                 wget -q -T 10 -O - http://127.0.0.1:18080/health/ready)" \
@@ -379,19 +326,13 @@ jobs:
       - name: Verify the public HTTPS edge
         shell: bash
         env:
-          # Environment-scoped variable, for example https://app.example.lt.
           PUBLIC_URL: ${{ vars.PUBLIC_URL }}
         run: |
           set -euo pipefail
           : "${PUBLIC_URL:?PUBLIC_URL must be set on the GitHub Environment}"
-          # Liveness through the public name proves DNS, TLS and port
-          # publication; application readiness was verified above.
           curl --fail --silent --show-error --max-time 10 \
             --retry 10 --retry-delay 3 "$PUBLIC_URL/health" >/dev/null
 
-      # Any failure or cancellation after the slot was chosen puts traffic and
-      # the queue worker back on the previous slot and removes the new one, so
-      # the balancer configuration again matches what is running.
       - name: Roll back a failed or cancelled deployment
         if: ${{ (failure() || cancelled()) && steps.slot.outcome == 'success' }}
         shell: bash
@@ -407,14 +348,11 @@ jobs:
           }
           active="$BALANCER_CONFIG_DIR/active.conf"
           echo "Deployment failed; restoring slot $OLD_SLOT."
-          # Restore the balancer only if this run changed its configuration;
-          # a failure before the switch never touched it.
           if [ "$CONFIG_CHANGED" = true ]; then
             cat "$active.previous" > "$active"
             if [ "$OLD_SLOT" != none ]; then
               compose exec -T balancer nginx -t && compose exec -T balancer nginx -s reload
             else
-              # First deployment: there is no previous slot to return to.
               compose stop balancer
             fi
           fi
@@ -424,9 +362,6 @@ jobs:
             compose start "worker-$OLD_SLOT" || compose up -d --no-deps "worker-$OLD_SLOT"
           fi
 
-      # The previous slot is removed only after the new one serves traffic and
-      # its worker runs. A later return to the previous version is a normal
-      # redeploy of that version through Ops: Deploy, not a slot switch.
       - name: Stop the previous slot
         if: ${{ success() && steps.switch.outputs.switched == 'true' && steps.slot.outputs.old != 'none' }}
         shell: bash
@@ -442,22 +377,12 @@ jobs:
 
       - name: Start log and metrics export
         if: ${{ always() }}
-        # Log export must never decide the result of a deployment: by now the
-        # new release serves traffic (or was rolled back above). A failure
-        # here is reported, but the job keeps the result of the rollout, so
-        # the environment tag and the main-to-stage sync follow what is
-        # really deployed.
         continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
-          # A separate Compose project, identical for single-slot and
-          # blue-green. It runs after every deployment, also a failed one, so
-          # the logs of a failed rollout are shipped too.
           if [ -s "$SECRETS_DIR/alloy.env" ] && [ -s "$SECRETS_DIR/loki_password" ] \
             && [ -f docker-compose.observability.yml ]; then
-            # --force-recreate: a changed config.alloy or credential is a
-            # bind-mounted file, which Compose would not notice by itself.
             if ! docker compose --env-file "$SECRETS_DIR/compose.env" \
               -f docker-compose.observability.yml up -d --wait --force-recreate alloy; then
               echo "::error::Log export did not start. The deployment result is not affected, but OPS-MON-P02 is not met for this environment until this is fixed."
@@ -469,14 +394,5 @@ jobs:
 
       - name: Clean up unused Docker resources
         if: ${{ success() }}
-        # Every deployment pulls new PHP and Nginx images onto the disk that
-        # also holds the database volume (OPS-FIN-P02). The organisation's
-        # action removes images that no container uses (keeping the latest
-        # versions per repository where they have tags), unused networks and
-        # old build cache; a stopped previous slot still holds its images. A
-        # rollback to an older release pulls it from the registry again.
-        # Volumes are never touched. Cleanup must not decide the deployment
-        # result. A project may keep a copy of the action in
-        # .github/actions/docker-cleanup and call it by path instead.
         continue-on-error: true
         uses: vilnius-vmsa/shared-workflows/.github/actions/docker-cleanup@main

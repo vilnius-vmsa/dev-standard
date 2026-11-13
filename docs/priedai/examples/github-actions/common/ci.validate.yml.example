@@ -1,13 +1,6 @@
-name: Example - CI Validate
+# Inactive example. Copy to .github/workflows/ci.validate.yml.
 
-# Reusable quality gate shared by the branch-based and the tag-based
-# CI: Pipeline. It runs for pull requests and for protected-branch pushes and
-# never receives deployment secrets. The calling job succeeds only when every
-# job below succeeds, so the call itself is the gate.
-#
-# Replace the commands with the project's own tools, but keep one step for
-# each check required by OPS-CI-P03 and OPS-DEVSEC-P02: build, formatting and
-# linting, static analysis, tests, dependency audit and secret detection.
+name: Example - CI Validate
 
 on:
   workflow_call:
@@ -27,21 +20,12 @@ jobs:
       - name: Set up PHP and Composer
         uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
-          # The PHP version and extensions the application supports. Do not
-          # rely on the ubuntu-latest defaults.
           php-version: "8.4"
           tools: composer:2
 
       - name: Validate Composer metadata
         run: composer validate --strict --no-check-publish
 
-      # Private Composer packages need a token here, passed to this step as
-      # COMPOSER_AUTH. How it gets here is the project's choice and is not
-      # part of this example. Note that this is a called workflow: a secret
-      # (for example a GitHub App key, as in CI: Build) is available only if
-      # the calling CI: Pipeline passes it and this workflow declares it
-      # under `on.workflow_call.secrets`. It is a build credential, not a
-      # deployment secret.
       - name: Install locked Composer dependencies
         run: composer install --no-interaction --prefer-dist --no-progress --no-scripts
 
@@ -49,7 +33,6 @@ jobs:
         run: vendor/bin/pint --test
 
       - name: Run static analysis
-        # For example Larastan/PHPStan with the level agreed for the project.
         run: vendor/bin/phpstan analyse --no-progress
 
       - name: Audit Composer dependencies
@@ -83,7 +66,6 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Lint frontend sources
-        # For example ESLint; `npm run lint` must fail on findings.
         run: npm run lint
 
       - name: Audit the production dependency tree
@@ -104,9 +86,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # Structure only: images, runtime secrets and SECRETS_DIR do not
-          # exist here. Interpolated values are validated by CD: Deploy and by
-          # the smoke gate, which run the real helper.
           for file in docker-compose.yml docker-compose.production.yml \
             docker-compose.observability.yml; do
             [ -f "$file" ] || continue
@@ -117,9 +96,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # The secrets helper must refuse debug mode, a non-deployed APP_ENV
-          # and secret-looking keys outside its allowlist before it writes any
-          # runtime file.
           digest=sha256:0000000000000000000000000000000000000000000000000000000000000000
           base=$'DB_DATABASE=ci\nDB_USERNAME=ci\nDB_PASSWORD=ci\nDB_ROOT_PASSWORD=ci\nREDIS_PASSWORD=ci\nAPP_KEY=ci'
           expect_refusal() {
@@ -152,17 +128,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      # A pinned gitleaks binary verified by checksum. gitleaks-action needs a
-      # licence in organisation repositories; the CLI does not. Take the
-      # checksum from the release's checksums file when updating the version.
       GITLEAKS_VERSION: 8.30.1
       GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
     steps:
       - name: Checkout repository with history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          # The commit range below needs history; a shallow checkout would
-          # scan only the last commit.
           fetch-depth: 0
 
       - name: Install pinned gitleaks
@@ -191,7 +162,6 @@ jobs:
             && git cat-file -e "${PUSH_BEFORE}^{commit}" 2>/dev/null; then
             range="${PUSH_BEFORE}..${HEAD_SHA}"
           else
-            # New branch or rewritten history: scan everything reachable.
             range="$HEAD_SHA"
           fi
           echo "Scanning $range"

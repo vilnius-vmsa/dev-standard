@@ -1,25 +1,7 @@
-# Inactive example. Copy to the application root as
-# docker-compose.observability.yml and replace every placeholder.
-#
-# Log and metrics export is a separate Compose project, not a service of the
-# application Compose file. The same file therefore serves the single-slot
-# and the blue-green topology unchanged, and a failed application rollout
-# does not stop log shipping. CD: Deploy starts it after every deployment,
-# also after a failed one.
-#
-# Alloy never mounts the Docker socket. A socket proxy exposes only the
-# read-only API endpoints that container discovery and log collection need;
-# a mounted socket, even read-only, would give full control of the host.
-#
-# Inputs, written by the runtime-secrets helper into SECRETS_DIR:
-#   alloy.env       non-secret Alloy settings (for example LOKI_URL,
-#                   LOKI_USERNAME); read by Compose on the host;
-#   loki_password   the push credential, mounted as a secret.
+# Inactive example. Copy to docker-compose.observability.yml.
 
-# Its own fixed project, next to the application's. Replace `application`.
 name: application-observability
 
-# UTC everywhere (ARCH-API-P13), as in the application Compose file.
 x-container-environment: &container-environment
   TZ: UTC
 
@@ -31,15 +13,9 @@ x-logging: &observability-logging
 
 services:
   docker-socket-proxy:
-    # Recommended for now: no high or critical Trivy findings and a separate
-    # switch for reading logs. It is a community image that runs as root on
-    # the Docker socket, so record it as an accepted risk. After changing the
-    # image or its version, confirm that logs still reach Loki: the same
-    # settings do not mean the same thing in another proxy image.
     image: ghcr.io/linuxserver/socket-proxy@sha256:REPLACE_WITH_CURRENT_DIGEST
     restart: unless-stopped
     logging: *observability-logging
-    # The proxy must open the root-owned Docker socket.
     user: "0:0"
     read_only: true
     security_opt: ["no-new-privileges:true"]
@@ -51,10 +27,6 @@ services:
           memory: 64M
     environment:
       <<: *container-environment
-      # Read-only discovery and log endpoints; everything else is denied.
-      # ALLOW_LOGS is required: without it this proxy answers 403 to
-      # GET /containers/<id>/logs, so Alloy finds the containers, ships
-      # nothing and still looks healthy.
       ALLOW_LOGS: "1"
       CONTAINERS: "1"
       NETWORKS: "1"
@@ -78,7 +50,6 @@ services:
     image: grafana/alloy@sha256:REPLACE_WITH_CURRENT_DIGEST
     restart: unless-stopped
     logging: *observability-logging
-    # The unprivileged alloy account of the official image.
     user: "473:473"
     read_only: true
     security_opt: ["no-new-privileges:true"]
@@ -103,15 +74,11 @@ services:
       docker-socket-proxy:
         condition: service_healthy
     networks:
-      # default: egress to the central platform; the proxy network is internal.
       - default
       - docker_socket_proxy
     ports:
-      # Host-local UI and metrics only.
       - "127.0.0.1:12345:12345"
     volumes:
-      # Example: alloy/config.alloy.example. It reads containers from the
-      # socket proxy at http://docker-socket-proxy:2375.
       - ./docker/alloy/config.alloy:/etc/alloy/config.alloy:ro
       - alloy_state:/var/lib/alloy/data
     tmpfs:

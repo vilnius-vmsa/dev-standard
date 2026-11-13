@@ -1,8 +1,4 @@
-; Inactive example. Copy to docker/php-fpm/conf.d/php.prod.ini; the production
-; Dockerfile installs it as /usr/local/etc/php/conf.d/zz-app.ini.
-;
-; The official PHP image ships no php.ini, so without this file PHP runs on
-; its built-in development defaults (errors displayed to visitors).
+; Inactive example. Copy to docker/php-fpm/conf.d/php.prod.ini.
 
 [PHP]
 date.timezone = UTC
@@ -10,12 +6,9 @@ display_errors = Off
 display_startup_errors = Off
 expose_php = Off
 log_errors = On
-; Keep argument values (credentials, tokens) out of stack traces in logs.
 zend.exception_ignore_args = On
-; Logs go to stderr and are collected centrally; nothing is written to disk.
 error_log = /dev/stderr
 memory_limit = 256M
-; Keep in line with client_max_body_size in the Nginx configuration.
 post_max_size = 16M
 upload_max_filesize = 16M
 max_execution_time = 120
@@ -25,7 +18,6 @@ realpath_cache_ttl = 600
 [opcache]
 opcache.enable = 1
 opcache.enable_cli = 0
-; The image is immutable: files never change while a container runs.
 opcache.validate_timestamps = 0
 opcache.memory_consumption = 128
 opcache.interned_strings_buffer = 16

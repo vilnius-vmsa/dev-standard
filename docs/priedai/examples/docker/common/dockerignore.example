@@ -1,34 +1,24 @@
-# Inactive example. Copy to the application root as .dockerignore.
-#
-# Everything listed here stays out of the Docker build context, so it can
-# never end up in an image layer or in the build cache (OPS-DOCKER-P02).
+# Inactive example. Copy to .dockerignore.
 
-# Local runtime secrets. docker/secrets is only the default of the local
-# docker-compose.yml; deployed environments keep their secrets in SECRETS_DIR,
-# a directory on the host outside the repository.
 docker/secrets
 docker/alloy/secrets
 .env
 .env.*
 !.env.example
 
-# Version control and CI
 .git
 .github
 
-# Dependencies and build output are produced inside the image.
 node_modules
 vendor
 public/build
 public/hot
 
-# Runtime state
 storage/logs/*
 storage/framework/cache/*
 storage/framework/sessions/*
 storage/framework/views/*
 bootstrap/cache/*
 
-# Documentation and local tooling
 docs
 *.md

@@ -1,7 +1,7 @@
+# Inactive example. Copy to .github/workflows/docs-check.yml.
+
 name: Example - Docs check
 
-# Copy to .github/workflows/docs-check.yml after confirming the repository's
-# documentation checker and paths.
 on:
   pull_request:
     paths:

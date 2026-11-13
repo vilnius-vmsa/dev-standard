@@ -1,10 +1,4 @@
-// Inactive example. Copy to docker/alloy/config.alloy; it is mounted by
-// docker-compose.observability.yml.
-//
-// Alloy reads containers through the Docker socket proxy, never through the
-// Docker socket itself, and ships their stdout/stderr to the central Loki.
-// Settings come from SECRETS_DIR/alloy.env (LOKI_URL, LOKI_USERNAME,
-// DEPLOY_ENV, NODE_NAME); the push credential is the loki_password secret.
+// Inactive example. Copy to docker/alloy/config.alloy.
 
 logging {
   level  = "info"
@@ -14,10 +8,6 @@ logging {
 discovery.docker "containers" {
   host = "http://docker-socket-proxy:2375"
 
-  // Only containers that opt in with the app.logging.enabled label (the
-  // x-log-labels anchors in the production Compose file). Both slots of a
-  // blue-green deployment carry the same labels, so a new slot is collected
-  // as soon as it starts. Alloy and the socket proxy carry no such label.
   filter {
     name   = "label"
     values = ["app.logging.enabled=true"]
@@ -76,8 +66,6 @@ discovery.relabel "container_logs" {
 }
 
 loki.source.docker "containers" {
-  // The Docker API tails each selected container's stdout and stderr and
-  // delivers plain log lines.
   host       = "http://docker-socket-proxy:2375"
   targets    = discovery.relabel.container_logs.output
   labels     = { source = "docker" }
@@ -85,9 +73,6 @@ loki.source.docker "containers" {
 }
 
 loki.process "container_logs" {
-  // No `stage.docker`: it parses the json-file log driver format, which this
-  // source never delivers, and would rewrite an application's own JSON line
-  // that happens to have `log` and `stream` keys.
   stage.decolorize {}
 
   forward_to = [loki.write.central.receiver]

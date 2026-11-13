@@ -26,7 +26,7 @@ Pavyzdžiai sugrupuoti pagal tai, kurį metodą projektas pasirinko (`.dev-stand
 | `docker/blue-green/` | Production Compose su slotais ir slotų upstream failai | `compose-blue-green` |
 | `instructions/` | Projekto vietinių taisyklių ir išimčių pavyzdys | visi |
 
-Projekte failai dedami į H.1 priede aprašytas vietas (`.github/workflows/`, `docker/`, šaknis), ne į šiuos pakatalogius. `single-slot/` ir `blue-green/` failai turi tuos pačius vardus (`cd.deploy.yml`, `ops.start-database.yml`, `docker-compose.production.yml`, `docker-compose.ci-smoke.override.yml`): projektas ima vieną variantą, todėl `ci.build` ir `ci.release` abiem vienodi, o smoke skriptas topologiją atpažįsta iš Compose failo. Blue-green projektas papildomai tik prideda `force_recreate_balancer` įvestį `ops.deploy` faile.
+Pavyzdžių failuose komentarų nėra, išskyrus pirmą eilutę, kuri nurodo, kur failą kopijuoti; kodėl kas nors padaryta būtent taip, aiškina [H priedas](../devops-ci-cd-modeliai.md). Projekte failai dedami į H.1 priede aprašytas vietas (`.github/workflows/`, `docker/`, šaknis), ne į šiuos pakatalogius. `single-slot/` ir `blue-green/` failai turi tuos pačius vardus (`cd.deploy.yml`, `ops.start-database.yml`, `docker-compose.production.yml`, `docker-compose.ci-smoke.override.yml`): projektas ima vieną variantą, todėl `ci.build` ir `ci.release` abiem vienodi, o smoke skriptas topologiją atpažįsta iš Compose failo. Blue-green projektas papildomai tik prideda `force_recreate_balancer` įvestį `ops.deploy` faile.
 
 ## Docker
 

@@ -1,3 +1,5 @@
+# Inactive example. Copy to .github/workflows/ci.build.yml.
+
 name: Example - CI Build (tag candidate)
 
 on:
@@ -14,23 +16,9 @@ permissions:
 
 jobs:
   build-test-attest:
-    # One group for every candidate build, so candidates are built in merge
-    # order and staging ends on the newest commit. The group is on the job,
-    # not on the workflow: a workflow-level group is taken as soon as a run is
-    # queued, before the `if` below is evaluated, so a run that is only going
-    # to be skipped (failed CI: Pipeline, a pull request) would push a real
-    # pending candidate out of the queue. A skipped job never takes the group.
-    # GitHub keeps one pending job per group: when several merges queue up,
-    # an older pending candidate is cancelled. That commit then has no
-    # staging-verified attestation and cannot be released; tag the newer
-    # commit, or re-run this workflow run for the commit that must be released.
     concurrency:
       group: tag-candidate-main
       cancel-in-progress: false
-    # workflow_run also fires for pull-request runs of CI: Pipeline, and the
-    # `branches` filter matches the head branch name only. Build solely for a
-    # push to main in this repository, never for a pull request (including
-    # one from a fork whose branch is named main).
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
@@ -66,15 +54,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
 
-      # Short-lived token for the private Composer packages the image build
-      # installs. Without `owner` and `repositories` the token is valid only
-      # for this repository and `composer install` fails on the first private
-      # package, so list every private package repository here.
-      # COMPOSER_APP_ID is a repository or organisation variable and
-      # COMPOSER_APP_PRIVATE_KEY a repository or organisation secret: this job
-      # declares no Environment, so an Environment secret would be empty.
-      # Remove the step (and the build secret below) when the project has no
-      # private packages.
       - name: Create Composer GitHub App token
         id: github-app-token
         uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
@@ -82,7 +61,6 @@ jobs:
           app-id: ${{ vars.COMPOSER_APP_ID }}
           private-key: ${{ secrets.COMPOSER_APP_PRIVATE_KEY }}
           owner: vilnius-vmsa
-          # Example names; replace with the project's private packages.
           repositories: |
             example-laravel-package
             example-shared-library
@@ -214,17 +192,9 @@ jobs:
         env:
           APP_IMAGE: ${{ steps.image.outputs.app_image }}
           NGINX_IMAGE: ${{ steps.image.outputs.nginx_image }}
-          # The script reads the topology (single-slot or blue-green) from
-          # docker-compose.production.yml; set SMOKE_TOPOLOGY only to override.
-          # The readiness route must report this revision as "release".
           SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
           SMOKE_JOB_CLASS: 'App\Jobs\SmokeTestJob'
           SMOKE_JOB_ID: dev-standard-ci-job-${{ github.run_id }}-${{ github.run_attempt }}
-        # Copy docker/common/scripts/smoke-published-images.sh.example to the
-        # consuming repository as docker/scripts/smoke-published-images.sh.
-        # It runs the images through docker-compose.production.yml,
-        # docker-compose.ci-smoke.override.yml and docker/scripts/prepare-runtime-secrets.sh
-        # from this checkout, with disposable values only.
         run: bash docker/scripts/smoke-published-images.sh
 
   deploy-staging:
@@ -245,13 +215,6 @@ jobs:
       release_attestation_required: false
     secrets: inherit
 
-  # Runs only after the staging deployment and its readiness gate succeeded.
-  # It records that fact in two ways:
-  # - a signed "staging-verified" attestation on each image digest, which is
-  #   the evidence ci.release verifies before promoting to production;
-  # - the immutable sha-<source SHA> tag, which is only how ci.release finds
-  #   the digest. A tag alone proves nothing: anyone who can write packages
-  #   can create one.
   publish-staging-source-tags:
     name: Attest and label staging-verified images
     needs: [build-test-attest, deploy-staging]
@@ -287,8 +250,6 @@ jobs:
             echo "nginx_digest=${NGINX_IMAGE##*@}"
           } >> "$GITHUB_OUTPUT"
 
-      # Replace <org-domain> with the organisation's own namespace; the same
-      # predicate type is verified in ci.release.yml.
       - name: Attest staging-verified application image
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
@@ -313,11 +274,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # An immutable tag is created once. If it already exists it must
-          # point at the same digest; it is never moved. A rebuild of the same
-          # commit produces a different digest and therefore stops here: the
-          # image already published for that commit is redeployed through
-          # Ops: Deploy instead.
           ensure_immutable_tag() {
             local repository="$1" digest="$2" tag="$3" output actual
             [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || {
@@ -332,12 +288,11 @@ jobs:
               }
               return 0
             fi
-            # Only a missing tag may be created; any other registry error stops.
             grep -Eqi 'not found|manifest unknown|no such manifest' <<<"$output" || {
               echo "$output" >&2
               return 1
             }
-            docker buildx imagetools create --tag "${repository}:${tag}" "${repository}@${digest}"
+            docker buildx imagetools create --prefer-index=false --tag "${repository}:${tag}" "${repository}@${digest}"
             for attempt in $(seq 1 15); do
               if output="$(docker buildx imagetools inspect "${repository}:${tag}" 2>&1)"; then
                 actual="$(awk '/^Digest:/ { print $2; exit }' <<<"$output")"

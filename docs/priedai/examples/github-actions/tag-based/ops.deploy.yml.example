@@ -1,9 +1,6 @@
-name: Example - Ops Deploy (tag-based)
+# Inactive example. Copy to .github/workflows/ops.deploy.yml.
 
-# Inactive example. Copy to .github/workflows/ops.deploy.yml only
-# after the reusable cd.deploy workflow and the consuming repository's
-# contracts have been adapted. This workflow redeploys a production release
-# tag; it never builds, retags or promotes an image.
+name: Example - Ops Deploy (tag-based)
 
 on:
   workflow_dispatch:
@@ -18,8 +15,6 @@ permissions:
   packages: read
   attestations: read
 
-# Not the deploy group: the called cd.deploy job takes `cd-deploy-<env>`
-# itself, and a caller holding the same group is cancelled as a deadlock.
 concurrency:
   group: ops-deploy-production
   cancel-in-progress: false
@@ -54,7 +49,10 @@ jobs:
             echo "image_tag must be a semantic release tag in the form vX.Y.Z." >&2
             exit 1
           }
-          git fetch origin main --no-tags
+          git show-ref --verify --quiet refs/remotes/origin/main || {
+            echo "origin/main was not fetched by the checkout step." >&2
+            exit 1
+          }
           TAG_SHA="$(git rev-list -n 1 "$RELEASE_TAG")"
           git show-ref --verify --quiet "refs/tags/$RELEASE_TAG"
           git merge-base --is-ancestor "$TAG_SHA" origin/main || {
@@ -107,10 +105,6 @@ jobs:
             echo "Release tag $RELEASE_TAG and image source revision do not match." >&2
             exit 1
           }
-          # ci.build is triggered by workflow_run, so its attestations always
-          # carry the default branch as source ref. --source-ref therefore
-          # does not prove where the built commit came from; the ancestry
-          # check against origin/main above is the gate. Do not remove it.
           for image in "$app_image" "$nginx_image"; do
             gh attestation verify "oci://${image}" \
               --repo "$GITHUB_REPOSITORY" \
@@ -128,10 +122,6 @@ jobs:
     name: Redeploy production release tag
     needs: resolve-release
     if: needs.resolve-release.result == 'success'
-    # Blue-green projects (cd.deploy.yml copied from the blue-green example)
-    # add a boolean `force_recreate_balancer` workflow_dispatch input here
-    # and pass it on (`force_recreate_balancer: ${{ inputs.force_recreate_balancer }}`)
-    # for the cases where an in-place balancer reload is not enough.
     uses: ./.github/workflows/cd.deploy.yml
     with:
       environment: production
@@ -141,4 +131,3 @@ jobs:
       release_workflow: ${{ needs.resolve-release.outputs.release_workflow }}
       release_attestation_required: true
     secrets: inherit
-

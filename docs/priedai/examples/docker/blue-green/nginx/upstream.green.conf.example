@@ -1,7 +1,5 @@
-# Inactive example. Copy to docker/nginx/conf.d/upstream.green.conf. Blue-green
-# Compose mounts it into nginx-green as /etc/nginx/conf.d/upstream.conf.
+# Inactive example. Copy to docker/nginx/conf.d/upstream.green.conf.
 
-# Run-time name resolution: see upstream.conf.example.
 upstream php-upstream {
     zone php-upstream 64k;
     resolver 127.0.0.11 valid=5s ipv6=off;

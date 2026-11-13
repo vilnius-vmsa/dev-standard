@@ -1,3 +1,5 @@
+# Inactive example. Copy to .github/workflows/ci.build.yml.
+
 name: Example - CI Build (branch-based)
 
 on:
@@ -63,15 +65,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
 
-      # Short-lived token for the private Composer packages the image build
-      # installs. Without `owner` and `repositories` the token is valid only
-      # for this repository and `composer install` fails on the first private
-      # package, so list every private package repository here.
-      # COMPOSER_APP_ID is a repository or organisation variable and
-      # COMPOSER_APP_PRIVATE_KEY a repository or organisation secret: this job
-      # declares no Environment, so an Environment secret would be empty.
-      # Remove the step (and the build secret below) when the project has no
-      # private packages.
       - name: Create Composer GitHub App token
         id: github-app-token
         uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
@@ -79,7 +72,6 @@ jobs:
           app-id: ${{ vars.COMPOSER_APP_ID }}
           private-key: ${{ secrets.COMPOSER_APP_PRIVATE_KEY }}
           owner: vilnius-vmsa
-          # Example names; replace with the project's private packages.
           repositories: |
             example-laravel-package
             example-shared-library
@@ -212,17 +204,9 @@ jobs:
         env:
           APP_IMAGE: ${{ steps.image.outputs.app_image }}
           NGINX_IMAGE: ${{ steps.image.outputs.nginx_image }}
-          # The script reads the topology (single-slot or blue-green) from
-          # docker-compose.production.yml; set SMOKE_TOPOLOGY only to override.
-          # The readiness route must report this revision as "release".
           SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
           SMOKE_JOB_CLASS: 'App\Jobs\SmokeTestJob'
           SMOKE_JOB_ID: dev-standard-ci-job-${{ github.run_id }}-${{ github.run_attempt }}
-        # Copy docker/common/scripts/smoke-published-images.sh.example to the
-        # consuming repository as docker/scripts/smoke-published-images.sh.
-        # It runs the images through docker-compose.production.yml,
-        # docker-compose.ci-smoke.override.yml and docker/scripts/prepare-runtime-secrets.sh
-        # from this checkout, with disposable values only.
         run: bash docker/scripts/smoke-published-images.sh
 
       - name: Attest immutable application release
@@ -245,9 +229,6 @@ jobs:
           push-to-registry: true
           create-storage-record: false
 
-      # Last step on purpose. The tag is what Ops: Deploy resolves, so it is
-      # published only when the release attestations above exist: a failure
-      # before this point leaves no tag behind, and the run can be repeated.
       - name: Publish immutable source image labels
         shell: bash
         env:
@@ -256,11 +237,6 @@ jobs:
           SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
         run: |
           set -euo pipefail
-          # An immutable tag is created once. If it already exists it must
-          # point at the same digest; it is never moved. A rebuild of the same
-          # commit produces a different digest and therefore stops here: the
-          # image already published for that commit is redeployed through
-          # Ops: Deploy instead.
           ensure_immutable_tag() {
             local repository="$1" digest="$2" tag="$3" output actual
             [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || {
@@ -275,12 +251,11 @@ jobs:
               }
               return 0
             fi
-            # Only a missing tag may be created; any other registry error stops.
             grep -Eqi 'not found|manifest unknown|no such manifest' <<<"$output" || {
               echo "$output" >&2
               return 1
             }
-            docker buildx imagetools create --tag "${repository}:${tag}" "${repository}@${digest}"
+            docker buildx imagetools create --prefer-index=false --tag "${repository}:${tag}" "${repository}@${digest}"
             for attempt in $(seq 1 15); do
               if output="$(docker buildx imagetools inspect "${repository}:${tag}" 2>&1)"; then
                 actual="$(awk '/^Digest:/ { print $2; exit }' <<<"$output")"
@@ -314,12 +289,6 @@ jobs:
     name: Promote the deployed ${{ needs.build-test-promote.outputs.environment }} image labels
     needs: [build-test-promote, deploy]
     if: needs.deploy.result == 'success' && needs.build-test-promote.result == 'success'
-    # Its own group, not the deploy group: the workflow that calls cd.deploy
-    # must not use `cd-deploy-<env>` (OPS-PIPE-P05), and as the single pending
-    # job of that group this job could be cancelled by a queued deployment,
-    # leaving the environment tag unmoved after a successful deploy. Pushes
-    # to one branch are already ordered by this workflow's `build-<branch>`
-    # group.
     concurrency:
       group: promote-${{ needs.build-test-promote.outputs.environment }}
       cancel-in-progress: false
@@ -352,7 +321,7 @@ jobs:
               echo "Invalid immutable image reference: $image" >&2
               return 1
             }
-            docker buildx imagetools create \
+            docker buildx imagetools create --prefer-index=false \
               --tag "${image%@*}:$label" \
               "$image"
             for attempt in $(seq 1 15); do

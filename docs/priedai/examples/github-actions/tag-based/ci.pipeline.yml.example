@@ -1,12 +1,6 @@
-# Unlike the other examples this name is not prefixed with "Example -":
-# ci.build.yml starts through `workflow_run` and listens for exactly this
-# workflow name. If it is changed here, change it there too.
-name: "CI: Pipeline"
+# Inactive example. Copy to .github/workflows/ci.pipeline.yml.
 
-# Copy to .github/workflows/ci.pipeline.yml together with ci.validate.yml.
-# In the tag-based model this workflow is only the quality gate. The candidate
-# build is a separate workflow (ci.build.yml) that starts through
-# `workflow_run` after this one succeeds for a push to main.
+name: "CI: Pipeline"
 
 on:
   pull_request:
@@ -17,8 +11,6 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  # Cancel superseded pull-request runs only; a push run is the gate that the
-  # candidate build waits for.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:

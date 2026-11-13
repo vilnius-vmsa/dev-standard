@@ -1,20 +1,5 @@
-# Inactive example, single-slot variant (a blue-green project copies
-# ../blue-green/docker-compose.ci-smoke.override.example.yml instead). Copy to
-# the application root as docker-compose.ci-smoke.override.yml. It is merged on top of
-# docker-compose.production.yml by docker/scripts/smoke-published-images.sh
-# and must never be used on a deployment host.
-#
-# The smoke gate deliberately changes as little as possible: the services,
-# hardening, secrets, networks and healthchecks are the production ones, so
-# the gate proves the real runtime contract. Secrets come from the same
-# runtime-secrets helper, which the script points at a disposable SECRETS_DIR
-# with disposable values and a throwaway self-signed TLS pair. Volumes are
-# isolated by the unique COMPOSE_PROJECT_NAME and removed with `down --volumes`.
-#
-# Add an entry here only for something that cannot run on a CI runner.
+# Inactive example. Copy to docker-compose.ci-smoke.override.yml.
 
 services:
   nginx:
-    # Do not publish the TLS port on the CI runner; the script talks to Nginx
-    # from inside the container.
     ports: !reset []

@@ -1,3 +1,5 @@
+# Inactive example. Copy to .github/workflows/dev-standard-sync.yml.
+
 name: Example - Dev standard sync
 
 on:

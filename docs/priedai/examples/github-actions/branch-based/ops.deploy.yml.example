@@ -1,11 +1,6 @@
-name: Example - Ops Deploy
+# Inactive example. Copy to .github/workflows/ops.deploy.yml.
 
-# Branch-based example: image_tag accepts only sha-<40>. For tag-based release
-# redeploy use ../tag-based/ops.deploy.yml.example instead.
-#
-# Inactive example. Copy to .github/workflows/ops.deploy.yml only after the
-# reusable cd.deploy workflow and the consuming repository's contracts have
-# been adapted. This workflow only redeploys already verified images.
+name: Example - Ops Deploy
 
 on:
   workflow_dispatch:
@@ -28,8 +23,6 @@ permissions:
   packages: read
   attestations: read
 
-# Not the deploy group: the called cd.deploy job takes `cd-deploy-<env>`
-# itself, and a caller holding the same group is cancelled as a deadlock.
 concurrency:
   group: ops-deploy-${{ inputs.environment }}
   cancel-in-progress: false
@@ -141,10 +134,6 @@ jobs:
   redeploy:
     name: Redeploy resolved ${{ inputs.environment }} images
     needs: resolve-image
-    # Blue-green projects (cd.deploy.yml copied from the blue-green example)
-    # add a boolean `force_recreate_balancer` workflow_dispatch input here
-    # and pass it on (`force_recreate_balancer: ${{ inputs.force_recreate_balancer }}`)
-    # for the cases where an in-place balancer reload is not enough.
     uses: ./.github/workflows/cd.deploy.yml
     with:
       environment: ${{ inputs.environment }}

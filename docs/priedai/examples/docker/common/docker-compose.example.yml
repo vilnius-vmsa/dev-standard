@@ -1,28 +1,16 @@
-# Inactive example. Copy to the application root as docker-compose.yml and
-# replace every placeholder. Never use this file as production configuration.
-# The development Dockerfiles it builds (docker/php-fpm/Dockerfile.dev,
-# docker/nginx/Dockerfile.dev) are the project's own; the standard provides
-# examples of the production Dockerfiles only.
+# Inactive example. Copy to docker-compose.yml.
 
 name: application-dev
 
-# Applied to every container: servers and databases keep time in UTC
-# (ARCH-API-P13), the same zone as date.timezone in php.prod.ini, so that
-# application timestamps, database time functions and logs agree. Local time
-# is a presentation concern (the application and Grafana convert it).
 x-container-environment: &container-environment
   TZ: UTC
 
-# Local log rotation: json-file keeps logs readable through the Docker API,
-# which Alloy uses; without limits they fill the host disk.
 x-logging: &application-logging
   driver: json-file
   options:
     max-size: "50m"
     max-file: "5"
 
-# Same labels as in production, so that local log shipping (the separate
-# docker-compose.observability.yml project) can be tested with this stack.
 x-log-labels:
   mysql: &mysql-log-labels
     app.logging.enabled: "true"
@@ -85,7 +73,6 @@ services:
       - mysql_data:/var/lib/mysql
     networks: [internal]
     healthcheck:
-      # A real query: `mysqladmin ping` also succeeds with a rejected password.
       test: ["CMD-SHELL", "MYSQL_PWD=$$(cat /run/secrets/mysql_root_password) mysql -h 127.0.0.1 -u root -N -e 'SELECT 1' >/dev/null"]
       interval: 10s
       timeout: 5s
@@ -134,10 +121,6 @@ services:
       - "${HTTP_PORT:-8080}:8080"
     networks: [internal]
 
-  # Log export is not part of this file and needs no Compose profile: it is
-  # the separate docker-compose.observability.yml project, which can also be
-  # started locally next to this stack when log shipping has to be tested.
-
 networks:
   internal:
     name: application-dev-internal
@@ -146,10 +129,6 @@ volumes:
   mysql_data:
   redis_data:
 
-# docker/secrets is the default for local development only. It is inside the
-# build context of the services above, so it must be listed in .dockerignore
-# (example: dockerignore.example) and in .gitignore. Deployed environments do
-# not use it: there SECRETS_DIR is a host directory outside the repository.
 secrets:
   mysql_password:
     file: ${SECRETS_DIR:-docker/secrets}/mysql_password

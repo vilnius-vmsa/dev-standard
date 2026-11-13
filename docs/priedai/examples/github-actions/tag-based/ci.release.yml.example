@@ -1,3 +1,5 @@
+# Inactive example. Copy to .github/workflows/ci.release.yml.
+
 name: Example - CI Release (tag-based)
 
 on:
@@ -39,15 +41,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # The `v*.*.*` trigger is a glob and also matches v1.2.3-rc1 or
-          # vfoo.bar.baz. Only a plain semantic version is a release.
           [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
             echo "$GITHUB_REF_NAME is not a release tag in the form vX.Y.Z." >&2
             exit 1
           }
-          # Full history is required: a shallow fetch (--depth) truncates
-          # origin/main, and the ancestry check would then pass only when the
-          # tag points at the tip of main.
           git fetch origin main --no-tags
           git show-ref --verify --quiet "refs/tags/$GITHUB_REF_NAME"
           TAG_SHA="$(git rev-list -n 1 "refs/tags/$GITHUB_REF_NAME")"
@@ -100,9 +97,6 @@ jobs:
           printf 'nginx_digest=%s\n' "$NGINX_DIGEST" >> "$GITHUB_OUTPUT"
           printf 'nginx_image=%s@%s\n' "$NGINX_REPOSITORY" "$NGINX_DIGEST" >> "$GITHUB_OUTPUT"
 
-      # The sha-<source SHA> tag above only locates the digests. The gate is
-      # this signed attestation: it exists only if ci.build.yml deployed these
-      # exact digests to staging and the staging readiness check passed.
       - name: Verify the staging-verified attestation
         shell: bash
         env:
@@ -140,11 +134,6 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          # An immutable tag is created once. If it already exists it must
-          # point at the same digest; it is never moved. A rebuild of the same
-          # commit produces a different digest and therefore stops here: the
-          # image already published for that commit is redeployed through
-          # Ops: Deploy instead.
           ensure_immutable_tag() {
             local repository="$1" digest="$2" tag="$3" output actual
             [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || {
@@ -159,12 +148,11 @@ jobs:
               }
               return 0
             fi
-            # Only a missing tag may be created; any other registry error stops.
             grep -Eqi 'not found|manifest unknown|no such manifest' <<<"$output" || {
               echo "$output" >&2
               return 1
             }
-            docker buildx imagetools create --tag "${repository}:${tag}" "${repository}@${digest}"
+            docker buildx imagetools create --prefer-index=false --tag "${repository}:${tag}" "${repository}@${digest}"
             for attempt in $(seq 1 15); do
               if output="$(docker buildx imagetools inspect "${repository}:${tag}" 2>&1)"; then
                 actual="$(awk '/^Digest:/ { print $2; exit }' <<<"$output")"
@@ -199,9 +187,6 @@ jobs:
           push-to-registry: true
           create-storage-record: false
 
-      # The release is the deployment record required by the standard: the
-      # version, the commit, the exact image digests, the migrations it
-      # contains and how to return to the previous version.
       - name: Create or publish the GitHub release
         shell: bash
         env:
@@ -210,14 +195,9 @@ jobs:
           SOURCE_SHA: ${{ steps.metadata.outputs.source_sha }}
           APP_IMAGE: ${{ steps.metadata.outputs.app_image }}
           NGINX_IMAGE: ${{ steps.metadata.outputs.nginx_image }}
-          # Where the application keeps its migrations.
           MIGRATIONS_PATH: database/migrations
         run: |
           set -euo pipefail
-          # The previous release is the highest strict vX.Y.Z tag reachable
-          # from the parent commit. A glob (`git describe --match`) would also
-          # accept pre-release tags such as v1.2.0-rc1, which have no released
-          # image to roll back to.
           previous_tag="$(git tag --merged "${SOURCE_SHA}^" --sort=-v:refname 2>/dev/null \
             | grep -E -m1 '^v[0-9]+\.[0-9]+\.[0-9]+$' || true)"
           record="$RUNNER_TEMP/release-record.md"
@@ -234,11 +214,6 @@ jobs:
             echo
             echo "### Migrations"
             echo
-            # Added files are new migrations. Any other change under the
-            # migrations path (modified, deleted, renamed) touches a migration
-            # that earlier releases may already have run: it will not run again,
-            # so the schema of existing environments silently differs from the
-            # code. The record lists both, each under its own heading.
             changed_migrations=""
             if [ -n "$previous_tag" ]; then
               migrations="$(git diff --name-only --diff-filter=A "$previous_tag" "$SOURCE_SHA" -- "$MIGRATIONS_PATH")"
@@ -280,10 +255,7 @@ jobs:
           } > "$record"
 
           if gh release view "$TAG" >/dev/null 2>&1; then
-            # A release prepared by hand keeps its text; the record is appended.
             gh release view "$TAG" --json body --jq .body > "$RUNNER_TEMP/release-body.md"
-            # A re-run must not append a second record: keep only the text
-            # above an existing one.
             sed -i '/^## Deployment record$/,$d' "$RUNNER_TEMP/release-body.md"
             { cat "$RUNNER_TEMP/release-body.md"; echo; cat "$record"; } > "$RUNNER_TEMP/release-notes.md"
             gh release edit "$TAG" --draft=false --latest --notes-file "$RUNNER_TEMP/release-notes.md"

@@ -1,9 +1,6 @@
-name: Example - CI Pipeline (branch-based)
+# Inactive example. Copy to .github/workflows/ci.pipeline.yml.
 
-# Copy to .github/workflows/ci.pipeline.yml together with ci.validate.yml,
-# ci.build.yml and cd.deploy.yml. Pull requests run only the quality gate; a
-# push to a protected branch additionally builds, deploys and, for main,
-# opens the main-to-stage synchronisation.
+name: Example - CI Pipeline (branch-based)
 
 on:
   pull_request:
@@ -14,9 +11,6 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  # Cancel superseded pull-request runs only. A push run also carries the
-  # nested build and deployment jobs, so cancelling it could stop a rollout
-  # halfway; CI: Build and CD: Deploy decide cancellation for themselves.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -27,16 +21,6 @@ jobs:
     name: Pipeline
     uses: ./.github/workflows/ci.validate.yml
 
-  # Decides whether this push needs an image build. The comparison is against
-  # what the target environment actually runs, not against the previous push:
-  # the base is the source revision of the image that carries the environment
-  # tag (moved only after a successful deployment and readiness check).
-  #
-  # A previous-push comparison silently loses code: a code push that was
-  # superseded in the queue, or whose deployment failed, would never be built
-  # if the next push changed documentation only. Here such a commit is still
-  # part of the difference to the deployed revision, so it is built with the
-  # next push whatever that push contains.
   detect-build-changes:
     name: Detect image-build changes
     needs: pipeline
@@ -68,7 +52,6 @@ jobs:
         env:
           SOURCE_BRANCH: ${{ github.ref_name }}
           HEAD_SHA: ${{ github.sha }}
-          # Every image of one build carries the same revision; one is enough.
           APP_REPOSITORY: ghcr.io/<org>/<app>-php
         run: |
           set -euo pipefail
@@ -79,13 +62,10 @@ jobs:
             *) echo "Unsupported protected branch: $SOURCE_BRANCH" >&2; exit 1 ;;
           esac
 
-          # The revision the environment runs: the source label of the image
-          # that currently carries the environment tag.
           deployed=""
           if output="$(docker buildx imagetools inspect "${APP_REPOSITORY}:${environment_tag}" --format '{{ json .Image }}' 2>&1)"; then
             deployed="$(jq -r '[.. | objects | .Labels? | objects | .["org.opencontainers.image.revision"] // empty] | first // ""' <<<"$output")"
           elif ! grep -Eqi 'not found|manifest unknown|no such manifest' <<<"$output"; then
-            # Only a missing tag means "never deployed"; anything else stops.
             echo "$output" >&2
             exit 1
           fi
@@ -106,18 +86,9 @@ jobs:
             changed_files="$(git diff --name-only "$deployed" "$HEAD_SHA")"
           fi
 
-          # Build unless every changed file is known not to reach the image.
-          # The list names what is safe to skip, so a new directory or file
-          # type triggers a build by default instead of being silently left
-          # undeployed. A project whose Dockerfile copies an explicit list of
-          # paths may instead mirror that list here, and must then keep the
-          # two in sync.
           matched_files=""
           while IFS= read -r path; do
             [ -n "$path" ] || continue
-            # Markdown is documentation only in the repository root. In a
-            # `case` pattern `*` also matches `/`, so a bare `*.md` would
-            # skip resources/**/*.md, which the image does contain.
             if [[ "$path" == *.md && "$path" != */* ]]; then
               continue
             fi
@@ -162,8 +133,6 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   build:
-    # Keep this job id and name: the shared main-to-stage synchronisation
-    # finds this run's deployment by the job named "Build and deploy images".
     name: Build and deploy images
     needs: [pipeline, detect-build-changes]
     if: >-
@@ -182,14 +151,6 @@ jobs:
       source_sha: ${{ github.sha }}
     secrets: inherit
 
-  # main is synchronised into stage in two cases only:
-  # - the build and the production deployment of this run succeeded;
-  # - the push changed no build-relevant file, so nothing was deployed and
-  #   main still matches production (for example documentation only).
-  # The shared workflow verifies the reported case against this run: with
-  # deployment_skipped it requires the build job to be skipped, otherwise it
-  # requires it to have succeeded. A failed or cancelled deployment is never
-  # synchronised. `!cancelled()` lets the job run although `build` was skipped.
   sync-main-to-stage:
     name: Synchronize deployed main to stage
     needs: [detect-build-changes, build]
@@ -209,9 +170,6 @@ jobs:
       contents: write
       pull-requests: write
       actions: read
-    # The organisation's own reusable workflow: referenced by @main, so every
-    # project follows the shared version. Third-party actions stay pinned to a
-    # commit SHA.
     uses: vilnius-vmsa/shared-workflows/.github/workflows/sync.main-to-stage.yml@main
     with:
       syncer_app_id: ${{ vars.SYNCER_APP_ID }}
