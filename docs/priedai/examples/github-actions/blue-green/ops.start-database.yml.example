@@ -65,6 +65,7 @@ jobs:
             docker-compose.production.yml
             docker-compose.observability.yml
             docker/alloy/config.alloy
+            docker/balancer/conf.d/default.conf
             docker/nginx/conf.d/upstream.blue.conf
             docker/nginx/conf.d/upstream.green.conf
             docker/scripts/prepare-runtime-secrets.sh

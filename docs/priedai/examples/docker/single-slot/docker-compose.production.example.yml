@@ -156,6 +156,7 @@ services:
     command: ["php", "artisan", "queue:work", "redis", "--sleep=1", "--tries=3", "--timeout=90", "--max-time=3600", "--no-interaction"]
     stop_grace_period: 100s
     healthcheck:
+      # The application writes this file: application/queue-worker-heartbeat.php.example.
       test: ["CMD", "php", "-r", "exit(@filemtime('/tmp/queue-worker.heartbeat') >= time() - 120 ? 0 : 1);"]
       interval: 30s
       timeout: 5s

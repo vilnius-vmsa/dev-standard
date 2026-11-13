@@ -142,6 +142,7 @@ jobs:
             docker-compose.production.yml
             docker-compose.observability.yml
             docker/alloy/config.alloy
+            docker/balancer/conf.d/default.conf
             docker/nginx/conf.d/upstream.blue.conf
             docker/nginx/conf.d/upstream.green.conf
             docker/scripts/prepare-runtime-secrets.sh
@@ -248,7 +249,6 @@ jobs:
           fi
           echo "config_changed=true" >> "$GITHUB_OUTPUT"
           cat > "$active" <<EOF
-          server_tokens off;
           upstream application {
               zone application 64k;
               resolver 127.0.0.11 valid=5s ipv6=off;
@@ -258,38 +258,6 @@ jobs:
               zone application_monitor 64k;
               resolver 127.0.0.11 valid=5s ipv6=off;
               server nginx-$NEXT_SLOT:18080 resolve;
-          }
-          server {
-              listen 8443 ssl;
-              server_name _;
-              ssl_certificate /run/secrets/tls_certificate;
-              ssl_certificate_key /run/secrets/tls_private_key;
-              ssl_protocols TLSv1.2 TLSv1.3;
-              add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-              client_max_body_size 16M;
-              location / {
-                  proxy_pass http://application;
-                  proxy_read_timeout 130s;
-                  proxy_send_timeout 130s;
-                  proxy_set_header Host \$host;
-                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-                  proxy_set_header X-Forwarded-Proto \$scheme;
-                  proxy_set_header X-Forwarded-Port 443;
-              }
-          }
-          server {
-              listen 18080;
-              server_name _;
-              location = /health {
-                  proxy_pass http://application;
-                  proxy_set_header Host \$host;
-                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-              }
-              location = /health/ready {
-                  proxy_pass http://application_monitor;
-                  proxy_set_header Host \$host;
-              }
-              location / { return 404; }
           }
           EOF
           if [ "${FORCE_RECREATE_BALANCER:-false}" = true ]; then

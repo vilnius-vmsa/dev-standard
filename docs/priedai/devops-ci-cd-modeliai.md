@@ -77,6 +77,8 @@ application/
 │   │   ├── Dockerfile.prod
 │   │   ├── nginx.conf           # bendra konfigūracija, įdedama į image
 │   │   └── conf.d/              # default.conf, upstream*.conf, edge-tls.conf
+│   ├── balancer/                # tik blue-green; image – oficialus Nginx, savo Dockerfile neturi
+│   │   └── conf.d/              # default.conf (TLS ir monitoringo listeneriai)
 │   ├── alloy/
 │   │   └── config.alloy         # naudojamas docker-compose.observability.yml
 │   └── scripts/
@@ -180,6 +182,7 @@ slotams:
 | `conf.d/default.conf` (image) | visi | `8080` aplikacija, `18080` readiness ir monitoringas |
 | `conf.d/upstream.conf` (image) | single-slot | `php-upstream` → `php:9000` |
 | `conf.d/upstream.blue.conf`, `upstream.green.conf` (mount) | `nginx-blue`, `nginx-green` | montuojami vietoj `upstream.conf`: kiekvienas slotas kreipiasi į savo `php-blue` / `php-green` |
+| `docker/balancer/conf.d/default.conf` (mount) | blue-green `balancer` | `8443` TLS listeneris ir `18080` monitoringas; užklausas perduoda į upstream'us `application` ir `application_monitor`, kuriuos į `active.conf` įrašo deploy |
 | `conf.d/edge-tls.conf` (mount) | single-slot `nginx` | `8443` TLS listeneris, perduodantis užklausą į vietinį `8080`; slotai jo nemontuoja ir TLS secrets neturi |
 
 Upstream vardai sprendžiami vykdymo metu: `server php:9000 resolve;` su `zone` ir `resolver 127.0.0.11 valid=5s ipv6=off;` (Nginx 1.27.3 ar naujesnis; tas pats galioja balancerio upstream'ams į slotus). Be to Nginx vardą išverčia tik paleidimo ar perkrovimo metu: jei PHP-FPM konteineris grįžta su kitu adresu (pvz. po avarijos), visos užklausos baigiasi klaida, kol Nginx neperkraunamas, o `/health` tuo metu rodo „ok“.
@@ -191,7 +194,7 @@ Pavyzdžiai: [site.conf](examples/docker/common/nginx/site.conf.example),
 [upstream.conf](examples/docker/common/nginx/upstream.conf.example),
 [upstream.blue.conf](examples/docker/blue-green/nginx/upstream.blue.conf.example),
 [upstream.green.conf](examples/docker/blue-green/nginx/upstream.green.conf.example) ir
-[edge-tls.conf](examples/docker/single-slot/nginx/edge-tls.conf.example); bendras [nginx.conf](examples/docker/common/nginx/nginx.conf.example) pritaikytas read-only failų sistemai ir neprivilegijuotam naudotojui.
+[edge-tls.conf](examples/docker/single-slot/nginx/edge-tls.conf.example), balancerio [default.conf](examples/docker/blue-green/balancer/default.conf.example); bendras [nginx.conf](examples/docker/common/nginx/nginx.conf.example) pritaikytas read-only failų sistemai ir neprivilegijuotam naudotojui.
 
 Local development naudoja atskirą HTTP-only kelią per hosto `:8080`; CI smoke
 paleidžia production Compose be publikuotų portų ir kreipiasi į Nginx
@@ -333,8 +336,17 @@ aplikacijoje pakanka vieno klausytojo:
 
 ```php
 // app/Providers/AppServiceProvider.php, boot()
-Queue::looping(fn () => touch('/tmp/queue-worker.heartbeat'));
+Event::listen(
+    [Looping::class, JobProcessing::class, JobProcessed::class],
+    fn () => touch('/tmp/queue-worker.heartbeat'),
+);
 ```
+
+`Looping` suveikia kiekviename cikle, o job'o įvykiai atnaujina failą ir tada, kai
+vykdomas ilgas job'as. Pavyzdys:
+[queue-worker-heartbeat.php](examples/application/queue-worker-heartbeat.php.example).
+Šio kodo aplikacijoje reikia ir CI smoke vartui: be jo worker'io `healthcheck`
+niekada nepraeina.
 
 `/tmp` worker'io konteineryje yra `tmpfs`, todėl failas nepergyvena perkrovimo
 ir pasenęs heartbeat negali likti iš ankstesnio konteinerio.
@@ -508,9 +520,12 @@ perjungimas atgal.
 Balancerio image yra oficialus Nginx image (1.27.3 ar naujesnis, nes upstream'ai
 naudoja `resolve`), fiksuotas digest'u ir atnaujinamas kaip kiti baziniai image.
 Projekto Nginx image balanceriui netinka: jame įdėta aplikacijos `default.conf`
-ir PHP-FPM upstream. Visa balancerio konfigūracija yra deploy sugeneruotas
-`active.conf`; jame nustatyta `server_tokens off`, kad viešas kraštas nerodytų
-Nginx versijos.
+ir PHP-FPM upstream. Balancerio konfigūracija laikoma savo kataloge
+`docker/balancer/conf.d/default.conf` (TLS ir monitoringo listeneriai,
+`server_tokens off`, kad viešas kraštas nerodytų Nginx versijos) ir montuojama iš
+checkout'o. Deploy generuoja tik `active.conf` su upstream'ais į aktyvų slotą;
+jis montuojamas kaip `upstream.conf`. Pakeitus `default.conf`, balanceris
+perkuriamas su `force_recreate_balancer`, nes veikiantis konteineris mato seną failą.
 
 Blue-green balanceris pagal nutylėjimą nekeičiamas: po `nginx -t` aktyvi
 konfigūracija pritaikoma per `nginx -s reload`, kad nebūtų nutraukiami aktyvūs

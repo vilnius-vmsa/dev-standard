@@ -129,6 +129,9 @@ volumes:
   mysql_data:
   redis_data:
 
+# Local development only. docker/secrets is inside the build context, so
+# .dockerignore must exclude it (see dockerignore.example); deployed
+# environments set SECRETS_DIR to a host directory outside the repository.
 secrets:
   mysql_password:
     file: ${SECRETS_DIR:-docker/secrets}/mysql_password

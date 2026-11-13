@@ -1,5 +1,6 @@
 # Inactive example. Copy to .dockerignore.
 
+# Required: docker-compose.yml keeps local secrets here by default.
 docker/secrets
 docker/alloy/secrets
 .env
