@@ -2,6 +2,15 @@
 
 <!-- Trumpai aprašykite, kas keičiama ir kodėl. -->
 
+<!--
+AI agents: replace both comments in this section with a show-me style description. Fill in every other section as it stands.
+Start with one sentence on what changes and why. Then add the smallest visual that makes the change clear, usually one or two:
+- a `diff` of a call tree, component tree, file tree, data shape or pseudocode, when the surrounding shape already exists
+- a Mermaid sequence diagram or flowchart, for data or control flow between parts
+- a whole code block, when most of it is new
+Keep only the calls, files, states and boundaries a reviewer needs to judge the change, and a sentence or two of prose beside each visual. Use the domain words from the repository's `GLOSSARY.md` when it has one. If the `pr` skill is installed, follow its Summary section for this.
+-->
+
 ## Pakeitimo tipas / Change type
 
 - [ ] `feat` — naujas funkcionalumas
@@ -35,11 +44,11 @@ Closes #
 
 ## Kontrolinis sąrašas / Checklist
 
-- [ ] Kodas atitinka projekto konvencijas ([4.2](docs/04-kodo-kurimo-gaires.md#42-kodo-struktūra-ir-konvencijos))
-- [ ] Testai pridėti / atnaujinti ([4.5](docs/04-kodo-kurimo-gaires.md#45-testai))
-- [ ] Dokumentacija atnaujinta (jei reikia) ([10.5](docs/10-dokumentacija.md#105-dokumentacijos-atnaujinimo-taisyklės))
+- [ ] Kodas atitinka projekto konvencijas ([4.2](https://vilnius-vmsa.github.io/dev-standard/kodo-kurimo-gaires#42-kodo-struktūra-ir-konvencijos))
+- [ ] Testai pridėti / atnaujinti ([4.5](https://vilnius-vmsa.github.io/dev-standard/kodo-kurimo-gaires#45-testai))
+- [ ] Dokumentacija atnaujinta (jei reikia) ([10.5](https://vilnius-vmsa.github.io/dev-standard/dokumentacija#105-dokumentacijos-atnaujinimo-taisyklės))
 - [ ] CI patikrinimai praeina
-- [ ] Jei naudotas AI — output peržiūrėtas ir patikrintas ([4.8](docs/04-kodo-kurimo-gaires.md#48-di-priemonių-naudojimas-ai-coding-assistants))
+- [ ] Jei naudotas AI — output peržiūrėtas ir patikrintas ([4.8](https://vilnius-vmsa.github.io/dev-standard/kodo-kurimo-gaires#48-di-priemonių-naudojimas-ai-coding-assistants))
 
 ## Ekrano nuotraukos / Screenshots
 

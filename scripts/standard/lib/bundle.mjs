@@ -57,7 +57,8 @@ When a change affects what the documentation describes, or when asked to write o
 `;
 
 // `skills`: the skills in standard/skills, name → (path inside the skill → content), copied unchanged.
-export function buildBundle({ rules, english, stacks, version, siteUrl, reviewMethod, skills = new Map() }) {
+// `prTemplate`: .github/pull_request_template.md, copied unchanged; sync installs it where a repository has none.
+export function buildBundle({ rules, english, stacks, version, siteUrl, reviewMethod, skills = new Map(), prTemplate }) {
   const reviewable = rules
     .filter((r) => r.check === 'ai-reviewable')
     .map((r) => {
@@ -75,6 +76,7 @@ export function buildBundle({ rules, english, stacks, version, siteUrl, reviewMe
     for (const [rel, content] of skillFiles) files.set(`skills/${name}/${rel}`, content);
   }
   files.set('agents-snippet.md', AGENTS_SNIPPET);
+  if (prTemplate !== undefined) files.set('pull_request_template.md', prTemplate);
   files.set('rules.json', `${JSON.stringify({
     version,
     rules: reviewable.map((r) => ({
