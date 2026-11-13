@@ -8,7 +8,10 @@ FROM ${PHP_IMAGE_REF} AS application
 FROM nginx:1.27-alpine@sha256:REPLACE_WITH_NGINX_DIGEST AS runtime
 
 # The PHP image owns the application build and public assets. The Nginx image
-# contains only the public web root and server configuration.
+# contains only the public web root and server configuration. The base image's
+# own pages (index.html, 50x.html) are removed first: they would be served as
+# /index.html and /50x.html.
+RUN rm -rf /usr/share/nginx/html/*
 COPY --from=application /var/www/public /usr/share/nginx/html
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 # Role-neutral configuration, identical for single-slot and both blue-green

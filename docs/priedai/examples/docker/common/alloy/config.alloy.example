@@ -76,8 +76,8 @@ discovery.relabel "container_logs" {
 }
 
 loki.source.docker "containers" {
-  // The Docker API tails each selected container's stdout and stderr; Docker
-  // preserves their origin as the Loki `stream` label.
+  // The Docker API tails each selected container's stdout and stderr and
+  // delivers plain log lines.
   host       = "http://docker-socket-proxy:2375"
   targets    = discovery.relabel.container_logs.output
   labels     = { source = "docker" }
@@ -85,7 +85,9 @@ loki.source.docker "containers" {
 }
 
 loki.process "container_logs" {
-  stage.docker {}
+  // No `stage.docker`: it parses the json-file log driver format, which this
+  // source never delivers, and would rewrite an application's own JSON line
+  // that happens to have `log` and `stream` keys.
   stage.decolorize {}
 
   forward_to = [loki.write.central.receiver]

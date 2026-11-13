@@ -55,8 +55,12 @@ COPY docker/php-fpm/conf.d/php.prod.ini /usr/local/etc/php/conf.d/zz-app.ini
 COPY docker/php-fpm/pool.d/www.prod.conf /usr/local/etc/php-fpm.d/zz-app.conf
 
 # The entrypoint exports the mounted secret files for the PHP process
-# (example: php-fpm/entrypoint.sh.example). Every command, including
-# `php artisan migrate` run by the deployment, goes through it.
+# (example: php-fpm/entrypoint.sh.example). Every container command goes
+# through it, including `php artisan migrate` that the deployment starts with
+# `docker compose run`. `docker compose exec` starts a process in a running
+# container without the entrypoint, so it does not see the secrets: run
+# one-off commands with `docker compose run --rm`, or as
+# `docker compose exec php app-entrypoint php artisan ...`.
 COPY docker/php-fpm/entrypoint.sh /usr/local/bin/app-entrypoint
 RUN chmod 0555 /usr/local/bin/app-entrypoint
 

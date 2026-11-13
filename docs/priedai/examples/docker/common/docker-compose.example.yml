@@ -1,5 +1,8 @@
 # Inactive example. Copy to the application root as docker-compose.yml and
 # replace every placeholder. Never use this file as production configuration.
+# The development Dockerfiles it builds (docker/php-fpm/Dockerfile.dev,
+# docker/nginx/Dockerfile.dev) are the project's own; the standard provides
+# examples of the production Dockerfiles only.
 
 name: application-dev
 
@@ -82,7 +85,8 @@ services:
       - mysql_data:/var/lib/mysql
     networks: [internal]
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p\"$$(cat /run/secrets/mysql_root_password)\" --silent"]
+      # A real query: `mysqladmin ping` also succeeds with a rejected password.
+      test: ["CMD-SHELL", "MYSQL_PWD=$$(cat /run/secrets/mysql_root_password) mysql -h 127.0.0.1 -u root -N -e 'SELECT 1' >/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 12

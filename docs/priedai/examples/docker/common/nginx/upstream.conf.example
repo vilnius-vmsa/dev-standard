@@ -4,7 +4,14 @@
 # upstream.blue.conf or upstream.green.conf over the same path, so one
 # immutable Nginx image digest serves every slot.
 
+# Nginx resolves an upstream name once, at start or reload, and keeps that
+# address. If the PHP-FPM container comes back with another address, every
+# request fails until Nginx is reloaded. `resolve` (Nginx 1.27.3+) re-resolves
+# the name through Docker's DNS; it needs `zone`. `valid` overrides Docker's
+# 600 s TTL.
 upstream php-upstream {
-    server php:9000;
+    zone php-upstream 64k;
+    resolver 127.0.0.11 valid=5s ipv6=off;
+    server php:9000 resolve;
     keepalive 16;
 }

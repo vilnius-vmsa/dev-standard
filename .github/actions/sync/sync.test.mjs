@@ -593,3 +593,65 @@ test('applyBundle does not recreate a PR template the team edited, and skips bun
   const result = await applyBundle({ repoDir: bare, bundleDir: await makeBundle(), version: 'v1.3.0', stacks: [] });
   assert.equal(result.prTemplate, null);
 });
+
+test('applyBundle rejects an unknown stack before it writes anything', async () => {
+  const repo = await tempDir();
+  await assert.rejects(applyBundle({ repoDir: repo, bundleDir: await makeBundle(), version: 'v1.3.0', stacks: ['laravel', 'nope'] }), /nope/);
+  assert.deepEqual(await readdir(repo), []);
+});
+
+test('two profile notes are separate callouts with a blank line between them', () => {
+  const warning = stackWarnings(['compose', 'k8s'], DEVOPS_MANIFEST);
+  assert.equal(warning.match(/\[!WARNING\]/g).length, 2);
+  assert.match(warning, /no release model[^\n]*\n\n> \[!WARNING\]\n> [^\n]*both a Compose profile and `k8s`/);
+});
+
+test('every profile warning says an edit on the default branch has no effect and to run the workflow again', () => {
+  const warning = stackWarnings(['infra'], DEVOPS_MANIFEST);
+  assert.match(warning, /on this pull request's branch and then run the workflow again/);
+  assert.match(warning, /An edit on the default branch has no effect while this pull request is open/);
+});
+
+test('the transitional note covers a technology without a profile and docker alone', () => {
+  const warning = stackWarnings(['infra'], DEVOPS_MANIFEST);
+  assert.match(warning, /technology the standard does not describe, list only the release model, and `docker` when it builds container images/);
+  assert.match(warning, /or list only `docker` when it builds container images/);
+});
+
+test('CLI apply keeps the agents warning and the profile warning as separate callouts', async () => {
+  const repo = await tempDir();
+  const warning = path.join(await tempDir(), 'warning.md');
+  await run(['apply', `--repo=${repo}`, `--bundle=${await makeBundle('v1.5.0', { stacks: PROFILE_STACKS })}`, '--version=v1.5.0', '--stacks=infra', `--warning=${warning}`]);
+  const text = await readFile(warning, 'utf8');
+  assert.equal(text.match(/\[!WARNING\]/g).length, 2);
+  // A blank line ends the first callout; without it Markdown would merge the two.
+  assert.match(text, /\n\n> \[!WARNING\]\n> `\.dev-standard\/config\.json` lists `infra`/);
+  assert.ok(text.indexOf('no `AGENTS.md`') < text.indexOf('lists `infra`'));
+});
+
+test('CLI apply reports a created PR template, and only then', async () => {
+  const bundle = await makeBundle('v1.3.0', { prTemplate: PR_TEMPLATE });
+  const repo = await tempDir();
+  const args = (dir) => ['apply', `--repo=${dir}`, `--bundle=${bundle}`, '--version=v1.3.0', '--stacks=', `--warning=${path.join(dir, 'warning.md')}`];
+  const first = await run(args(repo));
+  assert.match(first.stdout, /Created \.github\/pull_request_template\.md; later syncs leave it to the team\./);
+  const second = await run(args(repo));
+  assert.doesNotMatch(second.stdout, /Created/);
+});
+
+test('action.yml builds on an open sync pull request, shows the warnings and withdraws a stale pull request', async () => {
+  const action = await readFile(new URL('./action.yml', import.meta.url), 'utf8');
+  // The config of an open sync pull request wins over the default branch.
+  assert.match(action, /git show FETCH_HEAD:\.dev-standard\/config\.json > "\$pending"/);
+  assert.match(action, /sync\.mjs" plan "\$\{config_args\[@\]\}"/);
+  // The same warning file goes to the run summary and the pull request body.
+  assert.match(action, /sync\.mjs" apply [^\n]*\\\n\s+--warning="\$RUNNER_TEMP\/dev-standard-warning\.md"/);
+  assert.match(action, /cat "\$RUNNER_TEMP\/dev-standard-warning\.md" >> "\$GITHUB_STEP_SUMMARY"/);
+  assert.equal(action.match(/cat "\$RUNNER_TEMP\/dev-standard-warning\.md"/g).length, 2);
+  // Nothing left to change: an open pull request is closed, not left behind.
+  const inSync = action.slice(action.indexOf('if git diff --cached --quiet; then'), action.indexOf('commit -q -m'));
+  assert.match(inSync, /gh pr close "\$stale" --delete-branch/);
+  assert.match(inSync, /exit 0/);
+  // Install and pull request steps are skipped together when plan says so.
+  assert.equal(action.match(/if: steps\.plan\.outputs\.skip != 'true'/g).length, 2);
+});

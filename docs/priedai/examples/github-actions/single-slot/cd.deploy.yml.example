@@ -229,7 +229,7 @@ jobs:
       - name: Start log and metrics export
         if: ${{ always() }}
         # Log export must never decide the result of a deployment: by now the
-        # new release serves traffic (or was rolled back above). A failure
+        # new release serves traffic, or the rollout above failed. A failure
         # here is reported, but the job keeps the result of the rollout, so
         # the environment tag and the main-to-stage sync follow what is
         # really deployed.
@@ -252,3 +252,17 @@ jobs:
           else
             echo "::warning::Log export is not configured (ALLOY_ENV, LOKI_PASSWORD); OPS-MON-P02 is not met for this environment."
           fi
+
+      - name: Clean up unused Docker resources
+        if: ${{ success() }}
+        # Every deployment pulls new PHP and Nginx images onto the disk that
+        # also holds the database volume (OPS-FIN-P02). The organisation's
+        # action removes images that no container uses (keeping the latest
+        # versions per repository where they have tags), unused networks and
+        # old build cache; a stopped previous slot still holds its images. A
+        # rollback to an older release pulls it from the registry again.
+        # Volumes are never touched. Cleanup must not decide the deployment
+        # result. A project may keep a copy of the action in
+        # .github/actions/docker-cleanup and call it by path instead.
+        continue-on-error: true
+        uses: vilnius-vmsa/shared-workflows/.github/actions/docker-cleanup@main

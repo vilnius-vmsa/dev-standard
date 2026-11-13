@@ -214,7 +214,12 @@ jobs:
           MIGRATIONS_PATH: database/migrations
         run: |
           set -euo pipefail
-          previous_tag="$(git describe --tags --abbrev=0 --match 'v[0-9]*.[0-9]*.[0-9]*' "${SOURCE_SHA}^" 2>/dev/null || true)"
+          # The previous release is the highest strict vX.Y.Z tag reachable
+          # from the parent commit. A glob (`git describe --match`) would also
+          # accept pre-release tags such as v1.2.0-rc1, which have no released
+          # image to roll back to.
+          previous_tag="$(git tag --merged "${SOURCE_SHA}^" --sort=-v:refname 2>/dev/null \
+            | grep -E -m1 '^v[0-9]+\.[0-9]+\.[0-9]+$' || true)"
           record="$RUNNER_TEMP/release-record.md"
           {
             echo "## Deployment record"

@@ -5,7 +5,8 @@ applyTo: "**"
 <!-- Inactive example. Copy to .github/instructions/dev-standard-local.instructions.md
      and replace the paths and the reason with the project's own. Sync never
      touches this file. Local rules may only make the standard stricter; the
-     exception below is allowed because OPS-REPO-P02 itself provides for it. -->
+     exceptions below are allowed because OPS-REPO-P02 and OPS-PIPE-P07
+     themselves provide for them. Keep only the ones the project needs. -->
 
 # Project rules
 
@@ -23,3 +24,17 @@ planned separately.
 
 The common `infra` rules and the rules of the DevOps profiles chosen in
 `.dev-standard/config.json` apply to these paths.
+
+## Exception: OPS-PIPE-P07 (Git release model)
+
+This repository follows neither the branch-based nor the tag-based release
+model: production is deployed only by a manual run of `Ops: Deploy` with an
+image tag that was built from `main`.
+
+Reason: inherited release process; the move to the tag-based model is planned
+separately.
+
+`.dev-standard/config.json` therefore lists no release model (`flow-branch`,
+`flow-tag`). The deployment documentation describes how a release reaches
+each environment. The common `infra` rules and the chosen deployment method
+still apply.

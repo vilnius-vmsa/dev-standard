@@ -33,7 +33,9 @@ iš pull request'o, todėl jos tikrinamos prieš pradedant taikyti priedą proje
 | H.1 Repozitorijos struktūra | [8.10](../08-devops-ci-cd.md#810-bendri-pipeline-vartai-ir-profilio-pasirinkimas) (`OPS-REPO-P02`), [8.13.1](../08-devops-ci-cd.md#8131-bendri-reikalavimai-single-slot) | visi, `compose` |
 | H.2 Dockerfile kontrolė | [8.12](../08-devops-ci-cd.md#812-konteinerių-image) | `docker` |
 | H.3 Compose kontrolė | [8.13](../08-devops-ci-cd.md#813-docker-compose-diegimas) | `compose`, `compose-blue-green` |
-| H.4 GitHub Actions atsakomybės, smoke vartas, runner'iai, logų eksportas, image valymas | [8.10](../08-devops-ci-cd.md#810-bendri-pipeline-vartai-ir-profilio-pasirinkimas) | `infra` |
+| H.3 dalys: health kontraktas (readiness vartas), runtime secrets kontraktas | [8.10](../08-devops-ci-cd.md#810-bendri-pipeline-vartai-ir-profilio-pasirinkimas) (`OPS-PIPE-P01`), [8.1](../08-devops-ci-cd.md#81-aplinkos-ir-bendri-principai) (`OPS-ENV-P05`), [8.13.1](../08-devops-ci-cd.md#8131-bendri-reikalavimai-single-slot) (`OPS-COMPOSE-P09`) | `infra`, `compose` |
+| H.4 GitHub Actions atsakomybės, smoke vartas, runner'iai ir GitHub Environment | [8.10](../08-devops-ci-cd.md#810-bendri-pipeline-vartai-ir-profilio-pasirinkimas) | `infra` |
+| H.4 dalys: logų ir metrikų eksportas, image retention | [8.6](../08-devops-ci-cd.md#86-stebėsena-logai-ir-įvykių-valdymas-ci-cd-užtikrinimas) (`OPS-MON-P02`), [8.9](../08-devops-ci-cd.md#89-kainodara-ir-efektyvumas-finops) (`OPS-FIN-P02`) | `infra` |
 | H.4 dalys apie single-slot ir blue-green diegimą (slotų perjungimas, rollback, balanceris) | [8.13](../08-devops-ci-cd.md#813-docker-compose-diegimas) | `compose`, `compose-blue-green` |
 | H.5 Branch-based srautas | [8.11.1](../08-devops-ci-cd.md#8111-branch-based-diegimo-modelis) | `flow-branch` |
 | H.6 Tag-based srautas | [8.11.2](../08-devops-ci-cd.md#8112-tag-based-leidimo-modelis) | `flow-tag` |
@@ -84,7 +86,6 @@ application/
 ├── docker-compose.production.yml   # iš single-slot/ ARBA blue-green/ pavyzdžio (vienas failas)
 ├── docker-compose.ci-smoke.override.yml   # iš single-slot/ ARBA blue-green/ pavyzdžio
 ├── docker-compose.observability.yml
-├── docs/priedai/examples/       # reference files; not active workflows
 ├── .dockerignore                # iš dockerignore.example; apima ir lokalų docker/secrets
 └── application source, lock files and tests
 ```
@@ -181,6 +182,8 @@ slotams:
 | `conf.d/upstream.blue.conf`, `upstream.green.conf` (mount) | `nginx-blue`, `nginx-green` | montuojami vietoj `upstream.conf`: kiekvienas slotas kreipiasi į savo `php-blue` / `php-green` |
 | `conf.d/edge-tls.conf` (mount) | single-slot `nginx` | `8443` TLS listeneris, perduodantis užklausą į vietinį `8080`; slotai jo nemontuoja ir TLS secrets neturi |
 
+Upstream vardai sprendžiami vykdymo metu: `server php:9000 resolve;` su `zone` ir `resolver 127.0.0.11 valid=5s ipv6=off;` (Nginx 1.27.3 ar naujesnis; tas pats galioja balancerio upstream'ams į slotus). Be to Nginx vardą išverčia tik paleidimo ar perkrovimo metu: jei PHP-FPM konteineris grįžta su kitu adresu (pvz. po avarijos), visos užklausos baigiasi klaida, kol Nginx neperkraunamas, o `/health` tuo metu rodo „ok“.
+
 Aplikacijos konfigūracija visada kreipiasi į `php-upstream` ir niekada tiesiogiai
 į serviso vardą. Jei upstream būtų įrašytas image konfigūracijoje, abu slotai
 kreiptųsi į tą patį PHP servisą ir naujas slotas tyliai aptarnautų seną kodą.
@@ -241,7 +244,8 @@ ankstesnis konteineris. Atsakyme neturi būti priklausomybių adresų, klaidų
 tekstų ar kitos vidinės informacijos.
 
 Readiness nėra viešas endpointas: Nginx viešuose listeneriuose `/health/ready`
-grąžina `404`, o į PHP-FPM jį perduoda tik privatus `18080` listeneris, ribojamas
+grąžina `404` visais kelio variantais, kuriuos aplikacija nukreiptų į tą patį
+maršrutą (`/health/ready/`, `/index.php/health/ready`), o į PHP-FPM jį perduoda tik privatus `18080` listeneris, ribojamas
 iki `127.0.0.1` ir vidinio Docker tinklo. Deploy vartai jį kviečia konteinerio
 viduje (`docker compose exec`), todėl nei priklausomybių būsena, nei release
 identifikatorius nepatenka į internetą.
@@ -249,7 +253,8 @@ identifikatorius nepatenka į internetą.
 ```nginx
 # viešas / slot'o listeneris (8443, 8080)
 location = /health       { access_log off; default_type text/plain; return 200 'ok'; }
-location = /health/ready { return 404; }
+# prieš `index.php` location: regex location'ai tikrinami iš eilės
+location ~* ^/(index\.php/)?health/ready(/|$) { return 404; }
 
 # privatus monitoring listeneris
 server {
@@ -359,7 +364,7 @@ pan.), bet jo nėra nei `SECRET_KEYS`, nei `NON_SECRET_KEYS` sąraše, paruošim
 sustoja. Naujas raktas pridedamas trijose vietose kartu: helperio sąraše,
 entrypoint'e ir Compose `secrets:`.
 
-Compose projekto vardas nėra kontrakto dalis: jis fiksuotas pačiame Compose faile (`name:`), kaip etaloniniame projekte. Jei vardas būtų imamas iš checkout katalogo, perkėlus runner'io darbo katalogą Compose paleistų antrą stack'ą su tuščiais volume, nes volume vardai prasideda projekto vardu. Smoke vartas vardą perrašo kintamuoju `COMPOSE_PROJECT_NAME`, kad jo vienkartiniai konteineriai nesimaišytų su kitais.
+Compose projekto vardas nėra kontrakto dalis: jis fiksuotas pačiame Compose faile (`name:`), kaip etaloniniame projekte. Jei vardas būtų imamas iš checkout katalogo, perkėlus runner'io darbo katalogą Compose paleistų antrą stack'ą su tuščiais volume, nes volume vardai prasideda projekto vardu. Diegimo workflow'ai vardo neperduoda nei kintamuoju `COMPOSE_PROJECT_NAME`, nei `-p`, nei per Environment kintamuosius ar secrets: vardas keičiamas tik Compose faile, t. y. per PR su review, o ne aplinkos nustatymu, kuris gali pasikeisti nepastebėtas. Vienintelė išimtis – smoke vartas CI runner'yje: jis vardą perrašo kintamuoju `COMPOSE_PROJECT_NAME`, kad jo vienkartiniai konteineriai ir volume nesimaišytų su kitais, ir diegiamos aplinkos neliečia.
 
 | Kontrakto dalis | Reikšmė / paskirtis |
 |---|---|
@@ -500,6 +505,13 @@ mount), pašalina naują slotą ir vėl paleidžia seno slot'o worker'į. Senas 
 versijos yra įprastas tos versijos redeploy per `Ops: Deploy`, o ne slot'o
 perjungimas atgal.
 
+Balancerio image yra oficialus Nginx image (1.27.3 ar naujesnis, nes upstream'ai
+naudoja `resolve`), fiksuotas digest'u ir atnaujinamas kaip kiti baziniai image.
+Projekto Nginx image balanceriui netinka: jame įdėta aplikacijos `default.conf`
+ir PHP-FPM upstream. Visa balancerio konfigūracija yra deploy sugeneruotas
+`active.conf`; jame nustatyta `server_tokens off`, kad viešas kraštas nerodytų
+Nginx versijos.
+
 Blue-green balanceris pagal nutylėjimą nekeičiamas: po `nginx -t` aktyvi
 konfigūracija pritaikoma per `nginx -s reload`, kad nebūtų nutraukiami aktyvūs
 ryšiai. Blue-green projekto `Ops: Deploy` turi `force_recreate_balancer` input'ą
@@ -552,6 +564,16 @@ tada, kai `ops.housekeeping` jo paprašo: rankiniu paleidimu pažymėjus
 `HOUSEKEEPING_PRUNE_IMAGES`. Pagal nutylėjimą jis tik praneša, ką trintų (dry
 run); sąrašas matomas run'o suvestinėje. Tvarkaraščio paleidimas iš tikrųjų
 trina tik tada, kai papildomai nustatytas `HOUSEKEEPING_PRUNE_DRY_RUN` = `false`.
+
+Diegimo hoste senus image valo pats `cd.deploy`: po sėkmingo diegimo paskutinis
+žingsnis kviečia organizacijos `docker-cleanup` action'ą
+(`vilnius-vmsa/shared-workflows/.github/actions/docker-cleanup@main` arba jo
+kopiją projekto `.github/actions/` kataloge). Jis pašalina image, kurių
+nenaudoja joks konteineris, nenaudojamus tinklus ir seną build cache. Kitaip
+kiekvienas diegimas paliktų ankstesnius PHP ir Nginx image tame pačiame
+diske kaip duomenų bazės volume. Volume netrinami, o valymo klaida diegimo
+rezultato nekeičia (`continue-on-error`). Grįžtant prie senesnės versijos jos image vėl parsiunčiamas
+iš registry, todėl registry saugojimo riba turi apimti rollback laikotarpį.
 
 GHCR trina visą image versiją su visais jos tag'ais, o ne atskirą tag'ą, todėl
 versija parenkama tik tada, kai tai leidžia kiekvienas jos tag'as:

@@ -197,11 +197,14 @@ nginx_get() {
 # listener in single-slot, the slot listener in blue-green): Nginx answers.
 nginx_get "$APPLICATION_LISTENER/health" >/dev/null
 
-# Readiness must not be reachable through that listener.
-if nginx_get "$APPLICATION_LISTENER$READINESS_PATH" >/dev/null 2>&1; then
-  echo "$READINESS_PATH is exposed on the application listener." >&2
-  exit 1
-fi
+# Readiness must not be reachable through that listener, in any spelling the
+# application would route to the same handler.
+for exposed_path in "$READINESS_PATH" "$READINESS_PATH/" "/index.php$READINESS_PATH"; do
+  if nginx_get "$APPLICATION_LISTENER$exposed_path" >/dev/null 2>&1; then
+    echo "$exposed_path is exposed on the application listener." >&2
+    exit 1
+  fi
+done
 
 # Readiness: Nginx 18080 -> PHP-FPM -> application -> database and Redis.
 # The reported release must be the revision this pipeline run built.

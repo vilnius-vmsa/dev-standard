@@ -101,7 +101,7 @@ const profileNote = (text) => `> [!WARNING]\n> ${text}\n`;
 const NOTHING_DEPLOYED = 'If the repository deploys nothing (for example a library),';
 // While a sync pull request is open, sync reads the config from that pull request's branch, so an edit of
 // the config on the default branch is ignored and reverted when the pull request is merged.
-const HOW_TO_CHANGE = '>\n> To change the stacks, run the "Dev standard sync" workflow manually with the `stacks` input (the full list, for example `laravel,frontend,flow-branch,compose`), or edit `stacks` in `.dev-standard/config.json` on this pull request\'s branch. An edit on the default branch has no effect while this pull request is open.\n';
+const HOW_TO_CHANGE = '>\n> To change the stacks, run the "Dev standard sync" workflow manually with the `stacks` input (the full list, for example `laravel,frontend,flow-branch,compose`), or edit `stacks` in `.dev-standard/config.json` on this pull request\'s branch and then run the workflow again: the edit alone does not regenerate the rules files. An edit on the default branch has no effect while this pull request is open.\n';
 const withHowToChange = (notes) => (notes ? `${notes}${HOW_TO_CHANGE}` : '');
 
 // Markdown for the pull request body; empty when the DevOps profiles in the config need no attention.
@@ -115,13 +115,14 @@ function profileNotes(stacks, manifest) {
 
   const legacy = legacyStacks(stacks, manifest);
   if (legacy.length) {
-    return profileNote(`\`${CONFIG_FILE}\` lists \`infra\` but no DevOps profile, so this release still installs all of them: ${legacy.map((s) => `\`${s}\``).join(', ')}. Replace \`infra\` with the profiles this repository uses (one release model: \`flow-branch\` or \`flow-tag\`; one deployment: \`compose\`, \`compose-blue-green\` or \`k8s\`). A later release installs only the common rules for \`infra\`. ${NOTHING_DEPLOYED} keep \`infra\` as it is: the later release then gives it the common rules only.`);
+    return profileNote(`\`${CONFIG_FILE}\` lists \`infra\` but no DevOps profile, so this release still installs all of them: ${legacy.map((s) => `\`${s}\``).join(', ')}. Replace \`infra\` with the profiles this repository uses (one release model: \`flow-branch\` or \`flow-tag\`; one deployment: \`compose\`, \`compose-blue-green\` or \`k8s\`). A later release installs only the common rules for \`infra\`. If it deploys with a technology the standard does not describe, list only the release model, and \`docker\` when it builds container images (OPS-PIPE-P07). ${NOTHING_DEPLOYED} keep \`infra\` as it is, or list only \`docker\` when it builds container images: the later release then gives it the common rules only.`);
   }
   const lines = [];
   const models = RELEASE_MODELS.filter((model) => stacks.includes(model));
   const methods = DEPLOYMENT_METHODS.filter((method) => stacks.includes(method));
   if (models.length === 0 && methods.length === 0 && stacks.includes('docker')) {
-    // `docker` alone is a valid choice (OPS-PIPE-P07): the repository builds images and deploys nothing.
+    // `docker` alone is a valid choice (OPS-PIPE-P07): the repository builds images and deploys nothing,
+    // or deploys with a technology the standard has no profile for.
     // It is not silenced, because a repository that does deploy still needs its release model.
     return profileNote(`\`${CONFIG_FILE}\` lists \`docker\` without a release model or a deployment method. That is correct for a repository that builds container images and deploys nothing: say so in its README and ignore this note. If the repository deploys, add its release model (\`flow-branch\` or \`flow-tag\`), and a deployment method (\`compose\`, \`compose-blue-green\` or \`k8s\`) unless it deploys with a technology the standard does not describe (OPS-PIPE-P07).`);
   }
@@ -132,7 +133,7 @@ function profileNotes(stacks, manifest) {
   if (models.length === 2) {
     lines.push(profileNote(`\`${CONFIG_FILE}\` lists both \`flow-branch\` and \`flow-tag\`. A repository follows one release model; remove the other.`));
   } else if (models.length === 0) {
-    lines.push(profileNote(`\`${CONFIG_FILE}\` lists a deployment method but no release model, so the branch-based or tag-based rules are not installed. Add \`flow-branch\` or \`flow-tag\`.`));
+    lines.push(profileNote(`\`${CONFIG_FILE}\` lists a deployment method but no release model, so the branch-based or tag-based rules are not installed. Add \`flow-branch\` or \`flow-tag\`. Another release model is allowed only as an exception recorded in \`.github/instructions/dev-standard-local.instructions.md\` (OPS-PIPE-P07); then ignore this note.`));
   }
   if (methods.length === 0) {
     lines.push(profileNote(`\`${CONFIG_FILE}\` lists no deployment method, so the Compose or Kubernetes rules are not installed. Add \`compose\`, \`compose-blue-green\` or \`k8s\`. If the repository uses a technology the standard does not describe, state that in its deployment documentation (and list \`docker\` when it builds container images); then ignore this note (OPS-PIPE-P07).`));

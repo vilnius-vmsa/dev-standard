@@ -11,8 +11,10 @@
 # volume and network with it. If it came from the checkout directory, a moved
 # runner workspace would start a second stack with empty volumes. Replace
 # `application` with the application's name. One environment per host is
-# assumed; the CI smoke gate overrides the name with COMPOSE_PROJECT_NAME to
-# keep its disposable containers and volumes apart.
+# assumed. Deployments never pass the name through COMPOSE_PROJECT_NAME, `-p`
+# or an environment setting: it changes only here, through a reviewed pull
+# request. The CI smoke gate alone overrides it, on the CI runner, to keep its
+# disposable containers and volumes apart.
 name: application
 
 # Applied to every container: servers and databases keep time in UTC
@@ -344,7 +346,10 @@ services:
           memory: 256M
     image: ${BALANCER_IMAGE_REF:?BALANCER_IMAGE_REF is required}
     stop_grace_period: 130s
-    # The pinned balancer image must use the same nginx:101 runtime identity.
+    # The balancer is the official Nginx image pinned by digest, not the
+    # project's Nginx image. It must be Nginx 1.27.3 or newer (the generated
+    # upstreams use `resolve`) and run as nginx:101. Its only configuration is
+    # the active.conf mounted below.
     user: "101:101"
     tmpfs:
       - /run:rw,noexec,nosuid,nodev,size=4m,uid=101,gid=101,mode=0755

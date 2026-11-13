@@ -10,7 +10,7 @@ description: Vilnius City Municipality software development standard. Use when w
 The rules live in `.github/instructions/`:
 
 - `dev-standard-<stack>.instructions.md`: the standard's rules for each stack listed in `.dev-standard/config.json`, plus the stacks those build on (a file that builds on another says so near its top). The `applyTo` header of each file says which paths it covers.
-- `dev-standard-local.instructions.md` (if present): this repository's own extra rules. They can only be stricter than the standard, except for a file-layout exception the standard allows there (OPS-REPO-P02): the paths it names follow the infrastructure rules as if they were in the standard locations.
+- `dev-standard-local.instructions.md` (if present): this repository's own extra rules. They can only be stricter than the standard, except for two exceptions the standard allows there when recorded with a reason: a file-layout exception (OPS-REPO-P02), whose paths follow the infrastructure rules as if they were in the standard locations, and a release-model exception (OPS-PIPE-P07), under which the branch-based and tag-based rules do not apply.
 
 Read those files from disk. Never state a rule from memory.
 

@@ -78,10 +78,13 @@ jobs:
       PHP_IMAGE_GREEN: ${{ inputs.app_image }}
       NGINX_IMAGE_BLUE: ${{ inputs.nginx_image }}
       NGINX_IMAGE_GREEN: ${{ inputs.nginx_image }}
-      # This infrastructure edge image is maintained outside this repository.
-      # It is reviewed and pinned by digest, but is not covered by this
+      # The balancer is the current official Nginx image (1.27.3 or newer),
+      # pinned by digest and kept up to date like any other base image. It is
+      # not the project's Nginx image: that one carries the application's
+      # default.conf and the PHP-FPM upstream. Its whole configuration is the
+      # active.conf this workflow writes. It is not covered by this
       # application's build/release attestation contract.
-      BALANCER_IMAGE_REF: ghcr.io/<org>/<app>-balancer@sha256:<balancer-digest>
+      BALANCER_IMAGE_REF: docker.io/library/nginx@sha256:<balancer-digest>
       SOURCE_SHA: ${{ inputs.source_sha }}
       RELEASE_WORKFLOW: ${{ inputs.release_workflow }}
       RELEASE_ATTESTATION_REQUIRED: ${{ inputs.release_attestation_required }}
@@ -290,11 +293,20 @@ jobs:
           fi
           echo "config_changed=true" >> "$GITHUB_OUTPUT"
           cat > "$active" <<EOF
+          # The official image shows its version by default; the public edge
+          # must not.
+          server_tokens off;
+          # Names are re-resolved at run time (Nginx 1.27.3+), so a slot
+          # that comes back with another address is found without a reload.
           upstream application {
-              server nginx-$NEXT_SLOT:8080;
+              zone application 64k;
+              resolver 127.0.0.11 valid=5s ipv6=off;
+              server nginx-$NEXT_SLOT:8080 resolve;
           }
           upstream application_monitor {
-              server nginx-$NEXT_SLOT:18080;
+              zone application_monitor 64k;
+              resolver 127.0.0.11 valid=5s ipv6=off;
+              server nginx-$NEXT_SLOT:18080 resolve;
           }
           server {
               listen 8443 ssl;
@@ -307,6 +319,9 @@ jobs:
               client_max_body_size 16M;
               location / {
                   proxy_pass http://application;
+                  # Not shorter than fastcgi_read_timeout of the slot Nginx.
+                  proxy_read_timeout 130s;
+                  proxy_send_timeout 130s;
                   proxy_set_header Host \$host;
                   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
                   proxy_set_header X-Forwarded-Proto \$scheme;
@@ -451,3 +466,17 @@ jobs:
           else
             echo "::warning::Log export is not configured (ALLOY_ENV, LOKI_PASSWORD); OPS-MON-P02 is not met for this environment."
           fi
+
+      - name: Clean up unused Docker resources
+        if: ${{ success() }}
+        # Every deployment pulls new PHP and Nginx images onto the disk that
+        # also holds the database volume (OPS-FIN-P02). The organisation's
+        # action removes images that no container uses (keeping the latest
+        # versions per repository where they have tags), unused networks and
+        # old build cache; a stopped previous slot still holds its images. A
+        # rollback to an older release pulls it from the registry again.
+        # Volumes are never touched. Cleanup must not decide the deployment
+        # result. A project may keep a copy of the action in
+        # .github/actions/docker-cleanup and call it by path instead.
+        continue-on-error: true
+        uses: vilnius-vmsa/shared-workflows/.github/actions/docker-cleanup@main

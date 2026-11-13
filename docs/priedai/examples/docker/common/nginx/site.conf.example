@@ -17,6 +17,8 @@ server {
 
     client_max_body_size 16M;
 
+    # A location that sets its own `add_header` drops these server-level
+    # headers, so such a location repeats them.
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
@@ -25,9 +27,28 @@ server {
         try_files $uri $uri/ /index.php?$query_string;
     }
 
+    # Readiness reports dependency state and the release. Keep it off the
+    # application listener in every spelling the application would route:
+    # `/health/ready`, `/health/ready/` and `/index.php/health/ready`. This
+    # must stay above the `index.php` location (regex locations match in
+    # order). Gates call readiness through the monitoring listener.
+    location ~* ^/(index\.php/)?health/ready(/|$) { return 404; }
+
+    # User uploads (the read-only uploads volume). `^~` keeps them out of the
+    # regex locations below: an upload can be replaced under the same name, so
+    # it must not be cached as immutable, and it is only ever served as a file.
+    location ^~ /storage/ {
+        try_files $uri =404;
+        location ~ /\. { deny all; }
+    }
+
+    # Build assets have hashed names, so they can be cached for long.
     location ~* \.(?:css|js|gif|ico|jpe?g|png|svg|webp|woff2?|ttf|eot)$ {
         expires 30d;
         add_header Cache-Control "public, immutable";
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
         access_log off;
         try_files $uri =404;
     }
@@ -36,6 +57,12 @@ server {
         include fastcgi_params;
         # `php-upstream` is defined in upstream.conf, never here.
         fastcgi_pass php-upstream;
+        # Required for `keepalive` in the upstream to have any effect.
+        fastcgi_keep_conn on;
+        # Longer than PHP's max_execution_time (120 s). With the 60 s default
+        # Nginx answers 504 while PHP is still allowed to work.
+        fastcgi_read_timeout 130s;
+        fastcgi_send_timeout 130s;
         # The path inside the PHP-FPM container, not this container's root.
         fastcgi_param SCRIPT_FILENAME /var/www/public$fastcgi_script_name;
         fastcgi_param HTTP_AUTHORIZATION $http_authorization;
@@ -52,10 +79,6 @@ server {
         default_type text/plain;
         return 200 'ok';
     }
-
-    # Readiness reports dependency state and the release. Keep it off the
-    # application listener; gates call it through the monitoring listener.
-    location = /health/ready { return 404; }
 }
 
 # Private monitoring listener: container loopback and the Docker networks
@@ -69,6 +92,7 @@ server {
     location = /health/ready {
         include fastcgi_params;
         fastcgi_pass php-upstream;
+        fastcgi_keep_conn on;
         fastcgi_param SCRIPT_FILENAME /var/www/public/index.php;
         fastcgi_param SCRIPT_NAME /index.php;
         fastcgi_param REQUEST_URI /health/ready;
