@@ -30,6 +30,8 @@ Projekte failai dedami į H.1 priede aprašytas vietas (`.github/workflows/`, `d
 
 ## Docker
 
+* [.dockerignore](docker/common/dockerignore.example) – kas nepatenka į build kontekstą; būtinas, nes lokalus `docker-compose.yml` secrets pagal nutylėjimą laiko `docker/secrets` kataloge build konteksto viduje.
+
 * [Production multi-stage PHP-FPM Dockerfile](docker/common/Dockerfile.prod.example) jo [entrypoint](docker/common/php-fpm/entrypoint.sh.example), eksportuojantis sumontuotus secret failus, production [php.ini](docker/common/php-fpm/php.prod.ini.example) ir [PHP-FPM pool](docker/common/php-fpm/www.prod.conf.example).
 * [Production multi-stage Nginx Dockerfile](docker/common/Dockerfile.nginx.prod.example)
 * Nginx konfigūracija: bendras [nginx.conf](docker/common/nginx/nginx.conf.example), [site.conf](docker/common/nginx/site.conf.example) ir numatytasis [upstream.conf](docker/common/nginx/upstream.conf.example) (įkeliami į image), slot'ų [upstream.blue.conf](docker/blue-green/nginx/upstream.blue.conf.example) / [upstream.green.conf](docker/blue-green/nginx/upstream.green.conf.example) ir single-slot [edge-tls.conf](docker/single-slot/nginx/edge-tls.conf.example) (montuojami Compose).

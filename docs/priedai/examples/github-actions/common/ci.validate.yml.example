@@ -144,6 +144,7 @@ jobs:
           expect_refusal production $'APP_ENV=production\nexport MAIL_PASSWORD=x' 'not plain upper-case KEY=value'
           expect_refusal production $'APP_ENV=production\nDATABASE_URL=mysql://app:pw@db/app' 'not allowlisted: DATABASE_URL'
           expect_refusal production $'APP_ENV=production\nAPP_DEBUG=false\nDB_PASSWORD=a\'b' 'DB_PASSWORD must not contain'
+          expect_refusal production $'APP_ENV=production\nAPP_DEBUG=false\nREDIS_PASSWORD=a\"b' 'REDIS_PASSWORD must not contain'
           test ! -e "$RUNNER_TEMP/guard-secrets"
 
   secrets:

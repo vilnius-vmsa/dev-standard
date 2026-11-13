@@ -44,24 +44,38 @@ jobs:
           set -euo pipefail
           entries=()
           for environment in $IMAGE_TAGS; do
+            # The images of one environment are promoted together, so its tag
+            # is an all-or-nothing set: skipped when no image carries it,
+            # scanned when all do, and an error when only some do. Otherwise
+            # a deployed image could silently fall out of the scan.
+            found=()
+            missing=()
             for repository in "$PHP_REPOSITORY" "$NGINX_REPOSITORY"; do
               if ! output="$(docker buildx imagetools inspect "${repository}:${environment}" 2>&1)"; then
-                # Only a tag that does not exist is skipped. A registry outage,
-                # a denied login or a bad reference must fail the job: otherwise
-                # one image found would let the scan pass without the others.
+                # Only a tag that does not exist counts as missing. A registry
+                # outage, a denied login or a bad reference fails the job.
                 if ! grep -Eqi 'not found|manifest unknown|no such manifest' <<<"$output"; then
                   echo "$output" >&2
                   echo "::error::Could not look up ${repository}:${environment}; the scan cannot be trusted."
                   exit 1
                 fi
-                echo "::warning::${repository}:${environment} was not found; skipping."
+                missing+=("${repository}:${environment}")
                 continue
               fi
               digest="$(awk '$1 == "Digest:" { print $2; exit }' <<<"$output")"
               [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
-              entries+=("$(jq -cn --arg name "${repository##*/} (${environment})" \
+              found+=("$(jq -cn --arg name "${repository##*/} (${environment})" \
                 --arg ref "${repository}@${digest}" '{name: $name, ref: $ref}')")
             done
+            if ((${#missing[@]} > 0 && ${#found[@]} > 0)); then
+              echo "::error::The ${environment} tag exists on some images but not on: ${missing[*]}. The images of an environment must be promoted together."
+              exit 1
+            fi
+            if ((${#found[@]} == 0)); then
+              echo "::warning::No image carries the ${environment} tag; skipping this environment."
+              continue
+            fi
+            entries+=("${found[@]}")
           done
           ((${#entries[@]} > 0)) || { echo "No promoted images were found." >&2; exit 1; }
           images="$(printf '%s\n' "${entries[@]}" | jq -cs 'unique_by(.ref)')"

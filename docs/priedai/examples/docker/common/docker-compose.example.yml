@@ -142,6 +142,10 @@ volumes:
   mysql_data:
   redis_data:
 
+# docker/secrets is the default for local development only. It is inside the
+# build context of the services above, so it must be listed in .dockerignore
+# (example: dockerignore.example) and in .gitignore. Deployed environments do
+# not use it: there SECRETS_DIR is a host directory outside the repository.
 secrets:
   mysql_password:
     file: ${SECRETS_DIR:-docker/secrets}/mysql_password

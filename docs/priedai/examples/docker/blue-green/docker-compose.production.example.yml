@@ -186,7 +186,10 @@ services:
     stop_grace_period: 60s
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev,size=16m,uid=999,gid=1000,mode=1777
-    command: ["sh", "-ec", "exec redis-server --appendonly yes --requirepass \"$$(cat /run/secrets/redis_password)\""]
+    # The password is written to a config file on the tmpfs and never put on
+    # the redis-server command line. printf is a shell builtin, so the value
+    # does not appear in any process arguments either.
+    command: ["sh", "-ec", "umask 077; printf 'requirepass \"%s\"\\n' \"$$(cat /run/secrets/redis_password)\" > /tmp/redis.conf; exec redis-server /tmp/redis.conf --appendonly yes"]
     secrets: [redis_password]
     volumes:
       - redis_data:/data

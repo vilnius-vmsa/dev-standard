@@ -85,7 +85,7 @@ application/
 ├── docker-compose.ci-smoke.override.yml   # iš single-slot/ ARBA blue-green/ pavyzdžio
 ├── docker-compose.observability.yml
 ├── docs/priedai/examples/       # reference files; not active workflows
-├── .dockerignore
+├── .dockerignore                # iš dockerignore.example; apima ir lokalų docker/secrets
 └── application source, lock files and tests
 ```
 

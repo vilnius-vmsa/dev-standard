@@ -21,4 +21,5 @@ directories:
 Reason: inherited repository structure; the move to the standard layout is
 planned separately.
 
-All chapter 8 rules (OPS-*) apply to these paths.
+The common `infra` rules and the rules of the DevOps profiles chosen in
+`.dev-standard/config.json` apply to these paths.
