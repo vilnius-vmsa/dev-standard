@@ -35,10 +35,13 @@ jobs:
       - name: Validate Composer metadata
         run: composer validate --strict --no-check-publish
 
-      # If the application uses private packages, create a short-lived token
-      # here (for example actions/create-github-app-token, as in CI: Build)
-      # and pass it to this step as COMPOSER_AUTH. It is a build credential,
-      # not a deployment secret.
+      # Private Composer packages need a token here, passed to this step as
+      # COMPOSER_AUTH. How it gets here is the project's choice and is not
+      # part of this example. Note that this is a called workflow: a secret
+      # (for example a GitHub App key, as in CI: Build) is available only if
+      # the calling CI: Pipeline passes it and this workflow declares it
+      # under `on.workflow_call.secrets`. It is a build credential, not a
+      # deployment secret.
       - name: Install locked Composer dependencies
         run: composer install --no-interaction --prefer-dist --no-progress --no-scripts
 
@@ -122,7 +125,7 @@ jobs:
           expect_refusal() {
             local deploy_environment="$1" runtime_env="$2" expected="$3" output
             if output="$(RUNTIME_ENV="$base"$'\n'"$runtime_env" DEPLOY_ENVIRONMENT="$deploy_environment" \
-              SECRETS_DIR="$RUNNER_TEMP/guard-secrets" COMPOSE_PROJECT_NAME=ci-guard \
+              SECRETS_DIR="$RUNNER_TEMP/guard-secrets" \
               TLS_CERTIFICATE_B64=Y2k= TLS_PRIVATE_KEY_B64=Y2k= \
               PHP_IMAGE_REF="ci.invalid/php@$digest" NGINX_IMAGE_REF="ci.invalid/nginx@$digest" \
               bash docker/scripts/prepare-runtime-secrets.sh 2>&1)"; then
@@ -140,6 +143,7 @@ jobs:
           expect_refusal production $'APP_ENV=production\nPOSTMARK_TOKEN=x' 'not allowlisted: POSTMARK_TOKEN'
           expect_refusal production $'APP_ENV=production\nexport MAIL_PASSWORD=x' 'not plain upper-case KEY=value'
           expect_refusal production $'APP_ENV=production\nDATABASE_URL=mysql://app:pw@db/app' 'not allowlisted: DATABASE_URL'
+          expect_refusal production $'APP_ENV=production\nAPP_DEBUG=false\nDB_PASSWORD=a\'b' 'DB_PASSWORD must not contain'
           test ! -e "$RUNNER_TEMP/guard-secrets"
 
   secrets:

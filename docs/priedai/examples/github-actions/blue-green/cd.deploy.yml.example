@@ -73,7 +73,6 @@ jobs:
     env:
       COMPOSE_FILE: docker-compose.production.yml
       SECRETS_DIR: /srv/<application>/secrets
-      COMPOSE_PROJECT_NAME: <application>-${{ inputs.environment }}
       BALANCER_CONFIG_DIR: /srv/<application>/balancer
       PHP_IMAGE_BLUE: ${{ inputs.app_image }}
       PHP_IMAGE_GREEN: ${{ inputs.app_image }}
@@ -82,7 +81,7 @@ jobs:
       # This infrastructure edge image is maintained outside this repository.
       # It is reviewed and pinned by digest, but is not covered by this
       # application's build/release attestation contract.
-      BALANCER_IMAGE_REF: ghcr.io/<owner>/<application>-balancer@sha256:<balancer-digest>
+      BALANCER_IMAGE_REF: ghcr.io/<org>/<app>-balancer@sha256:<balancer-digest>
       SOURCE_SHA: ${{ inputs.source_sha }}
       RELEASE_WORKFLOW: ${{ inputs.release_workflow }}
       RELEASE_ATTESTATION_REQUIRED: ${{ inputs.release_attestation_required }}
@@ -195,7 +194,7 @@ jobs:
           compose_env="$SECRETS_DIR/compose.env"
           test -r "$compose_env"
           for variable in \
-            COMPOSE_PROJECT_NAME SECRETS_DIR DB_DATABASE DB_USERNAME \
+            SECRETS_DIR DB_DATABASE DB_USERNAME \
             PHP_IMAGE_BLUE PHP_IMAGE_GREEN NGINX_IMAGE_BLUE NGINX_IMAGE_GREEN \
             BALANCER_IMAGE_REF BALANCER_CONFIG_DIR; do
             grep -Eq "^${variable}=.+$" "$compose_env" || {
@@ -439,7 +438,6 @@ jobs:
             # --force-recreate: a changed config.alloy or credential is a
             # bind-mounted file, which Compose would not notice by itself.
             docker compose --env-file "$SECRETS_DIR/compose.env" \
-              -p "${COMPOSE_PROJECT_NAME}-observability" \
               -f docker-compose.observability.yml up -d --wait --force-recreate alloy
           else
             echo "::warning::Log export is not configured (ALLOY_ENV, LOKI_PASSWORD); OPS-MON-P02 is not met for this environment."

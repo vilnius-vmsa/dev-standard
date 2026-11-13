@@ -16,7 +16,8 @@
 #                   LOKI_USERNAME); read by Compose on the host;
 #   loki_password   the push credential, mounted as a secret.
 
-name: ${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME is required}-observability
+# Its own fixed project, next to the application's. Replace `application`.
+name: application-observability
 
 # UTC everywhere (ARCH-API-P13), as in the application Compose file.
 x-container-environment: &container-environment
@@ -30,6 +31,11 @@ x-logging: &observability-logging
 
 services:
   docker-socket-proxy:
+    # Recommended for now: no high or critical Trivy findings and a separate
+    # switch for reading logs. It is a community image that runs as root on
+    # the Docker socket, so record it as an accepted risk. After changing the
+    # image or its version, confirm that logs still reach Loki: the same
+    # settings do not mean the same thing in another proxy image.
     image: ghcr.io/linuxserver/socket-proxy@sha256:REPLACE_WITH_CURRENT_DIGEST
     restart: unless-stopped
     logging: *observability-logging
@@ -46,6 +52,10 @@ services:
     environment:
       <<: *container-environment
       # Read-only discovery and log endpoints; everything else is denied.
+      # ALLOW_LOGS is required: without it this proxy answers 403 to
+      # GET /containers/<id>/logs, so Alloy finds the containers, ships
+      # nothing and still looks healthy.
+      ALLOW_LOGS: "1"
       CONTAINERS: "1"
       NETWORKS: "1"
       PING: "1"

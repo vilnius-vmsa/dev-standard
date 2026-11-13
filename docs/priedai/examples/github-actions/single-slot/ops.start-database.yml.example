@@ -50,7 +50,6 @@ jobs:
     env:
       # Keep these aligned with CD: Deploy.
       COMPOSE_FILE: docker-compose.production.yml
-      COMPOSE_PROJECT_NAME: <application>-${{ inputs.environment }}
       SECRETS_DIR: /srv/<application>/secrets
       IMAGE_TAG: ${{ inputs.image_tag }}
       APP_REPOSITORY: ghcr.io/<org>/<app>-php

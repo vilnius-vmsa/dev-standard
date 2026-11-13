@@ -185,6 +185,7 @@ jobs:
           subject-name: ${{ steps.image.outputs.app_repository }}
           subject-digest: ${{ steps.image.outputs.app_digest }}
           push-to-registry: true
+          create-storage-record: false
 
       - name: Attest candidate Nginx image
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
@@ -192,6 +193,7 @@ jobs:
           subject-name: ${{ steps.image.outputs.nginx_repository }}
           subject-digest: ${{ steps.image.outputs.nginx_digest }}
           push-to-registry: true
+          create-storage-record: false
 
       - name: Verify build attestations before smoke test
         shell: bash

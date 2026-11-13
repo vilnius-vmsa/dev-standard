@@ -114,10 +114,10 @@ Single-slot ir blue-green `CD: Deploy` workflow perduoda sugeneruotą
 `SECRETS_DIR/compose.env` Compose interpolacijai; pats `RUNTIME_ENV` turinys
 Compose'ui per `--env-file` neperduodamas. Single-slot `CD: Deploy` job'as į helperį
 perduoda `RUNTIME_ENV`, `DEPLOY_ENVIRONMENT`, TLS reikšmes, image digest'us,
-`COMPOSE_PROJECT_NAME` ir `SECRETS_DIR`; helperis sugeneruoja `application.env`,
+ir `SECRETS_DIR`; helperis sugeneruoja `application.env`,
 Compose secret failus ir `compose.env`. Į `compose.env` įrašomi image nuorodos
 (single-slot – `PHP_IMAGE_REF`, `NGINX_IMAGE_REF`; blue-green – slotų nuorodos ir
-balancerio reikšmės), `COMPOSE_PROJECT_NAME`, `SECRETS_DIR`, `DB_DATABASE` ir
+balancerio reikšmės), `SECRETS_DIR`, `DB_DATABASE` ir
 `DB_USERNAME`. Abu deploy variantai prieš `pull` patikrina, kad šios reikšmės
 sugeneruotos, ir validuoja pilną Compose konfigūraciją.
 `CD: Deploy` ir blue-green workflow checkout'ina iš `source_sha` konkrečiam

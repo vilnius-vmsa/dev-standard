@@ -101,10 +101,10 @@ Pritaikomi Dockerfile, Compose ir GitHub Actions failai pateikti [DevOps pavyzd�
 
 Produkciniai Dockerfile turi būti multi-stage:
 
-1. `base` etape nustatoma fiksuota OS/runtime versija ir ne-root vartotojas.
-2. `dependencies` etape naudojami Composer/npm ar kito ekosistemos lock failai.
-3. `build` etape kompiliuojami asset'ai ir aplikacija; kešai naudojami tik per BuildKit cache mount.
-4. `runtime` etape kopijuojami tik vykdymui reikalingi failai, įrašomas `RELEASE_NUMBER`, paruošiamas PHP-FPM `ping.path` liveness patikrai (pats `healthcheck` aprašomas Compose faile) ir nustatomas exec formos `CMD`.
+1. Bazinis etapas (pavyzdyje `php_base`) nustato fiksuotą OS/runtime versiją, ne-root vartotoją ir PHP-FPM `ping.path` liveness patikrai.
+2. Priklausomybių etapai (`vendor_build`, `assets_build`) naudoja Composer/npm ar kitos ekosistemos lock failus.
+3. Build etapas (`application_build`) surenka aplikaciją; kešai naudojami tik per BuildKit cache mount.
+4. Galutinis etapas (`final`) kopijuoja tik vykdymui reikalingus failus, įrašo `RELEASE_NUMBER` (pats `healthcheck` aprašomas Compose faile) ir nustatomas exec formos `CMD`.
 
 PHP-FPM ir Nginx/frontend image turi turėti atskirus build ir runtime etapus. Runtime etape negali likti Node, Composer, kompiliatoriai, Git ar package manager cache'ai. Pritaikomi pavyzdžiai: [PHP-FPM Dockerfile](examples/docker/common/Dockerfile.prod.example) ir [Nginx/frontend Dockerfile](examples/docker/common/Dockerfile.nginx.prod.example).
 
@@ -142,7 +142,10 @@ naudoti vieną aplikacijos slotą. Jei pasirenkamas blue-green variantas, slotai
 paveldi bendrą konfigūraciją ir keičia tik slot'o image, pavadinimą bei
 priklausomybes; viešą portą valdo vienas balancer. Stateful duomenys (duomenų
 bazė, uploads ir reikalingi runtime failai) turi turėti aiškią persistent
-saugyklą.
+saugyklą. Naudotojų įkėlimų volume Nginx montuoja tik skaitymui ir su `nocopy`:
+kol volume tuščias, Docker jo savininką perima iš paskutinio sukurto konteinerio
+image, tad be `nocopy` volume atitektų Nginx naudotojui ir PHP negalėtų įrašyti
+pirmo failo.
 
 Persistent saugykloje laikomi tik naudotojų duomenys (pavyzdyje –
 `storage/app/public`). `storage/framework/*`, `storage/logs` ir `/tmp` yra
@@ -356,14 +359,16 @@ pan.), bet jo nėra nei `SECRET_KEYS`, nei `NON_SECRET_KEYS` sąraše, paruošim
 sustoja. Naujas raktas pridedamas trijose vietose kartu: helperio sąraše,
 entrypoint'e ir Compose `secrets:`.
 
+Compose projekto vardas nėra kontrakto dalis: jis fiksuotas pačiame Compose faile (`name:`), kaip etaloniniame projekte. Jei vardas būtų imamas iš checkout katalogo, perkėlus runner'io darbo katalogą Compose paleistų antrą stack'ą su tuščiais volume, nes volume vardai prasideda projekto vardu. Smoke vartas vardą perrašo kintamuoju `COMPOSE_PROJECT_NAME`, kad jo vienkartiniai konteineriai nesimaišytų su kitais.
+
 | Kontrakto dalis | Reikšmė / paskirtis |
 |---|---|
 | `RUNTIME_ENV` | Pilnas target aplinkos aplikacijos `.env` turinys – vardas vienodas staging ir production, nes kiekvienas GitHub Environment turi savo reikšmę (`OPS-ENV-P03`); perduodamas tik per protected GitHub Environment secret ir niekada neprintinamas. Helperis jį išskaido į `application.env` (be slaptų raktų) ir atskirus secret failus. |
 | `DEPLOY_ENVIRONMENT` | `staging` arba `production`; naudojamas aplinkos ir `APP_ENV` suderinamumui tikrinti. |
 | `TLS_CERTIFICATE_B64`, `TLS_PRIVATE_KEY_B64` | TLS sertifikato ir privataus rakto Base64 reikšmės; helperis tikrina dekodavimą, porą ir sertifikato galiojimą. |
-| `SECRETS_DIR`, `COMPOSE_PROJECT_NAME` | Hosto runtime katalogas ir Compose projekto vardas. Katalogas yra `0700` ir priklauso runner'io paskyrai; konteinerių montuojami secret failai jame yra `0444`, nes Compose file-secrets yra bind mount'ai ir neprivilegijuoti konteinerių naudotojai (PHP, Nginx, MySQL, Redis) kitaip jų neperskaitytų. `compose.env` skaito tik Compose hoste, todėl lieka `0600`. |
+| `SECRETS_DIR` | Hosto runtime katalogas. Katalogas yra `0700` ir priklauso runner'io paskyrai; konteinerių montuojami secret failai jame yra `0444`, nes Compose file-secrets yra bind mount'ai ir neprivilegijuoti konteinerių naudotojai (PHP, Nginx, MySQL, Redis) kitaip jų neperskaitytų. `compose.env` skaito tik Compose hoste, todėl lieka `0600`. |
 | Rekomenduojamas `prepare-runtime-secrets.sh` helperis | Iš aukščiau nurodytų įėjimų atomiškai sukuria `application.env` (be slaptų raktų), `app_key`, `mysql_password`, `mysql_root_password`, `redis_password`, `tls_certificate`, `tls_private_key` ir `compose.env`. |
-| `compose.env` | Sugeneruoti `COMPOSE_PROJECT_NAME`, `SECRETS_DIR`, DB reikšmės, ir pinned image refs; perduodamas `docker compose --env-file` prieš `config`, `pull` ir rollout. |
+| `compose.env` | Sugeneruoti `SECRETS_DIR`, DB reikšmės ir pinned image refs; perduodamas `docker compose --env-file` prieš `config`, `pull` ir rollout. |
 
 Priedo skriptas `docker/common/scripts/prepare-runtime-secrets.sh.example` yra
 rekomenduojamas helperio šaltinis, kurį projekte galima nukopijuoti kaip
@@ -514,7 +519,20 @@ nepavykęs aplikacijos diegimas nesustabdo logų siuntimo. Abu deploy workflow'a
 jį paleidžia po kiekvieno diegimo (`if: always()`), jei secrets helperis gavo
 `ALLOY_ENV` ir `LOKI_PASSWORD`; jei ne, run'e paliekamas įspėjimas, kad
 `OPS-MON-P02` šiai aplinkai neįvykdyta. Alloy nemontuoja Docker socket'o: jį
-pasiekia per socket proxy, kuris atveria tik skaitymo endpointus. Compose
+pasiekia per socket proxy, kuris atveria tik skaitymo endpointus. Logų skaitymui
+proxy turi turėti `ALLOW_LOGS=1`: vien `CONTAINERS=1` leidžia rasti konteinerius,
+bet ne skaityti jų logų, o Alloy tokiu atveju atrodo sveikas ir nieko nesiunčia.
+
+Socket proxy image šiuo metu rekomenduojamas `ghcr.io/linuxserver/socket-proxy`,
+prisegtas digest'u: iš išbandytų variantų jis vienintelis neturi aukštų ar kritinių
+Trivy radinių ir leidžia atverti logų skaitymą atskirai nuo kitų `/containers/`
+užklausų. `tecnativa/docker-socket-proxy` nerekomenduojamas: atnaujinamas retai
+ir skenuojant turi dešimtis žinomų pažeidžiamumų. Abu yra bendruomenės image, o
+proxy dirba kaip root prie Docker socket'o, todėl projektas tai įrašo kaip priimtą
+riziką. Keičiant proxy image ar jo versiją būtina iš naujo patikrinti, kad logai
+pasiekia Loki: tie patys nustatymai skirtinguose image reiškia ne tą patį.
+Organizacijos nuosavas proxy image ant oficialaus HAProxy (be root, su vienu
+peržiūrimu leidimų sąrašu) yra rengiamas; kai bus išleistas, pavyzdys rodys į jį. Compose
 profiliai tam nenaudojami nei development, nei production failuose: eksportas
 yra atskiras failas, kurį galima paleisti arba nepaleisti. Pavyzdinė
 [config.alloy](examples/docker/common/alloy/config.alloy.example) renka tik tų konteinerių
@@ -576,7 +594,7 @@ netinka: production job'as galėtų būti įvykdytas staging hoste ir atvirkšč
 Šių nustatymų code review nemato, todėl jie tikrinami perduodant projektą ir
 aprašomi projekto diegimo dokumentacijoje.
 
-Permissions nurodomos workflow arba job lygiu, `pull_request` iš fork'o negali gauti production secrets ar privileged build tokenų. Visi diegimo ir redeploy keliai baigiasi tame pačiame `CD: Deploy` job'e, o jo job lygio concurrency grupė `cd-deploy-<aplinka>` užtikrina, kad diegimas ir redeploy į tą pačią aplinką nevyktų lygiagrečiai. `ops.start-database` hostą keičia savo job'e (perrašo secrets katalogą), todėl naudoja tą pačią grupę. Kviečiantis workflow (pvz., `Ops: Deploy`) privalo naudoti kitą grupės vardą (`ops-deploy-<aplinka>`): jei kvietėjas ir kviečiamas job'as prašo tos pačios grupės, GitHub run'ą atšaukia kaip deadlock. Build ir release workflow grupės taip pat atskiros.
+Permissions nurodomos workflow arba job lygiu, `pull_request` iš fork'o negali gauti production secrets ar privileged build tokenų. Visi diegimo ir redeploy keliai baigiasi tame pačiame `CD: Deploy` job'e, o jo job lygio concurrency grupė `cd-deploy-<aplinka>` užtikrina, kad diegimas ir redeploy į tą pačią aplinką nevyktų lygiagrečiai. `ops.start-database` hostą keičia savo job'e (perrašo secrets katalogą), todėl naudoja tą pačią grupę. Aplinkos tag'o perkėlimas po diegimo (`promote-environment`) turi savo grupę `promote-<aplinka>`: bendroje deploy grupėje laukiantį perkėlimą galėtų atšaukti į eilę atėjęs kitas diegimas, ir tag'as liktų ant senos versijos. Kviečiantis workflow (pvz., `Ops: Deploy`) privalo naudoti kitą grupės vardą (`ops-deploy-<aplinka>`): jei kvietėjas ir kviečiamas job'as prašo tos pačios grupės, GitHub run'ą atšaukia kaip deadlock. Build ir release workflow grupės taip pat atskiros.
 
 
 ### Published-image smoke patikra

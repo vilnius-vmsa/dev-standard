@@ -7,7 +7,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { buildBundle } from '../../../scripts/standard/lib/bundle.mjs';
-import { agentsWarning, applyBundle, bundleSkills, CONFIG_FILE, legacyStacks, parseStacks, planRun, readConfig, resolveStacks, stackWarnings } from './sync.mjs';
+import {
+  agentsWarning, applyBundle, bundleSkills, CONFIG_FILE, DEPLOYMENT_METHODS, legacyStacks, parseStacks, planRun, readConfig,
+  RELEASE_MODELS, resolveStacks, stackWarnings,
+} from './sync.mjs';
+import { loadStacks } from '../../../scripts/standard/lib/stacks.mjs';
 
 const tempDir = () => mkdtemp(path.join(os.tmpdir(), 'dev-standard-sync-'));
 const SYNC = fileURLToPath(new URL('./sync.mjs', import.meta.url));
@@ -163,6 +167,15 @@ test('after the transition a repository that lists only infra is still warned', 
 
 test('the transitional note tells a repository that deploys nothing what to do', () => {
   assert.match(stackWarnings(['infra'], DEVOPS_MANIFEST), /deploys nothing .* keep `infra` as it is/);
+});
+
+test('every profile warning says where to change the stacks', () => {
+  for (const stacks of [['infra'], ['infra', 'docker'], ['flow-branch'], ['compose'], ['flow-branch', 'flow-tag', 'compose'], ['flow-tag', 'compose', 'k8s']]) {
+    const warning = stackWarnings(stacks, DEVOPS_MANIFEST);
+    assert.match(warning, /run the "Dev standard sync" workflow manually with the `stacks` input/, stacks.join(','));
+    assert.equal(warning.match(/To change the stacks/g).length, 1, stacks.join(','));
+  }
+  assert.equal(stackWarnings(['flow-tag', 'compose'], DEVOPS_MANIFEST), '');
 });
 
 test('a bundle from before the DevOps profiles gives no profile warning', () => {
@@ -340,6 +353,26 @@ test('CLI apply installs the bundle and writes the warning file', async () => {
   const { stdout } = await run(['apply', `--repo=${repo}`, `--bundle=${await makeBundle()}`, '--version=v1.3.0', '--stacks=laravel', `--warning=${warning}`]);
   assert.match(stdout, /Installed v1\.3\.0 for stacks: all, laravel, php/);
   assert.match(await readFile(warning, 'utf8'), /no `AGENTS\.md`/);
+});
+
+test('CLI apply writes the profile warning to the file the pull request shows', async () => {
+  const repo = await tempDir();
+  const warning = path.join(await tempDir(), 'warning.md');
+  await run(['apply', `--repo=${repo}`, `--bundle=${await makeBundle('v1.5.0', PROFILE_STACKS)}`, '--version=v1.5.0', '--stacks=infra', `--warning=${warning}`]);
+  const text = await readFile(warning, 'utf8');
+  assert.match(text, /no `AGENTS\.md`/);
+  assert.match(text, /lists `infra` but no DevOps profile/);
+  assert.match(text, /To change the stacks/);
+});
+
+test('the profile lists in sync match the real stacks file', async () => {
+  const stacks = await loadStacks(fileURLToPath(new URL('../../../standard/stacks.yaml', import.meta.url)));
+  for (const name of [...RELEASE_MODELS, ...DEPLOYMENT_METHODS, 'docker', 'infra']) assert.ok(stacks.has(name), name);
+  // What a repository that lists only `infra` still receives: exactly the profiles sync knows about.
+  assert.deepEqual([...stacks.get('infra').legacyIncludes].sort(), ['docker', ...RELEASE_MODELS, ...DEPLOYMENT_METHODS].sort());
+  // Every profile brings the common rules with it.
+  const manifest = { stacks: [...stacks.keys()], implies: Object.fromEntries([...stacks].map(([name, info]) => [name, info.implies])) };
+  for (const name of [...RELEASE_MODELS, ...DEPLOYMENT_METHODS, 'docker']) assert.ok(resolveStacks([name], manifest).includes('infra'), name);
 });
 
 test('CLI reports errors as workflow annotations', async () => {

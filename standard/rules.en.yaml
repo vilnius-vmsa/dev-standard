@@ -1228,6 +1228,9 @@ OPS-COMPOSE-P07:
 OPS-COMPOSE-P08:
   text: When the blue-green variant is chosen, the active slot is determined from the balancer configuration, not from separately stored state; traffic is switched only after the new slot passes its readiness check, and when deployment fails after the switch, traffic is returned to the previous slot.
   source_hash: 1fa41d26e9a5
+OPS-COMPOSE-P09:
+  text: In a Compose deployment, secret values reach the containers as mounted secret files from a restricted runtime directory on the deployment host, not through an environment file (`env_file`), `environment` values or the image.
+  source_hash: 6ab141cce977
 OPS-DEVSEC-P02:
   text: CI checks dependencies, runs static analysis and, where applicable, scans container images.
   source_hash: 1990b59f6c4b
@@ -1286,8 +1289,8 @@ OPS-FLOW-P06:
   text: If a project provides manual runtime service recreation, it uses an explicit operation with a concrete service allowlist; the implementation uses an image already present on the host, verifies the recreated service and forbids build, pull, promotion or image-reference changes.
   source_hash: 8f011c49a302
 OPS-FLOW-P07:
-  text: Secret preparation and rotation use a documented, safe and auditable procedure with an explicit input and output contract that never prints secret values; in a Compose deployment it additionally validates the application environment and TLS pair, installs files atomically with runtime permissions and prevents a partially written runtime state.
-  source_hash: a782abaf97ec
+  text: When the project uses environment or deployment secrets, their preparation and rotation use a documented, safe and auditable procedure with an explicit input and output contract; the procedure never prints secret values. In a Compose deployment it additionally validates the application environment and TLS pair, installs files atomically with runtime permissions and prevents a partially written runtime state.
+  source_hash: b5020349f6dc
 OPS-GITOPS-P01:
   text: The GitOps repository structure clearly separates application templates, environment parameters and, where applicable, cluster declarations.
   source_hash: 94daa58108fc
@@ -1337,8 +1340,8 @@ OPS-PIPE-P06:
   text: A workflow triggered by `workflow_run` verifies the conclusion, event, branch and repository of the triggering run before it uses secrets, publishes artifacts or deploys; build and deployment use the commit SHA of that run, not the tip of the default branch.
   source_hash: 072c0bf7ffcb
 OPS-PIPE-P07:
-  text: "The project declares its Git release model and deployment method: the matching stacks (`flow-branch` or `flow-tag`; `compose`, `compose-blue-green` or `k8s`) in `.dev-standard/config.json` and a description in the deployment documentation. Only one Git release model applies at a time. When no profile exists for the deployment technology (section 8.15), the deployment documentation or the README says so and no deployment-method stack is declared. When the repository deploys nothing (for example a library), the README says so and neither a release-model nor a deployment-method stack is declared. In both cases a project that builds container images declares `docker`."
-  source_hash: 0a68e467c281
+  text: "A repository that has CI/CD or delivery files (workflows, Dockerfiles, Compose files, manifests, deployment scripts) declares its DevOps stacks in `.dev-standard/config.json`: the chosen Git release model (`flow-branch` or `flow-tag`) and deployment method (`compose`, `compose-blue-green` or `k8s`), and describes them in the deployment documentation. Only one Git release model applies at a time. When no profile exists for the deployment technology (section 8.15), the deployment documentation says so and describes how that technology provides immutable artifacts, a readiness check, secret handling and rollback, and no deployment-method stack is declared. When the repository deploys nothing (for example a library), the README says so and `infra` alone is declared instead of a release model and a deployment method. In both cases a project that builds container images declares `docker`."
+  source_hash: 81c02c1bd897
 OPS-REPO-P01:
   text: An application repository clearly separates application code, Docker service configuration, root Compose files and active workflows; templates and examples are not mixed with active workflows.
   source_hash: 57644446cec4
@@ -1349,14 +1352,14 @@ OPS-TAG-P01:
   text: In the tag-based model, a production tag is a semantic-version tag that exists as `refs/tags/<name>` and points to a pre-tested commit; a branch named v1.2.3 is not a release tag.
   source_hash: 5d7f08b50126
 OPS-TAG-P02:
-  text: In a tag-based release that deploys a container image, the image is built once from the exact commit and passes the OPS-PIPE-P01 gates, and the same digest is promoted to production without a rebuild.
-  source_hash: 8beb49997da4
+  text: In a tag-based release, the deployed artifact (a container image) is built once from the exact commit and passes the OPS-PIPE-P01 gates, and the same artifact (for an image, the same digest) is promoted to production without a rebuild.
+  source_hash: 4f1572618d3c
 OPS-TAG-P03:
   text: In the tag-based model, a release records the commit SHA, the immutable identifiers of the deployed artifacts (digests for container images), migration information and rollback information; rollback uses an immutable identifier (a digest for an image) or a version tag, not an overwritten latest tag.
   source_hash: 6df2e8dd0758
 OPS-TAG-P04:
-  text: In the tag-based model, when a container image is deployed, only a digest that was deployed to staging and passed its readiness check may be promoted to production; staging may be skipped only under the conditions of OPS-TAG-P06.
-  source_hash: 52a98496ab38
+  text: "In the tag-based model, only an artifact (for a container image, a digest) that was deployed to staging and passed its readiness check may be promoted to production; staging may be skipped only when the candidate is fully verified by other gates and the production Environment requires approval by Required reviewers (OPS-TAG-P06). Whether the Environment requires reviewers is a repository setting that a human checks: when a workflow skips staging, list it under Open questions rather than reporting a violation."
+  source_hash: 1ed27b52b5d2
 OPS-VER-P02:
   text: Container images and other artefacts are tagged so it is clear which code version is deployed.
   source_hash: 5afec404997e

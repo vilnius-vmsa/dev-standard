@@ -57,7 +57,6 @@ jobs:
     env:
       DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
       COMPOSE_FILE: docker-compose.production.yml
-      COMPOSE_PROJECT_NAME: <application>-${{ inputs.environment }}
       SECRETS_DIR: /srv/<application>/secrets
       # These names are the production Compose contract. The secrets helper
       # writes them to SECRETS_DIR/compose.env before Compose is evaluated.
@@ -170,7 +169,7 @@ jobs:
           compose_env="$SECRETS_DIR/compose.env"
           test -r "$compose_env"
           for variable in \
-            COMPOSE_PROJECT_NAME SECRETS_DIR DB_DATABASE DB_USERNAME \
+            SECRETS_DIR DB_DATABASE DB_USERNAME \
             PHP_IMAGE_REF NGINX_IMAGE_REF; do
             grep -Eq "^${variable}=.+$" "$compose_env" || {
               echo "${variable} is missing from generated ${compose_env}." >&2
@@ -240,7 +239,6 @@ jobs:
             # --force-recreate: a changed config.alloy or credential is a
             # bind-mounted file, which Compose would not notice by itself.
             docker compose --env-file "$SECRETS_DIR/compose.env" \
-              -p "${COMPOSE_PROJECT_NAME}-observability" \
               -f docker-compose.observability.yml up -d --wait --force-recreate alloy
           else
             echo "::warning::Log export is not configured (ALLOY_ENV, LOKI_PASSWORD); OPS-MON-P02 is not met for this environment."

@@ -1,7 +1,7 @@
 # Inactive example. Copy to the application root as docker-compose.yml and
 # replace every placeholder. Never use this file as production configuration.
 
-name: ${COMPOSE_PROJECT_NAME:-application-dev}
+name: application-dev
 
 # Applied to every container: servers and databases keep time in UTC
 # (ARCH-API-P13), the same zone as date.timezone in php.prod.ini, so that
@@ -136,7 +136,7 @@ services:
 
 networks:
   internal:
-    name: ${COMPOSE_PROJECT_NAME:-application-dev}-internal
+    name: application-dev-internal
 
 volumes:
   mysql_data:

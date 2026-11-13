@@ -8,17 +8,19 @@ Read each matching rules file to its last line. If a read stops early, read the 
 
 Delivery rules are split by method. A repository chooses its profiles in `.dev-standard/config.json`: one release model (`flow-branch` or `flow-tag`) and one deployment method (`compose`, `compose-blue-green` or `k8s`). `docker` is not a deployment method: it holds the container image rules, comes with every deployment method, and is listed on its own by a repository that builds images but deploys with a technology the standard does not describe, or deploys nothing.
 
-* If `dev-standard-infra.instructions.md` is not installed, the repository has not enabled the DevOps rules (its config lists no infrastructure stack). Check none of them, do not state them from memory, and say in the summary that the DevOps rules are not enabled when the change touches delivery files.
-* `.dev-standard/config.json` decides which profiles are active: the stacks listed there, plus the stacks those build on. A profile rules file that is present but not chosen there is not active.
+* If `dev-standard-infra.instructions.md` is not installed, the repository has not enabled the DevOps rules (its config lists no infrastructure stack). Check none of them and do not state them from memory. When the repository has CI/CD or delivery files, that missing declaration is itself a violation of OPS-PIPE-P07, which is in `dev-standard-all.instructions.md`: report it once, on a change that touches those files or `.dev-standard/config.json`.
+* `.dev-standard/config.json` decides which profiles are active: the stacks listed there, plus the stacks those build on. A profile rules file that is present but not chosen there is not active, except in the transitional case below.
 * Apply the common `infra` rules and the rules of the active profiles. Do not apply or cite rules of a profile the repository did not choose.
 * If the change touches delivery files (workflows, Dockerfiles, Compose files, manifests, deployment scripts) and no release model or no deployment method is active, say in the summary that the method-specific rules were not checked and why: the standard does not describe this technology, the repository deploys nothing, or the profile is simply not chosen. Only the last case can be a violation, as the next point says. The common `infra` rules, when installed, still apply.
 * Outside the transitional case, report OPS-PIPE-P07 as a violation when the change touches `.dev-standard/config.json` or delivery files and the repository clearly deploys with a method the standard describes (production Compose files, Kubernetes manifests, Helm charts) or with a described release model, but the config does not list that stack: the rule requires the stack in the config as well as the description in the documentation, and without the stack those rules are not installed. Do not report it for a technology the standard does not describe or for a repository that deploys nothing.
-* Transitional: when the config lists `infra` and no profile, sync installs every profile file and the repository has not chosen yet. Decide from the repository itself which profiles to apply, apply only those, and name the missing choice in the summary:
+* Transitional case: the config lists `infra` and none of `docker`, `compose`, `compose-blue-green`, `flow-branch`, `flow-tag`, `k8s`. Sync then installs every profile file and the repository has not chosen yet. Decide from the repository itself which profiles to apply, apply only those, and name the missing choice in the summary:
   * release model: production is deployed by a `vX.Y.Z` tag: `flow-tag`; by a push or merge to `main` (with `stage` for staging): `flow-branch`;
   * deployment method: production Compose files with slot services (`*-blue`, `*-green`) and a balancer in front of them: `compose-blue-green`; other production Compose files: `compose`; Kubernetes manifests, Helm charts or Kustomize: `k8s`;
   * container images: a Dockerfile is present: `docker`, whatever the deployment method;
   * when the repository shows neither, apply none of that pair.
-* When the config itself lists both release models, report a configuration error.
+* Cases the standard does not describe in detail yet are reported as information in the summary, not as findings and without a severity label:
+  * the config lists both release models: say that a repository follows one release model, and apply the one its workflows actually use;
+  * the config lists a Compose profile together with `k8s`: apply both sets of rules and say that both are declared.
 
 ### Two passes
 

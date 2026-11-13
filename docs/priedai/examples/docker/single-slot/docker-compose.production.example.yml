@@ -2,7 +2,13 @@
 # docker-compose.production.yml and replace every placeholder. Production
 # never builds from the checkout.
 
-name: ${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME is required}
+# Fixed project name, as in the reference project. Compose prefixes every
+# volume and network with it. If it came from the checkout directory, a moved
+# runner workspace would start a second stack with empty volumes. Replace
+# `application` with the application's name. One environment per host is
+# assumed; the CI smoke gate overrides the name with COMPOSE_PROJECT_NAME to
+# keep its disposable containers and volumes apart.
+name: application
 
 # Applied to every container: servers and databases keep time in UTC
 # (ARCH-API-P13), the same zone as date.timezone in php.prod.ini, so that
@@ -133,7 +139,9 @@ services:
       - mysql_data:/var/lib/mysql
     networks: [internal]
     healthcheck:
-      test: ["CMD-SHELL", "MYSQL_PWD=$$(cat /run/secrets/mysql_root_password) mysqladmin ping -h 127.0.0.1 -u root --silent"]
+      # A real query, not `mysqladmin ping`: ping exits 0 even when the
+      # password is rejected, so a half-initialised server would look healthy.
+      test: ["CMD-SHELL", "MYSQL_PWD=$$(cat /run/secrets/mysql_root_password) mysql -h 127.0.0.1 -u root -N -e 'SELECT 1' >/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -233,7 +241,17 @@ services:
       # listener. The image itself stays role-neutral.
       - ./docker/nginx/conf.d/edge-tls.conf:/etc/nginx/conf.d/edge-tls.conf:ro
       # Read-only view of user uploads for the public storage link.
-      - application_uploads:/usr/share/nginx/html/storage:ro
+      # nocopy is required. While the uploads volume is still empty, Docker
+      # takes the owner of the volume root from the image of the container
+      # created last. Nginx is created after PHP and owns this directory as
+      # another user, so without nocopy the volume would end up owned by
+      # Nginx and PHP could never write the first upload.
+      - type: volume
+        source: application_uploads
+        target: /usr/share/nginx/html/storage
+        read_only: true
+        volume:
+          nocopy: true
     ports:
       # Server-only edge: TLS terminates in the production Nginx image on
       # 8443; the host exposes the public HTTPS port 443. The same production

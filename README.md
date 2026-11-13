@@ -100,7 +100,7 @@ The GitHub organization's Copilot custom instructions are set once by hand and o
      workflow_dispatch:
        inputs:
          stacks:
-           description: "First setup only, e.g. laravel,frontend"
+           description: "First setup or a stacks change: the full list, e.g. laravel,frontend,flow-branch,compose"
            required: false
          version:
            description: "latest or a release such as v1.3.1; empty keeps the pinned one"
@@ -127,16 +127,20 @@ The GitHub organization's Copilot custom instructions are set once by hand and o
 3. Open **Actions → Dev standard sync → Run workflow** and enter your stacks (`php`, `laravel`, `symfony`,
    `frontend`, `mobile`, `db`, and the DevOps profiles: one release model, `flow-branch` or `flow-tag`, and one
    deployment method, `compose`, `compose-blue-green` or `k8s`; `all` and the common `infra` rules are included
-   automatically). A stack that a newer release introduced (the DevOps profiles) can be listed only
-   after moving to that release: run the workflow with `version` set to `latest`. A repository that has CI but deploys nothing lists `infra` alone; sync then notes the missing
-   profiles, which such a repository can ignore. Merge the pull request it opens.
+   automatically; `docker` comes with every deployment method and is listed on its own only when the repository builds
+   images but deploys with a method the standard does not describe). A stack that a newer release introduced (the DevOps profiles) can be listed only
+   after moving to that release: run the workflow with `version` set to `latest`. A repository that has CI but deploys nothing lists `infra` alone. In this
+   release `infra` alone still installs every profile file and sync says so; from the next release it installs only
+   the common rules and sync notes the missing profiles, which such a repository can ignore. Merge the pull request it opens.
 4. Paste the section from the pull request's warning into your `AGENTS.md`, outside any block a tool generates (sync
    never edits it). Laravel Boost repositories also pin Claude Code's guidelines to `AGENTS.md` (CODE-AI-P12); the sync
    pull request shows how. When a release changes that section, the sync pull request warns again and shows the new version.
 
 Sync pins the version in `.dev-standard/config.json`. The weekly run opens a pull request when a new release
 exists; a manual run without input restores the pinned files; a manual run with `version` set to `latest` (or a
-release such as `v1.3.1`) moves to that release now; a manual run with `stacks` changes the stacks. Repositories
+release such as `v1.3.1`) moves to that release now; a manual run with `stacks` changes the stacks (give the full list). This is the way to change stacks: while a sync
+pull request is open, sync reads `.dev-standard/config.json` from that pull request's branch, so an edit of the
+file on the default branch is ignored and reverted when the pull request is merged. Repositories
 set up before the `version` input existed add it to their workflow to get the field.
 Vendor repositories that must stay on their contract version remove the `schedule` trigger. Put
 repository-specific rules in `.github/instructions/dev-standard-local.instructions.md`; sync never touches it.

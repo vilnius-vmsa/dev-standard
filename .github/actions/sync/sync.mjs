@@ -92,15 +92,19 @@ export function legacyStacks(stacks, manifest) {
   return added;
 }
 
-const RELEASE_MODELS = ['flow-branch', 'flow-tag'];
-const DEPLOYMENT_METHODS = ['compose', 'compose-blue-green', 'k8s'];
+export const RELEASE_MODELS = ['flow-branch', 'flow-tag'];
+export const DEPLOYMENT_METHODS = ['compose', 'compose-blue-green', 'k8s'];
 const profileNote = (text) => `> [!WARNING]\n> ${text}\n`;
 const NOTHING_DEPLOYED = 'If the repository deploys nothing (for example a library),';
+// While a sync pull request is open, sync reads the config from that pull request's branch, so an edit of
+// the config on the default branch is ignored and reverted when the pull request is merged.
+const HOW_TO_CHANGE = '>\n> To change the stacks, run the "Dev standard sync" workflow manually with the `stacks` input (the full list, for example `laravel,frontend,flow-branch,compose`), or edit `stacks` in `.dev-standard/config.json` on this pull request\'s branch. An edit on the default branch has no effect while this pull request is open.\n';
+const withHowToChange = (notes) => (notes ? `${notes}${HOW_TO_CHANGE}` : '');
 
 // Markdown for the pull request body; empty when the DevOps profiles in the config need no attention.
 // Does not depend on legacyIncludes: once the transition is over, a repository that still lists only
 // `infra` must be told why its profile files are being removed.
-export function stackWarnings(stacks, manifest) {
+function profileNotes(stacks, manifest) {
   // Releases before the DevOps profiles know none of these stacks.
   if (!RELEASE_MODELS.every((model) => manifest.stacks.includes(model))) return '';
   const resolved = resolveStacks(stacks, manifest);
@@ -115,7 +119,7 @@ export function stackWarnings(stacks, manifest) {
   const methods = DEPLOYMENT_METHODS.filter((method) => stacks.includes(method));
   if (models.length === 0 && methods.length === 0) {
     // One note, not two: a repository that deploys nothing legitimately has neither.
-    return profileNote(`\`${CONFIG_FILE}\` lists no release model and no deployment method, so the branch-based, tag-based, Compose and Kubernetes rules are not installed. Add one release model (\`flow-branch\` or \`flow-tag\`) and one deployment method (\`compose\`, \`compose-blue-green\` or \`k8s\`). ${NOTHING_DEPLOYED} say so in its README and ignore this note (OPS-PIPE-P07).`);
+    return profileNote(`\`${CONFIG_FILE}\` lists no release model and no deployment method, so the branch-based, tag-based, Compose and Kubernetes rules are not installed. Add one release model (\`flow-branch\` or \`flow-tag\`) and one deployment method (\`compose\`, \`compose-blue-green\` or \`k8s\`). If it deploys with a technology the standard does not describe, add only the release model (and \`docker\` when it builds container images). ${NOTHING_DEPLOYED} say so in its README and ignore this note (OPS-PIPE-P07).`);
   }
   if (models.length === 2) {
     lines.push(profileNote(`\`${CONFIG_FILE}\` lists both \`flow-branch\` and \`flow-tag\`. A repository follows one release model; remove the other.`));
@@ -128,6 +132,10 @@ export function stackWarnings(stacks, manifest) {
     lines.push(profileNote(`\`${CONFIG_FILE}\` lists both a Compose profile and \`k8s\`. A repository normally has one deployment method; keep both only if it really deploys both ways.`));
   }
   return lines.join('\n');
+}
+
+export function stackWarnings(stacks, manifest) {
+  return withHowToChange(profileNotes(stacks, manifest));
 }
 
 // Bundles up to v1.2.7 hold one skill in skill/ and list no skills in the manifest.

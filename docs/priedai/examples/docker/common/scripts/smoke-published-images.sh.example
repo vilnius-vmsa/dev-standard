@@ -111,6 +111,8 @@ fi
 # SECRETS_DIR at a deployment host directory and never pass real secrets.
 WORK_DIR="$(mktemp -d "${RUNNER_TEMP:-/tmp}/ci-image-smoke.XXXXXX")"
 export SECRETS_DIR="$WORK_DIR/secrets"
+# Overrides the fixed `name:` of the Compose file, so the gate never touches
+# containers, networks or volumes of another project on the runner.
 export COMPOSE_PROJECT_NAME="ci-smoke-${GITHUB_RUN_ID:-local}-${GITHUB_RUN_ATTEMPT:-1}"
 
 compose_files=(-f "$PRODUCTION_COMPOSE_FILE")

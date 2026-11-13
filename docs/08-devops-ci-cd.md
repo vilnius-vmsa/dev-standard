@@ -35,7 +35,7 @@ Kas laikoma saugia slaptųjų raktų saugykla (OPS-ENV-P05 taikymas):
 *   GitHub Environment secrets yra saugi slaptųjų raktų saugykla. Aplinkos ir runtime reikšmės (aplikacijos aplinka, slaptažodžiai, TLS) laikomos aplinkos lygiu, aplinkoje, apsaugotoje pagal OPS-PIPE-P03; jos nelaikomos repozitorijos ar organizacijos lygiu.
 *   Build metu reikalingi kredencialai, kurie nesuteikia prieigos prie aplinkų (pvz., privačių paketų skaitymo ar sinchronizacijos GitHub App raktas), gali būti repozitorijos ar organizacijos secrets, nes juos naudojantys job'ai aplinkos nedeklaruoja.
 *   Organizacijos slaptažodžių saugykla (DVLS) taip pat yra saugi saugykla ir naudojama papildomai – reikšmėms, kurios neperduodamos per CI/CD arba turi būti prieinamos žmonėms.
-*   Compose diegime reikšmės diegimo hoste gyvena tik riboto prieinamumo runtime kataloge ir į konteinerius patenka kaip sumontuoti failai, o ne per aplinkos failą ar image.
+*   Compose diegime reikšmės diegimo hoste gyvena tik riboto prieinamumo runtime kataloge ir į konteinerius patenka kaip sumontuoti failai, o ne per aplinkos failą ar image (`OPS-COMPOSE-P09`).
 *   Repozitorijos failai, `.env` pavyzdžiai su tikromis reikšmėmis, build argumentai, workflow kintamieji (`vars`), logai ir artefaktai saugykla nelaikomi.
 
 > Susiję skyriai: [3.5 Konfigūracija, slaptieji raktai ir aplinkos](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [3.7 Stebėsena ir diagnostika](03-architektura.md#37-stebėsena-ir-diagnostika)
@@ -57,7 +57,7 @@ PRIVALOMA:
     *   saugumo ir priklausomybių patikras
 <!-- OPS-CI-P04 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Artefaktai turi būti generuojami su aiškiu ir atsekamu identifikatoriumi.
-<!-- OPS-CI-P05 | process-level -->
+<!-- OPS-CI-P05 | human-reviewable -->
 *   Nepraėję privalomi kokybės vartai turi blokuoti merge’inimą.
 
 REKOMENDUOJAMA:
@@ -74,7 +74,7 @@ REKOMENDUOJAMA:
 PRIVALOMA:
 
 <!-- OPS-CD-P01 | process-level -->
-*   Diegimai turi būti atliekami per automatizuotą CD procesą, kuris užtikrina atsekamą ir pakartojamą leidimą į tikslinę aplinką.
+*   CD procesas turi užtikrinti atsekamą ir pakartojamą leidimą į tikslinę aplinką: iš jo įrašų turi būti aišku, kuri versija, kada ir kieno paleidimu įdiegta, o tą pačią versiją turi būti įmanoma įdiegti iš naujo. Kad diegiama tik per CI/CD, nustato `OPS-ENV-P01`.
 <!-- OPS-CD-P02 | human-reviewable -->
 *   GitOps turi būti laikomas numatytuoju diegimo modeliu ten, kur jis taikomas.
 <!-- OPS-CD-P03 | human-reviewable -->
@@ -174,7 +174,7 @@ PRIVALOMA:
 <!-- OPS-IAC-P02 | process-level -->
 *   IaC pakeitimai turi būti peržiūrimi per PR arba MR procesą taip pat, kaip ir programinis kodas.
 <!-- OPS-IAC-P03 | process-level -->
-*   Infrastruktūros būsena negali būti valdoma per neversijuojamus rankinius pakeitimus kaip įprastą praktiką.
+*   Infrastruktūros pakeitimai turi būti atliekami per versijuojamą IaC kodą; rankinis pakeitimas nėra įprasta praktika. Aplinkų būsenos deklaratyvų valdymą nustato `OPS-ENV-P04`.
 <!-- OPS-IAC-P04 | human-reviewable -->
 *   Kritiniai infrastruktūros sprendimai turi būti atsekami ir audituojami.
 
@@ -242,19 +242,19 @@ PRIVALOMA:
 <!-- OPS-PIPE-P02 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Build, testų, skenavimo ir kiti aplinkos nekeičiantys job'ai turi būti vykdomi GitHub-hosted runner'iuose ir negali naudoti deploy runner'ių ar aplinkų secrets; aplinką keičiantis job'as turi deklaruoti tos aplinkos GitHub Environment; Compose diegime jis papildomai turi būti vykdomas tik tos aplinkos self-hosted runner'yje, parenkamame pagal aplinkos label'į, o ne pagal bendrą visoms aplinkoms label'į.
 <!-- OPS-PIPE-P03 | human-reviewable -->
-*   Kiekviena deploy aplinka turi turėti atskirą GitHub Environment, kuriame laikomi tik tos aplinkos secrets ir kintamieji ir kuris riboja, iš kurių apsaugotų šakų ar tag'ų leidžiama diegti. Privalomas patvirtinimas yra PR peržiūra prieš sujungimą į apsaugotą šaką ([4.3.3 skyrių](04-kodo-kurimo-gaires.md#433-šakų-branch-apsauga)); production Environment „Required reviewers“ yra rekomenduojama papildoma priemonė. Compose diegime kiekviena aplinka turi turėti savo self-hosted runner'į su tos aplinkos label'iu, prieinamą tik tam skirtoms repozitorijoms.
+*   Kiekviena deploy aplinka turi turėti atskirą GitHub Environment, kuriame laikomi tik tos aplinkos secrets ir kintamieji ir kuris riboja, iš kurių apsaugotų šakų ar tag'ų leidžiama diegti. Privalomas patvirtinimas yra PR peržiūra prieš sujungimą į apsaugotą šaką (žr. [4.3.3 skyrių](04-kodo-kurimo-gaires.md#433-šakų-branch-apsauga)); production Environment „Required reviewers“ yra rekomenduojama papildoma priemonė. Compose diegime kiekviena aplinka turi turėti savo self-hosted runner'į su tos aplinkos label'iu, prieinamą tik tam skirtoms repozitorijoms.
 <!-- OPS-PIPE-P04 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Trečiųjų šalių GitHub action'ai ir reusable workflow'ai turi būti nurodomi pilnu commit SHA su versijos komentaru, o ne tag'u ar šaka; organizacijos nuosavi reusable workflow'ai ir action'ai (`vilnius-vmsa/*`) kol kas gali būti nurodomi šaka `@main`.
 <!-- OPS-PIPE-P05 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Visi diegimai į tą pačią aplinką turi būti vykdomi per vieną concurrency grupę, nustatytą pačiame deploy workflow'e arba jo job'e, kad du diegimai į tą pačią aplinką nevyktų vienu metu; deploy workflow'ą kviečiantis workflow negali naudoti to paties grupės vardo, o pradėtas diegimas negali būti atšaukiamas naujo run'o (`cancel-in-progress: false`).
 <!-- OPS-PIPE-P06 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Workflow, paleidžiamas per `workflow_run`, prieš naudodamas secrets, publikuodamas artefaktus ar diegdamas turi patikrinti jį sukėlusio run'o rezultatą, įvykį, šaką ir repozitoriją; build ir diegimas turi naudoti to run'o commit SHA, o ne numatytosios šakos viršūnę.
-<!-- OPS-PIPE-P07 | ai-reviewable | stacks=infra | enforced-by=ai -->
-*   Projektas turi deklaruoti pasirinktą Git leidimo modelį ir diegimo būdą: atitinkamus stack'us (`flow-branch` arba `flow-tag`; `compose`, `compose-blue-green` arba `k8s`) `.dev-standard/config.json` faile ir aprašymą diegimo dokumentacijoje. Vienu metu galioja vienas Git leidimo modelis. Jei diegimo technologijai profilio nėra ([8.15](#815-neaprašytos-technologijos)), tai nurodoma diegimo dokumentacijoje arba README, o diegimo būdo stack'as nedeklaruojamas. Jei repozitorija nieko nediegia (pvz., biblioteka), tai nurodoma README ir nedeklaruojamas nei Git leidimo modelio, nei diegimo būdo stack'as. Abiem atvejais konteinerių image statantis projektas deklaruoja `docker`.
+<!-- OPS-PIPE-P07 | ai-reviewable | stacks=all | enforced-by=ai -->
+*   Repozitorija, turinti CI/CD ar diegimo failų (workflow'ų, Dockerfile, Compose failų, manifestų, diegimo skriptų), turi `.dev-standard/config.json` faile deklaruoti DevOps stack'us: pasirinktą Git leidimo modelį (`flow-branch` arba `flow-tag`) ir diegimo būdą (`compose`, `compose-blue-green` arba `k8s`), ir aprašyti juos diegimo dokumentacijoje. Vienu metu galioja vienas Git leidimo modelis. Jei diegimo technologijai profilio nėra ([8.15](#815-neaprašytos-technologijos)), tai nurodoma diegimo dokumentacijoje kartu su aprašymu, kaip ta technologija užtikrina nekintamus artefaktus, readiness patikrą, secrets valdymą ir rollback, o diegimo būdo stack'as nedeklaruojamas. Jei repozitorija nieko nediegia (pvz., biblioteka), tai nurodoma README ir vietoj Git leidimo modelio bei diegimo būdo deklaruojamas vien `infra`. Abiem atvejais konteinerių image statantis projektas deklaruoja `docker`.
 <!-- OPS-FLOW-P05 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Kai diegiamas konteinerio image, rankiniam jau patikrinto image redeploy turi būti atskira operatoriaus procedūra, kuri pagal aplinkos tag'ą arba nekintamą source tag'ą išsprendžia kanoninių image repository digest'us, patikrina jų source revision bei build/release attestation, nekeičia kodo ar pasirinkto image digest'o ir nepakeičia lint, build ar saugos vartų. Į production gali būti diegiamas tik image, kurio source commit priklauso apsaugotam production šaltiniui, ir tai turi būti patikrinta prieš diegimą; staging gali naudoti staging šaltinio commit'ą.
 <!-- OPS-FLOW-P07 | ai-reviewable | stacks=infra | enforced-by=ai -->
-*   Secret paruošimui ir rotacijai turi būti dokumentuota saugi, audituojama procedūra su aiškia įėjimų ir išėjimų sutartimi, kuri neprintina secret reikšmių; Compose diegime ji papildomai turi validuoti aplikacijos aplinką ir TLS porą, įdiegti failus atomiškai su runtime leidimais ir neleisti pusiau įrašytos runtime būsenos.
+*   Jei projektas naudoja aplinkų ar diegimo secrets, jų paruošimui ir rotacijai turi būti dokumentuota saugi, audituojama procedūra su aiškia įėjimų ir išėjimų sutartimi; procedūra neprintina secret reikšmių. Compose diegime ji papildomai turi validuoti aplikacijos aplinką ir TLS porą, įdiegti failus atomiškai su runtime leidimais ir neleisti pusiau įrašytos runtime būsenos.
 <!-- OPS-REPO-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Konteinerių, CI/CD ir infrastruktūros failai aplikacijos repozitorijoje turi būti laikomi sutartose vietose: Dockerfile, servisų konfigūracija ir diegimo skriptai – `docker/` kataloge, Compose failai – repozitorijos šaknyje, darbo eigos ir action'ai – `.github/`, Kubernetes ir Helm manifestai – `k8s/`, `kubernetes/`, `helm/` arba `charts/` kataloge. Kita vieta leidžiama tik tada, kai išimtis įrašyta projekto `.github/instructions/dev-standard-local.instructions.md` faile, nurodant kelius ir priežastį; išimtyje nurodytiems keliams taikomos tos pačios 8 skyriaus (`OPS-*`) taisyklės.
 
@@ -262,7 +262,7 @@ Pasirinkimas deklaruojamas `.dev-standard/config.json` stack'ais (`OPS-PIPE-P07`
 
 | Stack | Kada rinktis | Taisyklės |
 |---|---|---|
-| `infra` | Įtraukiamas automatiškai su bet kuriuo žemiau esančiu | Bendros: 8.1–8.10 (išskyrus `OPS-REPO-P02`, kuri galioja visiems projektams) |
+| `infra` | Įtraukiamas automatiškai su bet kuriuo žemiau esančiu. Vienas pats deklaruojamas repozitorijos, kuri turi CI, bet nieko nediegia | Bendros: 8.1–8.10 (išskyrus `OPS-REPO-P02` ir `OPS-PIPE-P07`, kurios galioja visiems projektams) |
 | `flow-branch` | Git modelis: `stage` → staging, `main` → production | 8.11.1 |
 | `flow-tag` | Git modelis: production leidžiama apsaugotu `vX.Y.Z` tag'u | 8.11.2 |
 | `docker` | Įtraukiamas automatiškai su `compose` ir `k8s`; deklaruojamas tiesiogiai, kai image statomi, bet diegimo būdui profilio nėra | 8.12 |
@@ -338,18 +338,18 @@ environment tag'ą arba `sha-<40>` ir attestation šaltiniu naudoja `ci.build.ym
 
 > Taikoma projektams, pasirinkusiems stack'ą `flow-tag` (`.dev-standard/config.json`).
 
-Tag-based modelis tinka, kai produkcija turi būti leidžiama tik aiškiai patvirtintomis, versijuotomis versijomis. Šiame standarto pavyzdyje `main` push po CI vartų candidate digest'ą įdiegia į staging, o apsaugotas `vX.Y.Z` tag tik po sėkmingos staging patikros tą patį digest'ą promote'ina į production per apsaugotą GitHub Environment. Tag yra leidimo įrašas, o ne priežastis perbuild'inti jau patikrintą image. Kituose tag-based modeliuose staging gali būti pasirenkamas, tik `OPS-TAG-P06` sąlygomis.
+Tag-based modelis tinka, kai produkcija turi būti leidžiama tik aiškiai patvirtintomis, versijuotomis versijomis. Šiame standarto pavyzdyje `main` push po CI vartų candidate digest'ą įdiegia į staging, o apsaugotas `vX.Y.Z` tag tik po sėkmingos staging patikros tą patį digest'ą promote'ina į production per apsaugotą GitHub Environment. Tag yra leidimo įrašas, o ne priežastis perbuild'inti jau patikrintą image. Staging praleisti galima tik `OPS-TAG-P06` sąlygomis.
 
 PRIVALOMA:
 
 <!-- OPS-TAG-P01 | ai-reviewable | stacks=flow-tag | enforced-by=ai -->
 *   Tag-based modelyje produkcinis tag turi būti semantinės versijos tag, kuris realiai egzistuoja kaip `refs/tags/<name>` ir nurodo į iš anksto patikrintą commit; branch'as, pavadintas kaip `v1.2.3`, negali būti laikomas release tag.
 <!-- OPS-TAG-P02 | ai-reviewable | stacks=flow-tag | enforced-by=ai -->
-*   Tag-based leidime, kai diegiamas konteinerio image, image turi būti pastatytas vieną kartą iš tikslaus commit ir praeiti `OPS-PIPE-P01` vartus, o į produkciją turi būti promotion'intas tas pats digest be rebuild.
+*   Tag-based leidime diegiamas artefaktas (konteinerio image) turi būti pastatytas vieną kartą iš tikslaus commit ir praeiti `OPS-PIPE-P01` vartus, o į produkciją turi būti paaukštintas tas pats artefaktas (image – tas pats digest) be rebuild.
 <!-- OPS-TAG-P03 | ai-reviewable | stacks=flow-tag | enforced-by=ai -->
 *   Tag-based modelyje release turi registruoti commit SHA, diegiamų artefaktų nekintamus identifikatorius (konteinerių image – digest'us) ir migracijų bei rollback informaciją; rollback turi remtis nekintamu identifikatoriumi (image – digest) arba versijos tag, o ne perrašomu `latest`.
 <!-- OPS-TAG-P04 | ai-reviewable | stacks=flow-tag | enforced-by=ai -->
-*   Tag-based modelyje, kai diegiamas konteinerio image, į production gali būti paaukštintas tik digest'as, kuris buvo įdiegtas į staging ir praėjo jo readiness patikrą; staging praleisti galima tik `OPS-TAG-P06` sąlygomis.
+*   Tag-based modelyje į production gali būti paaukštintas tik artefaktas (konteinerio image – digest'as), kuris buvo įdiegtas į staging ir praėjo jo readiness patikrą; staging praleisti galima tik tada, kai candidate pilnai patikrintas kitais vartais ir production Environment reikalauja „Required reviewers“ patvirtinimo (`OPS-TAG-P06`).
 <!-- OPS-TAG-P05 | human-reviewable -->
 *   Tag-based modelyje release tag'ai turi būti apsaugoti repozitorijos taisyklėmis: nustatyta, kas gali juos kurti, o perkelti ar ištrinti paskelbto tag'o negalima.
 <!-- OPS-TAG-P06 | human-reviewable -->
@@ -362,7 +362,7 @@ push main → lint/validate/test → candidate build → scan/SBOM/provenance �
 protected vX.Y.Z tag → verify tag commit == staging-tested SHA → promote the same digest → deploy production (optional Environment approval)
 ```
 
-Tag push neturi iš naujo tikrinti ar perbuild'inti nepatikrinto kodo. Šiame modelyje promotion vartai turi remtis pasirašytu įrodymu, kad būtent šie image digest'ai buvo įdiegti į staging ir praėjo jo readiness patikrą (pavyzdyje – „staging-verified“ attestation, susieta su konkrečiu build run'u). SHA pagrindu pavadintas registry tag'as naudojamas tik digest'ui surasti ir pats savaime įrodymu nelaikomas.
+Tag push neturi iš naujo tikrinti ar perbuild'inti nepatikrinto kodo. `OPS-TAG-P04` reikalauja, kad į production patektų tik staging'e įdiegtas ir patikrintas artefaktas; šio standarto pavyzdyje tai įrodoma pasirašytu įrodymu, kad būtent šie image digest'ai buvo įdiegti į staging ir praėjo jo readiness patikrą (pavyzdyje – „staging-verified“ attestation, susieta su konkrečiu build run'u). SHA pagrindu pavadintas registry tag'as naudojamas tik digest'ui surasti ir pats savaime įrodymu nelaikomas.
 
 Tag-based rollback arba redeploy pagal versiją naudoja atskirą `Ops: Deploy`
 tag-based variantą: jis `vX.Y.Z` tag'ą susieja su image source SHA ir perduoda
@@ -407,6 +407,8 @@ PRIVALOMA:
 *   Jei projektas teikia rankinį runtime serviso atkūrimo kelią, jis turi vykti per aiškią operaciją su konkrečiu servisų allowlist'u; realizacija turi naudoti hoste jau esantį image, patikrinti atkurtą servisą ir neleisti build, pull, promotion ar image ref pakeitimo.
 <!-- OPS-COMPOSE-P06 | ai-reviewable | stacks=compose | enforced-by=ai -->
 *   Compose diegime secret rotacijos procedūra turi aprašyti saugią servisų restart ir rollback seką.
+<!-- OPS-COMPOSE-P09 | ai-reviewable | stacks=compose | enforced-by=ai -->
+*   Compose diegime slaptos reikšmės į konteinerius turi patekti kaip sumontuoti secret failai iš riboto prieinamumo runtime katalogo diegimo hoste, o ne per aplinkos failą (`env_file`), `environment` reikšmes ar image.
 
 ### 8.13.2. Blue-green variantas {#8132-blue-green-variantas}
 
@@ -482,5 +484,5 @@ Standartas diegimo profilius aprašo tik tiems būdams, kuriems yra parengtos ta
 *   projektui galioja visos bendros taisyklės ([8.1](#81-aplinkos-ir-bendri-principai)–[8.10](#810-bendri-pipeline-vartai-ir-profilio-pasirinkimas)) ir pasirinkto Git leidimo modelio taisyklės ([8.11](#811-git-leidimo-modeliai));
 *   konteinerių image taisyklės ([8.12](#812-konteinerių-image)) galioja kiekvienam projektui, kuris stato konteinerių image, nepriklausomai nuo diegimo būdo – toks projektas deklaruoja stack'ą `docker`;
 *   Compose ir Kubernetes taisyklės (8.13–8.14) netaikomos, o automatinis review ataskaitoje aiškiai nurodo, kad profilis nepasirinktas arba standarte neaprašytas ir specifinės taisyklės nevertintos – tai nėra tylus praleidimas;
-*   projektas diegimo dokumentacijoje aprašo, kaip pasirinkta technologija įgyvendina lygiaverčius reikalavimus: nekintamus artefaktus, readiness patikrą, secrets valdymą, rollback ir resursų ribas;
+*   projektas diegimo dokumentacijoje aprašo, kaip pasirinkta technologija įgyvendina lygiaverčius reikalavimus: nekintamus artefaktus, readiness patikrą, secrets valdymą, rollback ir resursų ribas (`OPS-PIPE-P07`);
 *   jei technologiją naudoja daugiau nei vienas projektas, standartui siūlomas naujas profilis (žr. [13 skyrių](13-standarto-prieziura.md)).

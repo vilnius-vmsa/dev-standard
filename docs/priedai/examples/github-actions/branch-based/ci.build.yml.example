@@ -183,6 +183,7 @@ jobs:
           subject-name: ${{ steps.image.outputs.app_repository }}
           subject-digest: ${{ steps.image.outputs.app_digest }}
           push-to-registry: true
+          create-storage-record: false
 
       - name: Attest Nginx build provenance
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
@@ -190,6 +191,7 @@ jobs:
           subject-name: ${{ steps.image.outputs.nginx_repository }}
           subject-digest: ${{ steps.image.outputs.nginx_digest }}
           push-to-registry: true
+          create-storage-record: false
 
       - name: Verify build attestations before smoke test
         shell: bash
@@ -312,8 +314,14 @@ jobs:
     name: Promote the deployed ${{ needs.build-test-promote.outputs.environment }} image labels
     needs: [build-test-promote, deploy]
     if: needs.deploy.result == 'success' && needs.build-test-promote.result == 'success'
+    # Its own group, not the deploy group: the workflow that calls cd.deploy
+    # must not use `cd-deploy-<env>` (OPS-PIPE-P05), and as the single pending
+    # job of that group this job could be cancelled by a queued deployment,
+    # leaving the environment tag unmoved after a successful deploy. Pushes
+    # to one branch are already ordered by this workflow's `build-<branch>`
+    # group.
     concurrency:
-      group: cd-deploy-${{ needs.build-test-promote.outputs.environment }}
+      group: promote-${{ needs.build-test-promote.outputs.environment }}
       cancel-in-progress: false
     runs-on: ubuntu-latest
     permissions:

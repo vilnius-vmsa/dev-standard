@@ -16,7 +16,7 @@ Read those files from disk. Never state a rule from memory.
 
 ## When writing or changing code
 
-1. List the files you will touch. Read `dev-standard-all.instructions.md` and every rules file whose `applyTo` matches one of them. For delivery files (workflows, Dockerfiles, Compose files, manifests, deployment scripts), follow only the DevOps profiles this repository chose, as the "DevOps profiles" section of [review-method.md](review-method.md) describes: a profile rules file that is present but not chosen in `.dev-standard/config.json` does not apply.
+1. List the files you will touch. Read `dev-standard-all.instructions.md` and every rules file whose `applyTo` matches one of them. For delivery files (workflows, Dockerfiles, Compose files, manifests, deployment scripts), follow only the DevOps profiles this repository chose, as the "DevOps profiles" section of [review-method.md](review-method.md) describes: a profile rules file that is present but not chosen in `.dev-standard/config.json` does not apply. The exception is the transitional case described there: when the config lists `infra` and none of `docker`, `compose`, `compose-blue-green`, `flow-branch`, `flow-tag`, `k8s`, every profile file is installed and you follow the ones that match what the repository actually uses.
 2. Follow every MUST rule. If you cannot, stop and tell the user which rule ID blocks you and why.
 3. Before you report the task as done, check your own changes against the same rules and fix every MUST violation.
 4. If the change alters behaviour, commands, configuration or an API that the repository's documentation describes, run the `dev-standard-docs` skill in update mode before you report the task as done.

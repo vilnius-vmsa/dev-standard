@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       stacks:
-        description: "First setup only, for example laravel,frontend"
+        description: "First setup or a stacks change: the full list, for example laravel,frontend,flow-branch,compose"
         required: false
         type: string
       version:
