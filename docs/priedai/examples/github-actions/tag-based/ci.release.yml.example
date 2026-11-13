@@ -229,8 +229,15 @@ jobs:
             echo
             echo "### Migrations"
             echo
+            # Added files are new migrations. Any other change under the
+            # migrations path (modified, deleted, renamed) touches a migration
+            # that earlier releases may already have run: it will not run again,
+            # so the schema of existing environments silently differs from the
+            # code. The record lists both, each under its own heading.
+            changed_migrations=""
             if [ -n "$previous_tag" ]; then
               migrations="$(git diff --name-only --diff-filter=A "$previous_tag" "$SOURCE_SHA" -- "$MIGRATIONS_PATH")"
+              changed_migrations="$(git diff --name-status -M --diff-filter=a "$previous_tag" "$SOURCE_SHA" -- "$MIGRATIONS_PATH")"
             else
               migrations="$(git ls-tree -r --name-only "$SOURCE_SHA" -- "$MIGRATIONS_PATH")"
             fi
@@ -242,6 +249,20 @@ jobs:
               done <<< "$migrations"
             else
               echo "No new database migrations."
+            fi
+            if [ -n "$changed_migrations" ]; then
+              echo
+              echo "**Existing migrations were changed.** A migration that an environment has already run is not run again, so these changes do not reach existing databases. Check each one before deploying; a schema change belongs in a new migration:"
+              echo
+              while IFS=$'\t' read -r status first second; do
+                case "$status" in
+                  M*) printf '%s\n' "- modified: \`$first\`" ;;
+                  D*) printf '%s\n' "- deleted: \`$first\`" ;;
+                  R*) printf '%s\n' "- renamed: \`$first\` → \`$second\`" ;;
+                  *)  printf '%s\n' "- changed ($status): \`$first\`" ;;
+                esac
+              done <<< "$changed_migrations"
+              echo "::warning::This release changes migrations that earlier releases already contain; see the Migrations section of the release record." >&2
             fi
             echo
             echo "### Rollback"

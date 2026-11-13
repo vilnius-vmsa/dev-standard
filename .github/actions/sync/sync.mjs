@@ -120,6 +120,11 @@ function profileNotes(stacks, manifest) {
   const lines = [];
   const models = RELEASE_MODELS.filter((model) => stacks.includes(model));
   const methods = DEPLOYMENT_METHODS.filter((method) => stacks.includes(method));
+  if (models.length === 0 && methods.length === 0 && stacks.includes('docker')) {
+    // `docker` alone is a valid choice (OPS-PIPE-P07): the repository builds images and deploys nothing.
+    // It is not silenced, because a repository that does deploy still needs its release model.
+    return profileNote(`\`${CONFIG_FILE}\` lists \`docker\` without a release model or a deployment method. That is correct for a repository that builds container images and deploys nothing: say so in its README and ignore this note. If the repository deploys, add its release model (\`flow-branch\` or \`flow-tag\`), and a deployment method (\`compose\`, \`compose-blue-green\` or \`k8s\`) unless it deploys with a technology the standard does not describe (OPS-PIPE-P07).`);
+  }
   if (models.length === 0 && methods.length === 0) {
     // One note, not two: a repository that deploys nothing legitimately has neither.
     return profileNote(`\`${CONFIG_FILE}\` lists no release model and no deployment method, so the branch-based, tag-based, Compose and Kubernetes rules are not installed. Add one release model (\`flow-branch\` or \`flow-tag\`) and one deployment method (\`compose\`, \`compose-blue-green\` or \`k8s\`). If it deploys with a technology the standard does not describe, add only the release model (and \`docker\` when it builds container images). ${NOTHING_DEPLOYED} say so in its README and ignore this note (OPS-PIPE-P07).`);

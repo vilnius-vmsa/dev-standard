@@ -518,7 +518,7 @@ projekte, todėl tas pats failas tinka single-slot ir blue-green topologijoms, o
 nepavykęs aplikacijos diegimas nesustabdo logų siuntimo. Abu deploy workflow'ai
 jį paleidžia po kiekvieno diegimo (`if: always()`), jei secrets helperis gavo
 `ALLOY_ENV` ir `LOKI_PASSWORD`; jei ne, run'e paliekamas įspėjimas, kad
-`OPS-MON-P02` šiai aplinkai neįvykdyta. Alloy nemontuoja Docker socket'o: jį
+`OPS-MON-P02` šiai aplinkai neįvykdyta. Logų eksporto žingsnis niekada nelemia diegimo rezultato (`continue-on-error`): jei Alloy nepasileidžia, run'e paliekama klaidos anotacija, bet job'o rezultatas lieka toks, koks buvo po rollout'o, todėl aplinkos tag'as ir sinchronizacija atitinka tai, kas iš tikrųjų įdiegta. Alloy nemontuoja Docker socket'o: jį
 pasiekia per socket proxy, kuris atveria tik skaitymo endpointus. Logų skaitymui
 proxy turi turėti `ALLOW_LOGS=1`: vien `CONTAINERS=1` leidžia rasti konteinerius,
 bet ne skaityti jų logų, o Alloy tokiu atveju atrodo sveikas ir nieko nesiunčia.
@@ -794,7 +794,7 @@ Tag workflow turi:
 3. pagal `sha-<source SHA>` tag'ą surasti digest'us ir patikrinti jų „staging-verified“ attestation, kurią `ci.build` pasirašo tik po sėkmingo staging deploy ir readiness patikros; be jos promotion nevyksta;
 4. production deploy vykdyti per apsaugotą GitHub Environment, kuris leidžia diegti tik iš apsaugotų tag'ų; „Required reviewers“ jame rekomenduojami, bet neprivalomi;
 5. promotion metu naudoti tą patį digest, o ne rebuild'inti source iš tag'o;
-6. įrašyti versiją, commit SHA, image digest'us, migracijas ir rollback veiksmus į release notes – pavyzdyje `ci.release` tai sugeneruoja pats kaip „Deployment record“ (naujos migracijos nuo ankstesnio tag'o ir ankstesnė versija rollback'ui) ir prideda prie GitHub Release;
+6. įrašyti versiją, commit SHA, image digest'us, migracijas ir rollback veiksmus į release notes – pavyzdyje `ci.release` tai sugeneruoja pats kaip „Deployment record“ (naujos migracijos nuo ankstesnio tag'o, atskirai – pakeistos, ištrintos ar pervadintos jau išleistos migracijos, ir ankstesnė versija rollback'ui) ir prideda prie GitHub Release;
 7. neleisti perrašyti jau paskelbto version tag ir naudoti `latest` kaip vienintelio rollback identifikatoriaus.
 
 Release workflow turi workflow lygiu nustatyti tik `contents: read`. Job'as,

@@ -228,6 +228,12 @@ jobs:
 
       - name: Start log and metrics export
         if: ${{ always() }}
+        # Log export must never decide the result of a deployment: by now the
+        # new release serves traffic (or was rolled back above). A failure
+        # here is reported, but the job keeps the result of the rollout, so
+        # the environment tag and the main-to-stage sync follow what is
+        # really deployed.
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -238,8 +244,11 @@ jobs:
             && [ -f docker-compose.observability.yml ]; then
             # --force-recreate: a changed config.alloy or credential is a
             # bind-mounted file, which Compose would not notice by itself.
-            docker compose --env-file "$SECRETS_DIR/compose.env" \
-              -f docker-compose.observability.yml up -d --wait --force-recreate alloy
+            if ! docker compose --env-file "$SECRETS_DIR/compose.env" \
+              -f docker-compose.observability.yml up -d --wait --force-recreate alloy; then
+              echo "::error::Log export did not start. The deployment result is not affected, but OPS-MON-P02 is not met for this environment until this is fixed."
+              exit 1
+            fi
           else
             echo "::warning::Log export is not configured (ALLOY_ENV, LOKI_PASSWORD); OPS-MON-P02 is not met for this environment."
           fi

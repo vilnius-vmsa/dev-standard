@@ -150,7 +150,14 @@ test('choosing a profile turns the transitional behaviour off', () => {
 });
 
 test('a half-chosen profile is reported instead of silently losing rules', () => {
-  assert.match(stackWarnings(['infra', 'docker'], DEVOPS_MANIFEST), /no release model and no deployment method/);
+  // `docker` alone is a valid choice: the note explains it instead of prescribing profiles.
+  for (const stacks of [['docker'], ['infra', 'docker']]) {
+    const note = stackWarnings(stacks, DEVOPS_MANIFEST);
+    assert.match(note, /lists `docker` without a release model or a deployment method/, stacks.join(','));
+    assert.match(note, /correct for a repository that builds container images and deploys nothing/, stacks.join(','));
+    assert.doesNotMatch(note, /Add one release model/, stacks.join(','));
+    assert.equal(note.match(/\[!WARNING\]/g).length, 1, stacks.join(','));
+  }
   assert.match(stackWarnings(['flow-branch'], DEVOPS_MANIFEST), /no deployment method/);
   assert.doesNotMatch(stackWarnings(['flow-branch'], DEVOPS_MANIFEST), /no release model/);
   assert.match(stackWarnings(['compose-blue-green'], DEVOPS_MANIFEST), /no release model/);

@@ -45,10 +45,18 @@ jobs:
           entries=()
           for environment in $IMAGE_TAGS; do
             for repository in "$PHP_REPOSITORY" "$NGINX_REPOSITORY"; do
-              output="$(docker buildx imagetools inspect "${repository}:${environment}" 2>&1)" || {
+              if ! output="$(docker buildx imagetools inspect "${repository}:${environment}" 2>&1)"; then
+                # Only a tag that does not exist is skipped. A registry outage,
+                # a denied login or a bad reference must fail the job: otherwise
+                # one image found would let the scan pass without the others.
+                if ! grep -Eqi 'not found|manifest unknown|no such manifest' <<<"$output"; then
+                  echo "$output" >&2
+                  echo "::error::Could not look up ${repository}:${environment}; the scan cannot be trusted."
+                  exit 1
+                fi
                 echo "::warning::${repository}:${environment} was not found; skipping."
                 continue
-              }
+              fi
               digest="$(awk '$1 == "Digest:" { print $2; exit }' <<<"$output")"
               [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
               entries+=("$(jq -cn --arg name "${repository##*/} (${environment})" \

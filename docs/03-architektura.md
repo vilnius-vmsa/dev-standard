@@ -701,7 +701,7 @@ PRIVALOMA:
 <!-- ARCH-REL-P05 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Kritinių paslaugų RTO ir RPO tikslai turi būti apibrėžti projektavimo stadijoje ir suderinti su verslo savininku.
 
-> Susiję skyriai: [9.5 SLA, SLO ir SLI](09-stebesena-logai.md#95-sla-slo-ir-sli) · [8.1 Aplinkos ir bendri principai](08-devops-ci-cd.md#81-aplinkos-ir-bendri-principai) · [8.14.1 Kubernetes diegimo reikalavimai](08-devops-ci-cd.md#8141-kubernetes-diegimo-reikalavimai)
+> Susiję skyriai: [9.5 SLA, SLO ir SLI](09-stebesena-logai.md#95-sla-slo-ir-sli) · [8.1 Aplinkos ir bendri principai](08-devops-ci-cd.md#81-aplinkos-ir-bendri-principai) · [8.13 Docker Compose diegimas](08-devops-ci-cd.md#813-docker-compose-diegimas) · [8.14.1 Kubernetes diegimo reikalavimai](08-devops-ci-cd.md#8141-kubernetes-diegimo-reikalavimai)
 
 ### 3.6.2. Sveikatos patikrinimas
 
@@ -727,7 +727,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-REL-R02 | ai-reviewable | stacks=php,infra | enforced-by=ai -->
 *   Readiness patikrinime vertinti svarbiausias priklausomybes, nuo kurių tiesiogiai priklauso užklausų aptarnavimas.
 
-> Susiję skyriai: [9.2 Monitoring ir metrikos](09-stebesena-logai.md#92-monitoring-ir-metrikos) · [8.14.1 Kubernetes diegimo reikalavimai](08-devops-ci-cd.md#8141-kubernetes-diegimo-reikalavimai)
+> Susiję skyriai: [9.2 Monitoring ir metrikos](09-stebesena-logai.md#92-monitoring-ir-metrikos) · [8.13 Docker Compose diegimas](08-devops-ci-cd.md#813-docker-compose-diegimas) · [8.14.1 Kubernetes diegimo reikalavimai](08-devops-ci-cd.md#8141-kubernetes-diegimo-reikalavimai)
 
 ### 3.6.3. Atsparumas tarpservisinėse komunikacijose
 
@@ -784,7 +784,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-REL-R14 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Jei naudojamas Saga ar kitas kompensacinis modelis, jo elgsena turi būti dokumentuota.
 
-> Susiję skyriai: [3.8 Diagramos ir dokumentavimas](#38-diagramos-ir-dokumentavimas) · [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas) · [8.14.1 Kubernetes diegimo reikalavimai](08-devops-ci-cd.md#8141-kubernetes-diegimo-reikalavimai)
+> Susiję skyriai: [3.8 Diagramos ir dokumentavimas](#38-diagramos-ir-dokumentavimas) · [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas) · [8.13 Docker Compose diegimas](08-devops-ci-cd.md#813-docker-compose-diegimas) · [8.14.1 Kubernetes diegimo reikalavimai](08-devops-ci-cd.md#8141-kubernetes-diegimo-reikalavimai)
 
 ### 3.6.6. Mažiausių privilegijų principas operaciniu lygmeniu
 
