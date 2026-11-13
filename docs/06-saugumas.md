@@ -107,7 +107,7 @@ REKOMENDUOJAMA:
 *   Paslapčių naudojimo modelį dokumentuoti taip, kad būtų aišku, kokios paslaptys naudojamos, kur jos laikomos ir kas turi prieigą.
 *   Neįprastą paslapčių naudojimą stebėti ir naudoti kaip saugumo signalą.
 
-> Susiję skyriai: [3.5 Konfigūracija, slaptieji raktai ir aplinkos](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [8.6 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė) · [9.1 Logging (žurnalų) standartai](09-stebesena-logai.md#91-logging-žurnalų-standartai)
+> Susiję skyriai: [3.5 Konfigūracija, slaptieji raktai ir aplinkos](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [8.5 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#85-devsecops-ci-cd-kontrolė) · [9.1 Logging (žurnalų) standartai](09-stebesena-logai.md#91-logging-žurnalų-standartai)
 
 ## 6.5. Saugumas naršyklėje
 
@@ -148,7 +148,7 @@ REKOMENDUOJAMA:
 
 Šiame poskyryje apibrėžiami saugumo testavimo reikalavimai, taikomi sistemos kūrimo ir leidimo procese.
 
-Bendrieji testavimo reikalavimai apibrėžti [#7](07-testavimas.md) skyriuje, o DevSecOps kontrolės – [#8.6](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė) skyriuje.
+Bendrieji testavimo reikalavimai apibrėžti [#7](07-testavimas.md) skyriuje, o DevSecOps kontrolės – [#8.5](08-devops-ci-cd.md#85-devsecops-ci-cd-kontrolė) skyriuje.
 
 PRIVALOMA:
 
@@ -163,4 +163,4 @@ REKOMENDUOJAMA:
 *   Saugumo testavimą derinti su architektūros peržiūra, grėsmių modeliavimu ir incidentų pamokomis.
 *   Saugumo testavimo apimtį peržiūrėti po reikšmingų architektūrinių ar integracinių pokyčių.
 
-> Susiję skyriai: [4.6 Saugumas kodo lygmeniu](04-kodo-kurimo-gaires.md#46-saugumas-kodo-lygmeniu) · [7 Testavimo reikalavimai ir principai](07-testavimas.md) · [8.6 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė) · [3.10 Atitiktis ir suderinamumas](03-architektura.md#310-atitiktis-ir-suderinamumas)
+> Susiję skyriai: [4.6 Saugumas kodo lygmeniu](04-kodo-kurimo-gaires.md#46-saugumas-kodo-lygmeniu) · [7 Testavimo reikalavimai ir principai](07-testavimas.md) · [8.5 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#85-devsecops-ci-cd-kontrolė) · [3.10 Atitiktis ir suderinamumas](03-architektura.md#310-atitiktis-ir-suderinamumas)

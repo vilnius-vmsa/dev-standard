@@ -1,0 +1,181 @@
+# Inactive example. Copy to .github/workflows/ci.pipeline.yml.
+
+name: Example - CI Pipeline (branch-based)
+
+on:
+  pull_request:
+    branches: [stage, main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [stage, main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  pipeline:
+    name: Pipeline
+    uses: ./.github/workflows/ci.validate.yml
+
+  detect-build-changes:
+    name: Detect image-build changes
+    needs: pipeline
+    if: ${{ github.event_name == 'push' && needs.pipeline.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      code_changed: ${{ steps.changes.outputs.code_changed }}
+    steps:
+      - name: Checkout pushed commit with history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Log in to the container registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compare with the deployed revision
+        id: changes
+        shell: bash
+        env:
+          SOURCE_BRANCH: ${{ github.ref_name }}
+          HEAD_SHA: ${{ github.sha }}
+          APP_REPOSITORY: ghcr.io/<org>/<app>-php
+        run: |
+          set -euo pipefail
+          [[ "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]
+          case "$SOURCE_BRANCH" in
+            stage) environment_tag=staging ;;
+            main) environment_tag=production ;;
+            *) echo "Unsupported protected branch: $SOURCE_BRANCH" >&2; exit 1 ;;
+          esac
+
+          deployed=""
+          if output="$(docker buildx imagetools inspect "${APP_REPOSITORY}:${environment_tag}" --format '{{ json .Image }}' 2>&1)"; then
+            deployed="$(jq -r '[.. | objects | .Labels? | objects | .["org.opencontainers.image.revision"] // empty] | first // ""' <<<"$output")"
+          elif ! grep -Eqi 'not found|manifest unknown|no such manifest' <<<"$output"; then
+            echo "$output" >&2
+            exit 1
+          fi
+
+          code_changed=false
+          reason=""
+          changed_files=""
+          if [ -z "$deployed" ]; then
+            code_changed=true
+            reason="no image carries the \`${environment_tag}\` tag yet"
+          elif ! [[ "$deployed" =~ ^[0-9a-f]{40}$ ]] || ! git cat-file -e "${deployed}^{commit}" 2>/dev/null; then
+            code_changed=true
+            reason="the deployed revision \`${deployed}\` is not a commit of this repository"
+          elif ! git merge-base --is-ancestor "$deployed" "$HEAD_SHA"; then
+            code_changed=true
+            reason="the deployed revision \`${deployed}\` is not an ancestor of this commit"
+          else
+            changed_files="$(git diff --name-only "$deployed" "$HEAD_SHA")"
+          fi
+
+          matched_files=""
+          while IFS= read -r path; do
+            [ -n "$path" ] || continue
+            if [[ "$path" == *.md && "$path" != */* ]]; then
+              continue
+            fi
+            case "$path" in
+              docs/*|LICENSE|.editorconfig|.gitattributes|.gitignore|\
+              .github/CODEOWNERS|.github/dependabot.yml|.github/pull_request_template.md|\
+              .github/ISSUE_TEMPLATE/*|.github/instructions/*|.dev-standard/*|\
+              .github/workflows/docs-check.yml|.github/workflows/dev-standard-sync.yml|\
+              .github/workflows/ops.*.yml)
+                ;;
+              *)
+                code_changed=true
+                matched_files="${matched_files}${path}"$'\n'
+                ;;
+            esac
+          done <<< "$changed_files"
+          if [ -z "$reason" ]; then
+            if [ "$code_changed" = true ]; then
+              reason="build-relevant files changed since the deployed revision"
+            else
+              reason="nothing build-relevant changed since the deployed revision"
+            fi
+          fi
+
+          echo "code_changed=$code_changed" >> "$GITHUB_OUTPUT"
+          echo "Build needed: $code_changed ($reason)"
+          {
+            echo "## Build decision"
+            echo
+            printf '%s\n' "- Environment tag: \`${environment_tag}\`"
+            printf '%s\n' "- Deployed revision: \`${deployed:-none}\`"
+            printf '%s\n' "- This commit: \`${HEAD_SHA}\`"
+            printf '%s\n' "- Image build: \`${code_changed}\` – ${reason}"
+            if [ -n "$matched_files" ]; then
+              echo
+              echo "### Files triggering the image build"
+              while IFS= read -r path; do
+                [ -n "$path" ] || continue
+                printf '%s\n' "- \`$path\`"
+              done <<< "$matched_files"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    name: Build and deploy images
+    needs: [pipeline, detect-build-changes]
+    if: >-
+      github.event_name == 'push' &&
+      needs.pipeline.result == 'success' &&
+      needs.detect-build-changes.result == 'success' &&
+      needs.detect-build-changes.outputs.code_changed == 'true'
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    uses: ./.github/workflows/ci.build.yml
+    with:
+      source_branch: ${{ github.ref_name }}
+      source_sha: ${{ github.sha }}
+    secrets: inherit
+
+  sync-main-to-stage:
+    name: Synchronize deployed main to stage
+    needs: [detect-build-changes, build]
+    if: >-
+      !cancelled() &&
+      github.event_name == 'push' &&
+      github.ref_name == 'main' &&
+      (
+        needs.build.result == 'success' ||
+        (
+          needs.build.result == 'skipped' &&
+          needs.detect-build-changes.result == 'success' &&
+          needs.detect-build-changes.outputs.code_changed == 'false'
+        )
+      )
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
+    uses: vilnius-vmsa/shared-workflows/.github/workflows/sync.main-to-stage.yml@main
+    with:
+      syncer_app_id: ${{ vars.SYNCER_APP_ID }}
+      source_sha: ${{ github.sha }}
+      source_branch: main
+      deployment_run_id: ${{ github.run_id }}
+      deployment_skipped: ${{ needs.build.result == 'skipped' }}
+    secrets:
+      SYNCER_PRIVATE_KEY: ${{ secrets.SYNCER_PRIVATE_KEY }}

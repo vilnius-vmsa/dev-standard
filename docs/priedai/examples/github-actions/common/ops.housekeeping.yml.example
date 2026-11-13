@@ -1,0 +1,45 @@
+# Inactive example. Copy to .github/workflows/ops.housekeeping.yml.
+
+name: Example - Ops housekeeping
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      days:
+        description: Retention period for workflow runs and logs.
+        required: false
+        default: "90"
+        type: string
+      prune_images:
+        description: Also prune old container image versions.
+        required: false
+        default: false
+        type: boolean
+      prune_dry_run:
+        description: Only report which image versions would be deleted.
+        required: false
+        default: true
+        type: boolean
+
+concurrency:
+  group: ops-housekeeping
+  cancel-in-progress: false
+
+permissions:
+  actions: write
+  packages: write
+
+jobs:
+  housekeeping:
+    name: Retain only required CI artifacts and images
+    uses: vilnius-vmsa/shared-workflows/.github/workflows/housekeeping.yml@main
+    with:
+      days: ${{ inputs.days || '90' }}
+      prune_images: ${{ inputs.prune_images == true || (github.event_name == 'schedule' && vars.HOUSEKEEPING_PRUNE_IMAGES == 'true') }}
+      prune_dry_run: ${{ (github.event_name == 'workflow_dispatch' && inputs.prune_dry_run != false) || (github.event_name == 'schedule' && vars.HOUSEKEEPING_PRUNE_DRY_RUN != 'false') }}
+      image_packages: <app>-php <app>-nginx
+      candidate_days: 14
+      source_keep: 20
+      source_days: 90

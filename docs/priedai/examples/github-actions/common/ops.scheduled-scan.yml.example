@@ -1,0 +1,152 @@
+# Inactive example. Copy to .github/workflows/ops.scheduled-scan.yml.
+
+name: Example - Ops scheduled scan
+
+on:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: ops-scheduled-scan
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: read
+
+env:
+  PHP_REPOSITORY: ghcr.io/<org>/<app>-php
+  NGINX_REPOSITORY: ghcr.io/<org>/<app>-nginx
+  IMAGE_TAGS: staging production
+
+jobs:
+  resolve-images:
+    name: Resolve promoted service images
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      images: ${{ steps.images.outputs.images }}
+    steps:
+      - name: Log in to the container registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve environment tags to immutable digests
+        id: images
+        shell: bash
+        run: |
+          set -euo pipefail
+          entries=()
+          for environment in $IMAGE_TAGS; do
+            found=()
+            missing=()
+            for repository in "$PHP_REPOSITORY" "$NGINX_REPOSITORY"; do
+              if ! output="$(docker buildx imagetools inspect "${repository}:${environment}" 2>&1)"; then
+                if ! grep -Eqi 'not found|manifest unknown|no such manifest' <<<"$output"; then
+                  echo "$output" >&2
+                  echo "::error::Could not look up ${repository}:${environment}; the scan cannot be trusted."
+                  exit 1
+                fi
+                missing+=("${repository}:${environment}")
+                continue
+              fi
+              digest="$(awk '$1 == "Digest:" { print $2; exit }' <<<"$output")"
+              [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+              found+=("$(jq -cn --arg name "${repository##*/} (${environment})" \
+                --arg ref "${repository}@${digest}" '{name: $name, ref: $ref}')")
+            done
+            if ((${#missing[@]} > 0 && ${#found[@]} > 0)); then
+              echo "::error::The ${environment} tag exists on some images but not on: ${missing[*]}. The images of an environment must be promoted together."
+              exit 1
+            fi
+            if ((${#found[@]} == 0)); then
+              echo "::warning::No image carries the ${environment} tag; skipping this environment."
+              continue
+            fi
+            entries+=("${found[@]}")
+          done
+          ((${#entries[@]} > 0)) || { echo "No promoted images were found." >&2; exit 1; }
+          images="$(printf '%s\n' "${entries[@]}" | jq -cs 'unique_by(.ref)')"
+          echo "images=$images" >> "$GITHUB_OUTPUT"
+
+  scan-images:
+    name: Scan ${{ matrix.image.name }}
+    needs: resolve-images
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.resolve-images.outputs.images) }}
+    steps:
+      - name: Log in to the container registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Scan the immutable image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ matrix.image.ref }}
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          format: table
+
+  audit-composer:
+    name: Audit locked Composer dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        if: ${{ hashFiles('composer.lock') != '' }}
+        with:
+          php-version: '8.4'
+          tools: composer:2
+      - run: composer audit --locked --no-interaction
+        if: ${{ hashFiles('composer.lock') != '' }}
+
+  audit-npm:
+    name: Audit production npm dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        if: ${{ hashFiles('package-lock.json') != '' }}
+        with:
+          node-version: '22'
+      - run: npm audit --package-lock-only --omit=dev --audit-level=high
+        if: ${{ hashFiles('package-lock.json') != '' }}
+
+  scan-secrets:
+    name: Scan repository history for secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GITLEAKS_VERSION: 8.30.1
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Install pinned gitleaks
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/gitleaks.tar.gz"
+          curl -fsSLo "$archive" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  ${archive}" | sha256sum -c -
+          tar -xzf "$archive" -C "$RUNNER_TEMP" gitleaks
+
+      - name: Scan the full history
+        run: '"$RUNNER_TEMP/gitleaks" git --redact --no-banner .'

@@ -1,6 +1,8 @@
 # Stacks a rule can be tagged with (stacks=... in the rule's tag comment).
 # applyTo is the Copilot path glob for the generated dev-standard-<stack>.instructions.md file.
 # implies lists stacks a repository gets automatically with this one (a Laravel repo also follows the php rules).
+# legacyIncludes is transitional: a repository that lists this stack and none of the listed ones still gets all of
+# them, and sync warns it to choose. Remove it in the release after the DevOps profiles were introduced.
 all:
   description: Rules for every repository
   applyTo: "**"
@@ -22,8 +24,39 @@ mobile:
   description: Mobile applications
   applyTo: "**/*.kt,**/*.kts,**/*.swift,**/*.dart,android/**,ios/**"
 infra:
-  description: Infrastructure, CI/CD and containers
-  applyTo: "**/Dockerfile*,**/docker-compose*.yml,**/*.tf,**/*.tfvars,.github/workflows/**,**/*.yml,**/*.yaml"
+  description: Infrastructure and CI/CD rules common to every delivery method
+  applyTo: ".github/workflows/**,.github/actions/**,.github/dependabot.yml,.github/dependabot.yaml,.dev-standard/config.json,**/docker/**,**/Dockerfile,**/Dockerfile.*,**/*.Dockerfile,**/Containerfile,**/Containerfile.*,**/.dockerignore,**/docker-compose*.yml,**/docker-compose*.yaml,**/compose.yml,**/compose.yaml,**/compose.*.yml,**/compose.*.yaml,**/compose-*.yml,**/compose-*.yaml,**/*.tf,**/*.tf.json,**/*.tfvars,**/*.hcl,**/k8s/**,**/kubernetes/**,**/helm/**,**/charts/**,**/Chart.yaml,**/Chart.lock,**/kustomization.yaml,**/kustomization.yml"
+  legacyIncludes: [docker, compose, compose-blue-green, flow-branch, flow-tag, k8s]
+# The globs are deliberately broad: a rules file loaded for an unrelated file (for example a frontend
+# `charts/` directory) costs a wrong review note that a developer closes and reports; a rules file that is
+# not loaded for a delivery file is a missed check.
+# Open remark: OPS-DOCKER-P03 (deploy by digest) is not loaded for Kubernetes manifests, because Kubernetes
+# delivery is not standardised yet; decide the globs together with the first Kubernetes project.
+docker:
+  # Compose files are included: OPS-DOCKER-P03 (deploy by digest) is checked in the production Compose file.
+  description: Container image build (Dockerfile, registry names, tags, labels, digests)
+  applyTo: "**/Dockerfile,**/Dockerfile.*,**/*.Dockerfile,**/Containerfile,**/Containerfile.*,**/.dockerignore,**/docker/**,**/docker-bake*.hcl,**/docker-compose*.yml,**/docker-compose*.yaml,**/compose.yml,**/compose.yaml,**/compose.*.yml,**/compose.*.yaml,**/compose-*.yml,**/compose-*.yaml,.github/workflows/**,.github/actions/**"
+  implies: [infra]
+compose:
+  description: Docker Compose deployment (single-slot by default)
+  applyTo: "**/docker-compose*.yml,**/docker-compose*.yaml,**/compose.yml,**/compose.yaml,**/compose.*.yml,**/compose.*.yaml,**/compose-*.yml,**/compose-*.yaml,**/docker/**,.github/workflows/**,.github/actions/**"
+  implies: [docker]
+compose-blue-green:
+  description: Docker Compose blue-green deployment (slots, balancer, rollback)
+  applyTo: "**/docker-compose*.yml,**/docker-compose*.yaml,**/compose.yml,**/compose.yaml,**/compose.*.yml,**/compose.*.yaml,**/compose-*.yml,**/compose-*.yaml,**/docker/**,.github/workflows/**,.github/actions/**"
+  implies: [compose]
+flow-branch:
+  description: Branch-based release model (stage to staging, main to production)
+  applyTo: ".github/workflows/**,.github/actions/**,**/docker/**"
+  implies: [infra]
+flow-tag:
+  description: Tag-based release model (protected release tag, promotion without rebuild)
+  applyTo: ".github/workflows/**,.github/actions/**,**/docker/**"
+  implies: [infra]
+k8s:
+  description: Kubernetes and GitOps deployment
+  applyTo: "**/k8s/**,**/kubernetes/**,**/helm/**,**/charts/**,**/Chart.yaml,**/Chart.lock,**/kustomization.yaml,**/kustomization.yml,.github/workflows/**,.github/actions/**"
+  implies: [docker]
 db:
   description: Database schema, migrations and queries
   applyTo: "**/migrations/**,database/**,**/*.sql"

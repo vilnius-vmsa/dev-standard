@@ -1,0 +1,14 @@
+<?php
+// Inactive example. Add to boot() in app/Providers/AppServiceProvider.php.
+// The worker healthcheck in docker-compose.production.yml reads this file;
+// without it `docker compose up --wait` never sees the worker as healthy.
+
+use Illuminate\Queue\Events\JobProcessed;
+use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Queue\Events\Looping;
+use Illuminate\Support\Facades\Event;
+
+Event::listen(
+    [Looping::class, JobProcessing::class, JobProcessed::class],
+    fn () => touch('/tmp/queue-worker.heartbeat'),
+);

@@ -1,0 +1,130 @@
+# Inactive example. Copy to .github/workflows/ops.start-database.yml.
+
+name: Example - Ops start database
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: GitHub Environment and self-hosted runner label.
+        required: true
+        type: choice
+        options: [staging, production]
+      image_tag:
+        description: Existing immutable image tag (sha-<40 hex> or vX.Y.Z). On a running environment use the currently deployed one.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: cd-deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  start-database:
+    name: Start MySQL on ${{ inputs.environment }}
+    runs-on: "${{ inputs.environment }}"
+    environment: ${{ inputs.environment }}
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: read
+    env:
+      COMPOSE_FILE: docker-compose.production.yml
+      SECRETS_DIR: /srv/<application>/secrets
+      IMAGE_TAG: ${{ inputs.image_tag }}
+      APP_REPOSITORY: ghcr.io/<org>/<app>-php
+      NGINX_REPOSITORY: ghcr.io/<org>/<app>-nginx
+    steps:
+      - name: Resolve the source revision of the image tag
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$IMAGE_TAG" =~ ^sha-([0-9a-f]{40})$ ]]; then
+            echo "ref=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+          elif [[ "$IMAGE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "ref=refs/tags/${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+          else
+            echo "Use an immutable sha-<40 hex> or vX.Y.Z image tag; floating tags are not allowed." >&2
+            exit 1
+          fi
+
+      - name: Checkout deployment configuration
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ steps.source.outputs.ref }}
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            docker-compose.production.yml
+            docker-compose.observability.yml
+            docker/alloy/config.alloy
+            docker/nginx/conf.d/edge-tls.conf
+            docker/scripts/prepare-runtime-secrets.sh
+
+      - name: Log in to the container registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve immutable image references
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$IMAGE_TAG" =~ ^(sha-[0-9a-f]{40}|v[0-9]+\.[0-9]+\.[0-9]+)$ ]] || {
+            echo "Use an immutable sha-<40 hex> or vX.Y.Z image tag; floating tags are not allowed." >&2
+            exit 1
+          }
+          resolve_digest() {
+            local repository="$1" digest
+            digest="$(docker buildx imagetools inspect "${repository}:${IMAGE_TAG}" | awk '/^Digest:/ { print $2; exit }')"
+            [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || {
+              echo "${repository}:${IMAGE_TAG} did not resolve to a digest." >&2
+              return 1
+            }
+            printf '%s@%s' "$repository" "$digest"
+          }
+          php_image_ref="$(resolve_digest "$APP_REPOSITORY")"
+          nginx_image_ref="$(resolve_digest "$NGINX_REPOSITORY")"
+          {
+            echo "PHP_IMAGE_REF=$php_image_ref"
+            echo "NGINX_IMAGE_REF=$nginx_image_ref"
+          } >> "$GITHUB_ENV"
+
+      - name: Prepare runtime secrets and Compose environment
+        shell: bash
+        env:
+          RUNTIME_ENV: ${{ secrets.RUNTIME_ENV }}
+          DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+          TLS_CERTIFICATE_B64: ${{ secrets.TLS_CERTIFICATE_B64 }}
+          TLS_PRIVATE_KEY_B64: ${{ secrets.TLS_PRIVATE_KEY_B64 }}
+          ALLOY_ENV: ${{ secrets.ALLOY_ENV }}
+          LOKI_PASSWORD: ${{ secrets.LOKI_PASSWORD }}
+        run: bash docker/scripts/prepare-runtime-secrets.sh
+
+      - name: Validate the prepared runtime configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in compose.env application.env app_key mysql_password mysql_root_password redis_password tls_certificate tls_private_key; do
+            test -s "$SECRETS_DIR/$file" || {
+              echo "$SECRETS_DIR/$file was not prepared." >&2
+              exit 1
+            }
+          done
+          docker compose --env-file "$SECRETS_DIR/compose.env" -f "$COMPOSE_FILE" config -q
+
+      - name: Start database and wait for health
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker compose --env-file "$SECRETS_DIR/compose.env" \
+            -f "$COMPOSE_FILE" up -d --wait --no-recreate mysql
+          docker compose --env-file "$SECRETS_DIR/compose.env" \
+            -f "$COMPOSE_FILE" ps mysql

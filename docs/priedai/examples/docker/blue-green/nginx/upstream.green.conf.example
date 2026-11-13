@@ -1,0 +1,8 @@
+# Inactive example. Copy to docker/nginx/conf.d/upstream.green.conf.
+
+upstream php-upstream {
+    zone php-upstream 64k;
+    resolver 127.0.0.11 valid=5s ipv6=off;
+    server php-green:9000 resolve;
+    keepalive 16;
+}

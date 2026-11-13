@@ -1,0 +1,102 @@
+# Inactive example. Copy to docker-compose.observability.yml.
+
+name: application-observability
+
+x-container-environment: &container-environment
+  TZ: UTC
+
+x-logging: &observability-logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
+services:
+  docker-socket-proxy:
+    image: ghcr.io/linuxserver/socket-proxy@sha256:REPLACE_WITH_CURRENT_DIGEST
+    restart: unless-stopped
+    logging: *observability-logging
+    user: "0:0"
+    read_only: true
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.05"
+          memory: 64M
+    environment:
+      <<: *container-environment
+      ALLOW_LOGS: "1"
+      CONTAINERS: "1"
+      NETWORKS: "1"
+      PING: "1"
+      VERSION: "1"
+      EVENTS: "0"
+      POST: "0"
+    networks: [docker_socket_proxy]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    tmpfs:
+      - /run:size=1m,mode=0755
+      - /tmp:size=4m,mode=1777
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--timeout=3", "-O", "/dev/null", "http://127.0.0.1:2375/version"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  alloy:
+    image: grafana/alloy@sha256:REPLACE_WITH_CURRENT_DIGEST
+    restart: unless-stopped
+    logging: *observability-logging
+    user: "473:473"
+    read_only: true
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
+    environment: *container-environment
+    env_file:
+      - ${SECRETS_DIR:?SECRETS_DIR is required}/alloy.env
+    secrets:
+      - source: loki_password
+        target: loki_password
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    depends_on:
+      docker-socket-proxy:
+        condition: service_healthy
+    networks:
+      - default
+      - docker_socket_proxy
+    ports:
+      - "127.0.0.1:12345:12345"
+    volumes:
+      - ./docker/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - alloy_state:/var/lib/alloy/data
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    healthcheck:
+      test: ["CMD", "alloy", "validate", "/etc/alloy/config.alloy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  alloy_state:
+
+secrets:
+  loki_password:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/loki_password
+
+networks:
+  docker_socket_proxy:
+    internal: true

@@ -48,7 +48,7 @@ REKOMENDUOJAMA:
 <!-- VER-API-R03 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Jei sistema turi išorinių vartotojų, vienu metu palaikyti bent dvi API versijas, kai tai pagrįsta produkto gyvavimo ciklu
 
-> Susiję skyriai: [3.3.2 Versijavimas](03-architektura.md#332-versijavimas) · [3.9.5 Atnaujinimų valdymas](03-architektura.md#395-atnaujinimų-valdymas) · [8.4 Versijavimas ir žymėjimas (release artefaktams)](08-devops-ci-cd.md#84-versijavimas-ir-žymėjimas-release-artefaktams) · [8.9 Leidimų (release) valdymas](08-devops-ci-cd.md#89-leidimų-release-valdymas)
+> Susiję skyriai: [3.3.2 Versijavimas](03-architektura.md#332-versijavimas) · [3.9.5 Atnaujinimų valdymas](03-architektura.md#395-atnaujinimų-valdymas) · [8.4 Versijavimas ir žymėjimas (release artefaktams)](08-devops-ci-cd.md#84-versijavimas-ir-žymėjimas-release-artefaktams) · [8.8 Leidimų (release) valdymas](08-devops-ci-cd.md#88-leidimų-release-valdymas)
 
 ## 5.3. Bibliotekų ir paketų valdymas (angl. dependencies)
 
@@ -110,7 +110,7 @@ REKOMENDUOJAMA:
 <!-- VER-ALLOW-R01 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Priklausomybės vertinamos ne tik pagal funkcionalumą, bet ir pagal ilgalaikį palaikomumą, bendruomenės aktyvumą ir saugumo istoriją.
 
-> Susiję skyriai: [3.10.5 Atviro kodo licencijos ir programinės įrangos sudėtis](03-architektura.md#3105-atviro-kodo-licencijos-ir-programinės-įrangos-sudėtis) · [8.6 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė)
+> Susiję skyriai: [3.10.5 Atviro kodo licencijos ir programinės įrangos sudėtis](03-architektura.md#3105-atviro-kodo-licencijos-ir-programinės-įrangos-sudėtis) · [8.5 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#85-devsecops-ci-cd-kontrolė)
 
 ## 5.5. Priklausomybių saugumas ir atsekamumas
 
@@ -130,4 +130,4 @@ REKOMENDUOJAMA:
 <!-- VER-SEC-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   SBOM naudoti pažeidžiamumų valdymui, licencijų auditui ir tiekimo grandinės rizikos vertinimui.
 
-> Susiję skyriai: [4.6 Saugumas kodo lygmeniu](04-kodo-kurimo-gaires.md#46-saugumas-kodo-lygmeniu) · [6 Saugumas (Security by Design)](06-saugumas.md) · [8.6 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė)
+> Susiję skyriai: [4.6 Saugumas kodo lygmeniu](04-kodo-kurimo-gaires.md#46-saugumas-kodo-lygmeniu) · [6 Saugumas (Security by Design)](06-saugumas.md) · [8.5 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#85-devsecops-ci-cd-kontrolė)

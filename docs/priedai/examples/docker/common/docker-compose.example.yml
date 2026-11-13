@@ -1,0 +1,141 @@
+# Inactive example. Copy to docker-compose.yml.
+
+name: application-dev
+
+x-container-environment: &container-environment
+  TZ: UTC
+
+x-logging: &application-logging
+  driver: json-file
+  options:
+    max-size: "50m"
+    max-file: "5"
+
+x-log-labels:
+  mysql: &mysql-log-labels
+    app.logging.enabled: "true"
+    app.logging.component: "mysql"
+    app.logging.service_name: "<application>-mysql"
+    app.logging.type: "database"
+  redis: &redis-log-labels
+    app.logging.enabled: "true"
+    app.logging.component: "redis"
+    app.logging.service_name: "<application>-redis"
+    app.logging.type: "cache"
+  php: &php-log-labels
+    app.logging.enabled: "true"
+    app.logging.component: "php"
+    app.logging.service_name: "<application>-php"
+    app.logging.type: "application"
+  worker: &worker-log-labels
+    app.logging.enabled: "true"
+    app.logging.component: "worker"
+    app.logging.service_name: "<application>-worker"
+    app.logging.type: "application"
+  nginx: &nginx-log-labels
+    app.logging.enabled: "true"
+    app.logging.component: "nginx"
+    app.logging.service_name: "<application>-nginx"
+    app.logging.type: "http"
+
+x-app-defaults: &app-defaults
+  logging: *application-logging
+  build:
+    context: .
+    dockerfile: docker/php-fpm/Dockerfile.dev
+  working_dir: /var/www
+  env_file:
+    - .env
+  environment:
+    <<: *container-environment
+    REDIS_HOST: redis
+    DB_HOST: mysql
+  depends_on:
+    mysql:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  networks: [internal]
+
+services:
+  mysql:
+    labels: *mysql-log-labels
+    logging: *application-logging
+    image: mysql:8.4@sha256:REPLACE_WITH_CURRENT_DIGEST
+    environment:
+      <<: *container-environment
+      MYSQL_DATABASE: ${DB_DATABASE:-application}
+      MYSQL_USER: ${DB_USERNAME:-application}
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+    secrets: [mysql_password, mysql_root_password]
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$(cat /run/secrets/mysql_root_password) mysql -h 127.0.0.1 -u root -N -e 'SELECT 1' >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    labels: *redis-log-labels
+    logging: *application-logging
+    environment: *container-environment
+    image: redis:7.4-alpine@sha256:REPLACE_WITH_CURRENT_DIGEST
+    command: ["sh", "-ec", "exec redis-server --requirepass \"$$(cat /run/secrets/redis_password)\""]
+    secrets: [redis_password]
+    volumes:
+      - redis_data:/data
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$(cat /run/secrets/redis_password)\" ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  php:
+    labels: *php-log-labels
+    <<: *app-defaults
+    volumes:
+      - .:/var/www
+      - ./docker/php-fpm/composer:/home/app/.composer
+    expose: [9000]
+
+  worker:
+    labels: *worker-log-labels
+    <<: *app-defaults
+    command: ["php", "artisan", "queue:work", "redis", "--sleep=1", "--tries=3"]
+
+  nginx:
+    labels: *nginx-log-labels
+    logging: *application-logging
+    environment: *container-environment
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile.dev
+    depends_on:
+      php:
+        condition: service_started
+    ports:
+      - "${HTTP_PORT:-8080}:8080"
+    networks: [internal]
+
+networks:
+  internal:
+    name: application-dev-internal
+
+volumes:
+  mysql_data:
+  redis_data:
+
+# Local development only. docker/secrets is inside the build context, so
+# .dockerignore must exclude it (see dockerignore.example); deployed
+# environments set SECRETS_DIR to a host directory outside the repository.
+secrets:
+  mysql_password:
+    file: ${SECRETS_DIR:-docker/secrets}/mysql_password
+  mysql_root_password:
+    file: ${SECRETS_DIR:-docker/secrets}/mysql_root_password
+  redis_password:
+    file: ${SECRETS_DIR:-docker/secrets}/redis_password
