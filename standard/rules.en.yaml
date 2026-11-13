@@ -1346,8 +1346,8 @@ OPS-REPO-P01:
   text: An application repository clearly separates application code, Docker service configuration, root Compose files and active workflows; templates and examples are not mixed with active workflows.
   source_hash: 57644446cec4
 OPS-REPO-P02:
-  text: "Container, CI/CD and infrastructure files in an application repository live in the agreed locations: Dockerfiles, service configuration and deployment scripts in the `docker/` directory, Compose files in the repository root, workflows and actions under `.github/`, Kubernetes and Helm manifests in a `k8s/`, `kubernetes/`, `helm/` or `charts/` directory. Another location is allowed only when the exception is recorded in the project's `.github/instructions/dev-standard-local.instructions.md` file with the paths and the reason; the DevOps rules (chapter 8, OPS-*) apply to the paths named in the exception."
-  source_hash: bc07c8658c20
+  text: "Container, CI/CD and infrastructure files in an application repository live in the agreed locations: the Dockerfile of each image and the configuration of its service in a separate `docker/<service>/` subdirectory (for example `docker/php-fpm/`, `docker/nginx/`), deployment scripts in `docker/scripts/`, and of these files only the Compose files and `.dockerignore` in the repository root, workflows and actions under `.github/`, Kubernetes and Helm manifests in a `k8s/`, `kubernetes/`, `helm/` or `charts/` directory. Another location is allowed only when the exception is recorded in the project's `.github/instructions/dev-standard-local.instructions.md` file with the paths and the reason; the DevOps rules (chapter 8, OPS-*) apply to the paths named in the exception."
+  source_hash: e0dd2bfea8b9
 OPS-TAG-P01:
   text: In the tag-based model, a production tag is a semantic-version tag that exists as `refs/tags/<name>` and points to a pre-tested commit; a branch named v1.2.3 is not a release tag.
   source_hash: 5d7f08b50126

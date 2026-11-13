@@ -12,7 +12,8 @@ applyTo: "**"
 
 ## Exception: OPS-REPO-P02 (file layout)
 
-Docker and deployment files are not kept in the repository root but in these
+Docker and deployment files are not kept in the standard locations
+(`docker/<service>/`, Compose files in the repository root) but in these
 directories:
 
 - `legacy/app/docker/**`

@@ -107,7 +107,7 @@ Produkciniai Dockerfile turi būti multi-stage:
 3. Build etapas (`application_build`) surenka aplikaciją; kešai naudojami tik per BuildKit cache mount.
 4. Galutinis etapas (`final`) kopijuoja tik vykdymui reikalingus failus, įrašo `RELEASE_NUMBER` (pats `healthcheck` aprašomas Compose faile) ir nustatomas exec formos `CMD`.
 
-PHP-FPM ir Nginx/frontend image turi turėti atskirus build ir runtime etapus. Runtime etape negali likti Node, Composer, kompiliatoriai, Git ar package manager cache'ai. Pritaikomi pavyzdžiai: [PHP-FPM Dockerfile](examples/docker/common/Dockerfile.prod.example) ir [Nginx/frontend Dockerfile](examples/docker/common/Dockerfile.nginx.prod.example).
+PHP-FPM ir Nginx/frontend image turi turėti atskirus build ir runtime etapus. Runtime etape negali likti Node, Composer, kompiliatoriai, Git ar package manager cache'ai. Pritaikomi pavyzdžiai: [PHP-FPM Dockerfile](examples/docker/common/php-fpm/Dockerfile.prod.example) ir [Nginx/frontend Dockerfile](examples/docker/common/nginx/Dockerfile.prod.example).
 
 Bazinis image turi būti nurodytas kartu su versija ir digest. `latest` ir plaukiojantys package manager reikalavimai produkciniame build'e draudžiami. Composer auth, npm tokenai, sertifikatai ir kiti secrets perduodami per BuildKit secret mount arba runtime secret saugyklą; jų negalima palikti `ARG`, `ENV`, source checkout'e ar image layer'iuose.
 
