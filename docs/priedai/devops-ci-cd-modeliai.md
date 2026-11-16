@@ -521,7 +521,11 @@ konteinerių image nuorodas, o naujus digest'us palieka tik diegiamam slotui:
 kitaip rollback ar vėlesnis `compose up` aktyvų slotą perkurtų su ką tik atmestu
 image. Jei aktyvaus slot'o image nepavyksta nustatyti digest'u (konteinerio nėra
 arba jo image nurodytas tag'u), diegimas sustoja dar nepalietęs slotų: be jo
-rollback neturėtų patikimo tikslo (`OPS-CD-P03`). Senas slotas
+rollback neturėtų patikimo tikslo (`OPS-CD-P03`). `Ops: Deploy` šios būsenos
+neištaiso, nes kviečia tą patį `cd.deploy`: operatorius hoste į `compose.env`
+įrašo ankstesnio slot'o digest'us (`PHP_IMAGE_<SLOT>`, `NGINX_IMAGE_<SLOT>`;
+juos rodo paskutinio sėkmingo diegimo aplinkos tag'as), atkuria slotą
+`docker compose up -d --no-deps` ir diegimą kartoja. Senas slotas
 šalinamas tik po sėkmingo perjungimo, todėl vėlesnis grįžimas prie ankstesnės
 versijos yra įprastas tos versijos redeploy per `Ops: Deploy`, o ne slot'o
 perjungimas atgal.

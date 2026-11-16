@@ -218,7 +218,7 @@ jobs:
               running_image="$(docker inspect --format '{{ .Config.Image }}' "$container")"
             fi
             if [[ ! "$running_image" =~ ^[^@[:space:]]+@sha256:[0-9a-f]{64}$ ]]; then
-              echo "::error::Cannot determine the immutable image of ${service}-${OLD_SLOT} (found: ${running_image:-no container}). Without it a failed deployment has no rollback target, so the deployment stops before touching slot ${OLD_SLOT}. Bring slot ${OLD_SLOT} back with its release through Ops: Deploy, then retry."
+              echo "::error::Cannot determine the immutable image of ${service}-${OLD_SLOT} (found: ${running_image:-no container}). Without it a failed deployment has no rollback target, so the deployment stops before touching slot ${OLD_SLOT}. Ops: Deploy stops at this same check; recreate slot ${OLD_SLOT} on the host with its previous digests set in compose.env, then retry."
               exit 1
             fi
             sed -i "s|^${variable}=.*|${variable}=${running_image}|" "$compose_env"
