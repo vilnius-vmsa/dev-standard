@@ -519,7 +519,9 @@ mount), pašalina naują slotą ir vėl paleidžia seno slot'o worker'į. Kad ta
 saugu, prieš rollout deploy į `compose.env` aktyviam slotui įrašo jo veikiančių
 konteinerių image nuorodas, o naujus digest'us palieka tik diegiamam slotui:
 kitaip rollback ar vėlesnis `compose up` aktyvų slotą perkurtų su ką tik atmestu
-image. Senas slotas
+image. Jei aktyvaus slot'o image nepavyksta nustatyti digest'u (konteinerio nėra
+arba jo image nurodytas tag'u), diegimas sustoja dar nepalietęs slotų: be jo
+rollback neturėtų patikimo tikslo (`OPS-CD-P03`). Senas slotas
 šalinamas tik po sėkmingo perjungimo, todėl vėlesnis grįžimas prie ankstesnės
 versijos yra įprastas tos versijos redeploy per `Ops: Deploy`, o ne slot'o
 perjungimas atgal.
