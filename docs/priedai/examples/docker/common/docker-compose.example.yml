@@ -44,6 +44,9 @@ x-app-defaults: &app-defaults
     context: .
     dockerfile: docker/php-fpm/Dockerfile.dev
   working_dir: /var/www
+  volumes:
+    - .:/var/www
+    - ./docker/php-fpm/composer:/home/app/.composer
   env_file:
     - .env
   environment:
@@ -97,9 +100,6 @@ services:
   php:
     labels: *php-log-labels
     <<: *app-defaults
-    volumes:
-      - .:/var/www
-      - ./docker/php-fpm/composer:/home/app/.composer
     expose: [9000]
 
   worker:
