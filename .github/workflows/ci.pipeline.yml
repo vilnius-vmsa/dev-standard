@@ -1,6 +1,6 @@
 name: "CI: Pipeline"
 
-run-name: "Lint & Validate ${{ github.event.pull_request.number }}"
+run-name: "Pipeline ${{ github.event.pull_request.number }}"
 
 on:
   pull_request:

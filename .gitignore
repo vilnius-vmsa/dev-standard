@@ -5,3 +5,4 @@ artifacts/
 .cache-loader/
 src/data/rules.generated.json
 pastabos.md
+nex-plan.md

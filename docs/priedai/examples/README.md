@@ -16,7 +16,7 @@ Pavyzdžiai sugrupuoti pagal tai, kurį metodą projektas pasirinko (`.dev-stand
 
 | Katalogas | Kam skirtas | Stack'as |
 |---|---|---|
-| `github-actions/common/` | Workflow'ai, vienodi visiems metodams: kokybės vartas, housekeeping, skenavimas, sync | `infra` |
+| `github-actions/common/` | Workflow'ai, vienodi visiems metodams: kokybės vartas, housekeeping, dokumentacijos patikra, sync | `infra` |
 | `github-actions/branch-based/` | Git modelis `stage` → staging, `main` → production | `flow-branch` |
 | `github-actions/tag-based/` | Git modelis su apsaugotu `vX.Y.Z` tag'u | `flow-tag` |
 | `github-actions/single-slot/` | `cd.deploy` ir `ops.start-database` vienam slotui | `compose` |
@@ -57,7 +57,7 @@ Pavyzdžių failuose komentarų nėra, išskyrus pirmą eilutę, kuri nurodo, ku
 * [Optional blue-green reusable deploy](github-actions/blue-green/cd.deploy.yml.example)
 * [Branch-based operator redeploy](github-actions/branch-based/ops.deploy.yml.example)
 * [Tag-based production release-tag redeploy](github-actions/tag-based/ops.deploy.yml.example)
-* [Scheduled image, dependency ir secret scan](github-actions/common/ops.scheduled-scan.yml.example)
+* Scheduled image, dependency ir secret scan: [branch-based](github-actions/branch-based/ops.scheduled-scan.yml.example) skenuoja image su aplinkų tag'ais `staging` ir `production`, [tag-based](github-actions/tag-based/ops.scheduled-scan.yml.example) – naujausio paskelbto leidimo (`vX.Y.Z`) image, nes tag-based modelis aplinkų tag'ų nekuria.
 * Operator-only database start: [single-slot](github-actions/single-slot/ops.start-database.yml.example) arba [blue-green](github-actions/blue-green/ops.start-database.yml.example)
 * [Scheduled housekeeping](github-actions/common/ops.housekeeping.yml.example) – workflow run'ų retention ir pasirenkamas senų image versijų valymas (`prune_images`, pagal nutylėjimą dry run).
 * [Tag-based candidate build, staging deploy, scan ir attestation](github-actions/tag-based/ci.build.yml.example)

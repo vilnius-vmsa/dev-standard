@@ -13,11 +13,11 @@ on:
         required: true
         type: string
       app_image:
-        description: Immutable application image digest used by both slots.
+        description: Immutable application image digest for the slot being deployed.
         required: true
         type: string
       nginx_image:
-        description: Immutable Nginx image digest used by both slots.
+        description: Immutable Nginx image digest for the slot being deployed.
         required: true
         type: string
       release_workflow:
@@ -197,6 +197,33 @@ jobs:
             echo "old=$old"
           } >> "$GITHUB_OUTPUT"
           echo "Active slot: $old; deploying slot: $next"
+
+      - name: Keep the active slot on its running images
+        if: ${{ steps.slot.outputs.old != 'none' }}
+        shell: bash
+        env:
+          OLD_SLOT: ${{ steps.slot.outputs.old }}
+        run: |
+          set -euo pipefail
+          compose_env="$SECRETS_DIR/compose.env"
+          compose() {
+            docker compose --env-file "$compose_env" -f "$COMPOSE_FILE" "$@"
+          }
+          slot_suffix="$(printf '%s' "$OLD_SLOT" | tr '[:lower:]' '[:upper:]')"
+          for service in php nginx; do
+            variable="$(printf '%s' "$service" | tr '[:lower:]' '[:upper:]')_IMAGE_${slot_suffix}"
+            container="$(compose ps -aq "${service}-${OLD_SLOT}" | head -n 1)"
+            running_image=""
+            if [ -n "$container" ]; then
+              running_image="$(docker inspect --format '{{ .Config.Image }}' "$container")"
+            fi
+            if [[ "$running_image" =~ ^[^@[:space:]]+@sha256:[0-9a-f]{64}$ ]]; then
+              sed -i "s|^${variable}=.*|${variable}=${running_image}|" "$compose_env"
+            else
+              echo "::warning::Could not read the image of ${service}-${OLD_SLOT}; ${variable} keeps the image being deployed, so a rollback could restart slot ${OLD_SLOT} with it."
+            fi
+          done
+          compose config -q
 
       - name: Start the next slot, migrate and check readiness
         id: rollout

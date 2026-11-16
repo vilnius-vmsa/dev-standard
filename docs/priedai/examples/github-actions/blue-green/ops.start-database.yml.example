@@ -39,7 +39,7 @@ jobs:
       APP_REPOSITORY: ghcr.io/<org>/<app>-php
       NGINX_REPOSITORY: ghcr.io/<org>/<app>-nginx
       BALANCER_CONFIG_DIR: /srv/<application>/balancer
-      BALANCER_IMAGE_REF: ghcr.io/<org>/<app>-balancer@sha256:<balancer-digest>
+      BALANCER_IMAGE_REF: docker.io/library/nginx@sha256:<balancer-digest>
     steps:
       - name: Resolve the source revision of the image tag
         id: source

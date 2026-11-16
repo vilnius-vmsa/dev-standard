@@ -1,6 +1,6 @@
 # Inactive example. Copy to .github/workflows/ops.scheduled-scan.yml.
 
-name: Example - Ops scheduled scan
+name: Example - Ops scheduled scan (tag-based)
 
 on:
   schedule:
@@ -18,11 +18,10 @@ permissions:
 env:
   PHP_REPOSITORY: ghcr.io/<org>/<app>-php
   NGINX_REPOSITORY: ghcr.io/<org>/<app>-nginx
-  IMAGE_TAGS: staging production
 
 jobs:
   resolve-images:
-    name: Resolve promoted service images
+    name: Resolve latest release images
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -35,42 +34,34 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Resolve environment tags to immutable digests
+      - name: Resolve the latest release tag to immutable digests
         id: images
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          if ! release_tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq .tag_name)"; then
+            echo "::error::No published release was found, or the lookup failed; there is no release image to scan."
+            exit 1
+          fi
+          [[ "$release_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo "::error::The latest release ${release_tag} is not a vX.Y.Z release tag."
+            exit 1
+          }
           entries=()
-          for environment in $IMAGE_TAGS; do
-            found=()
-            missing=()
-            for repository in "$PHP_REPOSITORY" "$NGINX_REPOSITORY"; do
-              if ! output="$(docker buildx imagetools inspect "${repository}:${environment}" 2>&1)"; then
-                if ! grep -Eqi 'not found|manifest unknown|no such manifest' <<<"$output"; then
-                  echo "$output" >&2
-                  echo "::error::Could not look up ${repository}:${environment}; the scan cannot be trusted."
-                  exit 1
-                fi
-                missing+=("${repository}:${environment}")
-                continue
-              fi
-              digest="$(awk '$1 == "Digest:" { print $2; exit }' <<<"$output")"
-              [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
-              found+=("$(jq -cn --arg name "${repository##*/} (${environment})" \
-                --arg ref "${repository}@${digest}" '{name: $name, ref: $ref}')")
-            done
-            if ((${#missing[@]} > 0 && ${#found[@]} > 0)); then
-              echo "::error::The ${environment} tag exists on some images but not on: ${missing[*]}. The images of an environment must be promoted together."
+          for repository in "$PHP_REPOSITORY" "$NGINX_REPOSITORY"; do
+            if ! output="$(docker buildx imagetools inspect "${repository}:${release_tag}" 2>&1)"; then
+              echo "$output" >&2
+              echo "::error::Could not look up ${repository}:${release_tag}; ci.release promotes both images before it publishes the release, so the scan cannot be trusted."
               exit 1
             fi
-            if ((${#found[@]} == 0)); then
-              echo "::warning::No image carries the ${environment} tag; skipping this environment."
-              continue
-            fi
-            entries+=("${found[@]}")
+            digest="$(awk '$1 == "Digest:" { print $2; exit }' <<<"$output")"
+            [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+            entries+=("$(jq -cn --arg name "${repository##*/} (${release_tag})" \
+              --arg ref "${repository}@${digest}" '{name: $name, ref: $ref}')")
           done
-          ((${#entries[@]} > 0)) || { echo "No promoted images were found." >&2; exit 1; }
-          images="$(printf '%s\n' "${entries[@]}" | jq -cs 'unique_by(.ref)')"
+          images="$(printf '%s\n' "${entries[@]}" | jq -cs .)"
           echo "images=$images" >> "$GITHUB_OUTPUT"
 
   scan-images:

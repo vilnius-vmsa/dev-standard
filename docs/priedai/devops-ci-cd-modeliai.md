@@ -61,7 +61,7 @@ application/
 │       ├── cd.deploy.yml        # iš single-slot/ ARBA blue-green/ pavyzdžio (vienas failas)
 │       ├── ops.deploy.yml       # iš branch-based/ arba tag-based/ pavyzdžio
 │       ├── ops.start-database.yml  # iš single-slot/ ARBA blue-green/ pavyzdžio
-│       ├── ops.scheduled-scan.yml
+│       ├── ops.scheduled-scan.yml  # iš branch-based/ arba tag-based/ pavyzdžio
 │       ├── ops.housekeeping.yml
 │       ├── docs-check.yml
 │       └── dev-standard-sync.yml
@@ -373,17 +373,20 @@ skirtingas `.env` reikšmių interpretavimas negali jų išskirti.
 Helperis veikia „fail closed“: jei `RUNTIME_ENV` turi raktą, kurio vardas
 atrodo kaip slaptas (`PASSWORD`, `SECRET`, `TOKEN`, `KEY`, `SALT`, `DSN` ir
 pan.), bet jo nėra nei `SECRET_KEYS`, nei `NON_SECRET_KEYS` sąraše, paruošimas
-sustoja. Naujas raktas pridedamas trijose vietose kartu: helperio sąraše,
-entrypoint'e ir Compose `secrets:`.
+sustoja. Naujas slaptas raktas pridedamas keturiose vietose kartu: helperio
+`SECRET_KEYS` sąraše, helperio `write_secret` eilute, kuri sukuria secret failą,
+image entrypoint'e ir Compose `secrets:`. Vien `SECRET_KEYS` raktą tik pašalina
+iš `application.env`: be `write_secret` eilutės secret failo nebus ir `compose up`
+nepavyks.
 
-Compose projekto vardas nėra kontrakto dalis: jis fiksuotas pačiame Compose faile (`name:`), kaip etaloniniame projekte. Jei vardas būtų imamas iš checkout katalogo, perkėlus runner'io darbo katalogą Compose paleistų antrą stack'ą su tuščiais volume, nes volume vardai prasideda projekto vardu. Diegimo workflow'ai vardo neperduoda nei kintamuoju `COMPOSE_PROJECT_NAME`, nei `-p`, nei per Environment kintamuosius ar secrets: vardas keičiamas tik Compose faile, t. y. per PR su review, o ne aplinkos nustatymu, kuris gali pasikeisti nepastebėtas. Vienintelė išimtis – smoke vartas CI runner'yje: jis vardą perrašo kintamuoju `COMPOSE_PROJECT_NAME`, kad jo vienkartiniai konteineriai ir volume nesimaišytų su kitais, ir diegiamos aplinkos neliečia.
+Compose projekto vardas nėra kontrakto dalis: jis fiksuotas pačiame Compose faile (`name:`). Jei vardas būtų imamas iš checkout katalogo, perkėlus runner'io darbo katalogą Compose paleistų antrą stack'ą su tuščiais volume, nes volume vardai prasideda projekto vardu. Diegimo workflow'ai vardo neperduoda nei kintamuoju `COMPOSE_PROJECT_NAME`, nei `-p`, nei per Environment kintamuosius ar secrets: vardas keičiamas tik Compose faile, t. y. per PR su review, o ne aplinkos nustatymu, kuris gali pasikeisti nepastebėtas. Vienintelė išimtis – smoke vartas CI runner'yje: jis vardą perrašo kintamuoju `COMPOSE_PROJECT_NAME`, kad jo vienkartiniai konteineriai ir volume nesimaišytų su kitais, ir diegiamos aplinkos neliečia.
 
 | Kontrakto dalis | Reikšmė / paskirtis |
 |---|---|
 | `RUNTIME_ENV` | Pilnas target aplinkos aplikacijos `.env` turinys – vardas vienodas staging ir production, nes kiekvienas GitHub Environment turi savo reikšmę (`OPS-ENV-P03`); perduodamas tik per protected GitHub Environment secret ir niekada neprintinamas. Helperis jį išskaido į `application.env` (be slaptų raktų) ir atskirus secret failus. |
 | `DEPLOY_ENVIRONMENT` | `staging` arba `production`; naudojamas aplinkos ir `APP_ENV` suderinamumui tikrinti. |
 | `TLS_CERTIFICATE_B64`, `TLS_PRIVATE_KEY_B64` | TLS sertifikato ir privataus rakto Base64 reikšmės; helperis tikrina dekodavimą, porą ir sertifikato galiojimą. |
-| `SECRETS_DIR` | Hosto runtime katalogas. Katalogas yra `0700` ir priklauso runner'io paskyrai; konteinerių montuojami secret failai jame yra `0444`, nes Compose file-secrets yra bind mount'ai ir neprivilegijuoti konteinerių naudotojai (PHP, Nginx, MySQL, Redis) kitaip jų neperskaitytų. `compose.env` skaito tik Compose hoste, todėl lieka `0600`. |
+| `SECRETS_DIR` | Hosto runtime katalogas. Katalogas yra `0700` ir priklauso runner'io paskyrai. Jo tėviniame kataloge (pavyzdžiuose `/srv/<application>`) runner'io paskyra turi turėti rašymo teisę, nes helperis ten kuria laikiną `0700` katalogą ir pakeičia `SECRETS_DIR` atominiu pervadinimu; paties tėvinio katalogo savininko ir teisių helperis nekeičia. Konteinerių montuojami secret failai jame yra `0444`, nes Compose file-secrets yra bind mount'ai ir neprivilegijuoti konteinerių naudotojai (PHP, Nginx, MySQL, Redis) kitaip jų neperskaitytų. `compose.env` skaito tik Compose hoste, todėl lieka `0600`. |
 | Rekomenduojamas `prepare-runtime-secrets.sh` helperis | Iš aukščiau nurodytų įėjimų atomiškai sukuria `application.env` (be slaptų raktų), `app_key`, `mysql_password`, `mysql_root_password`, `redis_password`, `tls_certificate`, `tls_private_key` ir `compose.env`. |
 | `compose.env` | Sugeneruoti `SECRETS_DIR`, DB reikšmės ir pinned image refs; perduodamas `docker compose --env-file` prieš `config`, `pull` ir rollout. |
 
@@ -446,7 +449,7 @@ Darbo eigų failai gali būti sujungti ar išskaidyti pagal projekto dydį, tač
 |---|---|---|---|
 | `ci.validate` | kviečiamas iš `ci.pipeline` (PR ir protected branch push) | formatavimas ir linting, statinė analizė, unit/contract testai, Composer/npm auditas, Compose struktūros patikra, secrets helperio apsaugų testas ir secret scan | privalomas kokybės vartas |
 | `ci.pipeline` | PR ir protected branch push | kviečia `ci.validate`; branch-based variante po push papildomai nustato build-reikšmingus pakeitimus, kviečia `ci.build` ir sinchronizaciją; tag-based variante yra tik vartas | vartų rezultatas, branch-based – ir build/deploy |
-| `docs-check` | dokumentacijos pakeitimai | nuorodų, anchor'ų ir dokumentacijos kelių patikra | dokumentacijos kokybės vartas |
+| `docs-check` | kiekvienas PR (be `paths` filtro: kodo failo pervadinimas ar ištrynimas taip pat gali palikti pasenusią nuorodą dokumentacijoje) | nuorodų, anchor'ų ir dokumentacijoje minimų kodo kelių patikra | dokumentacijos kokybės vartas |
 | `dev-standard-sync` | schedule arba manual | pasirinkto dev-standard release pritaikymas ir PR paruošimas | atnaujinimo PR arba sinchronizacijos rezultatas |
 | `ci.build` | branch-based: sėkmingas `ci.pipeline` po merge, kai nustatyti build-reikšmingi pakeitimai; tag-based: per `workflow_run` po sėkmingo `ci.pipeline` push'ui į `main` | checkout pagal exact SHA, multi-stage build, registry push, image scan, SBOM, provenance, attestation, image verification, disposable smoke test ir immutable source tag publication | patikrintas immutable digest perduotas į `cd.deploy`; environment tag promotion atliekamas tik po sėkmingo deploy ir health |
 | pasirenkamas `ci.test-image` | po build/attestation, didesniuose projektuose | Tas pats image-test etapas kaip atskira reusable workflow, kai jo nereikia laikyti pagrindiniame build workflow | patikrintas digest |
@@ -455,7 +458,7 @@ Darbo eigų failai gali būti sujungti ar išskaidyti pagal projekto dydį, tač
 | `ops.start-database` (jei taikoma) | atskiras operatoriaus veiksmas | savarankiškas DB paleidimas prieš pirmą deploy arba po incidento: pagal jau paskelbtą nekintamą image tag'ą paruošia runtime secrets ir paleidžia tik MySQL; variantas (single-slot ar blue-green) turi sutapti su `cd.deploy` | audituojamas operatoriaus rezultatas |
 | `ops.deploy`, branch-based variantas (jei taikoma) | atskiras operatoriaus veiksmas | jau patikrintų PHP-FPM/Nginx digest'ų redeploy pagal environment arba `sha-<40>` tag'ą | audituojamas redeploy ir health rezultatas |
 | `ops.deploy`, tag-based variantas (jei taikoma) | atskiras operatoriaus veiksmas | `vX.Y.Z` release tag'o redeploy; tag'as susiejamas su image source SHA ir `ci.release.yml` release attestation | audituojamas version tag redeploy ir health rezultatas |
-| `ops.scheduled-scan` | weekly schedule arba manual | promoted image, lockfile dependency ir secret istorijos scan | audituojami scan rezultatai |
+| `ops.scheduled-scan` | weekly schedule arba manual | promoted image (branch-based – aplinkų tag'ai `staging` ir `production`; tag-based – naujausio paskelbto leidimo `vX.Y.Z`), lockfile dependency ir secret istorijos scan | audituojami scan rezultatai |
 | `ops.housekeeping` | schedule arba manual | workflow run'ų ir logų retention (pavyzdyje 90 dienų); pasirinktinai – senų container image versijų valymas (`prune_images`) | kontroliuojamas CI ir registry saugojimas |
 
 `ci.build` smoke žingsnis turi likti trumpas ir aiškus workflow faile. Jei
@@ -479,7 +482,7 @@ Visi trečiųjų šalių action'ai nurodomi pilnu commit SHA su versijos komenta
 (`uses: actions/checkout@3d3c42e5… # v7`), niekada tag'u ar šaka (`OPS-PIPE-P04`):
 tag'ą jo savininkas gali perkelti į kitą kodą, o build job'e tas kodas gautų
 registry rašymo teises ir galimybę pasirašyti attestation. Pavyzdžiuose įrašyti
-SHA yra tie, kuriuos naudoja etaloninis `login` projektas; prieš naudojant juos
+SHA buvo peržiūrėti rengiant pavyzdžius; prieš naudojant juos
 reikia peržiūrėti iš naujo, o atnaujinimus palikti Dependabot'ui
 (`github-actions` ekosistema).
 
@@ -494,7 +497,7 @@ saugoti SBOM prie publikuoto image registry attestation metaduomenyse, o
 prieinami prieš smoke/promotion vartus. Atskirų lokalių SBOM failų generuoti
 nereikia, jei registry attestation yra išsaugota ir patikrinta.
 
-`ci.build` (arba pasirenkamas `ci.test-image`) turi perduoti tarp job'ų konkretų source SHA bei digest, o ne per naujo spręsti branch'o ar perrašomo tag reikšmę. `cd.deploy` negali būti laikomas sėkmingu vien todėl, kad paruošė secrets, Compose failą ar sulaukė `up --wait`: sėkmė reiškia faktinį paleidimą ir readiness patikrą, kurioje `release` sutampa su `source_sha`. Minimalūs pavyzdžiai pateikti [kokybės vartui](examples/github-actions/common/ci.validate.yml.example), [branch-based](examples/github-actions/branch-based/ci.pipeline.yml.example) ir [tag-based](examples/github-actions/tag-based/ci.pipeline.yml.example) CI Pipeline, [docs check](examples/github-actions/common/docs-check.yml.example), [dev-standard sync](examples/github-actions/common/dev-standard-sync.yml.example), [branch-based build](examples/github-actions/branch-based/ci.build.yml.example), [reusable deploy](examples/github-actions/single-slot/cd.deploy.yml.example), [branch-based Ops: Deploy](examples/github-actions/branch-based/ops.deploy.yml.example), [tag-based Ops: Deploy](examples/github-actions/tag-based/ops.deploy.yml.example), [scheduled scan](examples/github-actions/common/ops.scheduled-scan.yml.example), [housekeeping](examples/github-actions/common/ops.housekeeping.yml.example), start database ([single-slot](examples/github-actions/single-slot/ops.start-database.yml.example), [blue-green](examples/github-actions/blue-green/ops.start-database.yml.example)) ir [tag-based release](examples/github-actions/tag-based/ci.release.yml.example).
+`ci.build` (arba pasirenkamas `ci.test-image`) turi perduoti tarp job'ų konkretų source SHA bei digest, o ne per naujo spręsti branch'o ar perrašomo tag reikšmę. `cd.deploy` negali būti laikomas sėkmingu vien todėl, kad paruošė secrets, Compose failą ar sulaukė `up --wait`: sėkmė reiškia faktinį paleidimą ir readiness patikrą, kurioje `release` sutampa su `source_sha`. Minimalūs pavyzdžiai pateikti [kokybės vartui](examples/github-actions/common/ci.validate.yml.example), [branch-based](examples/github-actions/branch-based/ci.pipeline.yml.example) ir [tag-based](examples/github-actions/tag-based/ci.pipeline.yml.example) CI Pipeline, [docs check](examples/github-actions/common/docs-check.yml.example), [dev-standard sync](examples/github-actions/common/dev-standard-sync.yml.example), [branch-based build](examples/github-actions/branch-based/ci.build.yml.example), [reusable deploy](examples/github-actions/single-slot/cd.deploy.yml.example), [branch-based Ops: Deploy](examples/github-actions/branch-based/ops.deploy.yml.example), [tag-based Ops: Deploy](examples/github-actions/tag-based/ops.deploy.yml.example), scheduled scan ([branch-based](examples/github-actions/branch-based/ops.scheduled-scan.yml.example), [tag-based](examples/github-actions/tag-based/ops.scheduled-scan.yml.example)), [housekeeping](examples/github-actions/common/ops.housekeeping.yml.example), start database ([single-slot](examples/github-actions/single-slot/ops.start-database.yml.example), [blue-green](examples/github-actions/blue-green/ops.start-database.yml.example)) ir [tag-based release](examples/github-actions/tag-based/ci.release.yml.example).
 Deploy workflow checkout'ina iš `source_sha` tik tuos Compose, helperio ir runtime konfigūracijos failus, kurių reikia konkrečiam paleidimui, ir `docker compose -f` vykdo iš checkout workspace. Todėl hoste nelieka neaiškaus `/srv/<application>/docker-compose...` failo šaltinio. Pirmam diegimui atskiro paruošimo nereikia: `CD: Deploy` prieš migraciją pats paleidžia MySQL bei Redis ir sulaukia jų health. `ops.start-database` yra savarankiškas operatoriaus kelias, kai duomenų bazę reikia paleisti atskirai nuo aplikacijos (pvz., prieš pirmą deploy atkurti dump'ą arba po incidento): jis priima nekintamą `sha-<40>` arba `vX.Y.Z` image tag'ą, tuo pačiu helperiu paruošia runtime secrets ir `compose.env`, patikrina Compose konfigūraciją ir paleidžia tik `mysql`. Konfigūracijos failus jis checkout'ina iš tos revision, iš kurios pastatytas nurodytas image tag'as (`sha-<40>` – iš to commit'o, `vX.Y.Z` – iš to tag'o), o ne iš paleidimo šakos viršūnės; pats workflow failas vis tiek vykdomas iš paleidimo ref, todėl tas ref turi būti apsaugotas Environment šakų politika. Jis dalijasi `cd-deploy-<aplinka>` concurrency grupe, nes perrašo secrets katalogą. Tag'as turi jau egzistuoti registry: tag-based modelyje `sha-` tag'as atsiranda tik po pirmo sėkmingo staging diegimo, tad prieš patį pirmą diegimą šiuo workflow DB paleisti ten negalima. Variantas (single-slot ar blue-green) turi sutapti su `cd.deploy`.
 Blue-green `cd.deploy` variantas turi naudoti tą patį `source_sha`, image
 digest'ų, build attestation ir `release_workflow` release attestation vartą
@@ -512,7 +515,11 @@ balancerį → naujas worker'is → viešo HTTPS krašto patikra → seno slot'o
 sustabdymas. Jei bet kuris žingsnis po slot'o parinkimo nepavyksta arba run'as
 atšaukiamas, rollback žingsnis atstato ankstesnę balancerio konfigūraciją (ji
 išsaugoma prieš perrašant; failas keičiamas vietoje, nes tai vieno failo bind
-mount), pašalina naują slotą ir vėl paleidžia seno slot'o worker'į. Senas slotas
+mount), pašalina naują slotą ir vėl paleidžia seno slot'o worker'į. Kad tai būtų
+saugu, prieš rollout deploy į `compose.env` aktyviam slotui įrašo jo veikiančių
+konteinerių image nuorodas, o naujus digest'us palieka tik diegiamam slotui:
+kitaip rollback ar vėlesnis `compose up` aktyvų slotą perkurtų su ką tik atmestu
+image. Senas slotas
 šalinamas tik po sėkmingo perjungimo, todėl vėlesnis grįžimas prie ankstesnės
 versijos yra įprastas tos versijos redeploy per `Ops: Deploy`, o ne slot'o
 perjungimas atgal.
@@ -631,7 +638,7 @@ netinka: production job'as galėtų būti įvykdytas staging hoste ir atvirkšč
 Šių nustatymų code review nemato, todėl jie tikrinami perduodant projektą ir
 aprašomi projekto diegimo dokumentacijoje.
 
-Permissions nurodomos workflow arba job lygiu, `pull_request` iš fork'o negali gauti production secrets ar privileged build tokenų. Visi diegimo ir redeploy keliai baigiasi tame pačiame `CD: Deploy` job'e, o jo job lygio concurrency grupė `cd-deploy-<aplinka>` užtikrina, kad diegimas ir redeploy į tą pačią aplinką nevyktų lygiagrečiai. `ops.start-database` hostą keičia savo job'e (perrašo secrets katalogą), todėl naudoja tą pačią grupę. Aplinkos tag'o perkėlimas po diegimo (`promote-environment`) turi savo grupę `promote-<aplinka>`: bendroje deploy grupėje laukiantį perkėlimą galėtų atšaukti į eilę atėjęs kitas diegimas, ir tag'as liktų ant senos versijos. Kviečiantis workflow (pvz., `Ops: Deploy`) privalo naudoti kitą grupės vardą (`ops-deploy-<aplinka>`): jei kvietėjas ir kviečiamas job'as prašo tos pačios grupės, GitHub run'ą atšaukia kaip deadlock. Build ir release workflow grupės taip pat atskiros.
+Permissions nurodomos workflow arba job lygiu, `pull_request` iš fork'o negali gauti production secrets ar privileged build tokenų. Visi diegimo ir redeploy keliai baigiasi tame pačiame `CD: Deploy` job'e, o jo job lygio concurrency grupė `cd-deploy-<aplinka>` užtikrina, kad diegimas ir redeploy į tą pačią aplinką nevyktų lygiagrečiai. `ops.start-database` hostą keičia savo job'e (perrašo secrets katalogą), todėl naudoja tą pačią grupę. Aplinkos tag'o perkėlimas po diegimo (`promote-environment`) turi savo grupę `promote-<aplinka>`: bendroje deploy grupėje laukiantį perkėlimą galėtų atšaukti į eilę atėjęs kitas diegimas, ir tag'as liktų ant senos versijos. Kviečiantis workflow (pvz., `Ops: Deploy`) privalo naudoti kitą grupės vardą (`ops-deploy-<aplinka>`): jei kvietėjas ir kviečiamas job'as prašo tos pačios grupės, GitHub run'ą atšaukia kaip deadlock. Build ir release workflow grupės taip pat atskiros. `ci.release` visiems release tag'ams naudoja vieną grupę `release-production`, apimančią ir production diegimą: jei grupė priklausytų nuo tag'o, du beveik kartu sukurti tag'ai būtų tikrinami lygiagrečiai ir senesnis galėtų įsidiegti po naujesnio. GitHub vienoje grupėje laiko tik vieną laukiantį run'ą, todėl greitai sukūrus tris tag'us vidurinio run'as atšaukiamas ir jo leidimas nepaskelbiamas; production gauna naujausią. Tokio run'o vėliau kartoti nereikėtų – jis senesnę versiją įdiegtų ant naujesnės.
 
 
 ### Published-image smoke patikra

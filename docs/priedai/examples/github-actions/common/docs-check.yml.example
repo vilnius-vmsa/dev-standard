@@ -4,10 +4,6 @@ name: Example - Docs check
 
 on:
   pull_request:
-    paths:
-      - 'docs/**'
-      - '**/*.md'
-      - '.agents/skills/dev-standard-docs/**'
 
 permissions:
   contents: read

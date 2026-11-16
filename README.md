@@ -6,7 +6,7 @@ The standard for software development, modification, deployment, and
 maintenance of Vilnius City Municipality.
 
 [![Latest release](https://img.shields.io/github/v/release/vilnius-vmsa/dev-standard?display_name=tag&sort=semver&label=release)](https://github.com/vilnius-vmsa/dev-standard/releases/latest)
-[![Tests](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/ci.lint-validate.yml/badge.svg)](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/ci.lint-validate.yml)
+[![Tests](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/ci.pipeline.yml/badge.svg)](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/ci.pipeline.yml)
 [![Deployment](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/cd.deploy.yml/badge.svg)](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/cd.deploy.yml)
 [![CodeQL](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/codeql.yml/badge.svg)](https://github.com/vilnius-vmsa/dev-standard/actions/workflows/codeql.yml)
 [![Node.js 20 | 22+](https://img.shields.io/badge/Node.js-20%20%7C%2022%2B-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)

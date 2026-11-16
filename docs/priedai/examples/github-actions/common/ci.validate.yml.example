@@ -98,11 +98,15 @@ jobs:
           set -euo pipefail
           digest=sha256:0000000000000000000000000000000000000000000000000000000000000000
           base=$'DB_DATABASE=ci\nDB_USERNAME=ci\nDB_PASSWORD=ci\nDB_ROOT_PASSWORD=ci\nREDIS_PASSWORD=ci\nAPP_KEY=ci'
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj /CN=ci.invalid \
+            -keyout "$RUNNER_TEMP/guard-tls.key" -out "$RUNNER_TEMP/guard-tls.crt" 2>/dev/null
+          tls_certificate="$(base64 < "$RUNNER_TEMP/guard-tls.crt" | tr -d '\n')"
+          tls_private_key="$(base64 < "$RUNNER_TEMP/guard-tls.key" | tr -d '\n')"
           expect_refusal() {
             local deploy_environment="$1" runtime_env="$2" expected="$3" output
             if output="$(RUNTIME_ENV="$base"$'\n'"$runtime_env" DEPLOY_ENVIRONMENT="$deploy_environment" \
               SECRETS_DIR="$RUNNER_TEMP/guard-secrets" \
-              TLS_CERTIFICATE_B64=Y2k= TLS_PRIVATE_KEY_B64=Y2k= \
+              TLS_CERTIFICATE_B64="$tls_certificate" TLS_PRIVATE_KEY_B64="$tls_private_key" \
               PHP_IMAGE_REF="ci.invalid/php@$digest" NGINX_IMAGE_REF="ci.invalid/nginx@$digest" \
               bash docker/scripts/prepare-runtime-secrets.sh 2>&1)"; then
               echo "The helper accepted: $runtime_env" >&2
@@ -121,6 +125,8 @@ jobs:
           expect_refusal production $'APP_ENV=production\nDATABASE_URL=mysql://app:pw@db/app' 'not allowlisted: DATABASE_URL'
           expect_refusal production $'APP_ENV=production\nAPP_DEBUG=false\nDB_PASSWORD=a\'b' 'DB_PASSWORD must not contain'
           expect_refusal production $'APP_ENV=production\nAPP_DEBUG=false\nREDIS_PASSWORD=a\"b' 'REDIS_PASSWORD must not contain'
+          expect_refusal production $'APP_ENV=production\nAPP_DEBUG=\'true\'x' 'text after the closing quote'
+          expect_refusal production $'APP_ENV=production\nAPP_DEBUG=false\nDATABASE_URL="mysql://app:pw@db/app"x' 'text after the closing quote'
           test ! -e "$RUNNER_TEMP/guard-secrets"
 
   secrets:
