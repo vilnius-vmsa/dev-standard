@@ -71,7 +71,7 @@ export function resolveStacks(stacks, manifest) {
   const unknown = stacks.filter((s) => !manifest.stacks.includes(s));
   if (unknown.length) {
     const valid = manifest.stacks.filter((s) => s !== 'all');
-    throw new Error(`unknown stack(s): ${unknown.join(', ')}. Valid stacks: ${valid.join(', ')}`);
+    throw new Error(`unknown stack(s): ${unknown.join(', ')}. Valid stacks in release ${manifest.version}: ${valid.join(', ')}. A stack added in a newer release needs that release: run the sync with version "latest".`);
   }
   const resolved = new Set(['all']);
   const add = (stack) => {
@@ -80,7 +80,71 @@ export function resolveStacks(stacks, manifest) {
     for (const implied of manifest.implies?.[stack] ?? []) add(implied);
   };
   stacks.forEach(add);
+  for (const included of legacyStacks(stacks, manifest)) add(included);
   return [...resolved];
+}
+
+// Transitional: a stack that was split into profiles (infra) still brings all of them while the repository
+// lists none of them itself. Returns the profiles added that way.
+export function legacyStacks(stacks, manifest) {
+  const added = [];
+  for (const stack of stacks) {
+    const profiles = manifest.legacyIncludes?.[stack] ?? [];
+    if (profiles.length && !profiles.some((profile) => stacks.includes(profile))) added.push(...profiles);
+  }
+  return added;
+}
+
+export const RELEASE_MODELS = ['flow-branch', 'flow-tag'];
+export const DEPLOYMENT_METHODS = ['compose', 'compose-blue-green', 'k8s'];
+const profileNote = (text) => `> [!WARNING]\n> ${text}\n`;
+const NOTHING_DEPLOYED = 'If the repository deploys nothing (for example a library),';
+// While a sync pull request is open, sync reads the config from that pull request's branch, so an edit of
+// the config on the default branch is ignored and reverted when the pull request is merged.
+const HOW_TO_CHANGE = '>\n> To change the stacks, run the "Dev standard sync" workflow manually with the `stacks` input (the full list, for example `laravel,frontend,flow-branch,compose`), or edit `stacks` in `.dev-standard/config.json` on this pull request\'s branch and then run the workflow again: the edit alone does not regenerate the rules files. An edit on the default branch has no effect while this pull request is open.\n';
+const withHowToChange = (notes) => (notes ? `${notes}${HOW_TO_CHANGE}` : '');
+
+// Markdown for the pull request body; empty when the DevOps profiles in the config need no attention.
+// Does not depend on legacyIncludes: once the transition is over, a repository that still lists only
+// `infra` must be told why its profile files are being removed.
+function profileNotes(stacks, manifest) {
+  // Releases before the DevOps profiles know none of these stacks.
+  if (!RELEASE_MODELS.every((model) => manifest.stacks.includes(model))) return '';
+  const resolved = resolveStacks(stacks, manifest);
+  if (!resolved.includes('infra')) return '';
+
+  const legacy = legacyStacks(stacks, manifest);
+  if (legacy.length) {
+    return profileNote(`\`${CONFIG_FILE}\` lists \`infra\` but no DevOps profile, so this release still installs all of them: ${legacy.map((s) => `\`${s}\``).join(', ')}. Replace \`infra\` with the profiles this repository uses (one release model: \`flow-branch\` or \`flow-tag\`; one deployment: \`compose\`, \`compose-blue-green\` or \`k8s\`). A later release installs only the common rules for \`infra\`. If it deploys with a technology the standard does not describe, list only the release model, and \`docker\` when it builds container images (OPS-PIPE-P07). ${NOTHING_DEPLOYED} keep \`infra\` as it is, or list only \`docker\` when it builds container images: the later release then gives it the common rules only.`);
+  }
+  const lines = [];
+  const models = RELEASE_MODELS.filter((model) => stacks.includes(model));
+  const methods = DEPLOYMENT_METHODS.filter((method) => stacks.includes(method));
+  if (models.length === 0 && methods.length === 0 && stacks.includes('docker')) {
+    // `docker` alone is a valid choice (OPS-PIPE-P07): the repository builds images and deploys nothing,
+    // or deploys with a technology the standard has no profile for.
+    // It is not silenced, because a repository that does deploy still needs its release model.
+    return profileNote(`\`${CONFIG_FILE}\` lists \`docker\` without a release model or a deployment method. That is correct for a repository that builds container images and deploys nothing: say so in its README and ignore this note. If the repository deploys, add its release model (\`flow-branch\` or \`flow-tag\`), and a deployment method (\`compose\`, \`compose-blue-green\` or \`k8s\`) unless it deploys with a technology the standard does not describe (OPS-PIPE-P07).`);
+  }
+  if (models.length === 0 && methods.length === 0) {
+    // One note, not two: a repository that deploys nothing legitimately has neither.
+    return profileNote(`\`${CONFIG_FILE}\` lists no release model and no deployment method, so the branch-based, tag-based, Compose and Kubernetes rules are not installed. Add one release model (\`flow-branch\` or \`flow-tag\`) and one deployment method (\`compose\`, \`compose-blue-green\` or \`k8s\`). If it deploys with a technology the standard does not describe, add only the release model (and \`docker\` when it builds container images). ${NOTHING_DEPLOYED} say so in its README and ignore this note (OPS-PIPE-P07).`);
+  }
+  if (models.length === 2) {
+    lines.push(profileNote(`\`${CONFIG_FILE}\` lists both \`flow-branch\` and \`flow-tag\`. A repository follows one release model; remove the other.`));
+  } else if (models.length === 0) {
+    lines.push(profileNote(`\`${CONFIG_FILE}\` lists a deployment method but no release model, so the branch-based or tag-based rules are not installed. Add \`flow-branch\` or \`flow-tag\`. Another release model is allowed only as an exception recorded in \`.github/instructions/dev-standard-local.instructions.md\` (OPS-PIPE-P07); then ignore this note.`));
+  }
+  if (methods.length === 0) {
+    lines.push(profileNote(`\`${CONFIG_FILE}\` lists no deployment method, so the Compose or Kubernetes rules are not installed. Add \`compose\`, \`compose-blue-green\` or \`k8s\`. If the repository uses a technology the standard does not describe, state that in its deployment documentation (and list \`docker\` when it builds container images); then ignore this note (OPS-PIPE-P07).`));
+  } else if (methods.includes('k8s') && methods.length > 1) {
+    lines.push(profileNote(`\`${CONFIG_FILE}\` lists both a Compose profile and \`k8s\`. A repository normally has one deployment method; keep both only if it really deploys both ways.`));
+  }
+  return lines.join('\n');
+}
+
+export function stackWarnings(stacks, manifest) {
+  return withHowToChange(profileNotes(stacks, manifest));
 }
 
 // Bundles up to v1.2.7 hold one skill in skill/ and list no skills in the manifest.
@@ -140,7 +204,7 @@ export async function applyBundle({ repoDir, bundleDir, version, stacks }) {
 
   await mkdir(path.join(repoDir, path.dirname(CONFIG_FILE)), { recursive: true });
   await writeFile(path.join(repoDir, CONFIG_FILE), `${JSON.stringify({ version, stacks }, null, 2)}\n`);
-  return { stacks: resolved, skills: [...wantedSkills], prTemplate };
+  return { stacks: resolved, skills: [...wantedSkills], warning: stackWarnings(stacks, manifest), prTemplate };
 }
 
 async function hasPrTemplate(repoDir) {
@@ -276,8 +340,8 @@ async function main() {
       await setOutputs({ skip: 'true' });
     }
   } else if (command === 'apply') {
-    const { stacks, skills, prTemplate } = await applyBundle({ repoDir, bundleDir: values.bundle, version: values.version, stacks: parseStacks(values.stacks) });
-    await writeFile(values.warning, (await agentsWarning(repoDir, values.bundle)) ?? '');
+    const { stacks, skills, warning, prTemplate } = await applyBundle({ repoDir, bundleDir: values.bundle, version: values.version, stacks: parseStacks(values.stacks) });
+    await writeFile(values.warning, [(await agentsWarning(repoDir, values.bundle)) ?? '', warning].filter(Boolean).join('\n'));
     console.log(`Installed ${values.version} for stacks: ${stacks.join(', ')}; skills: ${skills.join(', ')}`);
     if (prTemplate) console.log(`Created ${prTemplate}; later syncs leave it to the team.`);
   } else {

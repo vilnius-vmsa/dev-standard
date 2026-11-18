@@ -1,0 +1,230 @@
+# Inactive example. Copy to docker-compose.production.yml.
+
+name: application
+
+x-container-environment: &container-environment
+  TZ: UTC
+
+x-logging: &application-logging
+  driver: json-file
+  options:
+    max-size: "50m"
+    max-file: "5"
+
+x-log-labels:
+  mysql: &mysql-log-labels
+    app.logging.enabled: "true"
+    app.logging.component: "mysql"
+    app.logging.service_name: "<application>-mysql"
+    app.logging.type: "database"
+  redis: &redis-log-labels
+    app.logging.enabled: "true"
+    app.logging.component: "redis"
+    app.logging.service_name: "<application>-redis"
+    app.logging.type: "cache"
+  php: &php-log-labels
+    app.logging.enabled: "true"
+    app.logging.component: "php"
+    app.logging.service_name: "<application>-php"
+    app.logging.type: "application"
+  worker: &worker-log-labels
+    app.logging.enabled: "true"
+    app.logging.component: "worker"
+    app.logging.service_name: "<application>-worker"
+    app.logging.type: "application"
+  nginx: &nginx-log-labels
+    app.logging.enabled: "true"
+    app.logging.component: "nginx"
+    app.logging.service_name: "<application>-nginx"
+    app.logging.type: "http"
+
+x-runtime-defaults: &runtime-defaults
+  restart: unless-stopped
+  read_only: true
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,nodev,size=32m,mode=1777
+  networks: [internal]
+  environment: *container-environment
+  logging: *application-logging
+
+x-php-defaults: &php-defaults
+  <<: *runtime-defaults
+  networks: [internal, egress]
+  image: ${PHP_IMAGE_REF:?PHP_IMAGE_REF must be an immutable digest reference}
+  stop_grace_period: 130s
+  env_file:
+    - ${SECRETS_DIR:?SECRETS_DIR is required}/application.env
+  environment:
+    <<: *container-environment
+    DB_HOST: mysql
+    REDIS_HOST: redis
+  secrets: [app_key, mysql_password, redis_password]
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,nodev,size=160m,uid=1001,gid=1001,mode=1777
+    - /var/www/storage/framework/views:rw,noexec,nosuid,nodev,size=32m,uid=1001,gid=1001,mode=0770
+    - /var/www/storage/framework/cache:rw,noexec,nosuid,nodev,size=16m,uid=1001,gid=1001,mode=0770
+    - /var/www/storage/framework/sessions:rw,noexec,nosuid,nodev,size=16m,uid=1001,gid=1001,mode=0770
+    - /var/www/storage/logs:rw,noexec,nosuid,nodev,size=16m,uid=1001,gid=1001,mode=0770
+    - /home/app:rw,noexec,nosuid,nodev,size=8m,uid=1001,gid=1001,mode=0750
+  volumes:
+    - application_uploads:/var/www/storage/app/public
+  depends_on:
+    mysql:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  mysql:
+    <<: *runtime-defaults
+    labels: *mysql-log-labels
+    image: mysql:8.4@sha256:REPLACE_WITH_CURRENT_DIGEST
+    user: "999:999"
+    stop_grace_period: 60s
+    tmpfs:
+      - /var/run/mysqld:rw,noexec,nosuid,nodev,size=8m,uid=999,gid=999,mode=0755
+      - /tmp:rw,noexec,nosuid,nodev,size=128m,uid=999,gid=999,mode=1777
+    deploy:
+      resources:
+        limits:
+          cpus: "2.00"
+          memory: 2G
+    environment:
+      <<: *container-environment
+      MYSQL_DATABASE: ${DB_DATABASE:?DB_DATABASE is required}
+      MYSQL_USER: ${DB_USERNAME:?DB_USERNAME is required}
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+    secrets: [mysql_password, mysql_root_password]
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$(cat /run/secrets/mysql_root_password) mysql -h 127.0.0.1 -u root -N -e 'SELECT 1' >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7.4-alpine@sha256:REPLACE_WITH_CURRENT_DIGEST
+    <<: *runtime-defaults
+    labels: *redis-log-labels
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+    user: "999:1000"
+    stop_grace_period: 60s
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m,uid=999,gid=1000,mode=1777
+    command: ["sh", "-ec", "umask 077; printf 'requirepass \"%s\"\\n' \"$$(cat /run/secrets/redis_password)\" > /tmp/redis.conf; exec redis-server /tmp/redis.conf --appendonly yes"]
+    secrets: [redis_password]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=$$(cat /run/secrets/redis_password) redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  php:
+    <<: *php-defaults
+    labels: *php-log-labels
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+    expose: [9000]
+    healthcheck:
+      test: ["CMD-SHELL", "SCRIPT_NAME=/fpm-ping SCRIPT_FILENAME=/fpm-ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000 | grep -q pong"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  worker:
+    <<: *php-defaults
+    labels: *worker-log-labels
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+    command: ["php", "artisan", "queue:work", "redis", "--sleep=1", "--tries=3", "--timeout=90", "--max-time=3600", "--no-interaction"]
+    stop_grace_period: 100s
+    healthcheck:
+      # The application writes this file: application/queue-worker-heartbeat.php.example.
+      test: ["CMD", "php", "-r", "exit(@filemtime('/tmp/queue-worker.heartbeat') >= time() - 120 ? 0 : 1);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  nginx:
+    <<: *runtime-defaults
+    labels: *nginx-log-labels
+    networks: [edge, internal]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+    image: ${NGINX_IMAGE_REF:?NGINX_IMAGE_REF must be an immutable digest reference}
+    stop_grace_period: 130s
+    tmpfs:
+      - /run:rw,noexec,nosuid,nodev,size=4m,uid=101,gid=101,mode=0755
+      - /var/cache/nginx:rw,noexec,nosuid,nodev,size=64m,uid=101,gid=101,mode=0750
+      - /tmp:rw,noexec,nosuid,nodev,size=32m,uid=101,gid=101,mode=1777
+    depends_on:
+      php:
+        condition: service_healthy
+    volumes:
+      - ./docker/nginx/conf.d/edge-tls.conf:/etc/nginx/conf.d/edge-tls.conf:ro
+      - type: volume
+        source: application_uploads
+        target: /usr/share/nginx/html/storage
+        read_only: true
+        volume:
+          nocopy: true
+    ports:
+      - "443:8443"
+    secrets:
+      - source: tls_certificate
+        target: tls_certificate
+      - source: tls_private_key
+        target: tls_private_key
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -T 3 --no-check-certificate -O /dev/null https://127.0.0.1:8443/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  edge:
+    driver: bridge
+  internal:
+    internal: true
+  egress:
+    driver: bridge
+
+volumes:
+  application_uploads:
+  mysql_data:
+  redis_data:
+
+secrets:
+  app_key:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/app_key
+  mysql_password:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/mysql_password
+  mysql_root_password:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/mysql_root_password
+  redis_password:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/redis_password
+  tls_certificate:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/tls_certificate
+  tls_private_key:
+    file: ${SECRETS_DIR:?SECRETS_DIR is required}/tls_private_key

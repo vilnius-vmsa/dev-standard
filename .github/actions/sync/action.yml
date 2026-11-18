@@ -78,6 +78,13 @@ runs:
         git add -A
         if git diff --cached --quiet; then
           echo "Already in sync with $VERSION."
+          # An open sync pull request is now out of date: for example its stacks were set back to what
+          # the default branch has. Left open, it would still offer the abandoned change for merging.
+          stale="$(gh pr list --head "$BRANCH" --base "$BASE" --state open --json number --jq '.[0].number // empty')"
+          if [[ -n "$stale" ]]; then
+            gh pr close "$stale" --delete-branch \
+              --comment "Closed by sync: the default branch already has the generated files for $VERSION and the requested stacks, so nothing is left to change."
+          fi
           exit 0
         fi
         git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \

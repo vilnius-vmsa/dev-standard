@@ -1,0 +1,353 @@
+# Inactive example. Copy to .github/workflows/ci.build.yml.
+
+name: Example - CI Build (branch-based)
+
+on:
+  workflow_call:
+    inputs:
+      source_branch:
+        description: Protected source branch that passed CI Pipeline.
+        required: true
+        type: string
+      source_sha:
+        description: Exact commit that passed CI Pipeline.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: build-${{ inputs.source_branch }}
+  cancel-in-progress: false
+
+jobs:
+  build-test-promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      environment: ${{ steps.meta.outputs.environment }}
+      source_sha: ${{ steps.meta.outputs.source_sha }}
+      app_image: ${{ steps.image.outputs.app_image }}
+      nginx_image: ${{ steps.image.outputs.nginx_image }}
+    steps:
+      - name: Checkout exact linted revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.source_sha }}
+          fetch-depth: 1
+
+      - name: Resolve deployment metadata
+        id: meta
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
+        run: |
+          set -euo pipefail
+          case "$SOURCE_BRANCH" in
+            stage) ENVIRONMENT=staging ;;
+            main) ENVIRONMENT=production ;;
+            *) echo "Unsupported protected branch: $SOURCE_BRANCH" >&2; exit 1 ;;
+          esac
+          printf 'source_sha=%s\n' "$SOURCE_SHA" >> "$GITHUB_OUTPUT"
+          printf 'environment=%s\n' "$ENVIRONMENT" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to the container registry
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REGISTRY: ghcr.io
+        run: echo "$GH_TOKEN" | docker login "$REGISTRY" -u "${{ github.actor }}" --password-stdin
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+
+      - name: Create Composer GitHub App token
+        id: github-app-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        with:
+          app-id: ${{ vars.COMPOSER_APP_ID }}
+          private-key: ${{ secrets.COMPOSER_APP_PRIVATE_KEY }}
+          owner: vilnius-vmsa
+          repositories: |
+            example-laravel-package
+            example-shared-library
+
+      - name: Build and push PHP-FPM candidate image
+        id: php
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: .
+          file: ./docker/php-fpm/Dockerfile.prod
+          push: true
+          build-args: |
+            RELEASE_NUMBER=${{ steps.meta.outputs.source_sha }}
+          secrets: |
+            composer_auth={"github-oauth":{"github.com":"${{ steps.github-app-token.outputs.token }}"}}
+          tags: ghcr.io/<org>/<app>-php:candidate-${{ steps.meta.outputs.source_sha }}-${{ github.run_id }}
+          labels: |
+            org.opencontainers.image.revision=${{ steps.meta.outputs.source_sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=candidate-${{ steps.meta.outputs.source_sha }}-${{ github.run_id }}
+          provenance: mode=max
+          sbom: true
+          cache-from: type=registry,ref=ghcr.io/<org>/<app>-php:buildcache
+          cache-to: type=registry,ref=ghcr.io/<org>/<app>-php:buildcache,mode=max
+
+      - name: Build and push Nginx candidate image
+        id: nginx
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: .
+          file: ./docker/nginx/Dockerfile.prod
+          push: true
+          build-args: |
+            PHP_IMAGE_REF=ghcr.io/<org>/<app>-php@${{ steps.php.outputs.digest }}
+          tags: ghcr.io/<org>/<app>-nginx:candidate-${{ steps.meta.outputs.source_sha }}-${{ github.run_id }}
+          labels: |
+            org.opencontainers.image.revision=${{ steps.meta.outputs.source_sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=candidate-${{ steps.meta.outputs.source_sha }}-${{ github.run_id }}
+          provenance: mode=max
+          sbom: true
+          cache-from: type=registry,ref=ghcr.io/<org>/<app>-nginx:buildcache
+          cache-to: type=registry,ref=ghcr.io/<org>/<app>-nginx:buildcache,mode=max
+
+      - name: Resolve published image digests
+        id: image
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
+          APP_REPOSITORY: ghcr.io/<org>/<app>-php
+          NGINX_REPOSITORY: ghcr.io/<org>/<app>-nginx
+          APP_DIGEST: ${{ steps.php.outputs.digest }}
+          NGINX_DIGEST: ${{ steps.nginx.outputs.digest }}
+        run: |
+          set -euo pipefail
+          CANDIDATE_TAG="candidate-${SOURCE_SHA}-${GITHUB_RUN_ID}"
+          [[ "$APP_DIGEST" == sha256:* && "$NGINX_DIGEST" == sha256:* ]]
+          echo "app_repository=$APP_REPOSITORY" >> "$GITHUB_OUTPUT"
+          echo "app_digest=$APP_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "nginx_repository=$NGINX_REPOSITORY" >> "$GITHUB_OUTPUT"
+          echo "nginx_digest=$NGINX_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "app_image=$APP_REPOSITORY@$APP_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "nginx_image=$NGINX_REPOSITORY@$NGINX_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "candidate_tag=$CANDIDATE_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Scan published application image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.app_image }}
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          format: table
+
+      - name: Scan published Nginx image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.nginx_image }}
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          format: table
+
+      - name: Verify SBOM and BuildKit provenance
+        shell: bash
+        env:
+          APP_IMAGE: ${{ steps.image.outputs.app_image }}
+          NGINX_IMAGE: ${{ steps.image.outputs.nginx_image }}
+        run: |
+          set -euo pipefail
+          for image in "$APP_IMAGE" "$NGINX_IMAGE"; do
+            sbom="$(docker buildx imagetools inspect "$image" --format '{{ json .SBOM }}')"
+            provenance="$(docker buildx imagetools inspect "$image" --format '{{ json .Provenance }}')"
+            jq -e '[.. | objects | select(.SPDXID? == "SPDXRef-DOCUMENT" and ((.packages? // []) | length > 0))] | length > 0' <<<"$sbom" >/dev/null
+            jq -e '[.. | objects | select(((.buildType? // "") | length > 0) or ((.buildDefinition?.buildType? // "") | length > 0))] | length > 0' <<<"$provenance" >/dev/null
+          done
+
+      - name: Attest application build provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-name: ${{ steps.image.outputs.app_repository }}
+          subject-digest: ${{ steps.image.outputs.app_digest }}
+          push-to-registry: true
+          create-storage-record: false
+
+      - name: Attest Nginx build provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-name: ${{ steps.image.outputs.nginx_repository }}
+          subject-digest: ${{ steps.image.outputs.nginx_digest }}
+          push-to-registry: true
+          create-storage-record: false
+
+      - name: Verify build attestations before smoke test
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP_IMAGE: ${{ steps.image.outputs.app_image }}
+          NGINX_IMAGE: ${{ steps.image.outputs.nginx_image }}
+        run: |
+          set -euo pipefail
+          for image in "$APP_IMAGE" "$NGINX_IMAGE"; do
+            gh attestation verify "oci://${image}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/ci.build.yml"
+          done
+
+      - name: Smoke-test immutable PHP, Nginx, database, Redis and worker images
+        shell: bash
+        env:
+          APP_IMAGE: ${{ steps.image.outputs.app_image }}
+          NGINX_IMAGE: ${{ steps.image.outputs.nginx_image }}
+          SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
+          SMOKE_JOB_CLASS: 'App\Jobs\SmokeTestJob'
+          SMOKE_JOB_ID: dev-standard-ci-job-${{ github.run_id }}-${{ github.run_attempt }}
+        run: bash docker/scripts/smoke-published-images.sh
+
+      - name: Attest immutable application release
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-name: ${{ steps.image.outputs.app_repository }}
+          subject-digest: ${{ steps.image.outputs.app_digest }}
+          predicate-type: https://in-toto.io/attestation/release/v0.1
+          predicate: '{"purl":"pkg:github/${{ github.repository }}@${{ steps.meta.outputs.source_sha }}"}'
+          push-to-registry: true
+          create-storage-record: false
+
+      - name: Attest immutable Nginx release
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-name: ${{ steps.image.outputs.nginx_repository }}
+          subject-digest: ${{ steps.image.outputs.nginx_digest }}
+          predicate-type: https://in-toto.io/attestation/release/v0.1
+          predicate: '{"purl":"pkg:github/${{ github.repository }}@${{ steps.meta.outputs.source_sha }}"}'
+          push-to-registry: true
+          create-storage-record: false
+
+      - name: Publish immutable source image labels
+        shell: bash
+        env:
+          APP_IMAGE: ${{ steps.image.outputs.app_image }}
+          NGINX_IMAGE: ${{ steps.image.outputs.nginx_image }}
+          SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
+        run: |
+          set -euo pipefail
+          ensure_immutable_tag() {
+            local repository="$1" digest="$2" tag="$3" output actual
+            [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || {
+              echo "Invalid digest for ${repository}:${tag}: ${digest}" >&2
+              return 1
+            }
+            if output="$(docker buildx imagetools inspect "${repository}:${tag}" 2>&1)"; then
+              actual="$(awk '/^Digest:/ { print $2; exit }' <<<"$output")"
+              [[ "$actual" = "$digest" ]] || {
+                echo "Immutable ${repository}:${tag} already points to ${actual}, not ${digest}." >&2
+                return 1
+              }
+              return 0
+            fi
+            grep -Eqi 'not found|manifest unknown|no such manifest' <<<"$output" || {
+              echo "$output" >&2
+              return 1
+            }
+            docker buildx imagetools create --prefer-index=false --tag "${repository}:${tag}" "${repository}@${digest}"
+            for attempt in $(seq 1 15); do
+              if output="$(docker buildx imagetools inspect "${repository}:${tag}" 2>&1)"; then
+                actual="$(awk '/^Digest:/ { print $2; exit }' <<<"$output")"
+                [[ "$actual" = "$digest" ]] && return 0
+              fi
+              sleep 2
+            done
+            echo "${repository}:${tag} does not preserve ${digest}." >&2
+            echo "$output" >&2
+            return 1
+          }
+          ensure_immutable_tag "${APP_IMAGE%@*}" "${APP_IMAGE##*@}" "sha-$SOURCE_SHA"
+          ensure_immutable_tag "${NGINX_IMAGE%@*}" "${NGINX_IMAGE##*@}" "sha-$SOURCE_SHA"
+
+  deploy:
+    needs: build-test-promote
+    permissions:
+      contents: read
+      packages: read
+      attestations: read
+    uses: ./.github/workflows/cd.deploy.yml
+    with:
+      environment: ${{ needs.build-test-promote.outputs.environment }}
+      source_sha: ${{ needs.build-test-promote.outputs.source_sha }}
+      app_image: ${{ needs.build-test-promote.outputs.app_image }}
+      nginx_image: ${{ needs.build-test-promote.outputs.nginx_image }}
+      release_workflow: ${{ github.repository }}/.github/workflows/ci.build.yml
+    secrets: inherit
+
+  promote-environment:
+    name: Promote the deployed ${{ needs.build-test-promote.outputs.environment }} image labels
+    needs: [build-test-promote, deploy]
+    if: needs.deploy.result == 'success' && needs.build-test-promote.result == 'success'
+    concurrency:
+      group: promote-${{ needs.build-test-promote.outputs.environment }}
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      APP_IMAGE: ${{ needs.build-test-promote.outputs.app_image }}
+      NGINX_IMAGE: ${{ needs.build-test-promote.outputs.nginx_image }}
+      ENVIRONMENT: ${{ needs.build-test-promote.outputs.environment }}
+    steps:
+      - name: Log in to the container registry
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REGISTRY: ghcr.io
+        run: echo "$GH_TOKEN" | docker login "$REGISTRY" -u "${{ github.actor }}" --password-stdin
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+
+      - name: Promote the health-verified image
+        shell: bash
+        run: |
+          set -euo pipefail
+          label_image() {
+            local image="$1" label="$2" digest actual inspect_output
+            digest="${image##*@}"
+            [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || {
+              echo "Invalid immutable image reference: $image" >&2
+              return 1
+            }
+            docker buildx imagetools create --prefer-index=false \
+              --tag "${image%@*}:$label" \
+              "$image"
+            for attempt in $(seq 1 15); do
+              if inspect_output="$(docker buildx imagetools inspect "${image%@*}:$label" 2>&1)"; then
+                actual="$(awk '/^Digest:/ { print $2; exit }' <<<"$inspect_output")"
+                [[ "$actual" = "$digest" ]] && return 0
+              fi
+              sleep 2
+            done
+            echo "Tag ${image%@*}:$label does not preserve digest $digest." >&2
+            echo "$inspect_output" >&2
+            return 1
+          }
+          case "$ENVIRONMENT" in
+            staging)
+              label_image "$APP_IMAGE" staging
+              label_image "$NGINX_IMAGE" staging
+              ;;
+            production)
+              label_image "$APP_IMAGE" production
+              label_image "$NGINX_IMAGE" production
+              label_image "$APP_IMAGE" latest
+              label_image "$NGINX_IMAGE" latest
+              ;;
+            *)
+              echo "Unsupported deployment environment: $ENVIRONMENT" >&2
+              exit 1
+              ;;
+          esac

@@ -1,0 +1,22 @@
+# Inactive example. Copy to .github/workflows/ci.pipeline.yml.
+
+name: "CI: Pipeline"
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  pipeline:
+    name: Pipeline
+    uses: ./.github/workflows/ci.validate.yml

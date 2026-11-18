@@ -1,0 +1,25 @@
+# Inactive example. Copy to .dockerignore.
+
+# Required: docker-compose.yml keeps local secrets here by default.
+docker/secrets
+docker/alloy/secrets
+.env
+.env.*
+!.env.example
+
+.git
+.github
+
+node_modules
+vendor
+public/build
+public/hot
+
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+
+docs
+*.md

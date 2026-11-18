@@ -1183,24 +1183,9 @@ DOC-UPD-R02:
 DOC-UPD-R03:
   text: Outdated documentation is treated as a quality signal, not just an editorial problem.
   source_hash: c29b900bd205
-OPS-CD-P01:
-  text: Deployments run through an automated CD process that makes releases to the target environment traceable and repeatable.
-  source_hash: 0852317b16c6
-OPS-CD-P03:
-  text: A rollback mechanism is defined, documented and tested.
-  source_hash: 1c56e073cb72
 OPS-CD-P04:
   text: Database migrations are part of the release process and run in a controlled way.
   source_hash: 0a56407d1028
-OPS-CD-P05:
-  text: The deployment strategy is chosen explicitly and matches the system's risk and criticality.
-  source_hash: fc1b1ff53d4c
-OPS-CD-R01:
-  text: Critical or high-risk releases use advanced strategies such as canary or blue-green.
-  source_hash: c57f46a1b74a
-OPS-CD-R02:
-  text: Where release windows are used, they are aligned with operational and business needs.
-  source_hash: 3b5daaf169b1
 OPS-CI-P01:
   text: The CI pipeline runs for every PR or MR and for main branches.
   source_hash: f52329f00fbc
@@ -1213,36 +1198,63 @@ OPS-CI-P03:
 OPS-CI-P04:
   text: Build artefacts get a clear, traceable identifier.
   source_hash: aacc70787810
-OPS-CI-P05:
-  text: Failed mandatory quality gates block merging.
-  source_hash: e51688346d00
 OPS-CI-R01:
   text: The pipeline is optimised to shorten feedback without reducing the scope of quality control.
   source_hash: 7068b403dab0
 OPS-CI-R02:
   text: Critical projects clearly separate fast PR checks from full pre-release checks.
   source_hash: 1c3da58fe87e
-OPS-DEVSEC-P01:
-  text: CI/CD runs security checks appropriate to the system's risk level.
-  source_hash: bcc2673184c1
+OPS-COMPOSE-P01:
+  text: Development, production and CI test Compose configurations are separated by purpose; production uses immutable images and runtime secrets and cannot build from the checkout.
+  source_hash: 72e0314558c2
+OPS-COMPOSE-P02:
+  text: "Where applicable, Compose services define healthchecks, dependencies, resource limits and secure execution; persistent storage of application services is used only for user data: framework caches, compiled views, build-generated files and logs are not kept in persistent storage."
+  source_hash: 3c33bb00151d
+OPS-COMPOSE-P03:
+  text: When the blue-green variant is chosen, both slots use the same image repositories and the same digest; the Nginx image may contain a default PHP-FPM upstream, but the Compose service of each slot replaces it with that slot's own upstream, so that a slot's Nginx talks only to the PHP-FPM of the same slot.
+  source_hash: 6e5c21af8068
+OPS-COMPOSE-P04:
+  text: "When the blue-green variant is chosen, slots differ only in what is slot-specific: the single-slot hardening and resource limits are preserved across every slot, the balancer and stateful services, only user-data storage may be shared between slots, and the build, attestation and smoke gates (OPS-PIPE-P01) stay the same as for single-slot; only the runtime rollout differs."
+  source_hash: aa37832e2727
+OPS-COMPOSE-P05:
+  text: When the blue-green variant is chosen and the project provides manual runtime service recreation, it manages slots and the balancer separately without disrupting the active slot; recreating the balancer after a TLS change is followed by an HTTPS health check.
+  source_hash: 5f9c2b863968
+OPS-COMPOSE-P06:
+  text: In a Compose deployment, the secret rotation procedure defines a safe service restart and rollback order.
+  source_hash: c80a1c84c112
+OPS-COMPOSE-P07:
+  text: When the blue-green variant is chosen, secret rotation preserves the active slot until rotation is complete and the switch is explicit.
+  source_hash: 8114675d6b15
+OPS-COMPOSE-P08:
+  text: When the blue-green variant is chosen, the active slot is determined from the balancer configuration, not from separately stored state; traffic is switched only after the new slot passes its readiness check, and when deployment fails after the switch, traffic is returned to the previous slot.
+  source_hash: 1fa41d26e9a5
+OPS-COMPOSE-P09:
+  text: In a Compose deployment to a deployed environment (staging, production), secret values reach the containers as mounted secret files from a restricted runtime directory on the deployment host, not through an environment file (`env_file`), `environment` values or the image. The requirement does not apply to Compose files for local development or CI tests that use throwaway values created only for that run.
+  source_hash: 91ffb20d26a8
 OPS-DEVSEC-P02:
   text: CI checks dependencies, runs static analysis and, where applicable, scans container images.
   source_hash: 1990b59f6c4b
 OPS-DEVSEC-P03:
-  text: Secret detection is enabled in repositories and in CI.
-  source_hash: 1bb2a69fd279
+  text: Secret detection runs in CI.
+  source_hash: 86bcb3dbfa66
 OPS-DEVSEC-P04:
-  text: Security findings classed as critical by organisational policy block the merge or release until the risk is resolved or explicitly accepted.
-  source_hash: b9c066db5abf
+  text: Security findings classed as critical by organisational policy stop the pipeline (the security check job fails) until the risk is resolved or explicitly accepted; branch protection (OPS-CI-P05) makes the failed gate block the merge.
+  source_hash: 37930d683b86
 OPS-DEVSEC-R01:
   text: An SBOM is generated automatically at release and stored with the release artefacts.
   source_hash: d69ce45bf9ff
-OPS-ENV-P01:
-  text: All deployments to environments go only through CI/CD; manual changes in environments are forbidden except for clearly documented incident handling.
-  source_hash: 3d940a48cd81
+OPS-DOCKER-P01:
+  text: Production Dockerfiles use named multi-stage stages, base images with a version and digest and, where the application uses a package manager, lock files; tools needed only during the build must not enter the final runtime image.
+  source_hash: 217fb1d42970
+OPS-DOCKER-P02:
+  text: Secrets, certificates and tokens are not copied into the Docker build context or image layers; build credentials use BuildKit secret mounts and runtime secrets use the secret mechanism of the runtime platform (for example mounted secret files), not the image.
+  source_hash: 31dd3efb1e69
+OPS-DOCKER-P03:
+  text: Each deployable service has one canonical registry image name that does not change between staging and production; environment, release version and build identifier are represented by tags, OCI labels and digests, not environment-specific repository names. Deployments use the digest, tags are navigation and promotion references, and `org.opencontainers.image.revision`, `org.opencontainers.image.source` and `org.opencontainers.image.version` provide traceability metadata.
+  source_hash: ddd6dff9cefd
 OPS-ENV-P02:
   text: CI/CD and GitOps keep environments isolated and compliant with section 3.5.3.
-  source_hash: eff91a64759f
+  source_hash: 69f4473c1774
 OPS-ENV-P03:
   text: The deployment pipeline does not use the same configuration or credentials for different environments unless this is explicitly described and approved.
   source_hash: e0822c487a81
@@ -1253,14 +1265,32 @@ OPS-ENV-R02:
   text: The project's deployment documentation describes how environments, branches and deployment flows relate.
   source_hash: afef1865f877
 OPS-FIN-P01:
-  text: Resources are labelled so costs can be seen per system, project or environment.
+  text: Resources are identifiable so that costs can be seen per system, project or environment.
   source_hash: df3b4756b98d
 OPS-FIN-P02:
   text: Retention of artefacts, images, logs and other stored objects is managed so it does not accumulate unjustified costs.
   source_hash: 4ea019580e2d
-OPS-FIN-P03:
-  text: System and infrastructure solutions are designed for support and operating efficiency, not only for functionality.
-  source_hash: 4d24168e43e1
+OPS-FLOW-P01:
+  text: When a branch-based model is selected, every protected branch has an unambiguous environment mapping (for example `stage` → staging, `main` → production) and the deployed artifact is built from the exact commit SHA that passed the OPS-PIPE-P01 gates.
+  source_hash: e4d7f22907e9
+OPS-FLOW-P02:
+  text: When the branch-based model is chosen, automatic synchronization is one-way only, from a successfully production-deployed main commit to stage; stage is never automatically merged into main, and conflicts stop synchronization for human resolution.
+  source_hash: 30044dabcc2b
+OPS-FLOW-P03:
+  text: When the branch-based model is selected, a separate CI quality gate runs for PRs and protected-branch pushes; the build and promotion process starts only after the gates succeed and build-significant changes have been detected.
+  source_hash: a0705c75fc80
+OPS-FLOW-P04:
+  text: "When the branch-based model is chosen and a container image is deployed, the build and promotion process follows this sequence: build → image vulnerability scanning → SBOM and provenance generation → attestation and its verification → smoke tests → immutable source tag publication → deployment and readiness check → environment tag promotion; every stage passes along the same commit SHA and immutable image digest. The staging, production and latest tags must not move before deployment and the readiness check succeed."
+  source_hash: 538263eac47d
+OPS-FLOW-P05:
+  text: When a container image is deployed, the project provides a separate operator procedure for manual redeployment of an already verified image; the procedure resolves canonical image repository digests from the environment tag or an immutable source tag, verifies their source revision and build/release attestations, does not change code or the selected image digest, and does not replace the lint, build or security gates. Only an image whose source commit belongs to the protected production source may be deployed to production, and this is verified before deployment; staging may use a commit of the staging source.
+  source_hash: ede487904bca
+OPS-FLOW-P06:
+  text: If a project provides manual runtime service recreation, it uses an explicit operation with a concrete service allowlist; the implementation uses an image already present on the host, verifies the recreated service and forbids build, pull, promotion or image-reference changes.
+  source_hash: 8f011c49a302
+OPS-FLOW-P07:
+  text: When the project uses environment or deployment secrets, their preparation and rotation use a documented, safe and auditable procedure with an explicit input and output contract; the procedure never prints secret values. In a Compose deployment it additionally validates the application environment and TLS pair, installs files atomically with runtime permissions and prevents a partially written runtime state.
+  source_hash: b5020349f6dc
 OPS-GITOPS-P01:
   text: The GitOps repository structure clearly separates application templates, environment parameters and, where applicable, cluster declarations.
   source_hash: 94daa58108fc
@@ -1268,17 +1298,11 @@ OPS-GITOPS-P02:
   text: The repository structure is consistent, so it is clear where shared templates and environment-specific parameters live.
   source_hash: abb57e113e2f
 OPS-GITOPS-P03:
-  text: When Helm or an equivalent is used, how charts are versioned and validated is clearly defined.
+  text: When Helm or an equivalent tool is used, how its packages are versioned and validated is clearly defined.
   source_hash: a01eb5f5c1ba
 OPS-GITOPS-R02:
   text: Environment parameters are kept separate from shared chart or template parts.
   source_hash: f787b0cd45f0
-OPS-IAC-P02:
-  text: IaC changes are reviewed through a PR or MR just like application code.
-  source_hash: 05a8c9b0b2ed
-OPS-IAC-P03:
-  text: Infrastructure state is not routinely managed through unversioned manual changes.
-  source_hash: 653500a96c1c
 OPS-K8S-P01:
   text: Deployment manifests include resource limits and requests, health probes and secure runtime settings.
   source_hash: f0416028ce14
@@ -1288,48 +1312,54 @@ OPS-K8S-P02:
 OPS-K8S-P03:
   text: Ingress is secured with TLS and an ingress configuration that meets organisational requirements.
   source_hash: 57b96f2a5c18
-OPS-K8S-P04:
-  text: Container and Kubernetes configuration does not contradict security, reliability or operational requirements.
-  source_hash: b38e44000874
 OPS-K8S-R01:
   text: Critical systems use extra reliability measures such as a pod disruption budget or horizontal scaling when the non-functional requirements call for it.
   source_hash: 79660e428e65
 OPS-K8S-R02:
   text: Manifest quality is checked before deployment, not only in the cluster.
   source_hash: 52a4a5245a12
-OPS-MON-P01:
-  text: Deployment and CI/CD configuration make sure the system meets chapter 9 requirements for logs, metrics, alerts and operational readiness.
-  source_hash: 3370b6594aac
 OPS-MON-P02:
-  text: Logs, metrics and, where applicable, traces are exported to the central monitoring platform.
-  source_hash: 7e4ef3a9618d
-OPS-MON-P03:
-  text: The deployment process makes clear when and how the observability configuration is checked.
-  source_hash: d655851adbf3
-OPS-MON-P04:
-  text: Rollback or incident steps in the release process are aligned with operational procedures.
-  source_hash: 5fbb0c93c35d
+  text: Logs, metrics and, where applicable, traces of a deployed system are exported to the central monitoring platform; the requirement does not apply to a repository that deploys nothing (for example a library).
+  source_hash: 4dc32dd5b771
 OPS-MON-R01:
-  text: Minimum observability readiness (health, log collection and key metrics) is checked before release.
+  text: Minimum observability readiness (for example health, log collection and key metrics) is checked before release.
   source_hash: f9de8a2aedae
-OPS-REL-P01:
-  text: Every production release has a clear release description.
-  source_hash: 5a9cf686b827
-OPS-REL-P02:
-  text: Before a release it is clear which changes are included, which risks are known, which migrations are needed and how rollback works.
-  source_hash: f34110b92d8e
-OPS-REL-P03:
-  text: The release approval process matches organisational responsibilities and audit needs.
-  source_hash: 2adcca584e52
-OPS-REL-P04:
-  text: Minimum release acceptance criteria are defined in advance.
-  source_hash: abe1220c8099
-OPS-REL-R01:
-  text: Production releases use a standard release notes template.
-  source_hash: 2b06721812fa
-OPS-REL-R02:
-  text: Release reviews cover technical, operational and business changes in one place.
-  source_hash: 87ae31a1b852
+OPS-PIPE-P01:
+  text: Regardless of the selected flow, deployment starts only after successful lint, tests and smoke tests and, when a container image is deployed, also after image vulnerability scanning, SBOM and provenance generation and attestation verification; deployment success is confirmed only after an actual target-environment readiness check (section 3.6.2) that goes through the application, evaluates its critical dependencies and confirms that the deployed code version is the one answering; a liveness probe or a static web-server response alone does not satisfy this gate; each job receives only the GitHub permissions it needs.
+  source_hash: 10984c45d74c
+OPS-PIPE-P02:
+  text: Build, test, scan and other jobs that do not change an environment run on GitHub-hosted runners and never use deployment runners or environment secrets; a job that changes an environment declares that environment's GitHub Environment; in a Compose deployment it additionally runs only on that environment's self-hosted runner, selected by the environment label rather than a label shared by all environments.
+  source_hash: 5c919dd573fc
+OPS-PIPE-P04:
+  text: Third-party GitHub actions and reusable workflows are referenced by a full commit SHA with a version comment, never by a tag or a branch; the organisation's own reusable workflows and actions (`vilnius-vmsa/*`) may for now be referenced by the `@main` branch.
+  source_hash: 7a0eb019f0c1
+OPS-PIPE-P05:
+  text: "All deployments to the same environment run through one concurrency group set in the deploy workflow itself or in its job, so that two deployments to the same environment never run at the same time; a workflow that calls the deploy workflow does not use the same group name, and a deployment in progress is not cancelled by a new run (`cancel-in-progress: false`)."
+  source_hash: cff9fb073e1a
+OPS-PIPE-P06:
+  text: A workflow triggered by `workflow_run` verifies the conclusion, event, branch and repository of the triggering run before it uses secrets, publishes artifacts or deploys; build and deployment use the commit SHA of that run, not the tip of the default branch.
+  source_hash: 072c0bf7ffcb
+OPS-PIPE-P07:
+  text: "A repository that has CI/CD or delivery files (workflows, Dockerfiles, Compose files, manifests, deployment scripts) declares its DevOps stacks in `.dev-standard/config.json`: the chosen Git release model (`flow-branch` or `flow-tag`) and deployment method (`compose`, `compose-blue-green` or `k8s`), and describes them in the deployment documentation. Only one Git release model applies at a time. When no profile exists for the deployment technology (section 8.15), the deployment documentation says so and describes how that technology provides immutable artifacts, a readiness check, secret handling and rollback, and no deployment-method stack is declared. A Git release model other than `flow-branch` or `flow-tag` is allowed only when the exception is recorded in the project's `.github/instructions/dev-standard-local.instructions.md` with the model and the reason; the deployment documentation then describes the model and no release-model stack is declared. When the repository deploys nothing (for example a library), the README says so and `infra` alone is declared instead of a release model and a deployment method. In both cases a project that builds container images declares `docker`."
+  source_hash: 6bd91db6523a
+OPS-REPO-P01:
+  text: An application repository clearly separates application code, Docker service configuration, root Compose files and active workflows; templates and examples are not mixed with active workflows.
+  source_hash: 57644446cec4
+OPS-REPO-P02:
+  text: "Container, CI/CD and infrastructure files in an application repository live in the agreed locations: the Dockerfile of each image and the configuration of its service in a separate `docker/<service>/` subdirectory (for example `docker/php-fpm/`, `docker/nginx/`), deployment scripts in `docker/scripts/`, and of these files only the Compose files and `.dockerignore` in the repository root, workflows and actions under `.github/`, Kubernetes and Helm manifests in a `k8s/`, `kubernetes/`, `helm/` or `charts/` directory. Another location is allowed only when the exception is recorded in the project's `.github/instructions/dev-standard-local.instructions.md` file with the paths and the reason; the DevOps rules (chapter 8, OPS-*) apply to the paths named in the exception."
+  source_hash: e0dd2bfea8b9
+OPS-TAG-P01:
+  text: In the tag-based model, a production tag is a semantic-version tag that exists as `refs/tags/<name>` and points to a pre-tested commit; a branch named v1.2.3 is not a release tag.
+  source_hash: 5d7f08b50126
+OPS-TAG-P02:
+  text: In a tag-based release, the deployed artifact (for example a container image) is built once from the exact commit and passes the OPS-PIPE-P01 gates, and the same artifact (for an image, the same digest) is promoted to production without a rebuild.
+  source_hash: 2240b7809b37
+OPS-TAG-P03:
+  text: In the tag-based model, a release records the commit SHA, the immutable identifiers of the deployed artifacts (digests for container images), migration information and rollback information; rollback uses an immutable identifier (a digest for an image) or a version tag, not an overwritten latest tag.
+  source_hash: 6df2e8dd0758
+OPS-TAG-P04:
+  text: In the tag-based model, only an artifact (for a container image, a digest) that was deployed to staging and passed its readiness check may be promoted to production; staging may be skipped only when the candidate is fully verified by other gates and the production Environment requires approval by Required reviewers (OPS-TAG-P06).
+  source_hash: 1ed27b52b5d2
 OPS-VER-P02:
   text: Container images and other artefacts are tagged so it is clear which code version is deployed.
   source_hash: 5afec404997e
@@ -1339,9 +1369,6 @@ OPS-VER-P03:
 OPS-VER-R01:
   text: Artefacts carry both a semantic version and an immutable commit or build identifier.
   source_hash: 2d2e2196ee6d
-OPS-VER-R02:
-  text: Release artefact tagging is aligned with the release notes and deployment documentation.
-  source_hash: 782441c4bd7a
 SEC-GDPR-P01:
   text: "Personal data fields in the persistence layer (ORM models/entities) are marked with the language's native annotation as described in appendix C, stating sensitivity level and data category (for example PHP: #[PersonalData]); the system can generate its personal data inventory automatically from the code."
   source_hash: b630c1f8ed6a

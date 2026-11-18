@@ -1,0 +1,18 @@
+#!/bin/sh
+# Inactive example. Copy to docker/php-fpm/entrypoint.sh.
+
+set -eu
+
+load_secret() {
+    variable_name="$1"
+    secret_file="/run/secrets/$2"
+
+    [ -r "$secret_file" ] || return 0
+    export "${variable_name}=$(cat "$secret_file")"
+}
+
+load_secret APP_KEY app_key
+load_secret DB_PASSWORD mysql_password
+load_secret REDIS_PASSWORD redis_password
+
+exec docker-php-entrypoint "$@"

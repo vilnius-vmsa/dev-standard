@@ -701,7 +701,7 @@ PRIVALOMA:
 <!-- ARCH-REL-P05 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Kritinių paslaugų RTO ir RPO tikslai turi būti apibrėžti projektavimo stadijoje ir suderinti su verslo savininku.
 
-> Susiję skyriai: [9.5 SLA, SLO ir SLI](09-stebesena-logai.md#95-sla-slo-ir-sli) · [8.1 Aplinkos ir bendri principai](08-devops-ci-cd.md#81-aplinkos-ir-bendri-principai) · [8.5 Konteinerių ir Kubernetes diegimo reikalavimai](08-devops-ci-cd.md#85-konteinerių-ir-kubernetes-diegimo-reikalavimai)
+> Susiję skyriai: [9.5 SLA, SLO ir SLI](09-stebesena-logai.md#95-sla-slo-ir-sli) · [8.1 Aplinkos ir bendri principai](08-devops-ci-cd.md#81-aplinkos-ir-bendri-principai) · [8.13 Docker Compose diegimas](08-devops-ci-cd.md#813-docker-compose-diegimas) · [8.14.1 Kubernetes diegimo reikalavimai](08-devops-ci-cd.md#8141-kubernetes-diegimo-reikalavimai)
 
 ### 3.6.2. Sveikatos patikrinimas
 
@@ -727,7 +727,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-REL-R02 | ai-reviewable | stacks=php,infra | enforced-by=ai -->
 *   Readiness patikrinime vertinti svarbiausias priklausomybes, nuo kurių tiesiogiai priklauso užklausų aptarnavimas.
 
-> Susiję skyriai: [9.2 Monitoring ir metrikos](09-stebesena-logai.md#92-monitoring-ir-metrikos) · [8.5 Konteinerių ir Kubernetes diegimo reikalavimai](08-devops-ci-cd.md#85-konteinerių-ir-kubernetes-diegimo-reikalavimai)
+> Susiję skyriai: [9.2 Monitoring ir metrikos](09-stebesena-logai.md#92-monitoring-ir-metrikos) · [8.13 Docker Compose diegimas](08-devops-ci-cd.md#813-docker-compose-diegimas) · [8.14.1 Kubernetes diegimo reikalavimai](08-devops-ci-cd.md#8141-kubernetes-diegimo-reikalavimai)
 
 ### 3.6.3. Atsparumas tarpservisinėse komunikacijose
 
@@ -784,7 +784,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-REL-R14 | ai-reviewable | stacks=php | enforced-by=ai -->
 *   Jei naudojamas Saga ar kitas kompensacinis modelis, jo elgsena turi būti dokumentuota.
 
-> Susiję skyriai: [3.8 Diagramos ir dokumentavimas](#38-diagramos-ir-dokumentavimas) · [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas) · [8.5 Konteinerių ir Kubernetes diegimo reikalavimai](08-devops-ci-cd.md#85-konteinerių-ir-kubernetes-diegimo-reikalavimai)
+> Susiję skyriai: [3.8 Diagramos ir dokumentavimas](#38-diagramos-ir-dokumentavimas) · [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas) · [8.13 Docker Compose diegimas](08-devops-ci-cd.md#813-docker-compose-diegimas) · [8.14.1 Kubernetes diegimo reikalavimai](08-devops-ci-cd.md#8141-kubernetes-diegimo-reikalavimai)
 
 ### 3.6.6. Mažiausių privilegijų principas operaciniu lygmeniu
 
@@ -1196,7 +1196,7 @@ REKOMENDUOJAMA:
 <!-- ARCH-COMP-R09 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Komponentų EOL datos turėtų būti stebimos centralizuotai, o atnaujinimai planuojami iš anksto, o ne tik po incidentų ar pažeidžiamumų paskelbimo.
 
-> Susiję skyriai: [6 Saugumas (Security by Design)](06-saugumas.md) · [6.6 OWASP Top 10](06-saugumas.md#66-owasp-top-10) · [6.7 Security testing](06-saugumas.md#67-security-testing) · [5 Versijavimas ir priklausomybių valdymas](05-versijavimas.md) · [8.6 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė)
+> Susiję skyriai: [6 Saugumas (Security by Design)](06-saugumas.md) · [6.6 OWASP Top 10](06-saugumas.md#66-owasp-top-10) · [6.7 Security testing](06-saugumas.md#67-security-testing) · [5 Versijavimas ir priklausomybių valdymas](05-versijavimas.md) · [8.5 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#85-devsecops-ci-cd-kontrolė)
 
 ### 3.10.5. Atviro kodo licencijos ir programinės įrangos sudėtis
 
@@ -1220,4 +1220,4 @@ REKOMENDUOJAMA:
 <!-- ARCH-COMP-R12 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Priklausomybes atnaujinti reguliariai ne tik reaguojant į pažeidžiamumus, bet ir prevenciškai.
 
-> Susiję skyriai: [5 Versijavimas ir priklausomybių valdymas](05-versijavimas.md) · [5.5 Priklausomybių saugumas ir atsekamumas](05-versijavimas.md#55-priklausomybių-saugumas-ir-atsekamumas) · [8.6 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė)
+> Susiję skyriai: [5 Versijavimas ir priklausomybių valdymas](05-versijavimas.md) · [5.5 Priklausomybių saugumas ir atsekamumas](05-versijavimas.md#55-priklausomybių-saugumas-ir-atsekamumas) · [8.5 DevSecOps (CI/CD kontrolė)](08-devops-ci-cd.md#85-devsecops-ci-cd-kontrolė)

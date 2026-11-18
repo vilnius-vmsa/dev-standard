@@ -168,7 +168,7 @@ REKOMENDUOJAMA:
 
 ## 7.7. Saugumo testavimas (DevSecOps)
 
-Saugumo testavimo reikalavimai apibrėžti [#6.7](06-saugumas.md#67-security-testing) skyriuje „Security testing", o DevSecOps kontrolės CI/CD procese – [#8.6](08-devops-ci-cd.md#86-devsecops-ci-cd-kontrolė) skyriuje.
+Saugumo testavimo reikalavimai apibrėžti [#6.7](06-saugumas.md#67-security-testing) skyriuje „Security testing", o DevSecOps kontrolės CI/CD procese – [#8.5](08-devops-ci-cd.md#85-devsecops-ci-cd-kontrolė) skyriuje.
 
 ## 7.8. Prieinamumo (Accessibility) testavimas
 
@@ -210,7 +210,7 @@ REKOMENDUOJAMA:
 <!-- TEST-CICD-R02 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Kritinių testų rezultatus rekomenduojama įtraukti į release peržiūrą.
 
-> Susiję skyriai: [4.3.5 Pull Request / Merge Request reikalavimai](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai) · [8.9 Leidimų (release) valdymas](08-devops-ci-cd.md#89-leidimų-release-valdymas)
+> Susiję skyriai: [4.3.5 Pull Request / Merge Request reikalavimai](04-kodo-kurimo-gaires.md#435-pull-request-merge-request-reikalavimai) · [8.2 CI (Continuous Integration) minimalūs reikalavimai](08-devops-ci-cd.md#82-ci-continuous-integration-minimalūs-reikalavimai) · [8.8 Leidimų (release) valdymas](08-devops-ci-cd.md#88-leidimų-release-valdymas)
 
 ## 7.10. Priėmimas (UAT) ir nefunkciniai kriterijai
 

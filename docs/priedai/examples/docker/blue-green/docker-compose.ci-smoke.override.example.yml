@@ -1,0 +1,5 @@
+# Inactive example. Copy to docker-compose.ci-smoke.override.yml.
+
+services:
+  balancer:
+    ports: !reset []

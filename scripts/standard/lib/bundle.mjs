@@ -92,6 +92,7 @@ export function buildBundle({ rules, english, stacks, version, siteUrl, reviewMe
     })),
   }, null, 2)}\n`);
   const implies = Object.fromEntries([...stacks].filter(([, info]) => info.implies?.length).map(([name, info]) => [name, info.implies]));
-  files.set('manifest.json', `${JSON.stringify({ version, stacks: [...stacks.keys()], implies, skills: [...skills.keys()], files: [...files.keys()].sort() }, null, 2)}\n`);
+  const legacyIncludes = Object.fromEntries([...stacks].filter(([, info]) => info.legacyIncludes?.length).map(([name, info]) => [name, info.legacyIncludes]));
+  files.set('manifest.json', `${JSON.stringify({ version, stacks: [...stacks.keys()], implies, ...(Object.keys(legacyIncludes).length ? { legacyIncludes } : {}), skills: [...skills.keys()], files: [...files.keys()].sort() }, null, 2)}\n`);
   return files;
 }

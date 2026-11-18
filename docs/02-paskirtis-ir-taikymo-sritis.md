@@ -120,7 +120,7 @@ REKOMENDUOJAMA:
 Kiekvienas standarto reikalavimas turi HTML komentaro žymą, nurodančią reikalavimo identifikatorių ir tikrinimo tipą:
 
 `<!-- IDENTIFIKATORIUS | tikrinimo-tipas -->`
-s
+
 **Identifikatoriaus formatas:** `<SRITIS>-<POSRITYS>-<P|R><NUMERIS>`
 
 *   `P` – PRIVALOMAS reikalavimas
@@ -139,7 +139,7 @@ Automatiškai tikrinamų (`ai-reviewable`) reikalavimų žymose papildomai nurod
 
 `<!-- IDENTIFIKATORIUS | ai-reviewable | stacks=<sritys> | enforced-by=<priemonė> -->`
 
-*   `stacks` – kableliais atskirtas technologijų sričių sąrašas, kurioms reikalavimas taikomas: `all` (visos sistemos), `php`, `laravel`, `symfony`, `frontend`, `mobile`, `infra` (CI/CD, konteineriai, infrastruktūra), `db`. Sričių aprašai ir failų šablonai pateikti `standard/stacks.yaml`.
+*   `stacks` – kableliais atskirtas technologijų sričių sąrašas, kurioms reikalavimas taikomas: `all` (visos sistemos), `php`, `laravel`, `symfony`, `frontend`, `mobile`, `db`, `infra` (bendros CI/CD ir infrastruktūros taisyklės) ir DevOps profiliai: Git leidimo modelis `flow-branch` arba `flow-tag`, konteinerių image `docker`, diegimo būdas `compose`, `compose-blue-green` arba `k8s` (žr. [8.10](08-devops-ci-cd.md#810-bendri-pipeline-vartai-ir-profilio-pasirinkimas)). Sričių aprašai ir failų šablonai pateikti `standard/stacks.yaml`.
 *   `enforced-by` – kaip reikalavimas tikrinamas: `ai` (DI kodo peržiūra) arba `tool:<pavadinimas>` (pvz., `tool:gitleaks`), kai jį patikimai patikrina automatinė priemonė.
 
 `human-reviewable` ir `process-level` žymose šie laukai nenaudojami.
@@ -224,7 +224,7 @@ Aukštesnės brandos lygis, **rekomenduojamas kritinėms viešosioms sistemoms**
 *   Atsparumo ir atkūrimo testai ([7.13](07-testavimas.md#713-atsparumo-dr-ir-atkūrimo-testai))
 *   Error budget principas ir SLO-driven planavimas ([9.5](09-stebesena-logai.md#95-sla-slo-ir-sli))
 *   SBOM generavimas kiekvienam leidimui ([5.5](05-versijavimas.md#55-priklausomybių-saugumas-ir-atsekamumas))
-*   FinOps sąnaudų stebėsena ([8.10](08-devops-ci-cd.md#810-kainodara-ir-efektyvumas-finops))
+*   FinOps sąnaudų stebėsena ([8.9](08-devops-ci-cd.md#89-kainodara-ir-efektyvumas-finops))
 *   Periodiniai penetraciniai testai ([6.7](06-saugumas.md#67-security-testing))
 
 ### 2.6.4. Lygio priskyrimas ir vertinimas

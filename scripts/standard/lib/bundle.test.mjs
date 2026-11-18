@@ -120,6 +120,20 @@ test('a stack that builds on another points to it, and the manifest lists implie
   assert.deepEqual(JSON.parse(files.get('manifest.json')).implies, { laravel: ['php'] });
 });
 
+test('the manifest carries legacyIncludes only when a stack defines it', () => {
+  assert.equal('legacyIncludes' in JSON.parse(build().get('manifest.json')), false);
+
+  const stacks = new Map([
+    ['all', { description: 'All', applyTo: '**' }],
+    ['infra', { description: 'Common', applyTo: '**/*.tf', legacyIncludes: ['docker'] }],
+    ['docker', { description: 'Images', applyTo: '**/Dockerfile*', implies: ['infra'] }],
+  ]);
+  const files = buildBundle({ rules: [], english: {}, stacks, version: 'v1.5.0', siteUrl: SITE, reviewMethod: METHOD });
+  const manifest = JSON.parse(files.get('manifest.json'));
+  assert.deepEqual(manifest.legacyIncludes, { infra: ['docker'] });
+  assert.deepEqual(manifest.implies, { docker: ['infra'] });
+});
+
 test('skills are copied unchanged and listed in the manifest', () => {
   const files = build();
   assert.equal(files.get('skills/dev-standard/SKILL.md'), CORE_SKILL.get('SKILL.md'));

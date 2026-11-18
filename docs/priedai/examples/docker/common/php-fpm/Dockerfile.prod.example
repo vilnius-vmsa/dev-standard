@@ -1,0 +1,133 @@
+# syntax=docker/dockerfile:1.7
+# Inactive example. Copy to docker/php-fpm/Dockerfile.prod.
+
+FROM composer:2@sha256:REPLACE_WITH_COMPOSER_DIGEST AS composer_bin
+FROM node:22-alpine@sha256:REPLACE_WITH_NODE_DIGEST AS node_build
+FROM php:8.4-fpm-alpine@sha256:REPLACE_WITH_PHP_DIGEST AS php_base
+
+ARG REDIS_PECL_VERSION=REPLACE_WITH_REDIS_PECL_VERSION
+
+ENV TZ=UTC \
+    HOME=/home/app
+
+RUN apk add --no-cache \
+        ca-certificates \
+        fcgi \
+        icu-libs \
+        libzip \
+        tzdata \
+    && apk add --no-cache --virtual .php-build-deps \
+        $PHPIZE_DEPS \
+        icu-dev \
+        libzip-dev \
+    && docker-php-ext-install -j"$(nproc)" \
+        bcmath \
+        intl \
+        opcache \
+        pcntl \
+        pdo_mysql \
+        zip \
+    && pecl install "redis-${REDIS_PECL_VERSION}" \
+    && docker-php-ext-enable redis \
+    && apk del .php-build-deps \
+    && addgroup -g 1001 -S app \
+    && adduser -u 1001 -D -S -G app -h /home/app app \
+    && install -d -o app -g app -m 0750 /var/www /home/app
+
+COPY docker/php-fpm/conf.d/php.prod.ini /usr/local/etc/php/conf.d/zz-app.ini
+COPY docker/php-fpm/pool.d/www.prod.conf /usr/local/etc/php-fpm.d/zz-app.conf
+
+COPY docker/php-fpm/entrypoint.sh /usr/local/bin/app-entrypoint
+RUN chmod 0555 /usr/local/bin/app-entrypoint
+
+WORKDIR /var/www
+
+FROM node_build AS assets_build
+
+WORKDIR /var/www
+
+COPY package.json package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    npm ci --no-audit --no-fund
+
+COPY vite.config.js ./
+COPY resources ./resources
+COPY public ./public
+RUN npm run build \
+    && rm -rf node_modules
+
+FROM php_base AS vendor_build
+
+COPY --from=composer_bin /usr/bin/composer /usr/local/bin/composer
+COPY composer.json composer.lock ./
+
+RUN --mount=type=secret,id=composer_auth,required=true \
+    --mount=type=cache,target=/tmp/composer-cache,sharing=locked \
+    COMPOSER_CACHE_DIR=/tmp/composer-cache \
+    COMPOSER_AUTH="$(cat /run/secrets/composer_auth)" \
+    composer install --no-dev --prefer-dist --optimize-autoloader \
+        --no-interaction --no-progress --no-scripts
+
+FROM php_base AS application_build
+
+COPY --from=vendor_build /var/www/vendor ./vendor
+COPY app ./app
+COPY bootstrap ./bootstrap
+COPY config ./config
+COPY database ./database
+COPY lang ./lang
+COPY public ./public
+COPY resources ./resources
+COPY routes ./routes
+COPY artisan composer.json composer.lock ./
+COPY --from=assets_build /var/www/public/ ./public/
+
+RUN install -d -o app -g app -m 0770 \
+        bootstrap/cache \
+        storage/framework/cache/data \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/logs \
+    && install -d -o app -g app -m 0755 storage/app/public \
+    && rm -f bootstrap/cache/*.php \
+    && APP_ENV=production \
+       APP_DEBUG=false \
+       APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= \
+       CACHE_STORE=array \
+       SESSION_DRIVER=array \
+       QUEUE_CONNECTION=sync \
+       php artisan package:discover --ansi
+
+FROM php_base AS final
+
+WORKDIR /var/www
+
+ARG RELEASE_NUMBER
+ENV RELEASE_NUMBER=${RELEASE_NUMBER}
+
+COPY --chown=app:app --from=application_build /var/www/app ./app
+COPY --chown=app:app --from=application_build /var/www/bootstrap ./bootstrap
+COPY --chown=app:app --from=application_build /var/www/config ./config
+COPY --chown=app:app --from=application_build /var/www/database ./database
+COPY --chown=app:app --from=application_build /var/www/lang ./lang
+COPY --chown=app:app --from=application_build /var/www/public ./public
+COPY --chown=app:app --from=application_build /var/www/resources ./resources
+COPY --chown=app:app --from=application_build /var/www/routes ./routes
+COPY --chown=app:app --from=application_build /var/www/vendor ./vendor
+COPY --chown=app:app --from=application_build /var/www/artisan ./artisan
+COPY --chown=app:app --from=application_build /var/www/composer.json ./composer.json
+
+RUN install -d -o app -g app -m 0770 \
+        bootstrap/cache \
+        storage/framework/cache/data \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/logs \
+    && install -d -o app -g app -m 0755 storage/app/public
+
+RUN ln -s ../storage/app/public public/storage
+
+EXPOSE 9000
+USER app
+ENTRYPOINT ["/usr/local/bin/app-entrypoint"]
+CMD ["php-fpm"]

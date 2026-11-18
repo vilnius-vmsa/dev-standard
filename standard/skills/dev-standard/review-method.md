@@ -1,8 +1,30 @@
 ## How to review
 
-The rules for this repository are in `.github/instructions/dev-standard-*.instructions.md`: apply every file whose `applyTo` matches a changed path, plus `dev-standard-local.instructions.md` if it exists. Local rules may make VMS rules stricter, never weaker; on conflict follow the VMS rule and report it.
+The rules for this repository are in `.github/instructions/dev-standard-*.instructions.md`: apply every file whose `applyTo` matches a changed path, plus `dev-standard-local.instructions.md` if it exists. Local rules may make VMS rules stricter, never weaker; on conflict follow the VMS rule and report it. Two exceptions are allowed by the standard itself when recorded there with a reason: a file-layout exception under OPS-REPO-P02 is valid, and the paths it names are reviewed as if they matched the `applyTo` of the `infra` rules file and of the active DevOps profile files; and a release-model exception under OPS-PIPE-P07 is valid, as the "DevOps profiles" section says.
 
 Read each matching rules file to its last line. If a read stops early, read the rest before you start.
+
+### DevOps profiles
+
+Delivery rules are split by method. A repository chooses its profiles in `.dev-standard/config.json`: one release model (`flow-branch` or `flow-tag`) and one deployment method (`compose`, `compose-blue-green` or `k8s`). `docker` is not a deployment method: it holds the container image rules, comes with every deployment method, and is listed on its own by a repository that builds images but deploys with a technology the standard does not describe, or deploys nothing.
+
+* If `dev-standard-infra.instructions.md` is not installed, the repository has not enabled the DevOps rules (its config lists no infrastructure stack). Check none of the rules in the `infra` and profile files and do not state them from memory; OPS-PIPE-P07 and OPS-REPO-P02 are in `dev-standard-all.instructions.md` and still apply. When the repository has CI/CD or delivery files, that missing declaration is itself a violation of OPS-PIPE-P07: report it once per review, on a change that touches those files or `.dev-standard/config.json`.
+* `.dev-standard/config.json` decides which profiles are active: the stacks listed there, plus the stacks those build on. A profile rules file that is present but not chosen there is not active, except in the transitional case below.
+* Apply the common `infra` rules and the rules of the active profiles. Do not apply or cite rules of a profile the repository did not choose.
+* If the change touches delivery files (workflows, Dockerfiles, Compose files, manifests, deployment scripts) and no release model or no deployment method is active, say in the summary that the method-specific rules were not checked and why: the standard does not describe this technology, the repository deploys nothing, or the profile is simply not chosen. Only the last case can be a violation, as the next point says. The common `infra` rules, when installed, still apply.
+* Outside the transitional case, report OPS-PIPE-P07 as a violation when the change touches `.dev-standard/config.json` or delivery files and the repository clearly deploys with a method the standard describes (production Compose files, Kubernetes manifests, Helm charts) or with a described release model, but the config does not list that stack: the rule requires the stack in the config as well as the description in the documentation, and without the stack those rules are not installed. Do not report it for a technology the standard does not describe or for a repository that deploys nothing.
+* Transitional case: the config lists `infra` and none of `docker`, `compose`, `compose-blue-green`, `flow-branch`, `flow-tag`, `k8s`. Sync then installs every profile file. First check whether the repository deploys anything: when the README says it deploys nothing and it has no deployment workflow, Compose deployment files or manifests, `infra` alone is the correct declaration (OPS-PIPE-P07); apply the common rules only and do not report a missing choice. Otherwise the repository has not chosen yet: decide from the repository itself which profiles to apply, apply only those, and name the missing choice in the summary:
+  * release model: production is deployed by a `vX.Y.Z` tag: `flow-tag`; by a push or merge to `main` (with `stage` for staging): `flow-branch`;
+  * deployment method: production Compose files with slot services (`*-blue`, `*-green`) and a balancer in front of them: `compose-blue-green`; other production Compose files: `compose`; Kubernetes manifests, Helm charts or Kustomize: `k8s`;
+  * container images: a Dockerfile is present: `docker`, whatever the deployment method;
+  * when the repository shows neither, apply none of that pair.
+* The config lists both release models (`flow-branch` and `flow-tag`): this breaks OPS-PIPE-P07, which allows one release model at a time. Report it as a violation on a change that touches `.dev-standard/config.json` or delivery files, and apply the rules of the model the workflows actually use.
+* Cases the standard does not describe in detail yet are reported as information in the summary, not as findings and without a severity label:
+  * the config lists a Compose profile together with `k8s`: apply both sets of rules and say that both are declared;
+  * the release model in use fits neither profile (for example production is deployed only by a manual run) and `dev-standard-local.instructions.md` records that as an exception to OPS-PIPE-P07 with the model and the reason: no release-model rules are checked; say so, and name the exception.
+* A repository that deploys with a release model other than `flow-branch` or `flow-tag` without such a recorded exception breaks OPS-PIPE-P07: report it as a violation on a change that touches `.dev-standard/config.json` or delivery files. An exception without a reason, or one that tries to waive anything else in the standard, is not valid.
+* Secure secrets store (OPS-ENV-P05): GitHub Environment secrets and the organisation's password vault count as one. Environment and runtime values belong at environment level; repository or organisation secrets are acceptable only for build-time credentials that give no access to an environment. Repository files, `.env` examples with real values, build arguments, workflow variables (`vars`), logs and artefacts are not a secrets store.
+* OPS-TAG-P04: whether the production Environment requires reviewers is a repository setting that a human checks. When a workflow skips staging, list it under "Open questions" rather than reporting a violation.
 
 ### Two passes
 
@@ -35,4 +57,4 @@ Do both, in this order.
 
 ### Summary
 
-State: overall assessment; number of findings per severity; how many MUST rules the second pass checked and which IDs it found violated; test and CI evidence; open questions; whether the dev-standard rule files are present, and their version; safe to merge: yes or no.
+State: overall assessment; number of findings per severity; how many MUST rules the second pass checked and which IDs it found violated; the DevOps profiles checked and not checked (for example "DevOps profiles: flow-branch, compose-blue-green. Not checked: flow-tag, k8s.") when the change touches delivery files; test and CI evidence; open questions; whether the dev-standard rule files are present, and their version; safe to merge: yes or no.
