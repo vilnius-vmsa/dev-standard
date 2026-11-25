@@ -7,6 +7,8 @@ import { fileURLToPath } from 'node:url';
 import { PDFDocument } from 'pdf-lib';
 import { chromium } from 'playwright';
 
+import { readSiteVersions } from './versions/lib/site-versions.mjs';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..');
 const buildDir = path.resolve(projectRoot, process.env.PDF_BUILD_DIR ?? 'build');
@@ -94,7 +96,9 @@ await access(buildDir);
 const sitemapRoutes = await readSitemapRoutes(buildDir);
 const basePath = process.env.PDF_BASE_PATH ?? inferBasePath(sitemapRoutes);
 const docRoutes = await readDocRoutes(path.resolve(projectRoot, 'docs'));
-const routes = orderRoutes(docRoutes, sitemapRoutes, basePath);
+// Earlier versions from the dropdown (`npm run versions:snapshot`) are other releases, not part of this PDF.
+const earlierVersionRoots = (readSiteVersions()?.versions ?? []).map(({ line }) => `${basePath}${line}`);
+const routes = orderRoutes(docRoutes, sitemapRoutes, basePath, earlierVersionRoots);
 
 if (routes.length === 0) {
   throw new Error('No pages found to include in the PDF.');
@@ -249,13 +253,14 @@ function normalizeRoute(route) {
   return withoutTrailingSlash.startsWith('/') ? withoutTrailingSlash : `/${withoutTrailingSlash}`;
 }
 
-function orderRoutes(docRoutes, sitemapRoutes, basePrefix) {
+function orderRoutes(docRoutes, sitemapRoutes, basePrefix, earlierVersionRoots) {
   if (sitemapRoutes.length === 0) {
     return docRoutes.map((route) => routeWithBase(route, basePrefix));
   }
 
   const sitemapSet = new Set(sitemapRoutes);
   const orderedRoutes = [];
+  const isEarlierVersion = (route) => earlierVersionRoots.some((root) => route === root || route.startsWith(`${root}/`));
 
   for (const route of docRoutes) {
     const candidate = routeWithBase(route, basePrefix);
@@ -266,8 +271,8 @@ function orderRoutes(docRoutes, sitemapRoutes, basePrefix) {
   }
 
   for (const route of sitemapRoutes) {
-    // The English rules page is non-binding and not part of the official PDF.
-    if (route.endsWith('/rules')) {
+    // The English rules page is non-binding, and earlier versions are other releases: neither is part of the official PDF.
+    if (route.endsWith('/rules') || isEarlierVersion(route)) {
       continue;
     }
 

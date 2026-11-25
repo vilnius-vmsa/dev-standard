@@ -52,6 +52,16 @@ npm audit --audit-level=high
 The command fails if it finds vulnerabilities with a `high` or `critical`
 severity level.
 
+A local build contains only `docs/`. To preview the version dropdown, copy the
+earlier versions from the release tags first, and remove them again with
+`--clean`. The copy includes every version the next deploy could list, and the
+dropdown labels `docs/` as unreleased (`Neišleista`):
+
+```bash
+npm run versions:snapshot
+npm run versions:snapshot -- --clean
+```
+
 ## Rules for AI agents
 
 Every `ai-reviewable` rule in `docs/` has a tag like
@@ -167,21 +177,47 @@ To publish a new version:
 
 1. Merge the planned changes into the `main` branch.
 2. Open **Actions** on GitHub and run the **CI: Create release tag** workflow.
-3. Enter a tag consisting of `v` and three numbers, such as `v1.2.3`, and
-   briefly explain why the version is being released.
+3. Enter a tag consisting of `v` and three numbers, such as `v1.2.3`, newer
+   than every existing version (the workflow tags `main`), and briefly explain
+   why the version is being released.
 4. The workflow validates the tag, creates a GitHub Release, and automatically
    generates a summary from Git commits and merged pull requests.
 5. The release workflow builds a publicly downloadable PDF and attaches it to
    the GitHub Release.
 6. **CD: Deploy to GitHub Pages** builds the tagged version and publishes the
-   website to GitHub Pages.
+   website to GitHub Pages. The tagged version is served at the site root; the
+   version dropdown also lists the latest patch of each of the three previous
+   minor releases (for example `1.3.5` at `/1.3/`), copied from its Git tag
+   during the build. Releases before `1.3.0` are not listed.
 
 A release is also created automatically when a correctly formatted Git tag,
 such as `v1.2.3`, is pushed to GitHub. Tags containing letters, extra segments,
 or pre-release suffixes are not accepted.
 
 To redeploy an existing published version, manually run
-**CD: Deploy to GitHub Pages** and provide its tag.
+**CD: Deploy to GitHub Pages** and provide its tag. The given version is served
+at the site root, so the tag of an older minor release rolls the site back to
+it; its version dropdown then lists only the releases before it.
+
+To patch an older minor release (for example `v1.3.6` after `v1.4.0`), cut a
+branch from that release's latest tag, commit the fix, and push the new tag from
+that branch. GitHub runs the release workflow as stored in the tagged commit, so
+first bring it up to date from `main`:
+
+```bash
+git checkout main -- .github/workflows/ci.create-tag.yml
+git commit -m "Use the current release workflow"
+```
+
+The patch is then not marked as the latest GitHub Release, and the newest
+release is deployed again; its version dropdown lists the patch if that minor
+release is one of the three shown. If the patch was released with an outdated
+workflow and became the latest release, mark the newest release as latest
+again and manually run **CD: Deploy to GitHub Pages** with its tag:
+
+```bash
+gh release edit v1.4.0 --latest
+```
 
 GitHub Release notes are generated according to
 [`.github/release.yml`](.github/release.yml). The

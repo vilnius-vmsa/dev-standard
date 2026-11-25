@@ -51,6 +51,16 @@ npm audit --audit-level=high
 Komanda grąžina klaidą, jei aptinkama aukšto (`high`) arba kritinio
 (`critical`) lygio pažeidžiamumų.
 
+Vietinis surinkimas apima tik `docs/`. Norėdami peržiūrėti versijų pasirinkimą,
+pirmiausia nukopijuokite ankstesnes versijas iš versijų žymų; pašalinti galima
+su `--clean`. Nukopijuojamos visos versijos, kurias galėtų rodyti kitas
+diegimas, o `docs/` pasirinkime pažymima kaip `Neišleista`:
+
+```bash
+npm run versions:snapshot
+npm run versions:snapshot -- --clean
+```
+
 ## Reikalavimai DI agentams
 
 Kiekvienas `ai-reviewable` reikalavimas `docs/` kataloge turi žymą, pvz.,
@@ -95,20 +105,46 @@ Naujos versijos išleidimas:
 1. Sujunkite planuojamus pakeitimus į `main` šaką.
 2. GitHub skiltyje **Actions** paleiskite **CI: Create release tag** workflow.
 3. Įveskite žymą, sudarytą iš `v` ir trijų skaičių, pavyzdžiui,
-   `v1.2.3`, ir trumpai aprašykite, kodėl versija išleidžiama.
+   `v1.2.3`, naujesnę už visas esamas versijas (workflow žymi `main`), ir
+   trumpai aprašykite, kodėl versija išleidžiama.
 4. Workflow patikrins žymą, sukurs GitHub Release ir automatiškai
    sugeneruos pakeitimų suvestinę iš Git commit bei sujungtų pull request.
 5. Release workflow surinks ir prie GitHub Release pridės viešai
    atsisiunčiamą PDF failą.
 6. **CD: Deploy to GitHub Pages** surinks būtent pažymėtą versiją ir
-   publikuos svetainę į GitHub Pages.
+   publikuos svetainę į GitHub Pages. Pažymėta versija rodoma svetainės
+   šaknyje, o versijų pasirinkime yra ir kiekvienos iš trijų ankstesnių minor
+   versijų naujausias pataisymas (pvz., `1.3.5` adresu `/1.3/`), surinkimo metu
+   nukopijuotas iš jo Git žymos. Versijos iki `1.3.0` nerodomos.
 
 Release taip pat sukuriamas automatiškai, kai į GitHub įkeliama tinkamo
 formato Git žyma, pavyzdžiui, `v1.2.3`. Žymos su raidėmis, papildomomis
 dalimis ar išankstinės versijos priesagomis nepriimamos.
 
 Pakartotiniam jau publikuotos versijos diegimui galima rankiniu būdu
-paleisti **CD: Deploy to GitHub Pages** ir nurodyti jos žymą.
+paleisti **CD: Deploy to GitHub Pages** ir nurodyti jos žymą. Nurodyta versija
+rodoma svetainės šaknyje, todėl ankstesnės minor versijos žyma grąžina svetainę
+į tą versiją; jos versijų pasirinkime tada rodomos tik už ją senesnės versijos.
+
+Ankstesnės minor versijos pataisymui (pvz., `v1.3.6` po `v1.4.0`) sukurkite
+šaką iš naujausios tos versijos žymos, įtraukite pataisymą ir iš tos šakos
+įkelkite naują žymą. GitHub paleidžia release workflow tokį, koks jis yra
+pažymėtame commit, todėl pirmiau atnaujinkite jį iš `main`:
+
+```bash
+git checkout main -- .github/workflows/ci.create-tag.yml
+git commit -m "Use the current release workflow"
+```
+
+Tada pataisymas nežymimas kaip naujausias GitHub Release, o iš naujo
+diegiama naujausia versija; jos versijų pasirinkime pataisymas rodomas, jei ta
+minor versija yra tarp trijų rodomų. Jei pataisymas buvo išleistas su pasenusiu
+workflow ir tapo naujausiu, vėl pažymėkite naujausią versiją kaip naujausią ir
+rankiniu būdu paleiskite **CD: Deploy to GitHub Pages** su jos žyma:
+
+```bash
+gh release edit v1.4.0 --latest
+```
 
 GitHub Release suvestinė generuojama pagal
 [`.github/release.yml`](.github/release.yml). Failas
