@@ -1,11 +1,10 @@
 name: "CD: Deploy to GitHub Pages"
 
-run-name: "Deploy ${{ github.event.release.tag_name || inputs.tag_name }} to GitHub Pages"
+run-name: "Deploy ${{ inputs.tag_name }} to GitHub Pages"
 
+# Started only by dispatch: the release workflow dispatches it with the tag to serve, and redeploys are run by hand.
+# Its releases, created with GITHUB_TOKEN, would not trigger `release: published` anyway.
 on:
-  release:
-    types:
-      - published
   workflow_dispatch:
     inputs:
       tag_name:
@@ -27,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.release.tag_name || inputs.tag_name }}
+          ref: ${{ inputs.tag_name }}
           fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
@@ -42,7 +41,7 @@ jobs:
         # only their own docs. A patch to an older minor release is listed by deploying the newest release again.
         shell: bash
         env:
-          TAG_NAME: ${{ github.event.release.tag_name || inputs.tag_name }}
+          TAG_NAME: ${{ inputs.tag_name }}
         run: |
           if [[ -f scripts/versions/cli.mjs ]]; then
             npm run versions:snapshot -- --current="$TAG_NAME"
