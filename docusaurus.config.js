@@ -15,6 +15,7 @@ const config = {
 
   trailingSlash: false,
   onBrokenLinks: 'throw',
+  onBrokenAnchors: 'throw',
 
   markdown: {
     hooks: {
