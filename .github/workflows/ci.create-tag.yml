@@ -25,6 +25,10 @@ concurrency:
   group: create-release-tag
   cancel-in-progress: false
 
+env:
+  # A release tag: v and three numbers without leading zeros. RELEASE_TAG in scripts/versions/lib/select.mjs is the same.
+  RELEASE_TAG_PATTERN: '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
+
 jobs:
   create-release:
     name: Create tag and GitHub Release
@@ -48,7 +52,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ ! "$TAG_NAME" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+          if [[ ! "$TAG_NAME" =~ $RELEASE_TAG_PATTERN ]]; then
             echo "::error::Tag must contain only a v prefix and three numbers, for example v1.2.3."
             exit 1
           fi
@@ -74,8 +78,16 @@ jobs:
             exit 1
           fi
 
+          newest_tag="$( { git tag --list 'v*'; echo "$TAG_NAME"; } | grep -E "$RELEASE_TAG_PATTERN" | sort -V | tail -n 1)"
+          # A new tag is created on main, which already contains every release, so it must be the newest version.
+          if [[ "$tag_exists" == "false" && "$newest_tag" != "$TAG_NAME" ]]; then
+            echo "::error::${TAG_NAME} is older than ${newest_tag}, but would tag main. To patch an older minor release, push the tag from a branch cut from that release."
+            exit 1
+          fi
+
           echo "tag_exists=${tag_exists}" >> "$GITHUB_OUTPUT"
           echo "release_sha=${release_sha}" >> "$GITHUB_OUTPUT"
+          echo "newest_tag=${newest_tag}" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-node@v6
         with:
@@ -115,6 +127,7 @@ jobs:
           TAG_EXISTS: ${{ steps.validate.outputs.tag_exists }}
           RELEASE_DESCRIPTION: ${{ inputs.release_description }}
           RELEASE_SHA: ${{ steps.validate.outputs.release_sha }}
+          NEWEST_TAG: ${{ steps.validate.outputs.newest_tag }}
         run: |
           set -euo pipefail
 
@@ -133,7 +146,7 @@ jobs:
           previous_tag=""
           while IFS= read -r candidate; do
             if [[ "$candidate" != "$TAG_NAME" \
-              && "$candidate" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] \
+              && "$candidate" =~ $RELEASE_TAG_PATTERN ]] \
               && git merge-base --is-ancestor "$candidate" "$RELEASE_SHA"; then
               previous_tag="$candidate"
               break
@@ -161,13 +174,20 @@ jobs:
 
           notes_flags=(--notes-file release-notes.md)
 
+          # Only the newest release is "Latest": the sync action and the "latest PDF" link follow it, so a patch to an
+          # older minor release must not take it.
+          latest_flag=--latest=false
+          if [[ "$NEWEST_TAG" == "$TAG_NAME" ]]; then
+            latest_flag=--latest
+          fi
+
           gh release create "$TAG_NAME" \
             "artifacts/dev-standard.pdf#Programinės įrangos kūrimo standartas (${TAG_NAME})" \
             "artifacts/dev-standard-agent-bundle.zip#Agent bundle (${TAG_NAME})" \
             "artifacts/bundle/rules.json#Rules (JSON)" \
             --title "$TAG_NAME" \
             --generate-notes \
-            --latest \
+            "$latest_flag" \
             "${source_flags[@]}" \
             "${notes_flags[@]}"
 
@@ -176,4 +196,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG_NAME: ${{ inputs.tag_name || github.ref_name }}
-        run: gh workflow run cd.deploy.yml --ref main --field tag_name="$TAG_NAME"
+          NEWEST_TAG: ${{ steps.validate.outputs.newest_tag }}
+        run: |
+          set -euo pipefail
+          # The site root keeps the newest release; a patch to an older minor release appears in its version dropdown.
+          if [[ "$NEWEST_TAG" != "$TAG_NAME" ]]; then
+            echo "::notice::${TAG_NAME} patches an older minor release; deploying ${NEWEST_TAG} so the site root stays on the newest release."
+          fi
+          gh workflow run cd.deploy.yml --ref main --field tag_name="$NEWEST_TAG"

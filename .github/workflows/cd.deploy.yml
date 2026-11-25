@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: "Published release tag to redeploy"
+        description: "Published release tag to serve at the site root (an older one rolls the site back)"
         required: true
         type: string
 
@@ -37,6 +37,18 @@ jobs:
         run: npm ci
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+      - name: Add earlier versions
+        # Releases before this one appear in the site's version dropdown; tags made before the dropdown existed build
+        # only their own docs. A patch to an older minor release is listed by deploying the newest release again.
+        shell: bash
+        env:
+          TAG_NAME: ${{ github.event.release.tag_name || inputs.tag_name }}
+        run: |
+          if [[ -f scripts/versions/cli.mjs ]]; then
+            npm run versions:snapshot -- --current="$TAG_NAME"
+          else
+            echo "::notice::${TAG_NAME} predates the version dropdown; building its own docs only."
+          fi
       - name: Build website
         run: npm run build
       - name: Upload Build Artifact

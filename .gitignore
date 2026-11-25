@@ -6,3 +6,8 @@ artifacts/
 src/data/rules.generated.json
 pastabos.md
 nex-plan.md
+# Earlier releases for the version dropdown, copied from git tags by `npm run versions:snapshot`
+/versioned_docs/
+/versioned_sidebars/
+/versions.json
+src/data/versions.generated.json

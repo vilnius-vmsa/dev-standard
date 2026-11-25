@@ -17,6 +17,7 @@
     "rules:draft": "node scripts/standard/cli.mjs draft",
     "rules:bundle": "node scripts/standard/cli.mjs bundle",
     "rules:site-data": "node scripts/standard/cli.mjs site-data",
+    "versions:snapshot": "node scripts/versions/cli.mjs",
     "prestart": "npm run rules:site-data",
     "prebuild": "npm run rules:site-data"
   },
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.7.0",
     "@docusaurus/types": "^3.7.0",
+    "@docusaurus/utils": "^3.7.0",
     "github-slugger": "^2.0.0",
     "pdf-lib": "^1.17.1",
     "playwright": "^1.61.0",
