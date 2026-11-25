@@ -68,6 +68,8 @@ jobs:
           if git show-ref --verify --quiet "refs/tags/${TAG_NAME}"; then
             tag_exists=true
             release_sha="$(git rev-list -n 1 "$TAG_NAME")"
+            # A manual run starts on main; the website, PDF and agent bundle must be built from the tagged commit.
+            git checkout --quiet --detach "$release_sha"
           elif [[ "$EVENT_NAME" == "push" ]]; then
             echo "::error::Pushed tag ${TAG_NAME} could not be checked out."
             exit 1
