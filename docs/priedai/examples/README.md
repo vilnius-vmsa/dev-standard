@@ -20,14 +20,14 @@ Pavyzdžiai sugrupuoti pagal tai, kurį metodą projektas pasirinko (`.dev-stand
 | `github-actions/branch-based/` | Git modelis `stage` → staging, `main` → production | `flow-branch` |
 | `github-actions/tag-based/` | Git modelis su apsaugotu `vX.Y.Z` tag'u | `flow-tag` |
 | `github-actions/single-slot/` | `cd.deploy` ir `ops.start-database` vienam slotui | `compose` |
-| `github-actions/blue-green/` | `cd.deploy` ir `ops.start-database` su blue-green slotais | `compose-blue-green` |
+| `github-actions/blue-green/` | `cd.deploy` ir `ops.start-database` su blue-green slotais (branch-based modeliui) | `compose-blue-green` |
 | `docker/common/` | Dockerfile, Nginx ir PHP-FPM konfigūracija, observability, development Compose | `docker`, `compose` |
 | `docker/single-slot/` | Production Compose vienam slotui ir TLS listeneris | `compose` |
 | `docker/blue-green/` | Production Compose su slotais ir slotų upstream failai | `compose-blue-green` |
 | `scripts/` | Workflow'ų ir operatorių vykdomi skriptai: smoke vartas (`ci/`), runtime secrets paruošimas (`deploy/`) | `compose` |
 | `instructions/` | Projekto vietinių taisyklių ir išimčių pavyzdys | visi |
 
-Pavyzdžių failuose komentarų nėra, išskyrus pirmą eilutę, kuri nurodo, kur failą kopijuoti; kodėl kas nors padaryta būtent taip, aiškina [H priedas](../devops-ci-cd-modeliai.md). Projekte failai dedami į H.1 priede aprašytas vietas (`.github/workflows/`, `docker/`, `scripts/`, šaknis), ne į šiuos pakatalogius. `single-slot/` ir `blue-green/` failai turi tuos pačius vardus (`cd.deploy.yml`, `ops.start-database.yml`, `docker-compose.production.yml`, `docker-compose.ci-smoke.override.yml`): projektas ima vieną variantą, todėl `ci.build` ir `ci.release` abiem vienodi, o smoke skriptas topologiją atpažįsta iš Compose failo. Blue-green projektas papildomai tik prideda `force_recreate_balancer` įvestį `ops.deploy` faile.
+Pavyzdžių failuose komentarų nėra, išskyrus pirmą eilutę, kuri nurodo, kur failą kopijuoti; kodėl kas nors padaryta būtent taip, aiškina [H priedas](../devops-ci-cd-modeliai.md). Projekte failai dedami į H.1 priede aprašytas vietas (`.github/workflows/`, `docker/`, `scripts/`, šaknis), ne į šiuos pakatalogius. `single-slot/` ir `blue-green/` failai turi tuos pačius vardus (`cd.deploy.yml`, `ops.start-database.yml`, `docker-compose.production.yml`, `docker-compose.ci-smoke.override.yml`): projektas ima vieną variantą, todėl `ci.build` abiem vienodas, o smoke skriptas topologiją atpažįsta iš Compose failo. Blue-green pavyzdys skirtas branch-based modeliui: tag-based `ci.release` perduoda `release_tag`, kurį priima tik single-slot `cd.deploy`. Blue-green projektas papildomai tik prideda `force_recreate_balancer` įvestį `ops.deploy` faile.
 
 ## Docker
 
