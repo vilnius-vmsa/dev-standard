@@ -820,6 +820,8 @@ REKOMENDUOJAMA:
 *   Atkūrimo testų rezultatus dokumentuoti ir naudoti tikslinant RTO ir RPO prielaidas.
 <!-- ARCH-REL-R16 | human-reviewable -->
 *   Kritinėms sistemoms reguliariai tikrinti ne tik atsarginių kopijų sukūrimą, bet ir pilną atkūrimo scenarijų.
+<!-- ARCH-REL-R17 | human-reviewable -->
+*   Kai organizacija daro viso hosto atsargines kopijas, jos laikomos sistemos atsarginėmis kopijomis (ARCH-COMP-P10). Projektas gali papildomai daryti savo duomenų kopiją prieš diegimo migracijas kaip rollback priemonę: nepavykusią migraciją ar klaidingą duomenų pakeitimą tada galima atšaukti neatkuriant viso hosto. Vertinant, ar hosto kopijos pakanka, atsižvelgti, kad veikiančios duomenų bazės hosto kopija be duomenų bazės dump'o ar įrašymo sustabdymo nebūtinai yra vientisa.
 
 > Susiję skyriai: [9.5 SLA, SLO ir SLI](09-stebesena-logai.md#95-sla-slo-ir-sli) · [9.6 Incidentų valdymas](09-stebesena-logai.md#96-incidentų-valdymas) · [9.8 Eksploatacijos dokumentacija](09-stebesena-logai.md#98-eksploatacijos-dokumentacija)
 

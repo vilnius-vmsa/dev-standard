@@ -108,7 +108,7 @@ jobs:
               SECRETS_DIR="$RUNNER_TEMP/guard-secrets" \
               TLS_CERTIFICATE_B64="$tls_certificate" TLS_PRIVATE_KEY_B64="$tls_private_key" \
               PHP_IMAGE_REF="ci.invalid/php@$digest" NGINX_IMAGE_REF="ci.invalid/nginx@$digest" \
-              bash docker/scripts/prepare-runtime-secrets.sh 2>&1)"; then
+              bash scripts/deploy/prepare-runtime-secrets.sh 2>&1)"; then
               echo "The helper accepted: $runtime_env" >&2
               exit 1
             fi

@@ -195,7 +195,7 @@ jobs:
           SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
           SMOKE_JOB_CLASS: 'App\Jobs\SmokeTestJob'
           SMOKE_JOB_ID: dev-standard-ci-job-${{ github.run_id }}-${{ github.run_attempt }}
-        run: bash docker/scripts/smoke-published-images.sh
+        run: bash scripts/ci/smoke-published-images.sh
 
   deploy-staging:
     name: Deploy candidate to staging

@@ -1,0 +1,89 @@
+# Inactive example. Copy to .github/dependabot.yml.
+
+version: 2
+
+updates:
+  - package-ecosystem: composer
+    directory: "/"
+    target-branch: dependencies
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: build
+      prefix-development: build
+      include: scope
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: npm
+    directory: "/"
+    target-branch: dependencies
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: build
+      prefix-development: build
+      include: scope
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    target-branch: dependencies
+    schedule:
+      interval: weekly
+      day: tuesday
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: ci
+      include: scope
+
+  - package-ecosystem: docker
+    directory: "/docker/php-fpm"
+    target-branch: dependencies
+    schedule:
+      interval: weekly
+      day: wednesday
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: build
+      include: scope
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "php"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
+
+  - package-ecosystem: docker
+    directory: "/docker/nginx"
+    target-branch: dependencies
+    schedule:
+      interval: weekly
+      day: wednesday
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: build
+      include: scope
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: docker-compose
+    directory: "/"
+    target-branch: dependencies
+    schedule:
+      interval: weekly
+      day: wednesday
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: build
+      include: scope
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

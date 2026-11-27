@@ -270,12 +270,13 @@ jobs:
       contents: read
       packages: read
       attestations: read
-    uses: ./.github/workflows/cd.deploy.yml
+    uses: <org>/<app>/.github/workflows/cd.deploy.yml@main
     with:
       environment: production
       source_sha: ${{ needs.verify-promote-release.outputs.source_sha }}
       app_image: ${{ needs.verify-promote-release.outputs.app_image }}
       nginx_image: ${{ needs.verify-promote-release.outputs.nginx_image }}
       release_workflow: ${{ github.repository }}/.github/workflows/ci.release.yml
+      release_tag: ${{ github.ref_name }}
       release_attestation_required: true
     secrets: inherit

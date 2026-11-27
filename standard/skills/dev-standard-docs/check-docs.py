@@ -3,9 +3,13 @@
 
 Ships with the dev-standard-docs skill. Run it from the repository root:
 
-    python3 .agents/skills/dev-standard-docs/check-docs.py [PATH ...]
+    python3 .agents/skills/dev-standard-docs/check-docs.py [--exclude PATH ...] [PATH ...]
 
 Without PATH it checks README.md, AGENTS.md and every Markdown file under docs/.
+Records are left out: they describe what was decided or done at a point in time
+(ADRs, a decision log, a progress or handoff log, a changelog) and keep the names
+that were true then. docs/adr/ and docs/decisions/ are always left out; name other
+records with --exclude. A record folder given as PATH is checked.
 Outside fenced code blocks it reports:
   - relative links and images whose target does not exist,
   - #anchors that match no heading in the linked Markdown file,
@@ -24,6 +28,7 @@ import unicodedata
 from urllib.parse import unquote
 
 DEFAULT_TARGETS = ["README.md", "AGENTS.md", "docs"]
+DEFAULT_EXCLUDES = ["docs/adr", "docs/decisions"]
 FENCE = re.compile(r"^\s*(`{3,}|~{3,})")
 HEADING = re.compile(r"^#{1,6}\s+(.+?)\s*#*\s*$")
 HTML_ANCHOR = re.compile(r"<a\s+[^>]*(?:id|name)=[\"']([^\"']+)[\"']")
@@ -133,12 +138,19 @@ def check_doc(root, top_dirs, doc):
     return errors
 
 
-def collect(root, targets, explicit):
+def within(path, folder):
+    return path == folder or folder in path.parents
+
+
+def collect(root, targets, explicit, excludes=()):
+    """Markdown files of the targets. An exclude leaves out what lies under it, unless the target itself does."""
     docs, errors = [], []
+    excludes = [root / e for e in excludes]
     for target in targets:
         path = root / target
         if path.is_dir():
-            docs.extend(sorted(path.rglob("*.md")))
+            skip = [e for e in excludes if not within(path, e)]
+            docs.extend(d for d in sorted(path.rglob("*.md")) if not any(within(d, e) for e in skip))
         elif path.is_file():
             docs.append(path)
         elif explicit:
@@ -149,11 +161,15 @@ def collect(root, targets, explicit):
 def main():
     parser = argparse.ArgumentParser(description="Check links and code paths in documentation.")
     parser.add_argument("--root", default=".", help="repository root (default: current directory)")
+    parser.add_argument("--exclude", action="append", default=[], metavar="PATH",
+                        help="a record (file or folder) to leave out, relative to the root; repeatable "
+                             "(docs/adr and docs/decisions are always left out)")
     parser.add_argument("paths", nargs="*", help="files or folders to check (default: README.md, AGENTS.md, docs/)")
     args = parser.parse_args()
     root = pathlib.Path(args.root).resolve()
     top_dirs = {p.name for p in root.iterdir() if p.is_dir() and p.name != ".git"}
-    docs, errors = collect(root, args.paths or DEFAULT_TARGETS, explicit=bool(args.paths))
+    excludes = DEFAULT_EXCLUDES + [e.strip("/") for e in args.exclude]
+    docs, errors = collect(root, args.paths or DEFAULT_TARGETS, explicit=bool(args.paths), excludes=excludes)
     for doc in docs:
         errors.extend(check_doc(root, top_dirs, doc))
     print("\n".join(errors) if errors else f"docs ok ({len(docs)} files)")

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Inactive example. Copy to docker/scripts/smoke-published-images.sh.
+# Inactive example. Copy to scripts/ci/smoke-published-images.sh.
 
 set -euo pipefail
 
@@ -9,7 +9,7 @@ set -euo pipefail
 : "${SMOKE_JOB_CLASS:?SMOKE_JOB_CLASS must identify the deterministic queue smoke job}"
 : "${SMOKE_JOB_ID:?SMOKE_JOB_ID must be unique for this smoke run}"
 
-SECRETS_HELPER="${SECRETS_HELPER:-docker/scripts/prepare-runtime-secrets.sh}"
+SECRETS_HELPER="${SECRETS_HELPER:-scripts/deploy/prepare-runtime-secrets.sh}"
 READINESS_PATH="${READINESS_PATH:-/health/ready}"
 
 PRODUCTION_COMPOSE_FILE="${PRODUCTION_COMPOSE_FILE:-docker-compose.production.yml}"

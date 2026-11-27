@@ -67,7 +67,7 @@ PRIVALOMA:
 <!-- VER-PKG-P06 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   Dependabot konfigūracija turi apimti aplikacijos bibliotekų, konteinerių vaizdų, CI/CD darbo eigų ir kitų projekto priklausomybių atnaujinimus, jei tokios priklausomybės naudojamos.
 <!-- VER-PKG-P07 | ai-reviewable | stacks=infra | enforced-by=ai -->
-*   Automatiniams priklausomybių atnaujinimams valdyti turi būti naudojama atskira ilgalaikė `dependencies` šaka, skirta Dependabot arba lygiaverčio įrankio siūlomiems atnaujinimams testuoti ir integruoti.
+*   Automatiniams priklausomybių atnaujinimams valdyti turi būti naudojama atskira ilgalaikė `dependencies` šaka, kurioje renkami Dependabot arba lygiaverčio įrankio siūlomi atnaujinimai. Jie turi būti ištestuoti prieš patenkant į `main`: ne vėliau kaip Pull Request iš `dependencies` į `main` CI vartuose. Atskiras CI paleidimas kiekvienam atnaujinimo Pull Request į `dependencies` neprivalomas.
 <!-- VER-PKG-P08 | ai-reviewable | stacks=all | enforced-by=ai -->
 *   `dependencies` šaka turi būti nuolat sinchronizuojama su pagrindine `main` šaka, kad priklausomybių atnaujinimai būtų vertinami pagal aktualią projekto kodo bazės ir konfigūracijos būseną.
 <!-- VER-PKG-P09 | ai-reviewable | stacks=infra | enforced-by=ai -->

@@ -106,6 +106,8 @@ Kur laikomos repozitorijos instrukcijos DI agentams, koks gali būti `CLAUDE.md`
     run: python3 .agents/skills/dev-standard-docs/check-docs.py
   ```
 
+  Tikrintuvas tikrina gyvuosius dokumentus. Įrašų – ADR, sprendimų žurnalo, darbų ar perdavimo žurnalo, pakeitimų žurnalo – jis netikrina, nes jie išlaiko tuo metu teisingus pavadinimus (DOC-ADR-R04): `docs/adr/` ir `docs/decisions/` praleidžiami pagal nutylėjimą, kiti įrašai nurodomi `--exclude` (pvz., `--exclude docs/PROGRESS.md`).
+
   Repozitorijos, kurios jau naudoja kitą nuorodų tikrintuvą, gali jį palikti.
 - **DI agentas** prieš pranešdamas, kad užduotis atlikta, paleidžia `dev-standard-docs` atnaujinimo režimą.
 - Naudojamos tik patvirtintos DI priemonės ([4.8](../04-kodo-kurimo-gaires.md#48-di-priemonių-naudojimas-ai-coding-assistants)).

@@ -129,5 +129,6 @@ jobs:
       app_image: ${{ needs.resolve-release.outputs.app_image }}
       nginx_image: ${{ needs.resolve-release.outputs.nginx_image }}
       release_workflow: ${{ needs.resolve-release.outputs.release_workflow }}
+      release_tag: ${{ inputs.image_tag }}
       release_attestation_required: true
     secrets: inherit

@@ -932,8 +932,8 @@ CODE-VCS-P06:
   text: Projects use a clear, documented branching strategy applied the same way by the whole team.
   source_hash: c895b6739cbc
 CODE-VCS-P07:
-  text: Branch names follow the format `<type>/ticket-<ticket id>-<short description>`, for example `feature/ticket-123456-add-2fa`.
-  source_hash: 39be1d1a8e9a
+  text: Branch names follow the format `<type>/ticket-<ticket id>-<short description>`, where `<type>` is a Conventional Commits type (`feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`, `build`, `perf`, `style`; see CODE-VCS-P16) or one of the long forms `feature`, `bugfix`, `hotfix`, `release`; for example `feature/ticket-123456-add-2fa` or `feat/ticket-123456-add-2fa`.
+  source_hash: 73ef38c1bcd9
 CODE-VCS-P09:
   text: Changes to these branches are made only through a PR or MR.
   source_hash: 926c41d1ef82
@@ -991,6 +991,9 @@ CODE-VCS-P27:
 CODE-VCS-P28:
   text: Large binary files are not kept in the repository without clear justification and a suitable management mechanism.
   source_hash: 67cc0d1a2b96
+CODE-VCS-P29:
+  text: "Branch names (CODE-VCS-P07) and the commit message format (CODE-VCS-P16, CODE-VCS-P17, CODE-VCS-P19) are checked automatically by the CI check of every pull request: it checks the branch name and the message of every commit in the pull request. Merge commits that GitHub creates (\"Merge pull request #…\") are not checked for the format. Local Git hooks may add to this check but do not replace it: they can be skipped, and commits made on GitHub (for example review suggestions applied in the browser) never pass through them. Pull requests opened by automated tools (for example Dependabot or the standard's sync) may be left out of the check."
+  source_hash: ef605f8958f7
 CODE-VCS-R01:
   text: Repository structure, names and responsibilities are consistent across the organisation.
   source_hash: faabe0ea3750
@@ -1238,8 +1241,8 @@ OPS-DEVSEC-P03:
   text: Secret detection runs in CI.
   source_hash: 86bcb3dbfa66
 OPS-DEVSEC-P04:
-  text: Security findings classed as critical by organisational policy stop the pipeline (the security check job fails) until the risk is resolved or explicitly accepted; branch protection (OPS-CI-P05) makes the failed gate block the merge.
-  source_hash: 37930d683b86
+  text: Security findings classed as critical by organisational policy stop the pipeline (the security check job fails) until the risk is resolved or explicitly accepted (OPS-DOCKER-P04 sets how a container image finding is accepted); branch protection (OPS-CI-P05) makes the failed gate block the merge.
+  source_hash: ecf212c2641a
 OPS-DEVSEC-R01:
   text: An SBOM is generated automatically at release and stored with the release artefacts.
   source_hash: d69ce45bf9ff
@@ -1252,6 +1255,9 @@ OPS-DOCKER-P02:
 OPS-DOCKER-P03:
   text: Each deployable service has one canonical registry image name that does not change between staging and production; environment, release version and build identifier are represented by tags, OCI labels and digests, not environment-specific repository names. Deployments use the digest, tags are navigation and promotion references, and `org.opencontainers.image.revision`, `org.opencontainers.image.source` and `org.opencontainers.image.version` provide traceability metadata.
   source_hash: ddd6dff9cefd
+OPS-DOCKER-P04:
+  text: "When the image scan reports a finding that has a published fix, the base image's version and digest are updated first. If the published base image does not contain the fix yet, the finding may be accepted temporarily in `.trivyignore` at the repository root (or the equivalent file of the scanner in use): the entry gives the finding's ID and an expiry date (`exp:YYYY-MM-DD`, at most 30 days after it is added), and a comment above it gives the reason and who accepted it; after the expiry the finding stops the pipeline again, and the entry is removed once a base image with the fix is used. Upgrading packages during the build from package repositories that are not pinned (for example `apt-get upgrade`, `apk upgrade`) is not a way out, because the same commit would then build differently (OPS-CI-P02); a date-pinned copy of a package repository (for example `snapshot.debian.org/archive/debian/<date>`) is allowed."
+  source_hash: 8bb99b41b569
 OPS-ENV-P02:
   text: CI/CD and GitOps keep environments isolated and compliant with section 3.5.3.
   source_hash: 69f4473c1774
@@ -1342,12 +1348,15 @@ OPS-PIPE-P06:
 OPS-PIPE-P07:
   text: "A repository that has CI/CD or delivery files (workflows, Dockerfiles, Compose files, manifests, deployment scripts) declares its DevOps stacks in `.dev-standard/config.json`: the chosen Git release model (`flow-branch` or `flow-tag`) and deployment method (`compose`, `compose-blue-green` or `k8s`), and describes them in the deployment documentation. Only one Git release model applies at a time. When no profile exists for the deployment technology (section 8.15), the deployment documentation says so and describes how that technology provides immutable artifacts, a readiness check, secret handling and rollback, and no deployment-method stack is declared. A Git release model other than `flow-branch` or `flow-tag` is allowed only when the exception is recorded in the project's `.github/instructions/dev-standard-local.instructions.md` with the model and the reason; the deployment documentation then describes the model and no release-model stack is declared. When the repository deploys nothing (for example a library), the README says so and `infra` alone is declared instead of a release model and a deployment method. In both cases a project that builds container images declares `docker`."
   source_hash: 6bd91db6523a
+OPS-PIPE-R01:
+  text: Inline `run:` blocks in a workflow that are longer than a few plain commands (about five lines), especially ones with functions, loops or branching, and logic repeated across workflows are moved into a repository script under `scripts/` (OPS-REPO-P02) or into a composite action; the workflow keeps the orchestration (appendix H.4, "Kur laikoma workflow logika").
+  source_hash: 24503943e45f
 OPS-REPO-P01:
   text: An application repository clearly separates application code, Docker service configuration, root Compose files and active workflows; templates and examples are not mixed with active workflows.
   source_hash: 57644446cec4
 OPS-REPO-P02:
-  text: "Container, CI/CD and infrastructure files in an application repository live in the agreed locations: the Dockerfile of each image and the configuration of its service in a separate `docker/<service>/` subdirectory (for example `docker/php-fpm/`, `docker/nginx/`), deployment scripts in `docker/scripts/`, and of these files only the Compose files and `.dockerignore` in the repository root, workflows and actions under `.github/`, Kubernetes and Helm manifests in a `k8s/`, `kubernetes/`, `helm/` or `charts/` directory. Another location is allowed only when the exception is recorded in the project's `.github/instructions/dev-standard-local.instructions.md` file with the paths and the reason; the DevOps rules (chapter 8, OPS-*) apply to the paths named in the exception."
-  source_hash: e0dd2bfea8b9
+  text: "Container, CI/CD and infrastructure files in an application repository live in the agreed locations: the Dockerfile of each image and the configuration of its service in a separate `docker/<service>/` subdirectory (for example `docker/php-fpm/`, `docker/nginx/`), scripts that belong to a container image or to one service (entrypoints, health checks, files copied into an image) in that service's directory or in `docker/scripts/`, scripts that workflows, Git hooks or operators run (checks, release, deployment, secret preparation) in `scripts/`, grouped by purpose (for example `scripts/ci/`, `scripts/release/`, `scripts/deploy/`, `scripts/hooks/`), and of these files only the Compose files and `.dockerignore` in the repository root, workflows and actions under `.github/`, Kubernetes and Helm manifests in a `k8s/`, `kubernetes/`, `helm/` or `charts/` directory. Another location is allowed only when the exception is recorded in the project's `.github/instructions/dev-standard-local.instructions.md` file with the paths and the reason; the DevOps rules (chapter 8, OPS-*) apply to the paths named in the exception."
+  source_hash: ac8375bff80b
 OPS-TAG-P01:
   text: In the tag-based model, a production tag is a semantic-version tag that exists as `refs/tags/<name>` and points to a pre-tested commit; a branch named v1.2.3 is not a release tag.
   source_hash: 5d7f08b50126
@@ -1360,6 +1369,9 @@ OPS-TAG-P03:
 OPS-TAG-P04:
   text: In the tag-based model, only an artifact (for a container image, a digest) that was deployed to staging and passed its readiness check may be promoted to production; staging may be skipped only when the candidate is fully verified by other gates and the production Environment requires approval by Required reviewers (OPS-TAG-P06).
   source_hash: 1ed27b52b5d2
+OPS-TAG-P07:
+  text: In the tag-based model, the release workflow started by a tag calls the production deployment from the protected branch's copy (`<org>/<repo>/.github/workflows/cd.deploy.yml@main`), not its own (`./.github/workflows/cd.deploy.yml`). The deployment accepts a release attestation only when this repository's release workflow signed it from that same version tag (`refs/tags/<tag>`) at the released commit, and an image build attestation only when the build workflow signed it from the protected branch; it checks the signing workflow the caller names against its own list of allowed workflows.
+  source_hash: 9b672f850102
 OPS-VER-P02:
   text: Container images and other artefacts are tagged so it is clear which code version is deployed.
   source_hash: 5afec404997e
@@ -1643,8 +1655,8 @@ VER-PKG-P06:
   text: The Dependabot configuration covers application libraries, container images, CI/CD workflows and other project dependencies where they are used.
   source_hash: a751f5886b44
 VER-PKG-P07:
-  text: Automated dependency updates are handled on a separate long-lived `dependencies` branch, where Dependabot or equivalent updates are tested and integrated.
-  source_hash: 82bad66c491c
+  text: Automated dependency updates are collected on a separate long-lived `dependencies` branch, where Dependabot or an equivalent tool proposes them. They are tested before they reach `main`, at the latest by the CI gates of the pull request from `dependencies` into `main`; a separate CI run for each update's pull request into `dependencies` is not required.
+  source_hash: 6a51742ba097
 VER-PKG-P08:
   text: The dependencies branch is kept in sync with main, so dependency updates are evaluated against the current code base and configuration.
   source_hash: ff796426df85

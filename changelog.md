@@ -91,6 +91,21 @@ Pasikeitę vardai ir sąsajos:
 - D ir F priedų šablonai (ADR, runbook) pateikiami angliškai ir įtraukiami į `dev-standard-docs` įgūdį; F priedo šablono atvaizdavimas pataisytas.
 - DI peržiūros metodas (`review-method.md`) atlieka du etapus: pirmiausia ieško defektų, tada tikrina pakeitimą pagal kiekvieną taikomą PRIVALOMA reikalavimą. Reikalavimo ID nurodomas tik tada, kai radinys pažeidžia to reikalavimo tekstą, o santraukoje nurodoma, kiek PRIVALOMA reikalavimų patikrinta.
 
+### Pakeista po pirmo 8 skyriaus ir H priedo taikymo projekte
+
+- **Skriptų vieta (`OPS-REPO-P02`).** `docker/` lieka image ar vienam servisui priklausantiems skriptams (entrypoint, health patikros); workflow'ų, Git hook'ų ir operatorių vykdomi skriptai laikomi `scripts/`, sugrupuoti pagal paskirtį. DevOps stack'ų `applyTo` papildytas `scripts/**`. Pavyzdžiai perkelti: `scripts/deploy/prepare-runtime-secrets.sh`, `scripts/ci/smoke-published-images.sh` (buvo `docker/scripts/`). H.1 nebeteigia, kad katalogų pavadinimai gali skirtis.
+- **Tag-based release diegia `main` kodu (naujas `OPS-TAG-P07`).** `ci.release` kviečia `<org>/<repo>/.github/workflows/cd.deploy.yml@main`, ne `./`; `cd.deploy` turi naują įvestį `release_tag`, `release_workflow` priima tik `ci.build.yml` arba `ci.release.yml`, o tag-based leidimui build attestation tikrina iš `refs/heads/main`, release attestation – iš `refs/tags/<tag>` ties `source_sha`. Tag-based `ops.deploy` perduoda `release_tag`.
+- **Image radinio priėmimas (naujas `OPS-DOCKER-P04`, `OPS-DOCKER-R01`).** Kai fiksuotoje bazėje pataisymo dar nėra, radinys priimamas `.trivyignore` su `exp:` data (iki 30 d.), priežastimi ir priėmusiu asmeniu; paketų atnaujinimas build metu iš nefiksuotų saugyklų neleidžiamas, datos fiksuota saugyklos kopija leidžiama. `OPS-DEVSEC-P04` nurodo į šią tvarką. Planinis skenavimas checkout'ina `.trivyignore`. H.2 papildytas poskyriu „Fiksuota bazė ir skenavimo vartas“.
+- **Dokumentacijos patikra ir įrašai (naujas `DOC-ADR-R04`).** `check-docs.py` praleidžia `docs/adr/` ir `docs/decisions/`, kitus įrašus (darbų žurnalą, changelog) nurodo nauja parinktis `--exclude`; įrašų katalogas, nurodytas kaip kelias, tikrinamas.
+- **Šakų tipai (`CODE-VCS-P07`).** Išvardyti leidžiami `<type>`: Conventional Commits tipai ir ilgosios formos `feature`, `bugfix`, `hotfix`, `release`.
+- **`dependencies` šakos testavimas (`VER-PKG-P07`).** Atnaujinimai testuojami ne vėliau kaip Pull Request iš `dependencies` į `main` CI vartuose; atskiras CI kiekvienam Dependabot PR į `dependencies` neprivalomas.
+- **Dependabot pavyzdys** (`github-actions/common/dependabot.yml.example`): visos pavyzdžių ekosistemos į `dependencies` šaką; kalbos runtime image (`php`) praleidžia ir minor atnaujinimus, kad nebūtų siūlomos naujos kalbos versijos ir jų release candidate'ai.
+- **Atsarginė kopija prieš migraciją (naujas `ARCH-REL-R17`).** Kai hostą kopijuoja organizacija, projektas gali daryti savo duomenų kopiją prieš migracijas kaip rollback priemonę.
+- **H.4 „Kur laikoma workflow logika“** – rekomenduojama praktika: workflow'ai orkestruoja, komandos laikomos skriptuose, actionlint ir ShellCheck CI. Naujas `OPS-PIPE-R01`: automatinis review siūlo ilgus inline `run:` blokus ir kartojamą logiką perkelti į `scripts/` ar composite action'ą (pavyzdžiai kol kas neperrašyti).
+- **Šakų ir commit žinučių patikra CI (naujas `CODE-VCS-P29`).** Kiekvieno PR CI tikrina šakos pavadinimą ir visų commit'ų žinutes (GitHub'o merge commit'ams formato patikra netaikoma); vietiniai Git hook'ai šios patikros nepakeičia. Automatinių įrankių PR gali būti išimti.
+
+Jei projektas jau naudoja pavyzdžius: perkelkite `docker/scripts/*.sh` į `scripts/` (arba įrašykite `OPS-REPO-P02` išimtį) ir atnaujinkite kelius workflow'uose; tag-based projektas `ci.release` deploy job'e pakeičia `uses:` į `@main` kopiją ir prideda `release_tag`, o production Environment „Deployment branches and tags“ lieka `v*.*.*` ir `main`.
+
 ## [1.0.0] - 2026-04-20
 
 ### Pridėta

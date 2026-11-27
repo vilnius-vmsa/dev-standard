@@ -122,3 +122,27 @@ test('a backticked path with a #L fragment is reported as a line number', async 
   assert.equal(result.code, 1);
   assert.equal(result.out.trim(), 'README.md:1: refers to a line number (src/Service/Foo.php#L12); reference the path and symbol instead');
 });
+
+test('records keep old names: ADR folders and --exclude paths are left out of a folder walk', async () => {
+  const stale = 'Moved since: `src/Service/Old.php`.\n';
+  const root = await repo({
+    ...BASE,
+    'docs/adr/0001-old.md': stale,
+    'docs/decisions/0002-old.md': stale,
+    'docs/PROGRESS.md': stale,
+    'docs/guide.md': 'See [the decision](adr/0001-old.md).\n',
+  });
+  const withProgress = await check(root);
+  assert.equal(withProgress.code, 1);
+  assert.deepEqual(withProgress.out.trim().split('\n'), ['docs/PROGRESS.md:1: missing path src/Service/Old.php']);
+  const clean = await check(root, ['--exclude', 'docs/PROGRESS.md']);
+  assert.equal(clean.code, 0, clean.out);
+  assert.match(clean.out, /docs ok \(2 files\)/);
+});
+
+test('a record folder given as a path is checked', async () => {
+  const root = await repo({ ...BASE, 'docs/adr/0001-old.md': '`src/Service/Old.php`\n' });
+  const result = await check(root, ['docs/adr']);
+  assert.equal(result.code, 1);
+  assert.equal(result.out.trim(), 'docs/adr/0001-old.md:1: missing path src/Service/Old.php');
+});

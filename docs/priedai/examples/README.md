@@ -16,17 +16,18 @@ Pavyzdžiai sugrupuoti pagal tai, kurį metodą projektas pasirinko (`.dev-stand
 
 | Katalogas | Kam skirtas | Stack'as |
 |---|---|---|
-| `github-actions/common/` | Workflow'ai, vienodi visiems metodams: kokybės vartas, housekeeping, dokumentacijos patikra, sync | `infra` |
+| `github-actions/common/` | Workflow'ai ir `.github` failai, vienodi visiems metodams: kokybės vartas, housekeeping, dokumentacijos patikra, sync, Dependabot | `infra` |
 | `github-actions/branch-based/` | Git modelis `stage` → staging, `main` → production | `flow-branch` |
 | `github-actions/tag-based/` | Git modelis su apsaugotu `vX.Y.Z` tag'u | `flow-tag` |
 | `github-actions/single-slot/` | `cd.deploy` ir `ops.start-database` vienam slotui | `compose` |
 | `github-actions/blue-green/` | `cd.deploy` ir `ops.start-database` su blue-green slotais | `compose-blue-green` |
-| `docker/common/` | Dockerfile, Nginx ir PHP-FPM konfigūracija, skriptai, observability, development Compose | `docker`, `compose` |
+| `docker/common/` | Dockerfile, Nginx ir PHP-FPM konfigūracija, observability, development Compose | `docker`, `compose` |
 | `docker/single-slot/` | Production Compose vienam slotui ir TLS listeneris | `compose` |
 | `docker/blue-green/` | Production Compose su slotais ir slotų upstream failai | `compose-blue-green` |
+| `scripts/` | Workflow'ų ir operatorių vykdomi skriptai: smoke vartas (`ci/`), runtime secrets paruošimas (`deploy/`) | `compose` |
 | `instructions/` | Projekto vietinių taisyklių ir išimčių pavyzdys | visi |
 
-Pavyzdžių failuose komentarų nėra, išskyrus pirmą eilutę, kuri nurodo, kur failą kopijuoti; kodėl kas nors padaryta būtent taip, aiškina [H priedas](../devops-ci-cd-modeliai.md). Projekte failai dedami į H.1 priede aprašytas vietas (`.github/workflows/`, `docker/`, šaknis), ne į šiuos pakatalogius. `single-slot/` ir `blue-green/` failai turi tuos pačius vardus (`cd.deploy.yml`, `ops.start-database.yml`, `docker-compose.production.yml`, `docker-compose.ci-smoke.override.yml`): projektas ima vieną variantą, todėl `ci.build` ir `ci.release` abiem vienodi, o smoke skriptas topologiją atpažįsta iš Compose failo. Blue-green projektas papildomai tik prideda `force_recreate_balancer` įvestį `ops.deploy` faile.
+Pavyzdžių failuose komentarų nėra, išskyrus pirmą eilutę, kuri nurodo, kur failą kopijuoti; kodėl kas nors padaryta būtent taip, aiškina [H priedas](../devops-ci-cd-modeliai.md). Projekte failai dedami į H.1 priede aprašytas vietas (`.github/workflows/`, `docker/`, `scripts/`, šaknis), ne į šiuos pakatalogius. `single-slot/` ir `blue-green/` failai turi tuos pačius vardus (`cd.deploy.yml`, `ops.start-database.yml`, `docker-compose.production.yml`, `docker-compose.ci-smoke.override.yml`): projektas ima vieną variantą, todėl `ci.build` ir `ci.release` abiem vienodi, o smoke skriptas topologiją atpažįsta iš Compose failo. Blue-green projektas papildomai tik prideda `force_recreate_balancer` įvestį `ops.deploy` faile.
 
 ## Docker
 
@@ -41,8 +42,8 @@ Pavyzdžių failuose komentarų nėra, išskyrus pirmą eilutę, kuri nurodo, ku
 * [Observability Compose (Alloy per Docker socket proxy)](docker/common/docker-compose.observability.example.yml) — atskiras projektas, bendras single-slot ir blue-green topologijoms; pavyzdinė [config.alloy](docker/common/alloy/config.alloy.example).
 * [Optional blue-green production Compose](docker/blue-green/docker-compose.production.example.yml) — serveriui, balancerio HTTPS per hosto `:443`.
 * Published-image CI smoke Compose override: [single-slot](docker/single-slot/docker-compose.ci-smoke.override.example.yml) arba [blue-green](docker/blue-green/docker-compose.ci-smoke.override.example.yml) — minimalus override, kurį smoke skriptas uždeda ant production Compose; tik išjungia hosto porto publikavimą (single-slot – Nginx, blue-green – balancerio).
-* [Runtime secrets preparation script](docker/common/scripts/prepare-runtime-secrets.sh.example) — rekomenduojamas patogus pavyzdys; jo kelias ir failo vardas nėra privalomi.
-* [Published-image smoke test script](docker/common/scripts/smoke-published-images.sh.example) — pavyzdinė privalomo smoke varto realizacija (projektas gali įgyvendinti savaip, jei įrodo tuos pačius punktus): paleidžia image'us per secrets helperį ir production Compose (`SMOKE_TOPOLOGY`: `single-slot` arba `blue-green`), tikrina readiness, worker'į ir priklausomybes; workflow žingsnis lieka trumpas.
+* [Runtime secrets preparation script](scripts/deploy/prepare-runtime-secrets.sh.example) — rekomenduojamas patogus pavyzdys; jo kelias ir failo vardas nėra privalomi.
+* [Published-image smoke test script](scripts/ci/smoke-published-images.sh.example) — pavyzdinė privalomo smoke varto realizacija (projektas gali įgyvendinti savaip, jei įrodo tuos pačius punktus): paleidžia image'us per secrets helperį ir production Compose (`SMOKE_TOPOLOGY`: `single-slot` arba `blue-green`), tikrina readiness, worker'į ir priklausomybes; workflow žingsnis lieka trumpas.
 
 ## GitHub Actions
 
@@ -50,6 +51,7 @@ Pavyzdžių failuose komentarų nėra, išskyrus pirmą eilutę, kuri nurodo, ku
 * [Branch-based CI Pipeline](github-actions/branch-based/ci.pipeline.yml.example) – vartas, build-reikšmingų pakeitimų nustatymas, build/deploy ir `main → stage` sinchronizacija.
 * [Tag-based CI Pipeline](github-actions/tag-based/ci.pipeline.yml.example) – tik vartas; candidate build paleidžiamas per `workflow_run`.
 * [Dokumentacijos patikra](github-actions/common/docs-check.yml.example)
+* [Dependabot](github-actions/common/dependabot.yml.example) – visos pavyzdžių ekosistemos (Composer, npm, GitHub Actions, Dockerfile bazės, Compose image'ai), atnaujinimai siūlomi į `dependencies` šaką (VER-PKG-P05–P07); major versijos planuojamos rankiniu būdu (VER-PKG-R02). Kalbos runtime image (`php`) praleidžia ir minor atnaujinimus: naujos kalbos versijos (pvz., PHP 8.4 → 8.5) ir jų release candidate'ai planuojami rankiniu būdu, ne per Dependabot.
 * [Dev standard sinchronizacija](github-actions/common/dev-standard-sync.yml.example)
 * [Vietinės taisyklės ir išdėstymo išimtis](instructions/dev-standard-local.instructions.md.example) – `OPS-REPO-P02` išimties pavyzdys projektui, kurio Docker ir diegimo failai laikomi ne sutartose vietose
 * [Branch-based build ir deploy](github-actions/branch-based/ci.build.yml.example)
@@ -110,8 +112,8 @@ Secret paruošimo ir rotacijos procedūra turi gauti `RUNTIME_ENV`,
 `DEPLOY_ENVIRONMENT`, image digest'us ir TLS Base64 reikšmes, validuoti aplinką
 bei TLS porą, atomiškai paruošti `application.env`, Compose secret failus ir
 `compose.env`, ir neprintinti secret reikšmių. Šiame priede pateiktas skriptas
-`docker/common/scripts/prepare-runtime-secrets.sh.example` yra rekomenduojamas šaltinis,
-kurį projekte galima nukopijuoti kaip `docker/scripts/prepare-runtime-secrets.sh`; kelias
+`scripts/deploy/prepare-runtime-secrets.sh.example` yra rekomenduojamas šaltinis,
+kurį projekte galima nukopijuoti kaip `scripts/deploy/prepare-runtime-secrets.sh`; kelias
 ir failo vardas nėra privalomi. Galima naudoti kitą įrankį ar secret managerį.
 Single-slot ir blue-green `CD: Deploy` workflow perduoda sugeneruotą
 `SECRETS_DIR/compose.env` Compose interpolacijai; pats `RUNTIME_ENV` turinys

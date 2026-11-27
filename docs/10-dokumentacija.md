@@ -182,6 +182,8 @@ REKOMENDUOJAMA:
 *   ADR turinį laikyti trumpą, aiškų ir orientuotą į sprendimo esmę, o ne perteklinį aprašymą.
 <!-- DOC-ADR-R03 | human-reviewable -->
 *   Jei sprendimas turi ilgalaikį poveikį saugumui, palaikomumui, kaštams ar perimamumui, rekomenduojama aiškiai aprašyti jo pasekmes ir rizikas.
+<!-- DOC-ADR-R04 | human-reviewable -->
+*   Repozitorijos dokumentaciją skirti į gyvuosius dokumentus ir įrašus. Gyvieji dokumentai aprašo sistemą tokią, kokia ji yra, ir neturi turėti neveikiančių nuorodų ar kelių. Įrašai aprašo, kas buvo nuspręsta ar padaryta tam tikru metu (ADR, sprendimų žurnalas, darbų ar perdavimo žurnalas, pakeitimų žurnalas), ir išlaiko tuo metu teisingus pavadinimus. Dokumentacijos patikra apima gyvuosius dokumentus, o įrašai iš jos išskiriami ([G.8](priedai/dokumentacijos-rengimo-metodika.md#g8-dokumentacijos-palaikymas)), kad dėl jos nereikėtų perrašyti senų ADR (DOC-ADR-P04).
 
 > Susiję skyriai: [3.1.5 Architecture Decision Records (ADR)](03-architektura.md#315-architecture-decision-records-adr) · [3.8 Diagramos ir dokumentavimas](03-architektura.md#38-diagramos-ir-dokumentavimas) · [D priedas. ADR šablonas](priedai/adr-sablonas.md)
 

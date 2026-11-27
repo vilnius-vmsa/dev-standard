@@ -207,7 +207,7 @@ jobs:
           SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
           SMOKE_JOB_CLASS: 'App\Jobs\SmokeTestJob'
           SMOKE_JOB_ID: dev-standard-ci-job-${{ github.run_id }}-${{ github.run_attempt }}
-        run: bash docker/scripts/smoke-published-images.sh
+        run: bash scripts/ci/smoke-published-images.sh
 
       - name: Attest immutable application release
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4

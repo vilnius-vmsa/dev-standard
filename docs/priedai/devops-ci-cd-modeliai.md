@@ -45,13 +45,13 @@ Kubernetes diegimui ([8.14](../08-devops-ci-cd.md#814-kubernetes-ir-gitops)) pav
 
 ## H.1. Rekomenduojama repozitorijos struktūra
 
-Katalogų pavadinimai gali skirtis, tačiau atsakomybės turi likti atskirtos:
+Katalogai, kuriuos įvardija `OPS-REPO-P02`, yra privalomi; failų vardai ir pakatalogiai po `scripts/` – pavyzdiniai:
 
 ```text
 application/
 ├── .github/
 │   ├── CODEOWNERS
-│   ├── dependabot.yml
+│   ├── dependabot.yml           # iš github-actions/common/ pavyzdžio
 │   ├── pull_request_template.md
 │   └── workflows/               # plokščias katalogas: GitHub nevykdo workflow'ų iš pakatalogių
 │       ├── ci.validate.yml      # iš github-actions/common/ pavyzdžių
@@ -79,11 +79,13 @@ application/
 │   │   └── conf.d/              # default.conf, upstream*.conf, edge-tls.conf
 │   ├── balancer/                # tik blue-green; image – oficialus Nginx, savo Dockerfile neturi
 │   │   └── conf.d/              # default.conf (TLS ir monitoringo listeneriai)
-│   ├── alloy/
-│   │   └── config.alloy         # naudojamas docker-compose.observability.yml
-│   └── scripts/
-│       ├── prepare-runtime-secrets.sh   # iš prepare-runtime-secrets.sh.example
-│       └── smoke-published-images.sh
+│   └── alloy/
+│       └── config.alloy         # naudojamas docker-compose.observability.yml
+├── scripts/                     # workflow'ų, Git hook'ų ir operatorių vykdomi skriptai, pagal paskirtį
+│   ├── ci/
+│   │   └── smoke-published-images.sh    # iš scripts/ci/ pavyzdžio
+│   └── deploy/
+│       └── prepare-runtime-secrets.sh   # iš scripts/deploy/ pavyzdžio
 ├── docker-compose.yml
 ├── docker-compose.production.yml   # iš single-slot/ ARBA blue-green/ pavyzdžio (vienas failas)
 ├── docker-compose.ci-smoke.override.yml   # iš single-slot/ ARBA blue-green/ pavyzdžio
@@ -92,7 +94,7 @@ application/
 └── application source, lock files and tests
 ```
 
-Šis išdėstymas yra privalomas (`OPS-REPO-P02`): automatinis review DevOps taisykles taiko pagal failų kelius, todėl kitur padėtas Dockerfile, manifestas ar diegimo skriptas liktų nepatikrintas. Jei projektui reikia kitos vietos, išimtis su keliais ir priežastimi įrašoma į `.github/instructions/dev-standard-local.instructions.md` ([pavyzdys](examples/instructions/dev-standard-local.instructions.md.example)).
+Šie katalogai privalomi (`OPS-REPO-P02`): automatinis review DevOps taisykles taiko pagal failų kelius, todėl kitur padėtas Dockerfile, manifestas ar skriptas liktų nepatikrintas. `docker/` laikomi tik tai image ar vienam servisui priklausantys skriptai (pvz., `entrypoint.sh`); skriptai, kuriuos vykdo workflow'ai, Git hook'ai ar operatoriai (patikros, release, diegimas, secrets paruošimas), laikomi `scripts/`. Jei projektui reikia kitos vietos, išimtis su keliais ir priežastimi įrašoma į `.github/instructions/dev-standard-local.instructions.md` ([pavyzdys](examples/instructions/dev-standard-local.instructions.md.example)).
 
 Blue-green projektas naudoja tuos pačius failų vardus kaip single-slot: `cd.deploy.yml` ir `docker-compose.production.yml` kopijuojami iš `blue-green/` pavyzdžių vietoj single-slot variantų. Tas pats galioja `ops.start-database.yml`. Todėl `ci.build`, `ci.release` ir smoke skriptas abiem variantams vienodi (smoke skriptas topologiją atpažįsta iš Compose failo); blue-green projektui lieka vienas pakeitimas – `ops.deploy` pridėti neprivalomą `force_recreate_balancer` įvestį.
 
@@ -114,6 +116,22 @@ PHP-FPM ir Nginx/frontend image turi turėti atskirus build ir runtime etapus. R
 Bazinis image turi būti nurodytas kartu su versija ir digest. `latest` ir plaukiojantys package manager reikalavimai produkciniame build'e draudžiami. Composer auth, npm tokenai, sertifikatai ir kiti secrets perduodami per BuildKit secret mount arba runtime secret saugyklą; jų negalima palikti `ARG`, `ENV`, source checkout'e ar image layer'iuose.
 
 Galutiniame image neturi būti kompiliatorių, Git, package manager cache'ų ar testų įrankių, nebent jie yra aiškiai reikalingi runtime. Failų kopijavimas turi naudoti tinkamą owner'į, o procesai turi veikti ne-root teisėmis.
+
+### Fiksuota bazė ir skenavimo vartas
+
+Fiksuotas bazinis image (`OPS-CI-P02`) negauna paketų pataisymų, kol jo leidėjas nepaskelbia naujos versijos, o skenavimo vartas (`OPS-DEVSEC-P04`) sustabdo build'ą dėl radinio, kuriam pataisymas jau yra. Pavyzdžių skenavimas (`ignore-unfixed: true`, `CRITICAL,HIGH`) praleidžia radinius be pataisymo, todėl lieka būtent šis atvejis. Tvarka (`OPS-DOCKER-P04`):
+
+1. atnaujinti bazinio image versiją ir digest'ą į naujausią paskelbtą;
+2. jei ir joje pataisymo dar nėra, radinį laikinai priimti `.trivyignore` faile su galiojimo data – Trivy jį skaito iš repozitorijos šaknies, o pasibaigus datai radinys vėl stabdo vartą;
+3. kai paskelbiama bazė su pataisymu, ją naudoti ir įrašą pašalinti.
+
+```text
+# php:8.4-fpm-bookworm: the published base has no fixed libxml2 yet.
+# Accepted by <name>, ticket-<id>; remove when the base image has the fix.
+CVE-2026-12345 exp:2026-12-20
+```
+
+Debian bazei galima ir datos fiksuota paketų saugyklos kopija (`snapshot.debian.org`): tas pats commit'as statomas vienodai, todėl `OPS-CI-P02` nepažeidžiamas. Alpine tokios kopijos neturi, todėl jai lieka `.trivyignore`. Planinis skenavimas (`ops.scheduled-scan`) checkout'ina tik `.trivyignore`, kad priimti radiniai jo nestabdytų, o pasibaigę – stabdytų.
 
 ### Image pavadinimas, tag'ai, label'iai ir digest'ai
 
@@ -390,9 +408,9 @@ Compose projekto vardas nėra kontrakto dalis: jis fiksuotas pačiame Compose fa
 | Rekomenduojamas `prepare-runtime-secrets.sh` helperis | Iš aukščiau nurodytų įėjimų atomiškai sukuria `application.env` (be slaptų raktų), `app_key`, `mysql_password`, `mysql_root_password`, `redis_password`, `tls_certificate`, `tls_private_key` ir `compose.env`. |
 | `compose.env` | Sugeneruoti `SECRETS_DIR`, DB reikšmės ir pinned image refs; perduodamas `docker compose --env-file` prieš `config`, `pull` ir rollout. |
 
-Priedo skriptas `docker/common/scripts/prepare-runtime-secrets.sh.example` yra
+Priedo skriptas `scripts/deploy/prepare-runtime-secrets.sh.example` yra
 rekomenduojamas helperio šaltinis, kurį projekte galima nukopijuoti kaip
-`docker/scripts/prepare-runtime-secrets.sh`. Failo kelias ir vardas nėra norminis
+`scripts/deploy/prepare-runtime-secrets.sh`. Failo kelias ir vardas nėra norminis
 reikalavimas: galima naudoti secret managerį ar kitą operatoriaus įrankį, jei
 jis išlaiko tą pačią įėjimų, atominių išėjimų ir neprintinamų reikšmių sutartį.
 `RUNTIME_ENV` turinys Compose'ui tiesiogiai per `--env-file` neperduodamas: Compose interpoliacijai naudojamas tik helperio sugeneruotas `compose.env`.
@@ -465,7 +483,7 @@ Darbo eigų failai gali būti sujungti ar išskaidyti pagal projekto dydį, tač
 patikra telpa į kelias komandas, ji gali būti workflow žingsnyje; sudėtingesnė
 DB, Redis, worker ir Nginx patikra rekomenduojama perkelti į projekto skriptą,
 kurį workflow iškviečia pagal digest'ais patikrintus image. Pavyzdinis
-`docker/scripts/smoke-published-images.sh` image'us paleidžia tuo pačiu keliu
+`scripts/ci/smoke-published-images.sh` image'us paleidžia tuo pačiu keliu
 kaip tikras deploy: secrets helperis su vienkartinėmis reikšmėmis, production
 Compose failas ir `CD: Deploy` komandų seka (`up` MySQL/Redis → migracija →
 `up --wait`). Tada per privatų Nginx `18080` listenerį užklausia
@@ -630,7 +648,7 @@ nustatymai, todėl jie yra pavyzdžių dalis:
 |---|---|
 | Lint, testai, build, scan, attestation, smoke, tag promotion | GitHub-hosted `ubuntu-latest`; be `environment:` ir be prieigos prie hostų |
 | Deploy, redeploy, `ops.start-database` | `runs-on: "${{ inputs.environment }}"` ir `environment: ${{ inputs.environment }}` |
-| Self-hosted runner'is | Po vieną kiekvienai aplinkai, su tos aplinkos label'iu (`staging`, `production`); prieinamas tik tam skirtoms repozitorijoms |
+| Self-hosted runner'is | Po vieną kiekvienai aplinkai, su tos aplinkos label'iu (`staging`, `production`); prieinamas tik tam skirtoms repozitorijoms. Jei organizacijos GitHub planas leidžia, production runner'io grupei nustatomi „Selected workflows“ – tik `main` versijos diegimo workflow'ai (pvz., `<org>/<repo>/.github/workflows/cd.deploy.yml@refs/heads/main` ir `ops.start-database.yml`); todėl tag-based `ci.release` kviečia `cd.deploy.yml@main`, o ne savo kopiją (`OPS-TAG-P07`) |
 | GitHub Environment | Po vieną kiekvienai aplinkai; jame tik tos aplinkos secrets ir kintamieji (`RUNTIME_ENV`, TLS, `PUBLIC_URL`) |
 | Build kredencialai (`COMPOSER_APP_ID`, `COMPOSER_APP_PRIVATE_KEY`) | Repozitorijos arba organizacijos lygio kintamasis ir secret, ne Environment: build job'as aplinkos nedeklaruoja. GitHub App token'ui `ci.build` nurodo `owner` ir privačių paketų repozitorijų sąrašą – be jų token'as galioja tik pačiai repozitorijai |
 | Environment „Deployment branches and tags“ | Branch-based: `staging` ← `stage`, `production` ← `main`; tag-based: `staging` ← `main`, `production` ← `v*.*.*` ir `main` (operatoriaus redeploy) |
@@ -646,6 +664,22 @@ aprašomi projekto diegimo dokumentacijoje.
 
 Permissions nurodomos workflow arba job lygiu, `pull_request` iš fork'o negali gauti production secrets ar privileged build tokenų. Visi diegimo ir redeploy keliai baigiasi tame pačiame `CD: Deploy` job'e, o jo job lygio concurrency grupė `cd-deploy-<aplinka>` užtikrina, kad diegimas ir redeploy į tą pačią aplinką nevyktų lygiagrečiai. `ops.start-database` hostą keičia savo job'e (perrašo secrets katalogą), todėl naudoja tą pačią grupę. Aplinkos tag'o perkėlimas po diegimo (`promote-environment`) turi savo grupę `promote-<aplinka>`: bendroje deploy grupėje laukiantį perkėlimą galėtų atšaukti į eilę atėjęs kitas diegimas, ir tag'as liktų ant senos versijos. Kviečiantis workflow (pvz., `Ops: Deploy`) privalo naudoti kitą grupės vardą (`ops-deploy-<aplinka>`): jei kvietėjas ir kviečiamas job'as prašo tos pačios grupės, GitHub run'ą atšaukia kaip deadlock. Build ir release workflow grupės taip pat atskiros. `ci.release` visiems release tag'ams naudoja vieną grupę `release-production`, apimančią ir production diegimą: jei grupė priklausytų nuo tag'o, du beveik kartu sukurti tag'ai būtų tikrinami lygiagrečiai ir senesnis galėtų įsidiegti po naujesnio. GitHub vienoje grupėje laiko tik vieną laukiantį run'ą, todėl greitai sukūrus tris tag'us vidurinio run'as atšaukiamas ir jo leidimas nepaskelbiamas; production gauna naujausią. Tokio run'o vėliau kartoti nereikėtų – jis senesnę versiją įdiegtų ant naujesnės.
 
+
+### Kur laikoma workflow logika
+
+Rekomenduojama praktika (neprivaloma; automatinis review ją siūlo pagal `OPS-PIPE-R01`): workflow'ai orkestruoja, o konkrečios komandos laikomos skriptuose, nebent darbą atlieka oficialus action'as arba žingsnis trumpas.
+
+1. Orkestravimas lieka workflow'e: kuri aplinka, kada, kas tvirtina, permissions, concurrency, rollback sąlygos. Skriptai nesišakoja pagal šakos ar aplinkos pavadinimą ir nekviečia GitHub API kitiems workflow'ams valdyti.
+2. Kai darbą atlieka oficialus action'as, naudojamas jis, o ne rankomis rašytas shell.
+3. Inline `run:` turi tik kelias paprastas komandas (apie penkias eilutes). Funkcijos, ciklai, šakojimasis, tai, ką operatorius turi paleisti rankomis, ir tai, kas naudojama ne vieną kartą, perkeliama į repozitorijos skriptą (`scripts/`, `OPS-REPO-P02`) arba, kai tai pasikartojanti žingsnių seka, į composite action'ą.
+4. Diegimo skriptai skaidomi pagal fazes – po vieną pavadintą žingsnį kiekvienam skriptui, kad žingsnių sąraše matytųsi, kur nepavykęs run'as sustojo. Testui, kurio dalys visada vykdomos viename job'e (pvz., smoke), pakanka vieno skripto.
+5. Skriptai įvestis gauna argumentais arba workflow'o nustatytais aplinkos kintamaisiais ir patys neskaito `GITHUB_*` ar `RUNNER_*` kintamųjų: laikino katalogo kelią (`$RUNNER_TEMP`) jiems perduoda workflow, rezultatus jie išveda į stdout, o `GITHUB_OUTPUT` rašo workflow žingsnis.
+6. actionlint tikrina workflow'us (įskaitant inline `run:` blokus), ShellCheck – visus skriptus; abu vykdomi CI. actionlint projektą randa pagal `.git`: be jo (pvz., hook'e, tikrinančiame index kopiją) jis tyliai praleidžia vietinių action'ų įvestis.
+7. Ta pati logika nekartojama keliuose workflow'uose ar workflow'e ir skripte.
+
+Taip parašytus skriptus galima testuoti ir išbandyti lokaliai, dar prieš pirmą run'ą GitHub'e. Skriptas, kuris ką nors tikrina (pvz., image kilmę), turi būti paimtas iš jau patikimo kodo: apsaugotos šakos checkout'o arba commit'o, kurio priklausymas `main` jau patikrintas (`OPS-TAG-P07`).
+
+Šio priedo pavyzdžiai šią praktiką taiko dar ne visur: dalis jų turi ilgų inline `run:` blokų, o image patikra (tag → digest, revision label'is, attestation) parašyta keliuose workflow'uose.
 
 ### Published-image smoke patikra
 
@@ -679,7 +713,7 @@ Compose, o topologija pirmą kartą paleidžiama tik staging hoste.
 
 #### Pavyzdinė realizacija
 
-`docker/scripts/smoke-published-images.sh` yra tik pavyzdys, kaip šiuos punktus
+`scripts/ci/smoke-published-images.sh` yra tik pavyzdys, kaip šiuos punktus
 įgyvendinti Laravel aplikacijai su Docker Compose; jo kopijuoti neprivaloma.
 Abiejuose `ci.build` pavyzdžiuose workflow turi trumpą `Smoke-test` žingsnį,
 kuris jį iškviečia su konkrečiais PHP-FPM ir Nginx digest'ais.
@@ -824,7 +858,7 @@ Svarbios sąlygos:
 - kiekvienas aplinkos deploy turi būti rollback'inamas pagal konkretų image digest;
 - rankinis redeploy atliekamas per `Ops: Deploy`, kuris išsprendžia promoted environment arba `sha-<40>` tag'ą į jau patikrintus PHP-FPM ir Nginx digest'us;
 - host-managed TLS ir kitas runtime maintenance valdomas atskira projekto arba platformos procedūra, nepatenkančia į `Ops: Deploy` redeploy workflow;
-- secret paruošimas ar rotacija vykdoma per dokumentuotą, saugią ir audituojamą procedūrą pagal H.3 aprašytą `RUNTIME_ENV`, TLS Base64, `SECRETS_DIR` ir `compose.env` kontraktą. Rekomenduojamas patogus helperio šaltinis yra `docker/common/scripts/prepare-runtime-secrets.sh.example`, kurį projekte galima nukopijuoti kaip `docker/scripts/prepare-runtime-secrets.sh`; šis kelias ir failo vardas nėra privalomi.
+- secret paruošimas ar rotacija vykdoma per dokumentuotą, saugią ir audituojamą procedūrą pagal H.3 aprašytą `RUNTIME_ENV`, TLS Base64, `SECRETS_DIR` ir `compose.env` kontraktą. Rekomenduojamas patogus helperio šaltinis yra `scripts/deploy/prepare-runtime-secrets.sh.example`, kurį projekte galima nukopijuoti kaip `scripts/deploy/prepare-runtime-secrets.sh`; šis kelias ir failo vardas nėra privalomi.
 
 ## H.6. Tag-based srauto pavyzdys
 
@@ -856,9 +890,10 @@ Tag workflow turi:
 2. išspręsti tag į konkretų commit ir patikrinti, kad ref yra tikras `refs/tags/...`, o ne taip pavadintas branch'as;
 3. pagal `sha-<source SHA>` tag'ą surasti digest'us ir patikrinti jų „staging-verified“ attestation, kurią `ci.build` pasirašo tik po sėkmingo staging deploy ir readiness patikros; be jos promotion nevyksta;
 4. production deploy vykdyti per apsaugotą GitHub Environment, kuris leidžia diegti tik iš apsaugotų tag'ų; „Required reviewers“ jame rekomenduojami, bet neprivalomi;
-5. promotion metu naudoti tą patį digest, o ne rebuild'inti source iš tag'o;
-6. įrašyti versiją, commit SHA, image digest'us, migracijas ir rollback veiksmus į release notes – pavyzdyje `ci.release` tai sugeneruoja pats kaip „Deployment record“ (naujos migracijos nuo ankstesnio tag'o, atskirai – pakeistos, ištrintos ar pervadintos jau išleistos migracijos, ir ankstesnė versija rollback'ui) ir prideda prie GitHub Release;
-7. neleisti perrašyti jau paskelbto version tag ir naudoti `latest` kaip vienintelio rollback identifikatoriaus.
+5. production deploy kviesti iš `main` kopijos (`<org>/<repo>/.github/workflows/cd.deploy.yml@main`), o ne iš tag'o (`./`), su įvestimi `release_tag`; `cd.deploy` tada `release_workflow` priima tik iš savo sąrašo (`ci.build.yml` arba `ci.release.yml`), build attestation – tik iš `refs/heads/main`, o release attestation – tik iš `refs/tags/<tag>` ties `source_sha` (`OPS-TAG-P07`);
+6. promotion metu naudoti tą patį digest, o ne rebuild'inti source iš tag'o;
+7. įrašyti versiją, commit SHA, image digest'us, migracijas ir rollback veiksmus į release notes – pavyzdyje `ci.release` tai sugeneruoja pats kaip „Deployment record“ (naujos migracijos nuo ankstesnio tag'o, atskirai – pakeistos, ištrintos ar pervadintos jau išleistos migracijos, ir ankstesnė versija rollback'ui) ir prideda prie GitHub Release;
+8. neleisti perrašyti jau paskelbto version tag ir naudoti `latest` kaip vienintelio rollback identifikatoriaus.
 
 Release workflow turi workflow lygiu nustatyti tik `contents: read`. Job'as,
 kuris išsprendžia smoke-tested metadata, promote'ina digest'us, kuria release ir
@@ -917,9 +952,9 @@ turi būti suderinamos su ankstesne kodo versija (expand/contract, žr. H.3).
   įdiegta“, ar „šiuo metu veikianti“ versija.
 - **Ankstesnės geros versijos radimas.** Nėra `production-previous` tag'o ar
   kito įrašo; ankstesnį SHA operatorius randa Actions istorijoje.
-- **Duomenų bazės kopija prieš migraciją.** Deploy jos nedaro; atsarginių
-  kopijų reikalavimai yra [3.6.7 skyriuje](../03-architektura.md#367-duomenų-atsarginės-kopijos-ir-atkūrimas),
-  bet ryšys su diegimu neaprašytas.
+- **Duomenų bazės kopija prieš migraciją.** Deploy jos nedaro. [3.6.7 skyrius](../03-architektura.md#367-duomenų-atsarginės-kopijos-ir-atkūrimas)
+  ją rekomenduoja kaip rollback priemonę, kai sistemos atsargines kopijas daro
+  organizacija (`ARCH-REL-R17`), tačiau pavyzdžiuose ji neįgyvendinta.
 - **Rollback bandymas.** `OPS-CD-P03` reikalauja patikrinto rollback; kaip ir
   kada jis bandomas, neaprašyta.
 
@@ -937,6 +972,8 @@ Prieš sujungiant DevOps pakeitimą patikrinkite:
 - [ ] PR ir protected branch/tag vartai vykdo lint, test, vulnerability scan ir secret scan.
 - [ ] Build ir testai vykdomi GitHub-hosted runner'iuose; deploy job'ai – tik tos aplinkos self-hosted runner'yje ir per tos aplinkos GitHub Environment su šakų/tag'ų politika.
 - [ ] Image turi SBOM, provenance ir attestation; attestation patikrinama prieš smoke test/promotion vartus.
+- [ ] Kiekvienas `.trivyignore` įrašas turi galiojimo datą (`exp:`), priežastį ir priėmusį asmenį (`OPS-DOCKER-P04`).
+- [ ] Tag-based sraute `ci.release` production diegimą kviečia iš `cd.deploy.yml@main`, o diegimas tikrina release attestation iš `refs/tags/<tag>` ties išleidžiamu commit'u (`OPS-TAG-P07`).
 - [ ] Branch-based sraute prieš deploy paskelbiamas tik nekintamas `sha-<40>` source tag'as, o `staging` / `production` / `latest` tag'ai perkeliami tik po sėkmingo deploy ir health patikros.
 - [ ] Smoke test patvirtina ne tik HTTP atsakymą, bet ir kritinį worker/database/Redis veikimą, kai jie yra sistemos dalis.
 - [ ] Liveness (`/health`, FPM ping) ir readiness (`/health/ready` per PHP-FPM su DB/Redis patikra) yra atskirti; Compose `healthcheck` naudoja liveness, o readiness pasiekiamas tik per privatų listenerį.

@@ -21,8 +21,13 @@ on:
         required: true
         type: string
       release_workflow:
-        description: Workflow that created the exact release attestation.
+        description: Workflow that created the exact release attestation (ci.build.yml or ci.release.yml of this repository).
         required: true
+        type: string
+      release_tag:
+        description: Version tag (vX.Y.Z) the release attestation was signed from; required with ci.release.yml, empty otherwise.
+        required: false
+        default: ""
         type: string
       release_attestation_required:
         description: Require a release attestation before rollout; candidate staging deploys may disable this while retaining build-attestation verification.
@@ -62,6 +67,7 @@ jobs:
       BALANCER_IMAGE_REF: docker.io/library/nginx@sha256:<balancer-digest>
       SOURCE_SHA: ${{ inputs.source_sha }}
       RELEASE_WORKFLOW: ${{ inputs.release_workflow }}
+      RELEASE_TAG: ${{ inputs.release_tag }}
       RELEASE_ATTESTATION_REQUIRED: ${{ inputs.release_attestation_required }}
       DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
       FORCE_RECREATE_BALANCER: ${{ inputs.force_recreate_balancer }}
@@ -79,6 +85,18 @@ jobs:
             echo 'Release attestation cannot be disabled outside the staging candidate deploy.' >&2
             exit 1
           fi
+          case "$RELEASE_WORKFLOW" in
+            "${GITHUB_REPOSITORY}/.github/workflows/ci.build.yml")
+              [[ -z "$RELEASE_TAG" ]] || { echo 'release_tag is only for ci.release.yml.' >&2; exit 1; } ;;
+            "${GITHUB_REPOSITORY}/.github/workflows/ci.release.yml")
+              [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+                echo 'A tag-based release needs release_tag in the form vX.Y.Z.' >&2
+                exit 1
+              } ;;
+            *)
+              echo "$RELEASE_WORKFLOW is not a release workflow of ${GITHUB_REPOSITORY}." >&2
+              exit 1 ;;
+          esac
 
       - name: Log in to the container registry
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
@@ -95,6 +113,12 @@ jobs:
           set -euo pipefail
           command -v gh
           command -v jq
+          build_source=()
+          release_source=()
+          if [[ -n "$RELEASE_TAG" ]]; then
+            build_source=(--source-ref refs/heads/main)
+            release_source=(--source-ref "refs/tags/${RELEASE_TAG}" --source-digest "$SOURCE_SHA")
+          fi
           verify_image() {
             local image="$1" name digest attestations revision
             name="${image%@*}"
@@ -107,11 +131,13 @@ jobs:
             }
             gh attestation verify "oci://${image}" \
               --repo "$GITHUB_REPOSITORY" \
-              --signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/ci.build.yml"
+              --signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/ci.build.yml" \
+              "${build_source[@]}"
             if [[ "$RELEASE_ATTESTATION_REQUIRED" == 'true' ]]; then
               attestations="$(gh attestation verify "oci://${image}" \
                 --repo "$GITHUB_REPOSITORY" \
                 --signer-workflow "$RELEASE_WORKFLOW" \
+                "${release_source[@]}" \
                 --predicate-type https://in-toto.io/attestation/release/v0.1 \
                 --format json)"
               jq -e \
@@ -145,7 +171,7 @@ jobs:
             docker/balancer/conf.d/default.conf
             docker/nginx/conf.d/upstream.blue.conf
             docker/nginx/conf.d/upstream.green.conf
-            docker/scripts/prepare-runtime-secrets.sh
+            scripts/deploy/prepare-runtime-secrets.sh
 
       - name: Prepare runtime Docker secrets
         shell: bash
@@ -156,7 +182,7 @@ jobs:
           TLS_PRIVATE_KEY_B64: ${{ secrets.TLS_PRIVATE_KEY_B64 }}
           ALLOY_ENV: ${{ secrets.ALLOY_ENV }}
           LOKI_PASSWORD: ${{ secrets.LOKI_PASSWORD }}
-        run: bash docker/scripts/prepare-runtime-secrets.sh
+        run: bash scripts/deploy/prepare-runtime-secrets.sh
 
       - name: Validate generated Compose runtime contract
         shell: bash

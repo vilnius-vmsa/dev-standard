@@ -99,6 +99,8 @@ python3 .agents/skills/dev-standard-docs/check-docs.py
 
 It checks README.md, AGENTS.md and `docs/` (pass paths to check others) for dead relative links, anchors with no matching heading, links or paths pointing at line numbers, and backticked paths under a top-level folder that do not exist. Fix every error it reports; it exits 0 when the docs are clean.
 
+Records are left out: ADRs, a decision log, a progress or handoff log and a changelog describe a point in time and keep the names that were true then, so they are never edited to satisfy the checker (DOC-ADR-P04). `docs/adr/` and `docs/decisions/` are skipped by default; name other records with `--exclude`, for example `--exclude docs/PROGRESS.md`, in the repository's CI step and in `AGENTS.md`.
+
 ## Facts to confirm
 
 Bootstrap and audit end with this section in the pull request description:

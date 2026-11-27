@@ -270,9 +270,13 @@ PRIVALOMA:
 
     `<type>/ticket-<ticket id>-<short description>`
 
-    Pavyzdys:
+    `<type>` – vienas iš Conventional Commits tipų (`feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`, `build`, `perf`, `style`; žr. CODE-VCS-P16) arba ilgųjų formų `feature`, `bugfix`, `hotfix`, `release`.
+
+    Pavyzdžiai:
 
     feature/ticket-123456-add-2fa
+
+    feat/ticket-123456-add-2fa
 
 *   Turi būti aiškiai apibrėžtos bent šios šakų paskirtys:
     *   main – stabilus, išleistas kodas (privaloma visoms strategijoms)
@@ -353,6 +357,8 @@ PRIVALOMA:
 *   Apimtis turi nurodyti kontekstą arba paliestą sritį, pvz. auth, api, ui, config, docker.
 <!-- CODE-VCS-P19 | ai-reviewable | stacks=all | enforced-by=tool:commitlint -->
 *   Trumpas aprašas turi būti imperatyvus, rašomas mažosiomis raidėmis ir be taško sakinio gale.
+<!-- CODE-VCS-P29 | ai-reviewable | stacks=all | enforced-by=ai -->
+*   Šakų pavadinimai (CODE-VCS-P07) ir commit žinučių formatas (CODE-VCS-P16, CODE-VCS-P17, CODE-VCS-P19) turi būti tikrinami automatiškai kiekvieno Pull Request CI patikroje: tikrinamas šakos pavadinimas ir visų PR commit'ų žinutės. GitHub'o sukuriamiems merge commit'ams („Merge pull request #…“) formato patikra netaikoma. Vietiniai Git hook'ai šią patikrą gali papildyti, bet jos nepakeičia: juos galima praleisti, o GitHub'e sukurti commit'ai (pvz., naršyklėje pritaikyti review pasiūlymai) pro juos nepraeina. Automatinių įrankių (pvz., Dependabot, standarto sinchronizavimo) Pull Request gali būti iš patikros išimti.
 
 REKOMENDUOJAMA:
 

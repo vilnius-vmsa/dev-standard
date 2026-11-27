@@ -128,7 +128,7 @@ PRIVALOMA:
 <!-- OPS-DEVSEC-P03 | ai-reviewable | stacks=infra | enforced-by=tool:gitleaks -->
 *   CI procese turi būti vykdomas slaptųjų raktų aptikimas.
 <!-- OPS-DEVSEC-P04 | ai-reviewable | stacks=infra | enforced-by=ai -->
-*   Saugumo radiniai, laikomi kritiniais pagal organizacijos politiką, turi sustabdyti pipeline (saugumo patikros job'as nepavyksta), kol rizika neišspręsta arba aiškiai nepriimta; kad nepavykęs vartas blokuotų merge'inimą, užtikrina šakos apsauga (`OPS-CI-P05`).
+*   Saugumo radiniai, laikomi kritiniais pagal organizacijos politiką, turi sustabdyti pipeline (saugumo patikros job'as nepavyksta), kol rizika neišspręsta arba aiškiai nepriimta (konteinerio image radinio priėmimo tvarką nustato `OPS-DOCKER-P04`); kad nepavykęs vartas blokuotų merge'inimą, užtikrina šakos apsauga (`OPS-CI-P05`).
 <!-- OPS-DEVSEC-P05 | human-reviewable -->
 *   Repozitorijose turi būti įjungtas platformos slaptųjų raktų aptikimas (pvz., GitHub secret scanning ir push protection).
 
@@ -256,7 +256,12 @@ PRIVALOMA:
 <!-- OPS-FLOW-P07 | ai-reviewable | stacks=infra | enforced-by=ai -->
 *   Jei projektas naudoja aplinkų ar diegimo secrets, jų paruošimui ir rotacijai turi būti dokumentuota saugi, audituojama procedūra su aiškia įėjimų ir išėjimų sutartimi; procedūra neprintina secret reikšmių. Compose diegime ji papildomai turi validuoti aplikacijos aplinką ir TLS porą, įdiegti failus atomiškai su runtime leidimais ir neleisti pusiau įrašytos runtime būsenos.
 <!-- OPS-REPO-P02 | ai-reviewable | stacks=all | enforced-by=ai -->
-*   Konteinerių, CI/CD ir infrastruktūros failai aplikacijos repozitorijoje turi būti laikomi sutartose vietose: kiekvieno image Dockerfile ir jo serviso konfigūracija – atskirame `docker/<servisas>/` pakatalogyje (pvz., `docker/php-fpm/`, `docker/nginx/`), diegimo skriptai – `docker/scripts/`, repozitorijos šaknyje iš šių failų – tik Compose failai ir `.dockerignore`, darbo eigos ir action'ai – `.github/`, Kubernetes ir Helm manifestai – `k8s/`, `kubernetes/`, `helm/` arba `charts/` kataloge. Kita vieta leidžiama tik tada, kai išimtis įrašyta projekto `.github/instructions/dev-standard-local.instructions.md` faile, nurodant kelius ir priežastį; išimtyje nurodytiems keliams taikomos tos pačios 8 skyriaus (`OPS-*`) taisyklės.
+*   Konteinerių, CI/CD ir infrastruktūros failai aplikacijos repozitorijoje turi būti laikomi sutartose vietose: kiekvieno image Dockerfile ir jo serviso konfigūracija – atskirame `docker/<servisas>/` pakatalogyje (pvz., `docker/php-fpm/`, `docker/nginx/`), skriptai, priklausantys konteinerio image ar vienam servisui (entrypoint, health patikros, į image kopijuojami failai), – to serviso kataloge arba `docker/scripts/`, workflow'ų, Git hook'ų ir operatorių vykdomi skriptai (patikros, release, diegimas, secrets paruošimas) – `scripts/`, sugrupuoti pagal paskirtį (pvz., `scripts/ci/`, `scripts/release/`, `scripts/deploy/`, `scripts/hooks/`), repozitorijos šaknyje iš šių failų – tik Compose failai ir `.dockerignore`, darbo eigos ir action'ai – `.github/`, Kubernetes ir Helm manifestai – `k8s/`, `kubernetes/`, `helm/` arba `charts/` kataloge. Kita vieta leidžiama tik tada, kai išimtis įrašyta projekto `.github/instructions/dev-standard-local.instructions.md` faile, nurodant kelius ir priežastį; išimtyje nurodytiems keliams taikomos tos pačios 8 skyriaus (`OPS-*`) taisyklės.
+
+REKOMENDUOJAMA:
+
+<!-- OPS-PIPE-R01 | ai-reviewable | stacks=infra | enforced-by=ai -->
+*   Workflow'o inline `run:` blokus, ilgesnius nei kelios paprastos komandos (apie penkios eilutės), ypač su funkcijomis, ciklais ar šakojimusi, taip pat logiką, kartojamą keliuose workflow'uose, perkelti į repozitorijos skriptą `scripts/` kataloge (`OPS-REPO-P02`) arba į composite action'ą; workflow'e lieka orkestravimas ([H.4 „Kur laikoma workflow logika“](priedai/devops-ci-cd-modeliai.md#kur-laikoma-workflow-logika)).
 
 Pasirinkimas deklaruojamas `.dev-standard/config.json` stack'ais (`OPS-PIPE-P07`); nuo jo priklauso, kurias šio skyriaus taisykles projektui taiko automatinis review:
 
@@ -354,6 +359,8 @@ PRIVALOMA:
 *   Tag-based modelyje release tag'ai turi būti apsaugoti repozitorijos taisyklėmis: nustatyta, kas gali juos kurti, o perkelti ar ištrinti paskelbto tag'o negalima.
 <!-- OPS-TAG-P06 | human-reviewable -->
 *   Tag-based modelyje staging gali būti praleistas tik tada, kai candidate pilnai patikrintas kitais vartais ir production Environment reikalauja „Required reviewers“ patvirtinimo.
+<!-- OPS-TAG-P07 | ai-reviewable | stacks=flow-tag | enforced-by=ai -->
+*   Tag-based modelyje tag'u paleistas release workflow'as production diegimą turi kviesti iš apsaugotos šakos kopijos (`<org>/<repo>/.github/workflows/cd.deploy.yml@main`), o ne savo (`./.github/workflows/cd.deploy.yml`). Diegimas turi priimti release attestation tik tada, kai ji pasirašyta šios repozitorijos release workflow'o iš to paties versijos tag'o (`refs/tags/<tag>`) ties išleidžiamu commit'u, o image build attestation – kai ji pasirašyta build workflow'o iš apsaugotos šakos; kvietėjo nurodytą pasirašiusį workflow'ą diegimas tikrina pagal savo leidžiamų sąrašą.
 
 Tipinė seka:
 
@@ -363,6 +370,10 @@ protected vX.Y.Z tag → verify tag commit == staging-tested SHA → promote the
 ```
 
 Tag push neturi iš naujo tikrinti ar perbuild'inti nepatikrinto kodo. `OPS-TAG-P04` reikalauja, kad į production patektų tik staging'e įdiegtas ir patikrintas artefaktas; šio standarto pavyzdyje tai įrodoma pasirašytu įrodymu, kad būtent šie image digest'ai buvo įdiegti į staging ir praėjo jo readiness patikrą (pavyzdyje – „staging-verified“ attestation, susieta su konkrečiu build run'u). SHA pagrindu pavadintas registry tag'as naudojamas tik digest'ui surasti ir pats savaime įrodymu nelaikomas.
+
+Tag push paleidžia ne `main`, o pažymėto commit'o `ci.release.yml` versiją, todėl release workflow'o patikromis negalima pasitikėti labiau nei pačiu tag'u: tag'ą sukurti galintis asmuo (`OPS-TAG-P05`) gali pažymėti commit'ą, kuriame patikros pakeistos. `OPS-TAG-P07` lemiamas patikras perkelia į kodą, kurio tag'as pakeisti negali: diegimo workflow'as imamas iš `main` ir pats patikrina, kad image pastatė `main` build'as, o paaukštino būtent to versijos tag'o release'as (`gh attestation verify` su `--source-ref refs/tags/<tag>` ir `--source-digest <commit>`). Kadangi kviečiama visada naujausia `main` diegimo workflow'o versija, jo įvestys turi likti suderinamos su ankstesnių tag'ų `ci.release.yml`.
+
+Release patikros vykdomos jau sukūrus tag'ą. Jų neišlaikęs tag'as nieko neišleidžia, tačiau paskelbto tag'o ištrinti negalima (`OPS-TAG-P05`), todėl jo versijos numeris lieka panaudotas ir leidžiama kita versija.
 
 Tag-based rollback arba redeploy pagal versiją naudoja atskirą `Ops: Deploy`
 tag-based variantą: jis `vX.Y.Z` tag'ą susieja su image source SHA ir perduoda
@@ -384,6 +395,13 @@ PRIVALOMA:
 *   Slapti raktai, sertifikatai ir tokenai negali būti kopijuojami į Docker build kontekstą ar image sluoksnius; build kredencialai turi būti perduodami per BuildKit secret mount, o runtime secrets – per vykdymo platformos secrets mechanizmą (pvz., sumontuotus secret failus), ne per image.
 <!-- OPS-DOCKER-P03 | ai-reviewable | stacks=docker | enforced-by=ai -->
 *   Kiekvienas deployuojamas servisas turi turėti vieną kanoninį registry image pavadinimą, nekintantį tarp staging ir production; aplinka, release versija ir build identifikatorius turi būti perteikiami tag'ais, OCI label'iais ir digest'ais, o ne kuriant aplinkai skirtingus repository pavadinimus. Deploy turi naudoti digest, tag'ai yra paieškos ir promotion nuorodos, o `org.opencontainers.image.revision`, `org.opencontainers.image.source` ir `org.opencontainers.image.version` – atsekamumo metadata.
+<!-- OPS-DOCKER-P04 | ai-reviewable | stacks=docker | enforced-by=ai -->
+*   Kai image skenavimas randa radinį, kuriam paskelbtas pataisymas, pirmiausia atnaujinama bazinio image versija ir digest'as. Jei paskelbtame baziniame image pataisymo dar nėra, radinys gali būti laikinai priimtas repozitorijos šaknies `.trivyignore` faile (arba lygiaverčiame naudojamo skenerio faile): įrašas nurodo radinio ID ir galiojimo pabaigą (`exp:YYYY-MM-DD`, ne vėliau kaip 30 dienų nuo įrašymo), o komentaras virš jo – priežastį ir kas radinį priėmė; pasibaigus galiojimui radinys vėl stabdo pipeline, o įrašas pašalinamas, kai naudojamas pataisymą turintis bazinis image. Paketų atnaujinimas build metu iš nefiksuotų paketų saugyklų (pvz., `apt-get upgrade`, `apk upgrade`) išeitimi nelaikomas, nes tas pats commit'as tada būtų statomas skirtingai (`OPS-CI-P02`); datos fiksuota paketų saugyklos kopija (pvz., `snapshot.debian.org/archive/debian/<data>`) leidžiama.
+
+REKOMENDUOJAMA:
+
+<!-- OPS-DOCKER-R01 | human-reviewable -->
+*   `.trivyignore` failą `CODEOWNERS` faile priskirti už saugumą atsakingam asmeniui ar komandai, kad radinio priėmimą patvirtintų ne tik pakeitimo autorius.
 
 > Susiję skyriai: [3.5 Konfigūracija, slaptieji raktai ir aplinkos](03-architektura.md#35-konfigūracija-slaptieji-raktai-ir-aplinkos) · [3.6 Patikimumas ir atsparumas](03-architektura.md#36-patikimumas-ir-atsparumas) · [6 Saugumas (Security by Design)](06-saugumas.md) · [8.14.1 Kubernetes diegimo reikalavimai](#8141-kubernetes-diegimo-reikalavimai)
 
